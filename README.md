@@ -10,13 +10,14 @@ Nothing here reads or changes your actual Mac, network, accounts or files. All
 state lives in this page's `localStorage`, and the whole project runs from
 `file://` with no build step, no server and no network access.
 
-**Live:** <https://isaiahaltdelete.github.io/Claude/>
+**Live:** <https://isaiahaltdelete.github.io/Claude/mac/> — the site root is a
+minimal index of projects; the simulator lives at `/mac`.
 
 ## Running it
 
-Open the live link above, or clone the repository and open `index.html` in any
-current browser — it works identically from `file://`, since nothing is fetched
-at runtime.
+Open the live link above, or clone the repository and open `mac/index.html` in
+any current browser. Everything except live web access works from `file://`,
+since all assets are local.
 
 | | |
 |---|---|
@@ -41,8 +42,8 @@ viewport resize.
 
 **Apps** — Finder (icon/list/column/gallery views, path bar, per-window history,
 Bin with Put Back and Empty), Safari (per-tab history, private browsing,
-bookmarks, downloads, a closed catalogue of simulated support pages, offline and
-captive-portal and fraudulent-site error states), Apple Mail (two accounts,
+bookmarks, downloads, a catalogue of simulated support pages, **real Wikipedia
+browsing**, offline and captive-portal and fraudulent-site error states), Apple Mail (two accounts,
 unified mailboxes, categories, compose/drafts/send, rules, signatures, junk,
 seven-pane settings sheet), Microsoft Outlook (ribbon, folder pane, Focused
 Inbox, calendar, People, its own settings), App Store (sections, app detail
@@ -76,18 +77,45 @@ below 820px windows become stacked sheets. Reduce motion, reduce transparency,
 increase contrast and text scaling all work, honour OS-level preferences, and
 every control is keyboard reachable with visible focus rings.
 
+## Live web access
+
+The simulated Safari can load the real web, which the globe button in its
+toolbar switches on and off.
+
+Wikipedia and its sister projects are fetched through their CORS-enabled API and
+rendered natively — Wikipedia sends `X-Frame-Options: DENY`, so an iframe could
+never work, but the API is open to browsers. Internal `/wiki/` links keep
+browsing inside the simulator, search hits the real search endpoint, and article
+text is attributed under CC BY-SA 4.0.
+
+Fetched markup is never assigned to `innerHTML`. It is parsed into an inert
+document, walked against a strict tag/attribute allowlist, and rebuilt — scripts,
+styles, iframes, forms, event-handler attributes and `javascript:`/`data:` URLs
+are all dropped.
+
+Any other real site is attempted in a sandboxed iframe. Most large sites refuse
+to be embedded, so known ones go straight to a "refused to connect" page with an
+open-in-a-new-tab escape hatch.
+
+Live loads still respect the **simulated** network, so scenarios stay honest: turn
+off the simulated Wi-Fi or clear its DNS and Wikipedia fails exactly like the
+built-in pages do. `.local` and `.test` hosts always stay simulated.
+
 ## Project layout
 
 ```
-index.html                 shell markup and script order
+index.html                 minimal white-on-black project index (site root)
+404.html                   matching not-found page
 .github/workflows/pages.yml  publishes the site to GitHub Pages on push to main
-assets/
+mac/                       the simulator, served at /mac
+mac/index.html             shell markup and script order
+mac/assets/
   fonts/                   Inter + JetBrains Mono (OFL) with @font-face mapping
   icons/                   41 generated app, document and volume icons
   wallpapers/              6 generated desktop pictures
   brand/apple-mark.svg     Apple mark drawn from primitives
-styles/                    tokens, controls, shell, windows, apps, settings, responsive
-scripts/
+mac/styles/                tokens, controls, shell, windows, apps, settings, responsive
+mac/scripts/
   01-core.js               helpers, persistence, session state
   02-glyphs.js             inline SVG glyph library and icon helpers
   03-state.js              the whole simulated Mac as default data
@@ -95,6 +123,7 @@ scripts/
   05-windows.js            app registry, window manager, Mission Control
   06-shell.js              appearance sync, menu bar, Dock, Control Centre, Launchpad
   07-spotlight.js          search, arithmetic and unit conversion
+  08-web.js                live web access, fetching and HTML sanitising
   10-16                    Finder, Safari, Mail, Outlook, App Store, utilities, media
   20-21                    System Settings and Apple Account
   30-31                    network/diagnostics and power/recovery/setup
@@ -132,6 +161,7 @@ MacSim.scenarios.breakDNS()      // names stop resolving
 MacSim.scenarios.lowBattery()
 MacSim.scenarios.fullTrash()
 MacSim.scenarios.signOut()       // Apple Account signed out
+MacSim.setting('browser.liveWeb', false)  // simulated pages only
 MacSim.reset()                   // Erase All Content and Settings
 ```
 

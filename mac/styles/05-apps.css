@@ -503,3 +503,111 @@
 .track-row { display: grid; grid-template-columns: 26px 1fr auto auto; gap: 10px; align-items: center; padding: 7px 14px; border-bottom: 0.5px solid var(--hair); font-size: 12px; text-align: left; width: 100%; }
 .track-row:hover { background: var(--fill); }
 .track-row.on { color: var(--accent); }
+
+/* ------------------------------------------------- live web (Mac.Web) */
+
+.live-frame-wrap { display: flex; flex-direction: column; height: 100%; }
+.live-banner {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex: none;
+  padding: 7px 11px;
+  background: rgba(var(--accent-rgb), 0.1);
+  border-bottom: 0.5px solid var(--hair);
+  color: var(--text-2);
+  font-size: 11.5px;
+}
+.live-banner svg { flex: none; color: var(--accent); }
+.live-banner span { flex: 1; min-width: 0; }
+.live-frame { flex: 1; min-height: 0; width: 100%; border: 0; background: #fff; }
+
+/* Articles fetched from Wikipedia are rendered with our own typography, since
+   the source stylesheet is deliberately not loaded. */
+.wiki-article {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 26px 30px 60px;
+  font-size: 14px;
+  line-height: 1.68;
+}
+.wiki-head { padding-bottom: 12px; border-bottom: 1px solid var(--hair); margin-bottom: 18px; }
+.wiki-source { margin: 0 0 6px; color: var(--muted); font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; }
+.wiki-article h1 { margin: 0; font-size: 30px; font-weight: 400; letter-spacing: -0.02em; font-family: Georgia, "Times New Roman", serif; }
+.wiki-body h2 {
+  margin: 30px 0 10px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid var(--hair);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 21px;
+  font-weight: 400;
+}
+.wiki-body h3 { margin: 22px 0 8px; font-size: 16px; font-weight: 600; }
+.wiki-body h4, .wiki-body h5, .wiki-body h6 { margin: 18px 0 6px; font-size: 14px; font-weight: 600; }
+.wiki-body p { margin: 0 0 14px; }
+.wiki-body ul, .wiki-body ol { margin: 0 0 14px; padding-left: 26px; }
+.wiki-body li { margin-bottom: 5px; }
+.wiki-body dl { margin: 0 0 14px; }
+.wiki-body dd { margin: 0 0 6px 22px; }
+.wiki-body a { color: #3366cc; text-decoration: none; }
+.wiki-body a:hover { text-decoration: underline; }
+[data-theme="dark"] .wiki-body a { color: #7aa7f5; }
+.wiki-body a.dead-link { color: #b03a2e; cursor: default; }
+.wiki-body a.external-link::after { content: " ↗"; font-size: 0.85em; opacity: 0.6; }
+.wiki-body img { max-width: 100%; height: auto; border-radius: 3px; }
+.wiki-body figure, .wiki-body .thumb {
+  max-width: min(320px, 46%);
+  margin: 4px 0 14px 20px;
+  float: right;
+  clear: right;
+  padding: 8px;
+  border-radius: 8px;
+  background: var(--card-2);
+  font-size: 11.5px;
+  line-height: 1.45;
+}
+.wiki-body figcaption, .wiki-body .thumbcaption { margin-top: 6px; color: var(--muted); }
+.wiki-body table {
+  border-collapse: collapse;
+  margin: 0 0 16px;
+  font-size: 12.5px;
+  max-width: 100%;
+  display: block;
+  overflow-x: auto;
+}
+.wiki-body th, .wiki-body td { padding: 6px 9px; border: 1px solid var(--hair); text-align: left; vertical-align: top; }
+.wiki-body th { background: var(--card-2); font-weight: 600; }
+.wiki-body .infobox {
+  float: right;
+  clear: right;
+  max-width: min(320px, 48%);
+  margin: 0 0 16px 20px;
+  font-size: 11.5px;
+}
+.wiki-body blockquote { margin: 0 0 14px; padding-left: 14px; border-left: 3px solid var(--hair); color: var(--text-2); }
+.wiki-body sup { font-size: 0.72em; }
+.wiki-body pre, .wiki-body code { font-family: var(--font-mono); font-size: 12px; }
+.wiki-body pre { padding: 10px 12px; border-radius: 7px; background: var(--card-2); overflow-x: auto; }
+.wiki-body hr { border: 0; border-top: 1px solid var(--hair); margin: 22px 0; }
+.wiki-licence {
+  margin: 34px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--hair);
+  clear: both;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+.wiki-licence a { color: var(--accent); }
+
+.wiki-search button[type="submit"] { flex: none; }
+
+@media (max-width: 620px) {
+  .wiki-article { padding: 18px 16px 44px; }
+  .wiki-article h1 { font-size: 24px; }
+  .wiki-body figure, .wiki-body .thumb, .wiki-body .infobox {
+    float: none;
+    max-width: 100%;
+    margin: 0 0 14px;
+  }
+}

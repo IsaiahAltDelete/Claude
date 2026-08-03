@@ -1,10 +1,12 @@
 /* ===========================================================================
    Safari.
 
-   Each window owns its own tab set; each tab owns its own history stack. Pages
-   come from a closed catalogue of built-in simulated sites — nothing is ever
-   fetched from the network — and every page reacts to the simulated Wi-Fi
-   state so offline, captive-portal and DNS problems are reproducible.
+   Each window owns its own tab set; each tab owns its own history stack.
+
+   Two sources of pages. A closed catalogue of built-in simulated sites backs
+   the troubleshooting scenarios, and Mac.Web (scripts/08-web.js) loads the real
+   web when live access is on. Both respect the simulated Wi-Fi state, so
+   offline, captive-portal and DNS faults stay reproducible either way.
    =========================================================================== */
 
 (function (Mac) {
@@ -53,21 +55,24 @@
       Mac.wm.render(win);
     },
 
-    /** Resolve typed input to one of the built-in destinations. */
+    /**
+     * Resolve typed input to a destination. Built-in simulated pages win, then
+     * the live web layer, then a simulated search.
+     */
     normalize(input) {
       const value = String(input || '').trim();
       if (!value) return 'start';
       const lower = value.toLowerCase().replace(/^https?:\/\//, '').replace(/\/+$/, '');
       if (SITES[lower]) return lower;
       if (['history', 'bookmarks', 'downloads', 'settings', 'start'].includes(lower)) return lower;
-      if (/^[\w.-]+\.[a-z]{2,}$/i.test(lower)) {
-        // A plausible hostname that this simulator does not host.
-        return `unreachable:${lower}`;
-      }
+      // Real destinations go through Mac.Web when live access is switched on.
+      // `.local` and `.test` hosts are always simulated, so scenarios still work.
+      if (Mac.Web.enabled() && Mac.Web.parse(value)) return `live:${value}`;
+      if (/^[\w.-]+\.[a-z]{2,}(\/.*)?$/i.test(lower)) return `unreachable:${lower.split('/')[0]}`;
       return `search:${value}`;
     },
 
-    navigate(win, input, { replace = false, bypass = false } = {}) {
+    navigate(win, input, { replace = false, bypass = false, searchTerm = '' } = {}) {
       const tab = this.tab(win);
       let url = this.normalize(input);
       const wifi = Mac.state.wifi;
@@ -89,21 +94,67 @@
       tab.url = url;
       tab.title = this.titleFor(url);
       tab.loading = true;
+      tab.live = null;
       if (bypass) tab.bypass = true;
       Mac.wm.render(win);
-
       clearTimeout(tab.timer);
+
+      // Live destinations resolve over the network instead of on a timer.
+      if (url.startsWith('live:')) {
+        const target = Mac.Web.parse(url.slice(5));
+        if (!target) {
+          tab.loading = false;
+          Mac.wm.render(win);
+          return;
+        }
+        if (searchTerm) target.search = searchTerm;
+        Mac.Web.load(win, tab, target).then(() => {
+          if (!win.state.tabs.includes(tab)) return;
+          tab.loading = false;
+          tab.title = this.liveTitle(tab);
+          this.record(tab);
+          Mac.wm.render(win);
+          if (tab.live?.hash) this.scrollToAnchor(win, tab.live.hash);
+        });
+        return;
+      }
+
       tab.timer = setTimeout(() => {
         if (!win.state.tabs.includes(tab)) return;
         tab.loading = false;
         tab.title = this.titleFor(tab.url);
-        if (!Mac.state.browser.private && !tab.url.startsWith('offline:')) {
-          Mac.state.browser.history.unshift({ title: tab.title, url: tab.url, at: Date.now() });
-          Mac.state.browser.history = Mac.state.browser.history.slice(0, 60);
-          Mac.save();
-        }
+        this.record(tab);
         Mac.wm.render(win);
       }, 620);
+    },
+
+    /** Add the finished load to history, unless private browsing is on. */
+    record(tab) {
+      if (Mac.state.browser.private) return;
+      if (tab.url.startsWith('offline:') || tab.url.startsWith('unreachable:')) return;
+      if (tab.live?.kind === 'error') return;
+      Mac.state.browser.history.unshift({ title: tab.title, url: tab.url, at: Date.now() });
+      Mac.state.browser.history = Mac.state.browser.history.slice(0, 60);
+      Mac.save();
+    },
+
+    liveTitle(tab) {
+      const live = tab.live;
+      if (!live) return 'Safari';
+      if (live.kind === 'wiki') return live.title;
+      if (live.kind === 'wiki-search') return `${live.query} — Search results`;
+      if (live.kind === 'frame') return live.host;
+      if (live.reason === 'missing') return 'Page not found';
+      if (live.reason === 'no-frame') return 'Refused to connect';
+      if (live.reason === 'simulated-offline') return 'You are not connected to the internet';
+      return 'Cannot open the page';
+    },
+
+    scrollToAnchor(win, anchor) {
+      const view = win.el.querySelector('.browser-view');
+      if (!view) return;
+      const target = view.querySelector(`#${CSS.escape(anchor)}, [id="${anchor}"]`);
+      if (target) view.scrollTop = target.offsetTop - 12;
     },
 
     go(win, delta) {
@@ -132,10 +183,20 @@
       if (url.startsWith('offline:')) return 'You are not connected to the internet';
       if (url.startsWith('unreachable:')) return 'Cannot find the server';
       if (url.startsWith('search:')) return `${url.slice(7)} — Search`;
+      if (url.startsWith('live:')) {
+        const target = Mac.Web.parse(url.slice(5));
+        if (!target) return 'Safari';
+        return target.kind === 'wiki' ? target.title.replace(/_/g, ' ') : target.host;
+      }
       return SITES[url]?.title || 'Safari';
     },
 
     favicon(url) {
+      if (url.startsWith('live:')) {
+        const target = Mac.Web.parse(url.slice(5));
+        const host = target?.kind === 'wiki' ? 'W' : (target?.host || 'L')[0].toUpperCase();
+        return `<span class="favicon" style="background:${target?.kind === 'wiki' ? '#3c3c3c' : '#5b6675'}">${esc(host)}</span>`;
+      }
       const site = SITES[url];
       const color = site?.color || '#8e98a5';
       const letter = (site?.title || url.replace(/^\w+:/, '') || 'S')[0].toUpperCase();
@@ -155,7 +216,9 @@
     render(win) {
       const tab = this.tab(win);
       const wifi = Mac.state.wifi;
-      const secure = wifi.enabled && wifi.current && !wifi.captive && !tab.url.startsWith('offline:') && !tab.url.startsWith('unreachable:');
+      const secure = wifi.enabled && wifi.current && !wifi.captive
+        && !tab.url.startsWith('offline:') && !tab.url.startsWith('unreachable:')
+        && tab.live?.kind !== 'error';
 
       return `<div class="browser">
         <div class="tab-strip">
@@ -171,9 +234,12 @@
           <button class="tool-btn" data-command="browser-reload" aria-label="${tab.loading ? 'Stop' : 'Reload'}">${glyph(tab.loading ? 'close' : 'refresh')}</button>
           <form class="address-field" data-address-form>
             ${glyph(secure ? 'lock' : 'warning', { cls: secure ? 'secure' : 'insecure' })}
-            <input value="${esc(tab.url === 'start' ? '' : tab.url.replace(/^(offline|unreachable|search):/, ''))}"
+            <input value="${esc(tab.url === 'start' ? '' : tab.url.replace(/^(offline|unreachable|search|live):/, ''))}"
               placeholder="Search or enter website name" aria-label="Address and search" spellcheck="false">
           </form>
+          <button class="tool-btn ${Mac.Web.enabled() ? 'on' : ''}" data-command="browser-live-toggle"
+            aria-label="${Mac.Web.enabled() ? 'Live web access on' : 'Live web access off'}"
+            title="${Mac.Web.enabled() ? 'Live web access is on' : 'Live web access is off'}">${glyph('globe')}</button>
           <button class="tool-btn ${Mac.state.browser.private ? 'on' : ''}" data-command="browser-private" aria-label="Private Browsing">${glyph('eye-off')}</button>
           <button class="tool-btn" data-command="browser-share" aria-label="Share">${glyph('share')}</button>
           <button class="tool-btn" data-command="browse" data-arg="bookmarks" aria-label="Bookmarks">${glyph('bookmark')}</button>
@@ -219,6 +285,7 @@
           </div></div></div>`;
       }
 
+      if (url.startsWith('live:')) return this.livePage(win, tab);
       if (url === 'portal.local') return this.portalPage();
       if (url === 'unsafe.test' && !tab.bypass) return this.warningPage();
       if (url === 'history') return this.historyPage();
@@ -235,6 +302,103 @@
         <div class="error-actions"><button class="btn primary" data-command="browse" data-arg="start">Return to Start Page</button></div></div></div>`;
     },
 
+    /* ---------------------------------------------------------- live pages */
+
+    livePage(win, tab) {
+      const live = tab.live;
+      if (!live) return '<div class="web-page start-page"><h1 style="margin-top:16vh">Loading…</h1></div>';
+
+      if (live.kind === 'wiki') {
+        const project = live.target.project === 'wikipedia' ? 'Wikipedia' : live.target.project;
+        return `<article class="wiki-article">
+          <div class="wiki-head">
+            <p class="wiki-source">${esc(project)} — ${esc(live.target.lang)}.${esc(live.target.project)}.org · fetched live</p>
+            <h1>${esc(live.title)}</h1>
+          </div>
+          ${live.html}
+          <p class="wiki-licence">Article text from ${esc(project)}, available under
+            <a data-command="browse" data-arg="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>.
+            Rendered by this simulator from the public API — scripts and styles are stripped.</p>
+        </article>`;
+      }
+
+      if (live.kind === 'wiki-search') {
+        return `<div class="web-page"><div class="web-wrap">
+          <p class="web-eyebrow">Wikipedia search</p>
+          <h1>Results for “${esc(live.query)}”</h1>
+          ${live.results.length ? `<div class="group" style="margin-top:16px">${live.results.map(hit =>
+            `<button class="row tappable" data-command="browse"
+              data-arg="${esc(live.target.lang)}.${esc(live.target.project)}.org/wiki/${esc(encodeURIComponent(hit.title))}">
+              <div class="row-text"><strong>${esc(hit.title)}</strong><p>${esc(hit.snippet)}</p></div>
+              <span class="row-value">${hit.words} words</span></button>`).join('')}</div>`
+            : `<div class="web-card"><p style="margin:0">Nothing matched that search.</p></div>`}
+        </div></div>`;
+      }
+
+      if (live.kind === 'frame') {
+        return `<div class="live-frame-wrap">
+          <div class="live-banner">
+            ${glyph('info', { size: 13 })}
+            <span>Loading <b>${esc(live.host)}</b> live. Some sites refuse to be embedded and will stay blank.</span>
+            <button class="btn" data-command="open-external" data-arg="${esc(live.url)}">Open in a new tab</button>
+          </div>
+          <iframe class="live-frame" src="${esc(live.url)}" title="${esc(live.host)}"
+            referrerpolicy="no-referrer" loading="eager"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"></iframe>
+        </div>`;
+      }
+
+      // Error states
+      if (live.reason === 'simulated-offline') {
+        return `<div class="error-page"><div>
+          <div class="error-art">${glyph('wifi-off', { size: 54 })}</div>
+          <h1>You are not connected to the internet</h1>
+          <p>The simulated Wi-Fi is off or has no working DNS, so live pages are blocked too. Fix the
+             connection in the simulator and try again.</p>
+          <div class="error-actions">
+            <button class="btn primary" data-command="browser-retry">Try Again</button>
+            <button class="btn" data-command="open-setting" data-arg="Wi-Fi">Open Wi-Fi Settings</button>
+            <button class="btn" data-command="run-diagnostics">Run Diagnostics</button>
+          </div></div></div>`;
+      }
+
+      if (live.reason === 'no-frame') {
+        return `<div class="error-page"><div>
+          <div class="error-art">${glyph('shield', { size: 54 })}</div>
+          <h1>${esc(live.host)} refused to connect</h1>
+          <p>This site sends headers that forbid other pages from embedding it, so it cannot be shown
+             inside the simulated browser. That is the site's choice, not a fault in the simulator —
+             real browsers show the same thing inside a frame.</p>
+          <div class="error-actions">
+            <button class="btn primary" data-command="open-external" data-arg="${esc(live.url)}">Open in a new tab</button>
+            <button class="btn" data-command="browse" data-arg="wikipedia.org/wiki/Main_Page">Try Wikipedia instead</button>
+            <button class="btn" data-command="browse" data-arg="start">Back to Start Page</button>
+          </div></div></div>`;
+      }
+
+      if (live.reason === 'missing') {
+        return `<div class="error-page"><div>
+          <div class="error-art">${glyph('search', { size: 54 })}</div>
+          <h1>That page does not exist</h1>
+          <p>Wikipedia has no article with that exact title. Try searching instead.</p>
+          <div class="error-actions">
+            <button class="btn primary" data-command="wiki-search" data-arg="${esc(live.target?.title || '')}">Search Wikipedia</button>
+            <button class="btn" data-command="browse" data-arg="start">Back to Start Page</button>
+          </div></div></div>`;
+      }
+
+      return `<div class="error-page"><div>
+        <div class="error-art">${glyph('warning', { size: 54 })}</div>
+        <h1>Safari cannot open the page</h1>
+        <p>The request to the live site failed${live.message ? ` — ${esc(live.message)}` : ''}.
+           This can happen when the network blocks the request, or when the page is opened straight from
+           a file rather than served over HTTP.</p>
+        <div class="error-actions">
+          <button class="btn primary" data-command="browser-retry">Try Again</button>
+          <button class="btn" data-command="browse" data-arg="start">Back to Start Page</button>
+        </div></div></div>`;
+    },
+
     startPage() {
       const hour = new Date().getHours();
       const greeting = hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening';
@@ -243,6 +407,12 @@
         <h1>Good ${greeting}${Mac.state.browser.private ? ' — Private Browsing' : ''}.</h1>
         <form class="start-search" data-address-form>${glyph('search')}
           <input placeholder="Search or enter website name" aria-label="Search the web" spellcheck="false"></form>
+        ${Mac.Web.enabled() ? `<form class="start-search wiki-search" data-wiki-form style="margin-top:12px">
+          ${glyph('search')}<input placeholder="Search Wikipedia" aria-label="Search Wikipedia" spellcheck="false">
+          <button class="btn" type="submit">Search</button></form>
+          <p class="muted" style="margin:10px 0 0;font-size:11.5px">Live web access is on — Wikipedia loads for real.
+            <button class="btn" style="margin-left:6px" data-command="browse" data-arg="wikipedia.org/wiki/__random__">Random article</button></p>`
+          : '<p class="muted" style="margin:12px 0 0;font-size:11.5px">Live web access is off — only built-in simulated pages will load.</p>'}
         <div class="favorites-grid">${favorites.map(favorite =>
           `<button class="favorite" data-command="browse" data-arg="${esc(favorite.url)}">
             <i style="background:${favorite.color}">${esc(favorite.title[0])}</i>${esc(favorite.title)}</button>`).join('')}</div>
@@ -314,6 +484,8 @@
       const browser = Mac.state.browser;
       return `<div class="web-page"><div class="web-wrap"><h1>Safari Settings</h1>
         ${UI.group(
+          UI.toggle('Live web access', 'browser.liveWeb',
+            'Load real pages from the internet. Wikipedia is fetched through its public API and rendered here; other sites are embedded when they allow it.'),
           UI.toggle('Private Browsing', 'browser.private', 'Private tabs are not added to History.'),
           UI.toggle('Prevent cross-site tracking', 'browser.preventTracking'),
           UI.toggle('Block pop-up windows', 'browser.blockPopups'),
@@ -335,6 +507,10 @@
       ];
       return `<div class="web-page"><div class="web-wrap">
         <p class="web-eyebrow">Simulated search</p><h1>Results for “${esc(q)}”</h1>
+        ${Mac.Web.enabled() ? `<div class="web-card" style="display:flex;align-items:center;gap:12px">
+          <div style="flex:1"><h3 style="margin:0 0 2px">Search Wikipedia for “${esc(q)}”</h3>
+          <p style="margin:0">Fetches real results from Wikipedia's public API.</p></div>
+          <button class="btn primary" data-command="wiki-search" data-arg="${esc(q)}">Search</button></div>` : ''}
         ${hits.map(hit => `<div class="web-card"><h3><button style="color:var(--accent);font:inherit"
           data-command="browse" data-arg="${esc(hit.url)}">${esc(hit.title)}</button></h3>
           <p style="margin:4px 0 0">${esc(hit.text)}</p>
