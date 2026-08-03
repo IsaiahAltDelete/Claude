@@ -222,6 +222,32 @@
           : 'Private Browsing is off.', { app: 'safari', transient: true });
         break;
       case 'browser-share': Mac.Dialog.info('Share', 'Sharing is simulated — nothing leaves this page.', 'share'); break;
+      case 'browser-live-toggle':
+        Mac.toggle('browser.liveWeb');
+        Mac.wm.refresh('safari');
+        Mac.Notify.show('Safari', Mac.Web.enabled()
+          ? 'Live web access is on. Wikipedia loads for real; other sites load when they allow embedding.'
+          : 'Live web access is off. Only the built-in simulated pages will load.', { app: 'safari', transient: true });
+        break;
+      case 'wiki-search': {
+        const target = win?.appId === 'safari' ? win : appWin('safari');
+        const query = String(arg || '').trim();
+        if (!query) break;
+        Mac.Browser.navigate(target, `wikipedia.org/w/index.php?search=${encodeURIComponent(query)}`, { searchTerm: query });
+        Mac.wm.focus(target.id);
+        break;
+      }
+      case 'open-external': {
+        // Real navigation away from the simulator, so confirm first.
+        const confirmed = await Mac.Dialog.confirm({
+          title: 'Leave the simulator?',
+          body: `This opens <b>${esc(arg)}</b> in a real new browser tab, outside the simulator.`,
+          confirmLabel: 'Open',
+          icon: 'globe',
+        });
+        if (confirmed) window.open(arg, '_blank', 'noopener,noreferrer');
+        break;
+      }
       case 'browser-bookmark':
         if (win?.appId === 'safari') {
           const tab = Mac.Browser.tab(win);
@@ -982,6 +1008,14 @@
       if (host) { host.state.selected = Number(contact.dataset.contact); Mac.wm.render(host); }
       return;
     }
+    const webAnchor = target.closest('[data-web-anchor]');
+    if (webAnchor) {
+      event.preventDefault();
+      const host = winFor(webAnchor);
+      if (host) Mac.Browser.scrollToAnchor(host, webAnchor.dataset.webAnchor);
+      return;
+    }
+
     const spotResult = target.closest('[data-spot-index]');
     if (spotResult) { Mac.Spotlight.index = Number(spotResult.dataset.spotIndex); Mac.Spotlight.activate(); return; }
 
@@ -1023,6 +1057,13 @@
     }
     if (form.id === 'unlock-form') {
       Mac.Screens.unlock(Mac.$('#unlock-password').value);
+      return;
+    }
+    if (form.matches('[data-wiki-form]')) {
+      const host = winFor(form) || appWin('safari');
+      const input = form.querySelector('input');
+      Mac.run('wiki-search', input.value, form);
+      void host;
       return;
     }
     if (form.matches('[data-address-form]')) {
