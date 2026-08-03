@@ -10,9 +10,13 @@ Nothing here reads or changes your actual Mac, network, accounts or files. All
 state lives in this page's `localStorage`, and the whole project runs from
 `file://` with no build step, no server and no network access.
 
+**Live:** <https://isaiahaltdelete.github.io/Claude/>
+
 ## Running it
 
-Open `index.html` in any current browser.
+Open the live link above, or clone the repository and open `index.html` in any
+current browser — it works identically from `file://`, since nothing is fetched
+at runtime.
 
 | | |
 |---|---|
@@ -76,6 +80,7 @@ every control is keyboard reachable with visible focus rings.
 
 ```
 index.html                 shell markup and script order
+.github/workflows/pages.yml  publishes the site to GitHub Pages on push to main
 assets/
   fonts/                   Inter + JetBrains Mono (OFL) with @font-face mapping
   icons/                   41 generated app, document and volume icons
