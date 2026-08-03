@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="dark">
-<title>Unfinished Projects</title>
-<meta name="description" content="A running index of things being built — some finished, most not.">
-<link rel="icon" href="favicon.svg">
+<title>404 — Not found</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 fill=%22%23000%22/%3E%3Crect x=%227%22 y=%227%22 width=%2218%22 height=%2218%22 rx=%223%22 fill=%22none%22 stroke=%22%23fff%22 stroke-width=%222.4%22/%3E%3C/svg%3E">
 
 <style>
   /* --------------------------------------------------------------------
@@ -176,43 +176,28 @@
 <body>
 <main class="page">
   <header>
-    <h1>Unfinished&nbsp;projects</h1>
-    <p class="tagline">A running index of things being built. Most are in progress;
-      anything with a link is far enough along to open.</p>
+    <h1>Not&nbsp;here</h1>
+    <p class="tagline">That page does not exist. Everything that does is on the index.</p>
   </header>
-
-  <p class="label">Index</p>
-
   <div class="index">
-    <!-- To add a project, copy one block. Use <a class="entry" href="…"> when
-         there is something to open, or <div class="entry empty"> when there
-         isn't yet. Keep the numbers sequential. -->
-
-    <a class="entry" href="mac/">
-      <span class="num">01</span>
-      <span>
-        <h2>macOS Troubleshooting Simulator<span class="arrow" aria-hidden="true">→</span></h2>
-        <p>A full macOS Tahoe desktop in the browser — window management, Finder,
-          Safari, Mail, Outlook, System Settings, Recovery — built for support
-          training. Its Safari browses Wikipedia for real; everything else runs offline.</p>
-        <span class="meta"><span>/mac</span><span>html · css · js</span><span>no dependencies</span></span>
-      </span>
-      <span class="status live">live</span>
+    <a class="entry" id="home" href="/">
+      <span class="num">&larr;</span>
+      <span><h2>Back to the index<span class="arrow" aria-hidden="true">&rarr;</span></h2></span>
+      <span class="status">home</span>
     </a>
-
-    <div class="entry empty">
-      <span class="num">02</span>
-      <span>
-        <h2>Next one, not started</h2>
-        <p>This slot is a placeholder. Nothing to open yet.</p>
-      </span>
-      <span class="status">empty</span>
-    </div>
   </div>
-
-  <footer>
-    Source on <a href="https://github.com/IsaiahAltDelete/Claude">GitHub</a>.
-  </footer>
 </main>
+<script>
+  /* A project Pages site lives under /<repo>/, and this page is served for any
+     depth beneath it, so the site root has to be worked out at runtime. */
+  (function () {
+    var root = '/';
+    if (location.hostname.endsWith('github.io')) {
+      var first = location.pathname.split('/')[1];
+      if (first) root = '/' + first + '/';
+    }
+    document.getElementById('home').setAttribute('href', root);
+  }());
+</script>
 </body>
 </html>

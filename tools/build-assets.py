@@ -15,8 +15,9 @@ import math
 import pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-ICONS = ROOT / "assets" / "icons"
-WALLS = ROOT / "assets" / "wallpapers"
+SITE = ROOT / "mac"
+ICONS = SITE / "assets" / "icons"
+WALLS = SITE / "assets" / "wallpapers"
 
 SIZE = 128
 # macOS app icons sit on a superellipse ("squircle") rather than a rounded
@@ -689,7 +690,7 @@ for name, stops in WALLPAPERS.items():
     (WALLS / f"{name}.svg").write_text(svg)
 
 # Apple brand mark, drawn from primitives so nothing is copied from a remote file.
-(ROOT / "assets" / "brand" / "apple-mark.svg").write_text(
+(SITE / "assets" / "brand" / "apple-mark.svg").write_text(
     """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 84 100" role="img" aria-label="System menu">
  <path fill="currentColor" d="M57.8 53.2c-.1-10.4 8.5-15.4 8.9-15.6-4.8-7-12.3-8-15-8.2-6.8-.5-12.5 3.8-15.8 3.8-3.3 0-8.1-3.7-13.3-3.6C15.8 29.7 9 34.4 5.3 41.7c-7.5 13-1.9 32.3 5.4 42.9 3.6 5.2 7.9 10.9 13.6 10.7 5.4-.2 7.5-3.5 14.1-3.5 6.6 0 8.4 3.5 14.1 3.4 5.8-.1 9.5-5.3 13.1-10.5 4.1-6 5.8-11.8 5.9-12.1-.1-.1-11.6-4.5-11.7-19.4z"/>
  <path fill="currentColor" d="M48.6 22.1c2.9-3.5 4.9-8.4 4.4-13.3-4.3.2-9.5 2.9-12.5 6.4-2.7 3.1-5 8.1-4.4 12.9 4.8.4 9.6-2.4 12.5-6z"/>
