@@ -1,0 +1,61 @@
+name: Deploy to GitHub Pages
+
+# The simulator is a static site with no build step, so the repository is
+# published as-is. `configure-pages` turns Pages on the first time this runs.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: Upload site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  # Non-blocking: confirms the committed artwork still matches the generator.
+  # Runs alongside the deploy so a cosmetic drift never takes the site down.
+  assets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Regenerate icons and wallpapers
+        run: python3 tools/build-assets.py
+      - name: Report any drift
+        run: |
+          if git diff --quiet -- assets; then
+            echo "Committed assets match tools/build-assets.py."
+          else
+            echo "::warning::assets/ differs from the generator output — run tools/build-assets.py and commit."
+            git --no-pager diff --stat -- assets
+          fi
