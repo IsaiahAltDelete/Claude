@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="description" content="An offline, browser-based macOS Tahoe troubleshooting simulator for support training.">
+<title>macOS Tahoe — Troubleshooting Simulator</title>
+
+<link rel="icon" href="assets/icons/finder.svg">
+<link rel="stylesheet" href="assets/fonts/fonts.css">
+<link rel="stylesheet" href="styles/01-tokens.css">
+<link rel="stylesheet" href="styles/02-controls.css">
+<link rel="stylesheet" href="styles/03-shell.css">
+<link rel="stylesheet" href="styles/04-windows.css">
+<link rel="stylesheet" href="styles/05-apps.css">
+<link rel="stylesheet" href="styles/06-settings.css">
+<link rel="stylesheet" href="styles/07-responsive.css">
+</head>
+<body>
+<div id="simulator" data-theme="light">
+
+  <!-- ------------------------------------------------------------- startup -->
+  <section id="boot-screen" class="system-screen" aria-label="Starting up">
+    <div class="boot-card">
+      <div class="apple-mark" id="boot-mark" aria-hidden="true"></div>
+      <div class="boot-track"><i id="boot-progress"></i></div>
+      <p class="boot-note" id="boot-note"></p>
+    </div>
+  </section>
+
+  <!-- Login window (after log out / restart) -->
+  <section id="login-screen" class="system-screen wallpapered hidden" aria-label="Login window">
+    <div class="lock-status" id="login-status"></div>
+    <div style="position:absolute;inset:0;display:grid;place-items:center;padding:20px">
+      <div id="login-body"></div>
+    </div>
+    <div class="screen-actions" id="login-actions"></div>
+  </section>
+
+  <!-- Lock screen (Control-Command-Q) -->
+  <section id="lock-screen" class="system-screen wallpapered hidden" aria-label="Lock screen">
+    <div class="lock-status" id="lock-status"></div>
+    <div class="lock-hero">
+      <div class="lock-date" id="lock-date"></div>
+      <div class="lock-time" id="lock-time"></div>
+    </div>
+    <div class="auth-card" id="lock-auth"></div>
+    <div class="screen-actions" id="lock-actions"></div>
+  </section>
+
+  <section id="sleep-screen" class="system-screen sleep-screen hidden" aria-label="Display sleep">
+    <button data-command="wake">Click or press any key to wake</button>
+  </section>
+
+  <section id="power-off-screen" class="system-screen hidden" aria-label="Powered off">
+    <div style="text-align:center">
+      <div class="apple-mark" id="off-mark" style="width:52px;height:62px;margin:0 auto 24px" aria-hidden="true"></div>
+      <p class="muted" style="color:#8b8b90">This simulated Mac is shut down.</p>
+      <button class="btn large" data-command="power-on" style="margin-top:10px">Power On</button>
+    </div>
+  </section>
+
+  <section id="recovery-screen" class="system-screen panel-screen hidden" aria-label="macOS Recovery">
+    <div class="panel-card" id="recovery-body"></div>
+  </section>
+
+  <section id="setup-screen" class="system-screen panel-screen hidden" aria-label="Setup Assistant">
+    <div class="panel-card" id="setup-body"></div>
+  </section>
+
+  <!-- ------------------------------------------------------------- desktop -->
+  <main id="desktop" class="hidden" aria-label="Desktop">
+    <header class="menu-bar" id="menu-bar" role="menubar">
+      <div class="menu-group menu-left" id="menu-left"></div>
+      <div class="menu-group menu-right" id="menu-right"></div>
+    </header>
+
+    <div class="desktop-widgets" id="desktop-widgets"></div>
+    <div class="desktop-items" id="desktop-items"></div>
+
+    <div id="window-layer" aria-live="polite"></div>
+    <div id="snap-preview" class="hidden" aria-hidden="true"></div>
+    <div id="overlay-layer"></div>
+    <div id="surface-layer"></div>
+    <div class="toast-stack" id="toast-stack" role="status" aria-live="polite"></div>
+
+    <div class="dock-wrap" id="dock-wrap">
+      <nav class="dock" id="dock" aria-label="Dock"></nav>
+    </div>
+  </main>
+
+  <div id="modal-layer"></div>
+  <div id="brightness-veil" aria-hidden="true"></div>
+  <div id="warmth-veil" aria-hidden="true"></div>
+</div>
+
+<noscript style="position:fixed;inset:0;display:grid;place-items:center;background:#111;color:#fff;padding:24px;text-align:center">
+  This troubleshooting simulator needs JavaScript enabled.
+</noscript>
+
+<!-- Load order matters: core primitives, then the shell, then app modules,
+     then the event layer that wires everything together. -->
+<script src="scripts/01-core.js"></script>
+<script src="scripts/02-glyphs.js"></script>
+<script src="scripts/03-state.js"></script>
+<script src="scripts/04-ui.js"></script>
+<script src="scripts/05-windows.js"></script>
+<script src="scripts/06-shell.js"></script>
+<script src="scripts/07-spotlight.js"></script>
+<script src="scripts/10-finder.js"></script>
+<script src="scripts/11-safari.js"></script>
+<script src="scripts/12-mail.js"></script>
+<script src="scripts/13-outlook.js"></script>
+<script src="scripts/14-appstore.js"></script>
+<script src="scripts/15-utilities.js"></script>
+<script src="scripts/16-media.js"></script>
+<script src="scripts/20-settings.js"></script>
+<script src="scripts/21-account.js"></script>
+<script src="scripts/30-network.js"></script>
+<script src="scripts/31-power.js"></script>
+<script src="scripts/40-events.js"></script>
+<script src="scripts/99-boot.js"></script>
+</body>
+</html>
