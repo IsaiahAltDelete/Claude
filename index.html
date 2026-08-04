@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="dark">
-<title>Unfinished Projects</title>
-<meta name="description" content="A running index of things being built — some finished, most not.">
+<title>Simulators</title>
+<meta name="description" content="Browser simulators of real devices, built for support training.">
 <link rel="icon" href="favicon.svg">
 
 <style>
@@ -149,10 +149,6 @@
   }
   a.entry:hover .arrow, a.entry:focus-visible .arrow { transform: translateX(4px); color: #fff; }
 
-  /* Placeholder row for work that has not shipped anything to look at. */
-  .entry.empty { color: var(--faint); }
-  .entry.empty h2 { color: var(--faint); font-weight: 400; }
-
   /* ------------------------------------------------------------ footer */
 
   footer {
@@ -177,17 +173,18 @@
 <body>
 <main class="page">
   <header>
-    <h1>Unfinished&nbsp;projects</h1>
-    <p class="tagline">A running index of things being built. Most are in progress;
-      anything with a link is far enough along to open.</p>
+    <h1>Simulators</h1>
+    <p class="tagline">Devices rebuilt in the browser, close enough to the real
+      thing to practise on. No installs, no accounts — open one and start
+      breaking it.</p>
   </header>
 
   <p class="label">Index</p>
 
   <div class="index">
-    <!-- To add a project, copy one block. Use <a class="entry" href="…"> when
-         there is something to open, or <div class="entry empty"> when there
-         isn't yet. Keep the numbers sequential. -->
+    <!-- To add a simulator, copy one entry block and keep the numbers
+         sequential. The status pill reads "live" when there is something to
+         open; use "wip" for anything still being built. -->
 
     <a class="entry" href="mac/">
       <span class="num">01</span>
@@ -201,14 +198,18 @@
       <span class="status live">live</span>
     </a>
 
-    <div class="entry empty">
+    <a class="entry" href="iphone/">
       <span class="num">02</span>
       <span>
-        <h2>Next one, not started</h2>
-        <p>This slot is a placeholder. Nothing to open yet.</p>
+        <h2>iPhone Simulator<span class="arrow" aria-hidden="true">&rarr;</span></h2>
+        <p>A full iOS phone — lock screen, Control Centre, Spotlight, App Library,
+          and thirty-odd apps from Photos and Camera through Health, Home, Music and
+          Settings. Wi-Fi, cellular and account faults can be staged deliberately.
+          Its Maps loads a real map; everything else runs offline.</p>
+        <span class="meta"><span>/iphone</span><span>html &middot; css &middot; js</span><span>no dependencies</span></span>
       </span>
-      <span class="status">empty</span>
-    </div>
+      <span class="status live">live</span>
+    </a>
   </div>
 
   <footer>
