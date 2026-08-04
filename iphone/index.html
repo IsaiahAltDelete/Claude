@@ -807,14 +807,18 @@ function h(html){const t=document.createElement('template');t.innerHTML=html.tri
 const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 /* ---------- persistent state ---------- */
-const SAVE_KEY='iphone-sim-v2';
+const SAVE_KEY='iphone-sim-v3';
+/* Saves before v3 carried a different, real-looking identity. Rather than
+   rewriting them on load — which meant shipping those names in this file — the
+   key was bumped and the old entry is dropped. */
+const RETIRED_KEYS=['iphone-sim','iphone-sim-v2'];
 const DEFAULTS = {
   settings:{
     dark:true, brightness:0.9, wallpaper:0, textSize:1, bold:false,
     airplane:false, wifi:true, wifiName:'SPECTRUM-5G', bluetooth:true, cellular:true, network:'online',
     dnd:false, lowpower:false, rotationLock:false, autoLock:'2 Minutes', touchCursor:true,
     searchEngine:'Google', blockPopups:true, preventTracking:true, faceid:true,
-    name:"Isaiah's iPhone", appleID:'isaiah.s@icloud.com',
+    name:"Alex's iPhone", appleID:'alex.rivera@icloud.example',
     autoUpdates:true, cellDownloads:false, offloadUnused:false, hapticFeedback:true, appleIntelligence:true,
     ringer:75, mailPreview:2, mailSignature:'Sent from my iPhone', mailThread:true
   },
@@ -835,7 +839,8 @@ const DEFAULTS = {
 let State = load();
 function load(){
   try{
-    let raw = localStorage.getItem(SAVE_KEY);
+    RETIRED_KEYS.forEach(k=>localStorage.removeItem(k));
+    const raw = localStorage.getItem(SAVE_KEY);
     if(!raw) return structuredClone(DEFAULTS);
     const s = JSON.parse(raw);
     s.settings = Object.assign(structuredClone(DEFAULTS.settings), s.settings||{});
@@ -852,7 +857,7 @@ function factoryReset(){ localStorage.removeItem(SAVE_KEY); location.reload(); }
 function ACC(){
   if(!State.accounts) State.accounts={
     signedIn:1,
-    list:[{id:1,name:'Isaiah S.',email:'isaiah.s@icloud.com',initials:'IS',
+    list:[{id:1,name:'Alex Rivera',email:'alex.rivera@icloud.example',initials:'AR',
            color:'linear-gradient(135deg,#5e5ce6,#0a84ff)',storage:47.2,plan:'200 GB'}]
   };
   return State.accounts;
@@ -1479,7 +1484,7 @@ $('#bMute').onclick=()=>{ State.settings.dnd=!State.settings.dnd; save(); ringer
 let LOCK_NOTIFS=[
   {app:'mail',   title:'Spectrum',  body:'Your July statement is ready — $189.98 due August 12', when:'2m ago'},
   {app:'appstore',title:'App Store',body:'2 apps have updates available', when:'18m ago'},
-  {app:'messages',title:'Karma',    body:'Call me when you get a chance 💙', when:'1h ago'}
+  {app:'messages',title:'Nina',    body:'Call me when you get a chance 💙', when:'1h ago'}
 ];
 function pushNotification(app,title,body,{thread=null}={}){
   LOCK_NOTIFS.unshift({app,title,body,when:'now',thread});
@@ -1571,7 +1576,7 @@ function ringTone(on){
     beep(); ringTimer=setInterval(beep,2600);
   }catch(e){}
 }
-function incomingCall(name='Karma S',number='mobile'){
+function incomingCall(name='Nina Okafor',number='mobile'){
   if(Call.state!=='idle') return toast('A call is already in progress');
   Object.assign(Call,{state:'incoming',name,number,started:0,mute:false,speaker:false,hold:false});
   showCallUI(); ringTone(true);
@@ -2189,7 +2194,7 @@ function settingsRoot(){
 
     group(content,{rows:[
       {label:'Game Center', icon:'🎮', iconBg:'#5e5ce6', onClick:()=>nav.push(infoListView('Game Center','',
-        ['Apple Account — isaiah.s@icloud.com','Nickname — isaiah_s','Friends — 12','Nearby Players'],''))},
+        ['Apple Account — alex.rivera@icloud.example','Nickname — alex_rivera','Friends — 12','Nearby Players'],''))},
       {label:'iCloud', icon:'☁️', iconBg:'#0a84ff', value:'47.2 GB of 200 GB', onClick:()=>nav.push(icloudView())},
       {label:'Wallet & Apple Pay', icon:'💳', iconBg:'#1c1c1e', onClick:()=>nav.push(infoListView('Wallet & Apple Pay','Payment Cards',
         ['Add Card','Express Transit Card','Double-Click Side Button','Allow Payments on Mac'],'Payment features are disabled in the simulator.'))}
@@ -2293,7 +2298,7 @@ function phoneSettingsView(){
       {label:'Live Voicemail',toggle:()=>true,onToggle:()=>{}},
       {label:'Call Blocking & Identification',onClick:()=>toast('Simulated')}]});
     group(b,{rows:[{label:'Simulate an Incoming Call',cls:'blue center',onClick:()=>{
-      goHome(); setTimeout(()=>incomingCall('Karma S','mobile'),400); }}]});
+      goHome(); setTimeout(()=>incomingCall('Nina Okafor','mobile'),400); }}]});
   }};
 }
 
@@ -2351,8 +2356,8 @@ function appleIDView(){
        onClick:()=>nav.push(deviceDetailView('MacBook Pro','MacBook Pro 14″, 2023','Orlando, FL'))},
       {label:'Apple TV 4K', sub:'Living Room', icon:'📺', iconBg:'#8e8e93',
        onClick:()=>nav.push(deviceDetailView('Apple TV 4K','Apple TV 4K (3rd gen)','Living Room'))},
-      {label:'Isaiah’s Apple Watch', sub:'Apple Watch Series 9', icon:'⌚', iconBg:'#8e8e93',
-       onClick:()=>nav.push(deviceDetailView('Isaiah’s Apple Watch','Apple Watch Series 9','Paired with this iPhone'))}
+      {label:'Alex’s Apple Watch', sub:'Apple Watch Series 9', icon:'⌚', iconBg:'#8e8e93',
+       onClick:()=>nav.push(deviceDetailView('Alex’s Apple Watch','Apple Watch Series 9','Paired with this iPhone'))}
     ]});
     group(b,{rows:[
       {label:'Switch or Add Account…', cls:'blue center', onClick:()=>signInSheet(nav,{switching:true})},
@@ -2376,7 +2381,7 @@ function appleIDView(){
 function personalInfoView(){
   return {title:'Personal Information', shortTitle:'Personal', build(b,nav){
     group(b,{rows:[
-      {label:'Name',value:'Isaiah S.',onClick:()=>toast('Name changes are simulated')},
+      {label:'Name',value:'Alex Rivera',onClick:()=>toast('Name changes are simulated')},
       {label:'Date of Birth',value:'••/••/••••',onClick:()=>toast('Hidden in the simulator')}]});
     group(b,{header:'Reachable At',rows:[
       {label:State.settings.appleID,sub:'Apple Account & contact email',chevron:false},
@@ -2411,7 +2416,7 @@ function paymentView(){
       {label:'Apple Card •••• 4417',sub:'Daily Cash 2%',icon:'💳',iconBg:'#5e5ce6',onClick:()=>toast('Card details are simulated')},
       {label:'Add Payment Method…',cls:'blue',onClick:()=>toast('The simulator can’t take payment details')}]});
     group(b,{header:'Shipping Address',rows:[
-      {labelHTML:'Isaiah S.<br><span class="muted" style="font-size:14px">1200 Lakefront Ave<br>Orlando, FL 32801</span>',chevron:false}]});
+      {labelHTML:'Alex Rivera<br><span class="muted" style="font-size:14px">1200 Lakefront Ave<br>Orlando, FL 32801</span>',chevron:false}]});
   }};
 }
 function mediaPurchasesView(){
@@ -2439,7 +2444,7 @@ function findMyView(){
   }};
 }
 function familyView(){
-  const members=[['Isaiah S.','Organiser','IS','#0a84ff'],['Karma S','Parent/Guardian','KS','#bf5af2'],
+  const members=[['Alex Rivera','Organiser','AR','#0a84ff'],['Nina Okafor','Parent/Guardian','NO','#bf5af2'],
     ['Dad','Adult','D','#30d158'],['Jordan Reyes','Adult','JR','#ff9f0a']];
   return {title:'Family', build(b,nav){
     group(b,{rows:members.map(([n,role,init,color])=>({
@@ -2975,7 +2980,7 @@ function networkDetailView(ssid){
 function BT(){
   if(!State.bt) State.bt={devices:[
     {n:'AirPods Pro',       type:'audio', batt:82, conn:true},
-    {n:'Isaiah’s Apple Watch',type:'watch',batt:64, conn:true},
+    {n:'Alex’s Apple Watch',type:'watch',batt:64, conn:true},
     {n:'Spectrum Voice Remote',type:'remote',batt:null,conn:false},
     {n:'Honda HR-V',        type:'car',   batt:null,conn:false},
     {n:'JBL Flip 6',        type:'audio', batt:35, conn:false}
@@ -3635,9 +3640,9 @@ function appStoreSettingsView(){
   }};
 }
 function passwordsView(){
-  const items=[['spectrum.net','isaiah.s@icloud.com'],['netflix.com','isaiah.s@icloud.com'],
-    ['disneyplus.com','isaiah.s'],['max.com','isaiah.s@icloud.com'],['peacocktv.com','isaiah.s'],
-    ['paramountplus.com','isaiah.s@icloud.com']];
+  const items=[['spectrum.net','alex.rivera@icloud.example'],['netflix.com','alex.rivera@icloud.example'],
+    ['disneyplus.com','alex.rivera'],['max.com','alex.rivera@icloud.example'],['peacocktv.com','alex.rivera'],
+    ['paramountplus.com','alex.rivera@icloud.example']];
   return {title:'Passwords', build(b,nav){
     b.appendChild(el('div','searchfield',`${SVG.search}<input placeholder="Search">`));
     group(b,{rows:items.map(([site,user])=>({
@@ -4019,7 +4024,7 @@ function storeOfflineView(retry){
 }
 function storeTodayView(){
   return {title:'', shortTitle:'Today',
-    left:[], right:[{html:`<div class="avatar" style="width:32px;height:32px;font-size:13px;background:linear-gradient(135deg,#5e5ce6,#0a84ff)">IS</div>`,
+    left:[], right:[{html:`<div class="avatar" style="width:32px;height:32px;font-size:13px;background:linear-gradient(135deg,#5e5ce6,#0a84ff)">AR</div>`,
       onClick:n=>n.push(storeAccountView())}],
     build(b,nav){
       const d=new Date();
@@ -4087,7 +4092,7 @@ function storeRow(app,nav,{rank}={}){
 function storeGamesView(){
   const games=()=>STORE.filter(a=>a.game);
   return {title:'Games', largeTitle:true, shortTitle:'Games',
-    right:[{html:`<div class="avatar" style="width:32px;height:32px;font-size:13px;background:linear-gradient(135deg,#5e5ce6,#0a84ff)">IS</div>`,
+    right:[{html:`<div class="avatar" style="width:32px;height:32px;font-size:13px;background:linear-gradient(135deg,#5e5ce6,#0a84ff)">AR</div>`,
       onClick:n=>n.push(storeAccountView())}],
     build(b,nav){
       const feat=games()[0];
@@ -4113,7 +4118,7 @@ function storeGamesView(){
 }
 function storeAppsView(){
   return {title:'Apps', largeTitle:true, shortTitle:'Apps',
-    right:[{html:`<div class="avatar" style="width:32px;height:32px;font-size:13px;background:linear-gradient(135deg,#5e5ce6,#0a84ff)">IS</div>`,
+    right:[{html:`<div class="avatar" style="width:32px;height:32px;font-size:13px;background:linear-gradient(135deg,#5e5ce6,#0a84ff)">AR</div>`,
       onClick:n=>n.push(storeAccountView())}],
     build(b,nav){
       const hs=el('div','hscroll');
@@ -4227,7 +4232,7 @@ function storeSearchView(){
 }
 function storeUpdatesView(){
   return {title:'Updates', largeTitle:true, shortTitle:'Updates',
-    right:[{html:`<div class="avatar" style="width:32px;height:32px;font-size:13px;background:linear-gradient(135deg,#5e5ce6,#0a84ff)">IS</div>`,
+    right:[{html:`<div class="avatar" style="width:32px;height:32px;font-size:13px;background:linear-gradient(135deg,#5e5ce6,#0a84ff)">AR</div>`,
       onClick:n=>n.push(storeAccountView())}],
     build(b,nav){
       const pending=(State.updatesAvailable||[]).filter(id=>State.installed.includes(id));
@@ -4275,8 +4280,8 @@ function storeUpdatesView(){
 function storeAccountView(){
   return {title:'Account', backLabel:'Done', build(b,nav){
     const head=el('div','pad'); head.style.textAlign='center';
-    head.innerHTML=`<div class="avatar" style="width:80px;height:80px;font-size:30px;margin:4px auto 10px;background:linear-gradient(135deg,#5e5ce6,#0a84ff)">IS</div>
-      <div style="font-size:20px;font-weight:600">Isaiah S.</div>
+    head.innerHTML=`<div class="avatar" style="width:80px;height:80px;font-size:30px;margin:4px auto 10px;background:linear-gradient(135deg,#5e5ce6,#0a84ff)">AR</div>
+      <div style="font-size:20px;font-weight:600">Alex Rivera</div>
       <div class="muted" style="font-size:14px">${esc(State.settings.appleID)}</div>`;
     b.appendChild(head);
     group(b,{rows:[
@@ -4775,7 +4780,7 @@ function seedInbox(acct){
   const me=acct.address, now=Date.now();
   const base=[
     {from:{n:'Spectrum',e:'no-reply@spectrum.net'},subject:'Your July statement is ready',date:now-HOURS(2),
-     body:`Hi Isaiah,\n\nYour Spectrum statement for July is now available.\n\nAccount ending: 4417\nAmount due: $189.98\nDue date: August 12\n\nYour bill includes Spectrum Internet Ultra, Spectrum TV Select and Spectrum Mobile (2 lines). You are enrolled in Auto Pay — no action is needed.\n\nView your full statement in the My Spectrum app.\n\nThank you,\nSpectrum Billing`,
+     body:`Hi Alex,\n\nYour Spectrum statement for July is now available.\n\nAccount ending: 4417\nAmount due: $189.98\nDue date: August 12\n\nYour bill includes Spectrum Internet Ultra, Spectrum TV Select and Spectrum Mobile (2 lines). You are enrolled in Auto Pay — no action is needed.\n\nView your full statement in the My Spectrum app.\n\nThank you,\nSpectrum Billing`,
      attachments:[{n:'July_Statement.pdf',s:'214 KB'}]},
     {from:{n:'Netflix',e:'info@mailer.netflix.com'},subject:'New device signed in to your account',date:now-HOURS(6),
      body:`We noticed a new sign-in to your Netflix account.\n\nDevice: iPhone 15 Pro\nLocation: Orlando, FL, US\nTime: Today at 3:14 PM\n\nIf this was you, no action is needed. If you don't recognize this activity, change your password immediately.\n\n— The Netflix Team`},
@@ -4792,13 +4797,13 @@ function seedInbox(acct){
      body:`We're performing network maintenance near your service address on Thursday between 1:00 AM and 5:00 AM.\n\nYou may experience brief interruptions to Internet, TV and Voice service during this window. No action is required.\n\nWe appreciate your patience.`},
     {from:{n:'Paramount+',e:'no-reply@paramountplus.com'},subject:'Your subscription renews soon',date:now-DAYS(4),
      body:`Your Paramount+ with SHOWTIME plan renews on the 19th for $12.99/month.\n\nManage or cancel anytime from Settings > Subscriptions.`},
-    {from:{n:'Karma S',e:'karma.s@gmail.com'},subject:'Sunday dinner?',date:now-DAYS(5),
-     body:`Hey,\n\nAre you coming by Sunday? I'm making the short ribs you like. Bring the projector if you still have it — everyone wants to watch the game outside.\n\n— Karma`},
+    {from:{n:'Nina Okafor',e:'nina.okafor@example.com'},subject:'Sunday dinner?',date:now-DAYS(5),
+     body:`Hey,\n\nAre you coming by Sunday? I'm making the short ribs you like. Bring the projector if you still have it — everyone wants to watch the game outside.\n\n— Nina`},
     {from:{n:'Hulu',e:'hulu@mail.hulu.com'},subject:'We saved your spot',date:now-DAYS(6),
      body:`You're 12 minutes into an episode. Pick up where you left off, or check out three new arrivals we think you'll like.`}
   ];
   const msgs = base.map((b,i)=>mkMsg({...b, to:me, read:i>2, box:'inbox'}));
-  msgs.push(mkMsg({from:{n:acct.name,e:me},to:'karma.s@gmail.com',subject:'Re: Sunday dinner?',box:'sent',read:true,
+  msgs.push(mkMsg({from:{n:acct.name,e:me},to:'nina.okafor@example.com',subject:'Re: Sunday dinner?',box:'sent',read:true,
     date:now-DAYS(5)+HOURS(2),body:`I'll be there around 4. I'll bring the projector and some drinks.\n\n${State.settings.mailSignature}`}));
   msgs.push(mkMsg({from:{n:acct.name,e:me},to:'',subject:'Cancel cable box',box:'drafts',read:true,date:now-DAYS(1),
     body:`Reminder to myself: call Spectrum about returning the second cable box now that everything is on the app.`}));
@@ -4807,11 +4812,11 @@ function seedInbox(acct){
   return msgs;
 }
 function defaultMail(){
-  const a={id:1,name:'Isaiah S.',address:State.settings.appleID,provider:'gmail',color:'#ea4335',
+  const a={id:1,name:'Alex Rivera',address:State.settings.appleID,provider:'gmail',color:'#ea4335',
     desc:'Gmail',imap:'imap.gmail.com',smtp:'smtp.gmail.com',type:'IMAP',
     enabled:{mail:true,contacts:true,calendars:true,notes:false}};
   a.messages=seedInbox(a);
-  return {accounts:[a], seq:2, vip:['karma.s@gmail.com']};
+  return {accounts:[a], seq:2, vip:['nina.okafor@example.com']};
 }
 function ML(){ if(!State.mail) { State.mail=defaultMail(); save(); } return State.mail; }
 function allMessages(){ return ML().accounts.flatMap(a=>a.messages.map(m=>({...m,_acct:a.id}))); }
@@ -5071,7 +5076,7 @@ function composeMail({reply,forward,draft,account,all,subject,body,to,onSent}={}
       d.appendChild(i);
       if(key==='to'){ const p=el('button','','＋'); p.style.color='var(--sysblue)';
         p.onclick=()=>actionSheet('Suggested Contacts',
-          ['karma.s@gmail.com','support@spectrum.net','isaiah.work@outlook.com','billing@charter.net'].map(e=>({
+          ['nina.okafor@example.com','support@spectrum.net','alex.work@outlook.example','billing@charter.net'].map(e=>({
             text:e,onClick:()=>{ i.value=i.value? i.value+', '+e : e; f.to=i.value; }})));
         d.appendChild(p); }
       fields.appendChild(d); return i;
@@ -5687,7 +5692,7 @@ function mySpectrumShell(app,win){
   v.innerHTML=`
     <div style="background:linear-gradient(160deg,#003057,#0072ce);padding:64px 18px 22px;color:#fff">
       <div style="font-size:13px;opacity:.85">Welcome back,</div>
-      <div style="font-size:24px;font-weight:700">Isaiah</div>
+      <div style="font-size:24px;font-weight:700">Alex</div>
       <div style="margin-top:16px;background:rgba(255,255,255,.14);border-radius:14px;padding:14px">
         <div style="font-size:12px;opacity:.85">Account ending 4417 · Auto Pay on</div>
         <div style="font-size:30px;font-weight:800;margin:4px 0">$189.98</div>
@@ -5945,7 +5950,7 @@ const WORDS=('crane slate audio house plant mount brick trace shine grape stone 
 'sugar tiger urban vivid wharf yield zebra amber blaze cider dodge elbow flint grasp hedge inlet joker '+
 'kneel latch mirth nudge onset prism quart rider swirl thorn ultra vapor wager yeast abide badge cabin '+
 'daisy eagle fjord glide honey islet jewel kayak lodge motel niche olive punch quest rapid siren tulip '+
-'usher vault waltz alloy bloom coral drift ember frost gauge hover input japan karma lunar month night').split(' ');
+'usher vault waltz alloy bloom coral drift ember frost gauge hover input japan nina lunar month night').split(' ');
 function wordleGame(app,win){
   const {stage,controls,scoreEl}=gameChrome(app,win,{sub:'Six tries',statLabel:'Streak'});
   scoreEl.textContent=gmBest(app.id);
@@ -6281,10 +6286,10 @@ function gameShell(app,win){
    PHONE — Favourites / Recents / Contacts / Keypad / Voicemail
    ========================================================================= */
 const CONTACTS=[
-  {first:'Karma',last:'S',fav:true,phones:[['mobile','(407) 555-0118'],['home','(407) 555-0192']],email:'karma.s@gmail.com',note:'Sunday dinner at 4'},
+  {first:'Nina',last:'Okafor',fav:true,phones:[['mobile','(407) 555-0118'],['home','(407) 555-0192']],email:'nina.okafor@example.com',note:'Sunday dinner at 4'},
   {first:'Jordan',last:'Reyes',fav:true,phones:[['iPhone','(407) 555-0143']],email:'jordan@example.com'},
   {first:'Spectrum',last:'Support',org:'Charter Communications',fav:true,phones:[['main','(855) 707-7328'],['billing','(833) 267-6094']]},
-  {first:'Dad',last:'',nick:'Dad',fav:true,phones:[['mobile','(407) 555-0177']],email:'m.s@example.com'},
+  {first:'Dad',last:'',nick:'Dad',fav:true,phones:[['mobile','(407) 555-0177']],email:'ray.rivera@example.com'},
   {first:'Alicia',last:'Nunez',phones:[['mobile','(321) 555-0164']],email:'alicia.n@example.com'},
   {first:'Ben',last:'Carter',phones:[['work','(407) 555-0136']]},
   {first:'Dr.',last:'Whitfield',org:'Orlando Family Medicine',phones:[['work','(407) 555-0110']]},
@@ -6292,7 +6297,7 @@ const CONTACTS=[
   {first:'Greg',last:'Patterson',phones:[['mobile','(407) 555-0129']]},
   {first:'Hannah',last:'Kim',phones:[['iPhone','(407) 555-0188']],email:'hannah.kim@example.com'},
   {first:'Marcus',last:'Bell',phones:[['mobile','(407) 555-0102']]},
-  {first:'Nina',last:'Okafor',phones:[['iPhone','(407) 555-0173']],email:'nina.o@example.com'},
+  {first:'Priya',last:'Raman',phones:[['iPhone','(407) 555-0173']],email:'priya.raman@example.com'},
   {first:'Pizza',last:'Roma',org:'Pizza Roma',phones:[['main','(407) 555-0199']]},
   {first:'Tasha',last:'Green',phones:[['mobile','(407) 555-0147']]},
   {first:'Victor',last:'Alvarez',phones:[['work','(407) 555-0121']],email:'valvarez@example.com'}
@@ -6302,11 +6307,11 @@ const contactBy=n=>CONTACTS.find(c=>contactName(c)===n||c.nick===n);
 function defaultRecents(){
   const now=Date.now(), M=60000;
   return [
-    {who:'Karma S',        type:'missed',   label:'mobile', at:now-14*M},
+    {who:'Nina Okafor',        type:'missed',   label:'mobile', at:now-14*M},
     {who:'Jordan Reyes',   type:'outgoing', label:'iPhone', at:now-92*M, dur:'4:12'},
     {who:'Spectrum Support',type:'incoming',label:'main',   at:now-5*60*M, dur:'11:38'},
     {who:'(407) 555-0164', type:'outgoing', label:'mobile', at:now-8*60*M, dur:'0:44'},
-    {who:'Karma S',        type:'incoming', label:'mobile', at:now-26*60*M, dur:'19:02'},
+    {who:'Nina Okafor',        type:'incoming', label:'mobile', at:now-26*60*M, dur:'19:02'},
     {who:'Unknown',        type:'missed',   label:'',       at:now-31*60*M},
     {who:'Dad',            type:'outgoing', label:'mobile', at:now-2*1440*M, dur:'2:35'},
     {who:'Pizza Roma',     type:'outgoing', label:'main',   at:now-3*1440*M, dur:'1:07'},
@@ -6317,8 +6322,8 @@ function defaultRecents(){
 function defaultVoicemails(){
   const now=Date.now(), M=60000;
   return [
-    {who:'Karma S',at:now-14*M,dur:'0:24',unheard:true,
-     text:'Hey, it’s Karma. Just checking that you’re still coming Sunday — call me back when you get a minute.'},
+    {who:'Nina Okafor',at:now-14*M,dur:'0:24',unheard:true,
+     text:'Hey, it’s Nina. Just checking that you’re still coming Sunday — call me back when you get a minute.'},
     {who:'Spectrum Support',at:now-2*1440*M,dur:'0:41',unheard:true,
      text:'This is a courtesy call from Spectrum regarding scheduled maintenance in your area on Thursday between 1 and 5 AM. No action is needed.'},
     {who:'Dr. Whitfield',at:now-9*1440*M,dur:'0:18',unheard:false,
@@ -6448,10 +6453,10 @@ function contactsView(picking){
       b.appendChild(sf2);
       const me=el('div','grp');
       const meRow=el('div','wf-row');
-      meRow.innerHTML=`${avatarFor('Isaiah S.')}
-        <div class="wf-name">Isaiah S.<div class="sub">My Card</div></div>
+      meRow.innerHTML=`${avatarFor('Alex Rivera')}
+        <div class="wf-name">Alex Rivera<div class="sub">My Card</div></div>
         <div class="chev">${SVG.chev}</div>`;
-      meRow.onclick=()=>nav.push(contactDetailView('Isaiah S.'));
+      meRow.onclick=()=>nav.push(contactDetailView('Alex Rivera'));
       me.appendChild(meRow);
       b.appendChild(me);
       const holder=el('div'); b.appendChild(holder);
@@ -6484,7 +6489,7 @@ function contactDetailView(name){
   return {title:'', backLabel:'Back', shortTitle:'Contact',
     right:[{text:'Edit',onClick:()=>toast('Editing contacts is simulated')}],
     build(b,nav){
-      const me = name==='Isaiah S.';
+      const me = name==='Alex Rivera';
       const c = contactBy(name);
       const phones = c? c.phones : (me? [['mobile','(407) 555-0142']] : [['mobile',numberFor(name)||name]]);
       const head=el('div'); head.style.cssText='text-align:center;padding:4px 20px 18px';
@@ -6679,7 +6684,7 @@ function voicemailView(){
 
 
 function defaultThreads(){ return [
-  {n:'Karma',msgs:[['in','Call me when you get a chance 💙',1],['out','Just got out of work — calling now',0]]},
+  {n:'Nina',msgs:[['in','Call me when you get a chance 💙',1],['out','Just got out of work — calling now',0]]},
   {n:'Spectrum',msgs:[['in','Your appointment is confirmed for Thu 8–10 AM. Reply C to cancel.',1]]},
   {n:'Jordan',msgs:[['in','you get Max working on the tv?',1],['out','yeah installed it on my phone too',0],['in','clutch. game night sunday?',1]]},
   {n:'Delivery',msgs:[['in','Your package was delivered to the front door.',1]]}
@@ -7655,7 +7660,7 @@ const Sim={
   },
   ring(name){
     if(locked) { /* incoming calls also wake a locked phone */ }
-    incomingCall(name||'Karma S','mobile'); this.log('Incoming call from '+(name||'Karma S'));
+    incomingCall(name||'Nina Okafor','mobile'); this.log('Incoming call from '+(name||'Nina Okafor'));
   },
   answer(){ answerCall(); this.log('Call answered'); },
   end(){ if(Call.state==='idle') return this.log('No active call'); endCall(); this.log('Call ended'); },
@@ -7746,7 +7751,7 @@ function renderPanel(){
 
     <h4>Calls</h4>
     <div class="pbtns">
-      <button class="pbtn green wide" data-a="ring">📞 Incoming call — Karma</button>
+      <button class="pbtn green wide" data-a="ring">📞 Incoming call — Nina</button>
       <button class="pbtn" data-a="ringspectrum">Call: Spectrum</button>
       <button class="pbtn" data-a="answer">Answer</button>
       <button class="pbtn red wide" data-a="end">End call${Call.state==='active'?' · '+callDuration():''}</button>
@@ -7804,7 +7809,7 @@ function renderPanel(){
   p.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{
     const a=b.dataset.a;
     ({lock:()=>Sim.lock(), home:()=>{goHome();Sim.log('Home');}, reboot:()=>Sim.reboot(),
-      ring:()=>Sim.ring('Karma S'), ringspectrum:()=>Sim.ring('Spectrum Support'), answer:()=>Sim.answer(), end:()=>Sim.end(),
+      ring:()=>Sim.ring('Nina Okafor'), ringspectrum:()=>Sim.ring('Spectrum Support'), answer:()=>Sim.answer(), end:()=>Sim.end(),
       cantconnect:()=>Sim.cantConnect(), newmail:()=>Sim.newMail(), addemail:()=>Sim.addEmail(), addother:()=>Sim.addEmailOther(),
       verify:()=>Sim.verify(), openmsgs:()=>Sim.openMessages(),
       low:()=>Sim.battery(.15), full:()=>Sim.battery(1), charge:()=>Sim.charge(), silent:()=>Sim.silent(),

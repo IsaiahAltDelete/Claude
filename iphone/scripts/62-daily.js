@@ -550,7 +550,7 @@ function CON() {
     people: [
       { id: 'c1', first: 'Dana', last: 'Whitfield', phone: '+1 (407) 555-0148', email: 'dana@support.example', org: 'Support Desk', fav: true },
       { id: 'c2', first: 'Service', last: 'Desk', phone: '+1 (407) 555-0100', email: 'servicedesk@support.example', org: 'Shared mailbox', fav: true },
-      { id: 'c3', first: 'Milo', last: 'Rivera', phone: '+1 (407) 555-0193', email: 'milo@icloud.example', org: 'Family', fav: false },
+      { id: 'c3', first: 'Milo', last: 'Rivera', phone: '+1 (407) 555-0193', email: 'milo.rivera@icloud.example', org: 'Family', fav: false },
       { id: 'c4', first: 'Bench', last: 'Tools', phone: '+1 (800) 555-0111', email: 'news@benchtools.example', org: 'Vendor', fav: false },
       { id: 'c5', first: 'Ada', last: 'Lovelace', phone: '+1 (407) 555-0177', email: 'ada@analytical.example', org: 'Engineering', fav: false },
       { id: 'c6', first: 'Grace', last: 'Hopper', phone: '+1 (407) 555-0166', email: 'grace@navy.example', org: 'Engineering', fav: false },
