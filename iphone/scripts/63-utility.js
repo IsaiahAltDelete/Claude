@@ -403,20 +403,20 @@ defineApp({
     const root = el('div', 'calc');
     root.style.paddingTop = '52px';
 
-    /* mode bar */
-    const modes = el('div');
-    modes.style.cssText = 'flex:none;display:flex;align-items:center;justify-content:space-between;padding:2px 14px 6px;color:#fff';
-    const tapeButton = el('button', '', SF.history);
-    tapeButton.style.cssText = 'color:#ff9f0a;display:grid;place-items:center;width:36px;height:36px';
+    /* Mode bar. Its own classes, because `.calc button` is a blanket rule for
+       76px orange-and-grey keypad buttons and it swallows anything else placed
+       inside .calc — the segmented control came out as two giant grey pills. */
+    const modes = el('div', 'calc-bar');
+    const tapeButton = el('button', 'calc-tape', SF.history);
+    tapeButton.title = 'Calculation history';
     const modeSeg = segmented(['Basic', 'Scientific'], CALC().mode || 'Basic', choice => {
       CALC().mode = choice; save(); build();
     });
-    modeSeg.style.cssText += ';width:172px;flex:none';
+    modeSeg.classList.add('calc-modes');
     modes.append(tapeButton, modeSeg);
 
     const out = el('div', 'out', '0');
-    const expression = el('div');
-    expression.style.cssText = 'flex:none;text-align:right;color:#8e8e93;font-size:15px;padding:0 16px 4px;min-height:19px';
+    const expression = el('div', 'calc-expr');
     const keys = el('div', 'keys');
     root.append(modes, expression, out, keys);
     win.appendChild(root);
@@ -435,7 +435,12 @@ defineApp({
     };
     const show = () => {
       out.textContent = current.length > 9 ? trim(parseFloat(current)) : current;
-      out.style.fontSize = out.textContent.length > 9 ? '48px' : out.textContent.length > 7 ? '62px' : '80px';
+      /* Scientific mode gives half the height to a second keypad, so the
+         display starts smaller and steps down from there. */
+      const ceiling = CALC().mode === 'Scientific' ? 46 : 80;
+      const digits = out.textContent.length;
+      const scale = digits > 9 ? 0.6 : digits > 7 ? 0.78 : 1;
+      out.style.fontSize = `${Math.round(ceiling * scale)}px`;
       expression.textContent = stored != null && operator
         ? `${stored} ${operator}${fresh ? '' : ` ${current}`}`
         : '';
@@ -525,23 +530,37 @@ defineApp({
       show();
     }
 
+    /*
+     * Two grids, not one. The scientific pad is six columns and the standard
+     * pad is four, and flowing the four-column block into a six-column grid was
+     * what scrambled the number keys — 9 and × ended up on the same row as 4, 5
+     * and 6. Keeping them separate means the digits stay exactly where muscle
+     * memory expects them in both modes.
+     */
     function build() {
       const scientific = CALC().mode === 'Scientific';
-      keys.style.gridTemplateColumns = scientific ? 'repeat(6,1fr)' : 'repeat(4,1fr)';
-      keys.style.gap = scientific ? '8px' : '12px';
       keys.innerHTML = '';
-      const layout = scientific ? [...SCIENTIFIC, ...BASIC] : BASIC;
-      layout.forEach(([key, cls]) => {
-        const label = key === 'Rad' ? (degrees ? 'Rad' : 'Deg') : key;
-        const button = el('button', cls || '', esc(label));
-        if (scientific) {
-          button.style.height = '46px';
-          button.style.fontSize = key.length > 3 ? '13px' : key.length > 1 ? '15px' : '21px';
-          button.style.borderRadius = '24px';
-        }
-        button.onclick = () => press(key);
-        keys.appendChild(button);
-      });
+      // On the root, so the display can shrink to make room for two pads.
+      root.classList.toggle('sci', scientific);
+
+      const pad = (entries, columns, compact) => {
+        const grid = el('div', 'pad' + (compact ? ' pad-sci' : ''));
+        grid.style.gridTemplateColumns = `repeat(${columns},1fr)`;
+        entries.forEach(([key, cls]) => {
+          const label = key === 'Rad' ? (degrees ? 'Rad' : 'Deg') : key;
+          const button = el('button', cls || '', esc(label));
+          if (compact) {
+            // Long labels like log₁₀ and ʸ√x need to step down a size or two.
+            button.style.fontSize = label.length > 3 ? '12px' : label.length > 1 ? '14px' : '19px';
+          }
+          button.onclick = () => press(key);
+          grid.appendChild(button);
+        });
+        return grid;
+      };
+
+      if (scientific) keys.appendChild(pad(SCIENTIFIC, 6, true));
+      keys.appendChild(pad(BASIC, 4, false));
       show();
     }
 
