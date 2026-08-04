@@ -43,77 +43,78 @@ function libraryBuckets() {
   return buckets;
 }
 
-/** A folder tile: up to four full icons, or three plus a mini grid. */
+/**
+ * A folder tile: up to four tappable icons, or three plus a mini grid standing
+ * in for the rest. Tapping an icon opens that app; tapping anywhere else opens
+ * the folder.
+ */
 function libraryFolder(bucket) {
-  const tile = el('div');
-  tile.style.cssText = 'cursor:pointer;text-align:center';
-  const box = el('div');
-  box.style.cssText = `display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:8px;border-radius:22px;
-    background:rgba(120,120,128,.26);backdrop-filter:blur(20px);aspect-ratio:1`;
-  const shown = bucket.members.slice(0, 4);
-  shown.forEach((id, index) => {
+  const tile = el('div', 'al-folder');
+  const box = el('div', 'al-folder-box');
+  bucket.members.slice(0, 4).forEach((id, index) => {
     if (index === 3 && bucket.members.length > 4) {
-      const mini = el('div');
-      mini.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:2px';
+      const mini = el('div', 'al-mini');
       bucket.members.slice(3, 7).forEach(extra => {
         const dot = el('div');
-        dot.style.cssText = 'border-radius:4px;overflow:hidden';
         dot.innerHTML = appIconHTML(Apps[extra], 15);
         mini.appendChild(dot);
       });
       box.appendChild(mini);
       return;
     }
-    const slot = el('div');
+    const slot = el('div', 'al-slot');
     slot.innerHTML = appIconHTML(Apps[id], 34);
-    slot.style.cssText = 'display:grid;place-items:center';
+    slot.title = Apps[id].name;
     slot.onclick = event => { event.stopPropagation(); closeLibrary(); openApp(id); };
     box.appendChild(slot);
   });
   tile.appendChild(box);
-  tile.appendChild(h(`<div style="font-size:11px;color:#fff;margin-top:6px;text-shadow:0 1px 3px rgba(0,0,0,.6)">${esc(bucket.name)}</div>`));
+  const label = el('div', 'al-folder-name');
+  label.textContent = bucket.name;
+  tile.appendChild(label);
   tile.onclick = () => openLibraryFolder(bucket);
   return tile;
 }
 
+/* Same stacking rule as Spotlight — see spotlightLayer() for the ladder. */
 function libraryLayer() {
   let layer = $('#applibrary');
   if (layer) return layer;
   layer = el('div');
   layer.id = 'applibrary';
-  layer.style.cssText = `position:absolute;inset:0;z-index:42;display:none;flex-direction:column;
-    background:rgba(20,20,22,.62);backdrop-filter:blur(34px) saturate(160%);padding:56px 18px 22px;overflow-y:auto`;
   $('#screen').appendChild(layer);
+  layer.addEventListener('pointerdown', event => { if (event.target === layer) closeLibrary(); });
   return layer;
 }
 
 function openLibrary() {
+  closeSpotlight();
   const layer = libraryLayer();
-  layer.style.display = 'flex';
+  layer.classList.add('on');
   layer.innerHTML = '';
   layer.scrollTop = 0;
+  $('#home').classList.add('blurred');
 
-  const search = el('div');
-  search.style.cssText = `display:flex;align-items:center;justify-content:center;gap:7px;height:38px;margin-bottom:18px;
-    border-radius:12px;background:rgba(255,255,255,.16);color:#fff;font-size:16px;cursor:pointer`;
+  const search = el('button', 'al-search');
   search.innerHTML = `${SF.magnifier}<span>App Library</span>`;
   search.onclick = () => { closeLibrary(); openSpotlight(); };
   layer.appendChild(search);
 
-  const grid = el('div');
-  grid.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:20px 16px;padding-bottom:24px';
+  const grid = el('div', 'al-grid');
   libraryBuckets().forEach(bucket => grid.appendChild(libraryFolder(bucket)));
   layer.appendChild(grid);
 
-  const close = el('button', '', 'Close');
-  close.style.cssText = 'color:#fff;opacity:.7;font-size:14px;padding:10px;margin:0 auto 8px';
+  const close = el('button', 'al-close', 'Close');
   close.onclick = closeLibrary;
   layer.appendChild(close);
 }
 
 function closeLibrary() {
   const layer = $('#applibrary');
-  if (layer) layer.style.display = 'none';
+  if (!layer || !layer.classList.contains('on')) return;
+  layer.classList.remove('on');
+  if (!currentApp) $('#home').classList.remove('blurred');
+  setTimeout(() => { if (!layer.classList.contains('on')) layer.innerHTML = ''; }, 240);
 }
 
 function openLibraryFolder(bucket) {
@@ -295,112 +296,227 @@ function spotlightResults(query) {
   return groups;
 }
 
+/* Search history, so the idle screen has something useful on it. */
+function spotlightRecents() {
+  return slice('spotlight', () => ({ recents: [] })).recents;
+}
+
+function rememberSearch(query) {
+  const text = query.trim();
+  if (text.length < 2) return;
+  const state = slice('spotlight', () => ({ recents: [] }));
+  state.recents = [text, ...state.recents.filter(entry => entry.toLowerCase() !== text.toLowerCase())].slice(0, 6);
+  save();
+}
+
+/*
+ * The layer sits at z-index 320: above the home screen (100) and any open app
+ * (200), below the lock screen (350), the home indicator (600/610), Control
+ * Centre (650) and sheets (700). Getting this wrong is what made the first
+ * version render underneath the app icons.
+ */
 function spotlightLayer() {
   let layer = $('#spotlight');
   if (layer) return layer;
   layer = el('div');
   layer.id = 'spotlight';
-  layer.style.cssText = `position:absolute;inset:0;z-index:44;display:none;flex-direction:column;
-    background:rgba(16,16,18,.72);backdrop-filter:blur(34px) saturate(170%);padding:52px 0 0`;
   $('#screen').appendChild(layer);
   layer.addEventListener('pointerdown', event => { if (event.target === layer) closeSpotlight(); });
   return layer;
 }
 
+/** One result row, shared by the top hit and every section. */
+function spotlightRow(row, { compact = false } = {}) {
+  const item = el('div', 'sl-row');
+  const size = compact ? 30 : 38;
+  const iconHTML = row.iconHTML
+    || `<div class="sl-ic" style="background:${row.iconBg || '#8e8e93'};width:${size}px;height:${size}px">${row.icon || ''}</div>`;
+  item.innerHTML = `<div class="sl-icwrap">${iconHTML}</div>
+    <div class="sl-text">
+      <div class="sl-label">${esc(row.label)}</div>
+      ${row.sub ? `<div class="sl-sub">${esc(row.sub)}</div>` : ''}
+    </div>
+    <div class="sl-chev">${SVG.chev}</div>`;
+  item.onclick = () => { closeSpotlight(); row.onClick(); };
+  return item;
+}
+
 function openSpotlight() {
   closeLibrary();
   const layer = spotlightLayer();
-  layer.style.display = 'flex';
+  layer.classList.add('on');
   layer.innerHTML = '';
 
-  const field = el('div');
-  field.style.cssText = `display:flex;align-items:center;gap:8px;margin:0 16px 12px;height:40px;padding:0 12px;
-    border-radius:12px;background:rgba(255,255,255,.18);color:#fff;flex:none`;
-  field.innerHTML = `<span style="display:grid;place-items:center;opacity:.8">${SF.magnifier}</span>`;
+  /* The wallpaper and icons blur behind Spotlight, the way they do on a phone.
+     #home already has the exact effect as .blurred, so it is reused. */
+  const home = $('#home');
+  const wasBlurred = home.classList.contains('blurred');
+  home.classList.add('blurred');
+  layer.dataset.restoreBlur = wasBlurred ? '1' : '';
+
+  const head = el('div', 'sl-head');
+  const field = el('div', 'sl-field');
+  field.innerHTML = `<span class="sl-mag">${SF.magnifier}</span>`;
   const input = el('input');
   input.placeholder = 'Search';
-  input.style.cssText = 'flex:1;min-width:0;background:transparent;border:0;outline:0;color:#fff;font-size:17px';
+  input.autocapitalize = 'off';
+  input.autocomplete = 'off';
+  input.spellcheck = false;
   field.appendChild(input);
-  const cancel = el('button', '', 'Cancel');
-  cancel.style.cssText = 'color:#fff;opacity:.8;font-size:15px;flex:none';
+  const clear = el('button', 'sl-clear', '✕');
+  clear.title = 'Clear';
+  clear.onclick = () => { input.value = ''; render(); input.focus(); };
+  field.appendChild(clear);
+  const cancel = el('button', 'sl-cancel', 'Cancel');
   cancel.onclick = closeSpotlight;
-  const head = el('div');
-  head.style.cssText = 'display:flex;align-items:center;flex:none;padding-right:12px';
   head.append(field, cancel);
   layer.appendChild(head);
 
-  const body = el('div');
-  body.style.cssText = 'flex:1;overflow-y:auto;padding:0 0 24px';
+  const body = el('div', 'sl-body');
   layer.appendChild(body);
+
+  /** Tiles used for Siri Suggestions and the app section. */
+  const appTileFor = id => {
+    const tile = el('div', 'sl-tile');
+    tile.innerHTML = `${appIconHTML(Apps[id], 54)}<div class="sl-tile-name">${esc(Apps[id].name)}</div>`;
+    tile.onclick = () => { closeSpotlight(); openApp(id); };
+    return tile;
+  };
+
+  function renderIdle() {
+    /* Recently used apps read better as suggestions than a fixed list, so the
+       switcher order is used when there is one. */
+    const recentApps = [...openApps.keys()].reverse().filter(id => Apps[id]);
+    const suggestions = [...new Set([...recentApps, ...allAppIds()])].slice(0, 8);
+
+    body.appendChild(h('<div class="sl-head-label">Siri Suggestions</div>'));
+    const grid = el('div', 'sl-tiles');
+    suggestions.forEach(id => grid.appendChild(appTileFor(id)));
+    body.appendChild(grid);
+
+    const recents = spotlightRecents();
+    if (recents.length) {
+      const label = el('div', 'sl-head-label');
+      label.textContent = 'Recent Searches';
+      const clearAll = el('button', 'sl-clearall', 'Clear');
+      clearAll.onclick = () => { slice('spotlight', () => ({ recents: [] })).recents = []; save(); render(); };
+      label.appendChild(clearAll);
+      body.appendChild(label);
+      const list = el('div', 'sl-card');
+      recents.forEach(text => {
+        /* A recent search re-runs the query rather than closing Spotlight, so
+           its own onClick replaces the one spotlightRow installs. */
+        const row = spotlightRow({ icon: SF.history, iconBg: '#48484a', label: text, onClick: () => {} },
+          { compact: true });
+        row.onclick = () => { input.value = text; render(); input.focus(); };
+        list.appendChild(row);
+      });
+      body.appendChild(list);
+    }
+
+    /* A few things worth doing straight from search. */
+    body.appendChild(h('<div class="sl-head-label">Shortcuts</div>'));
+    const shortcuts = el('div', 'sl-card');
+    [
+      { icon: SF.camera, iconBg: '#3a3a3c', label: 'Take a Photo', sub: 'Camera', onClick: () => openApp('camera') },
+      { icon: SF.compose, iconBg: '#ffd60a', label: 'New Note', sub: 'Notes', onClick: () => {
+        const note = { id: Date.now(), folder: 'notes', body: '', at: Date.now() };
+        NT().items.unshift(note);
+        save();
+        openApp('notes');
+        const inst = openApps.get('notes');
+        if (inst && inst.nav) { inst.nav.popToRoot(); inst.nav.push(noteEditorView(note)); }
+      } },
+      { icon: SF.grid, iconBg: '#0a84ff', label: 'App Library', sub: `${allAppIds().length} apps`, onClick: () => openLibrary() },
+      { icon: SF.wifi, iconBg: '#0a84ff', label: 'Wi-Fi Settings', sub: State.settings.wifiName || 'Not connected', onClick: () => {
+        openApp('settings');
+        const inst = openApps.get('settings');
+        if (inst && inst.nav) { inst.nav.popToRoot(); inst.nav.push(wifiView()); }
+      } },
+    ].forEach(row => shortcuts.appendChild(spotlightRow(row, { compact: true })));
+    body.appendChild(shortcuts);
+
+    body.appendChild(h(`<div class="sl-note">Searches apps, settings, contacts, notes, reminders, events, mail,
+      messages, tickers and cities — all on device.</div>`));
+  }
+
+  function renderResults(query) {
+    const groups = spotlightResults(query);
+    /* The web fallback is always last and always present, so "only that one"
+       means nothing on the phone matched. */
+    const onDevice = groups.filter(group2 => group2.title !== 'Siri Suggested Website');
+
+    if (!onDevice.length) {
+      body.appendChild(h(`<div class="sl-empty">
+        <div class="sl-empty-glyph">${SF.magnifier}</div>
+        <div class="sl-empty-title">No Results</div>
+        <div class="sl-empty-sub">Nothing on this iPhone matches “${esc(query.trim())}”.</div></div>`));
+    } else {
+      /* Top Hit, the way Spotlight leads with its best guess. */
+      const top = onDevice[0].rows[0];
+      body.appendChild(h('<div class="sl-head-label">Top Hit</div>'));
+      const hit = el('div', 'sl-card sl-tophit');
+      hit.appendChild(spotlightRow(top));
+      body.appendChild(hit);
+    }
+
+    groups.forEach((group2, index) => {
+      const rows = index === 0 && onDevice.length ? group2.rows.slice(1) : group2.rows;
+      if (!rows.length) return;
+      const label = el('div', 'sl-head-label');
+      label.textContent = group2.title;
+      body.appendChild(label);
+
+      /* Applications read better as a row of icons than as a list. */
+      if (group2.title === 'Applications') {
+        const grid = el('div', 'sl-tiles');
+        rows.forEach(row => {
+          const id = allAppIds().find(appId => Apps[appId].name === row.label);
+          grid.appendChild(id ? appTileFor(id) : spotlightRow(row));
+        });
+        body.appendChild(grid);
+        return;
+      }
+
+      const card = el('div', 'sl-card');
+      rows.forEach(row => card.appendChild(spotlightRow(row)));
+      body.appendChild(card);
+    });
+  }
 
   const render = () => {
     body.innerHTML = '';
+    body.scrollTop = 0;
     const query = input.value;
-    if (!query.trim()) {
-      /* Idle state: the eight most likely apps, like Siri Suggestions. */
-      body.appendChild(h(`<div style="color:rgba(255,255,255,.5);font-size:12px;letter-spacing:.5px;
-        padding:6px 20px 10px">SIRI SUGGESTIONS</div>`));
-      const grid = el('div');
-      grid.style.cssText = 'display:grid;grid-template-columns:repeat(4,1fr);gap:18px 8px;padding:0 16px';
-      allAppIds().slice(0, 8).forEach(id => {
-        const tile = el('div');
-        tile.style.cssText = 'text-align:center;cursor:pointer';
-        tile.innerHTML = `${appIconHTML(Apps[id], 52)}
-          <div style="font-size:11px;color:#fff;margin-top:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(Apps[id].name)}</div>`;
-        tile.onclick = () => { closeSpotlight(); openApp(id); };
-        grid.appendChild(tile);
-      });
-      body.appendChild(grid);
-      body.appendChild(h(`<div style="color:rgba(255,255,255,.42);font-size:13px;line-height:1.5;padding:26px 24px 0">
-        Search apps, settings, contacts, notes, reminders, events, mail, messages, stocks and cities.
-        Everything is searched on device.</div>`));
-      return;
-    }
-
-    const groups = spotlightResults(query);
-    if (groups.length === 1) {
-      body.appendChild(h(`<div style="text-align:center;color:rgba(255,255,255,.55);font-size:15px;padding:34px 30px 18px">
-        No results on this iPhone for “${esc(query.trim())}”.</div>`));
-    }
-    groups.forEach(group2 => {
-      body.appendChild(h(`<div style="color:rgba(255,255,255,.5);font-size:12px;letter-spacing:.5px;
-        padding:16px 20px 6px">${esc(group2.title.toUpperCase())}</div>`));
-      const list = el('div');
-      list.style.cssText = 'margin:0 12px;border-radius:14px;background:rgba(255,255,255,.1);overflow:hidden';
-      group2.rows.forEach((row, index) => {
-        const item = el('div');
-        item.style.cssText = `display:flex;align-items:center;gap:12px;padding:11px 14px;cursor:pointer;color:#fff;
-          ${index ? 'border-top:.5px solid rgba(255,255,255,.12)' : ''}`;
-        const iconHTML = row.iconHTML
-          || `<div style="width:32px;height:32px;border-radius:8px;background:${row.iconBg || '#8e8e93'};
-              display:grid;place-items:center;color:#fff">${row.icon || ''}</div>`;
-        item.innerHTML = `<div style="flex:none;display:grid;place-items:center">${iconHTML}</div>
-          <div style="flex:1;min-width:0">
-            <div style="font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(row.label)}</div>
-            ${row.sub ? `<div style="font-size:12px;opacity:.6;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(row.sub)}</div>` : ''}
-          </div>`;
-        item.onclick = () => { closeSpotlight(); row.onClick(); };
-        list.appendChild(item);
-      });
-      body.appendChild(list);
-    });
+    layer.classList.toggle('searching', Boolean(query.trim()));
+    if (query.trim()) renderResults(query);
+    else renderIdle();
   };
 
   input.oninput = render;
   input.onkeydown = event => {
-    if (event.key === 'Escape') closeSpotlight();
-    if (event.key === 'Enter') {
-      const first = spotlightResults(input.value)[0];
-      if (first) { closeSpotlight(); first.rows[0].onClick(); }
-    }
+    if (event.key === 'Escape') { closeSpotlight(); return; }
+    if (event.key !== 'Enter') return;
+    const query = input.value.trim();
+    if (!query) return;
+    rememberSearch(query);
+    const first = spotlightResults(query)[0];
+    if (first) { closeSpotlight(); first.rows[0].onClick(); }
   };
+  /* Anything actually opened from a search is worth remembering too. */
+  body.addEventListener('click', () => rememberSearch(input.value), true);
+
   render();
-  setTimeout(() => input.focus(), 120);
+  setTimeout(() => input.focus(), 140);
 }
 
 function closeSpotlight() {
   const layer = $('#spotlight');
-  if (layer) { layer.style.display = 'none'; layer.innerHTML = ''; }
+  if (!layer || !layer.classList.contains('on')) return;
+  layer.classList.remove('on', 'searching');
+  if (!layer.dataset.restoreBlur) $('#home').classList.remove('blurred');
+  /* Emptied after the fade so the contents do not vanish mid-transition. */
+  setTimeout(() => { if (!layer.classList.contains('on')) layer.innerHTML = ''; }, 240);
 }
 
 /* ================================================ wiring into the home UI === */
@@ -440,14 +556,17 @@ renderHome = function renderHomeWithLibrary() {
     dots.appendChild(dot);
   }
 
-  /* Search pill above the dock. */
+  /* The Search pill is a flex item between the page dots and the dock, not an
+     absolutely positioned overlay — as an overlay it landed on top of the
+     dots. #home is a flex column, so inserting before #dock is enough. */
   const home = $('#home');
-  if (home && !$('#searchPill')) {
+  const dock = $('#dock');
+  if (home && dock && !$('#searchPill')) {
     const pill = el('button');
     pill.id = 'searchPill';
-    pill.innerHTML = `<span style="display:grid;place-items:center">${SF.magnifier}</span><span>Search</span>`;
-    home.appendChild(pill);
+    pill.innerHTML = `<span class="sp-ic">${SF.magnifier}</span><span>Search</span>`;
     pill.onclick = event => { event.stopPropagation(); openSpotlight(); };
+    home.insertBefore(pill, dock);
   }
 };
 
@@ -473,11 +592,14 @@ renderHome = function renderHomeWithLibrary() {
   pagesEl.addEventListener('pointercancel', () => { tracking = false; });
 }());
 
-/* Escape and going home both dismiss the extra layers. */
+/* Escape closes the topmost extra layer before the built-in handler can read
+   it as "go home", which is why this listener captures. */
 document.addEventListener('keydown', event => {
   if (event.key !== 'Escape') return;
-  if ($('#spotlight') && $('#spotlight').style.display === 'flex') { closeSpotlight(); event.stopPropagation(); }
-  else if ($('#applibrary') && $('#applibrary').style.display === 'flex') { closeLibrary(); event.stopPropagation(); }
+  const spotlight = $('#spotlight');
+  const library = $('#applibrary');
+  if (spotlight && spotlight.classList.contains('on')) { closeSpotlight(); event.stopPropagation(); }
+  else if (library && library.classList.contains('on')) { closeLibrary(); event.stopPropagation(); }
 }, true);
 
 const baseGoHome = goHome;
@@ -485,4 +607,13 @@ goHome = function goHomeClosingLayers() {
   closeSpotlight();
   closeLibrary();
   baseGoHome();
+};
+
+/* Opening an app from anywhere must clear the layers too, or Spotlight would
+   stay blurred over the top of whatever was launched. */
+const baseOpenApp = openApp;
+openApp = function openAppClosingLayers(id, origin) {
+  closeSpotlight();
+  closeLibrary();
+  baseOpenApp(id, origin);
 };
