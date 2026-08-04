@@ -8,15 +8,15 @@
 
 /* ------------------------------------------------------ home screen add-ons */
 
-/* Search pill above the dock, the way iOS shows it. */
+/* Search pill between the page dots and the dock. It is a flex item in #home's
+   column, not an overlay — absolutely positioned it landed on the dots. */
 #searchPill {
-  position: absolute;
-  left: 50%;
-  bottom: 112px;
-  transform: translateX(-50%);
+  flex: none;
+  align-self: center;
   display: flex;
   align-items: center;
   gap: 5px;
+  margin: 0 0 10px;
   padding: 7px 15px;
   border-radius: 18px;
   background: rgba(120, 120, 128, .3);
@@ -24,21 +24,206 @@
   color: #fff;
   font-size: 14px;
   font-weight: 500;
-  z-index: 3;
   box-shadow: 0 2px 10px rgba(0, 0, 0, .22);
 }
+#searchPill .sp-ic { display: grid; place-items: center; }
 #searchPill svg { width: 15px; height: 15px; }
 #searchPill:active { background: rgba(120, 120, 128, .48); }
-/* The pill would sit under the wobbling icons in edit mode, so it steps aside. */
+/* Nothing to search while icons are wobbling. */
 #home.jiggle #searchPill { opacity: 0; pointer-events: none; }
+
+/* Adding the Search pill costs about 40px of column height, which the six-row
+   icon grid did not have to give — the last row's labels were being clipped.
+   Tightening the row gap and the dots' padding buys it back. */
+#pages .grid { gap: 14px 16px; }
+#dots { padding: 7px 0 3px; }
 
 /* The App Library page holds folders rather than icons, so it scrolls. */
 #libraryPage { overflow-y: auto; scrollbar-width: none; }
-#libraryPage::-webkit-scrollbar,
-#applibrary::-webkit-scrollbar,
-#spotlight::-webkit-scrollbar { display: none; }
-#applibrary, #spotlight { scrollbar-width: none; }
-#spotlight input::placeholder { color: rgba(255, 255, 255, .55); }
+#libraryPage::-webkit-scrollbar { display: none; }
+
+/* ------------------------------------------------- Spotlight / App Library */
+
+/*
+ * Stacking: above #home (100) and #applayer (200), below #lock (350), the home
+ * indicator (600/610), Control Centre (650) and sheets (700). The first version
+ * used 42/44 and rendered underneath the app icons.
+ */
+#spotlight,
+#applibrary {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .22s ease;
+  scrollbar-width: none;
+}
+#spotlight { z-index: 320; padding-top: 52px; background: rgba(14, 14, 16, .58); backdrop-filter: blur(30px) saturate(170%); }
+#applibrary { z-index: 300; padding: 56px 18px 22px; overflow-y: auto; background: rgba(18, 18, 20, .52); backdrop-filter: blur(34px) saturate(160%); }
+#spotlight.on,
+#applibrary.on { opacity: 1; pointer-events: auto; }
+.light #spotlight { background: rgba(242, 242, 247, .5); }
+.light #applibrary { background: rgba(242, 242, 247, .44); }
+#spotlight::-webkit-scrollbar,
+#applibrary::-webkit-scrollbar { display: none; }
+
+/* --- search field --- */
+.sl-head { flex: none; display: flex; align-items: center; gap: 4px; padding: 0 12px 12px 16px; }
+.sl-field {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 10px 0 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .2);
+}
+.light .sl-field { background: rgba(118, 118, 128, .16); }
+.sl-mag { display: grid; place-items: center; opacity: .75; color: var(--txt); }
+.sl-field input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  color: var(--txt);
+  font-size: 17px;
+  font-family: var(--sf);
+}
+.sl-field input::placeholder { color: var(--txt2); }
+.sl-clear {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .3);
+  color: var(--txt);
+  font-size: 11px;
+  line-height: 1;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .15s;
+}
+#spotlight.searching .sl-clear { opacity: 1; pointer-events: auto; }
+.sl-cancel { flex: none; color: var(--sysblue); font-size: 15px; padding: 0 6px; }
+
+/* --- body --- */
+.sl-body { flex: 1; overflow-y: auto; padding: 0 0 30px; scrollbar-width: none; }
+.sl-body::-webkit-scrollbar { display: none; }
+
+.sl-head-label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 18px 20px 7px;
+  color: var(--txt2);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.sl-body > .sl-head-label:first-child { padding-top: 4px; }
+.sl-clearall { color: var(--sysblue); font-size: 12px; text-transform: none; letter-spacing: 0; font-weight: 400; }
+
+/* Grouped rows sit on a translucent card, matching the material of the layer. */
+.sl-card {
+  margin: 0 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, .12);
+  overflow: hidden;
+}
+.light .sl-card { background: rgba(255, 255, 255, .7); }
+.sl-tophit { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .16); }
+
+.sl-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px 10px 14px;
+  cursor: pointer;
+  color: var(--txt);
+}
+.sl-row + .sl-row { border-top: .5px solid rgba(128, 128, 132, .34); }
+.sl-row:active { background: rgba(255, 255, 255, .1); }
+.sl-icwrap { flex: none; display: grid; place-items: center; }
+.sl-ic { border-radius: 8px; display: grid; place-items: center; color: #fff; }
+.sl-ic svg { width: 19px; height: 19px; }
+.sl-icwrap .appicon { border-radius: 9px; }
+.sl-text { flex: 1; min-width: 0; }
+.sl-label { font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sl-sub { font-size: 12px; color: var(--txt2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 1px; }
+.sl-chev { flex: none; color: var(--txt3); display: grid; place-items: center; }
+.sl-chev svg { width: 13px; height: 13px; }
+
+/* App results and Siri Suggestions read as icons, not as list rows. */
+.sl-tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px 6px; padding: 2px 14px 4px; }
+.sl-tile { text-align: center; cursor: pointer; }
+.sl-tile:active .appicon { transform: scale(.9); }
+.sl-tile .appicon { margin: 0 auto; }
+.sl-tile-name {
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--txt);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sl-empty { text-align: center; padding: 56px 34px 14px; }
+.sl-empty-glyph { display: grid; place-items: center; color: var(--txt3); margin-bottom: 12px; }
+.sl-empty-glyph svg { width: 46px; height: 46px; }
+.sl-empty-title { font-size: 18px; font-weight: 600; color: var(--txt); }
+.sl-empty-sub { font-size: 13.5px; color: var(--txt2); margin-top: 5px; line-height: 1.45; }
+.sl-note { padding: 26px 24px 0; color: var(--txt3); font-size: 12.5px; line-height: 1.5; }
+
+/* --- App Library --- */
+.al-search {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: 38px;
+  margin-bottom: 18px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .18);
+  color: var(--txt);
+  font-size: 16px;
+}
+.light .al-search { background: rgba(118, 118, 128, .16); }
+.al-search svg { width: 16px; height: 16px; }
+.al-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 16px; padding-bottom: 24px; }
+.al-close { color: var(--txt2); font-size: 14px; padding: 10px; margin: 0 auto 8px; }
+
+.al-folder { cursor: pointer; text-align: center; }
+.al-folder-box {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  padding: 8px;
+  border-radius: 22px;
+  background: rgba(120, 120, 128, .26);
+  backdrop-filter: blur(20px);
+  aspect-ratio: 1;
+}
+.light .al-folder-box { background: rgba(255, 255, 255, .42); }
+.al-slot { display: grid; place-items: center; }
+.al-slot:active .appicon { transform: scale(.9); }
+.al-mini { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 2px; }
+.al-mini > div { border-radius: 4px; overflow: hidden; }
+/* Sits over the wallpaper, so it follows the theme rather than being locked to
+   white — white on a light blurred wallpaper was barely readable. */
+.al-folder-name {
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--txt);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, .35);
+}
+.light .al-folder-name { text-shadow: 0 1px 3px rgba(255, 255, 255, .6); }
 
 /* ---------------------------------------------------------------- photos */
 
