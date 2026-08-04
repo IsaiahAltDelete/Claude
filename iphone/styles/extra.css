@@ -55,9 +55,77 @@
 
 /* ------------------------------------------------------------- calculator */
 
-/* Scientific mode packs six columns in, so keys sit at the bottom and shrink
-   rather than stretching the grid. */
-.calc .keys { align-content: end; }
+/* `.calc button` in index.html is a blanket rule for the keypad: 76px tall,
+   grey, 33px type. Anything else placed inside .calc inherits it, so the mode
+   bar's controls opt out explicitly rather than being restyled inline. */
+.calc-bar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 2px 14px 8px;
+  color: #fff;
+}
+.calc .calc-tape {
+  width: 38px;
+  height: 38px;
+  min-height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .12);
+  color: #ff9f0a;
+  font-size: 0;
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.calc .calc-tape svg { width: 19px; height: 19px; }
+.calc .calc-modes { flex: none; width: 178px; padding: 2px; }
+.calc .calc-modes button {
+  height: 28px;
+  min-height: 0;
+  padding: 0 10px;
+  border-radius: 7px;
+  background: transparent;
+  color: rgba(255, 255, 255, .62);
+  font-size: 13px;
+  font-weight: 500;
+}
+.calc .calc-modes button.on { background: rgba(255, 255, 255, .18); color: #fff; }
+
+.calc-expr {
+  flex: none;
+  text-align: right;
+  color: #8e8e93;
+  font-size: 15px;
+  padding: 0 16px 4px;
+  min-height: 19px;
+  font-variant-numeric: tabular-nums;
+}
+
+/*
+ * Two independent grids: six columns of scientific keys above the standard
+ * four-column pad, so the digits keep their familiar positions in both modes.
+ *
+ * The heights are deliberate rather than intrinsic. .keys never shrinks below
+ * its content, so if the rows are too tall the pad pushes past the bottom of
+ * the screen and squeezes the display to nothing. Scientific mode fits in
+ * 5x40 + 5x52 + gaps, leaving room for the readout above it.
+ */
+.calc .keys { flex: none; display: flex; flex-direction: column; gap: 10px; }
+.calc .pad { display: grid; gap: 12px; }
+.calc .out { min-height: 0; }
+
+.calc .pad-sci { gap: 7px; }
+.calc .pad-sci button { height: 40px; border-radius: 22px; font-weight: 400; }
+/* In scientific mode iOS keeps the function keys dark and reserves the light
+   grey for AC / +/- / %, which sit in the standard pad below. */
+.calc .pad-sci button.fn { background: #333; color: #fff; }
+.calc .pad-sci button.op { background: #ff9f0a; }
+
+.calc.sci .pad:not(.pad-sci) { gap: 9px; }
+.calc.sci .pad:not(.pad-sci) button { height: 52px; font-size: 25px; }
+.calc.sci .pad:not(.pad-sci) button.zero { padding-left: 24px; }
 .calc button { transition: filter .08s; }
 
 /* ------------------------------------------------------------------ notes */
