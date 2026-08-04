@@ -15,8 +15,9 @@
      -------------------------------------------------------------------- */
   :root {
     --fg: #fff;
-    --dim: #8a8a8a;
-    --faint: #3a3a3a;
+    --dim: #8a8a8a;      /* 6.1:1 on black */
+    --faint: #757575;    /* 4.6:1 — the dimmest tone still used for text */
+    --decor: #3a3a3a;    /* non-text only: arrows, separators */
     --hair: #1f1f1f;
     --bg: #000;
   }
@@ -126,7 +127,7 @@
   }
 
   /* Middots between meta items, so they don't read as one run of text. */
-  .meta span + span::before { content: "·"; margin-right: 10px; color: #2c2c2c; }
+  .meta span + span::before { content: "·"; margin-right: 10px; color: var(--decor); }
 
   .status {
     align-self: baseline;
@@ -143,7 +144,7 @@
   .arrow {
     display: inline-block;
     margin-left: 8px;
-    color: var(--faint);
+    color: var(--decor);
     transition: transform 0.18s ease, color 0.18s ease;
   }
   a.entry:hover .arrow, a.entry:focus-visible .arrow { transform: translateX(4px); color: #fff; }

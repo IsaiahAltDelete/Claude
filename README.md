@@ -1,14 +1,16 @@
 # macOS Tahoe Troubleshooting Simulator
 
-An offline, browser-based simulation of a Mac running macOS Tahoe 26, built for
-support training. It looks and behaves like the real desktop — Liquid Glass
+A browser-based simulation of a Mac running macOS Tahoe 26, built for support
+training. It looks and behaves like the real desktop — Liquid Glass
 materials, a working window manager, System Settings, Mail, Outlook, Safari, the
 App Store, Recovery and Setup Assistant — so agents can rehearse full
 troubleshooting flows without touching a real machine.
 
 Nothing here reads or changes your actual Mac, network, accounts or files. All
-state lives in this page's `localStorage`, and the whole project runs from
-`file://` with no build step, no server and no network access.
+state lives in this page's `localStorage`, and there is no build step and no
+server. Every asset is local, so the simulator runs straight from `file://` —
+the one thing that reaches the network is the browser's optional live web
+access, described below.
 
 **Live:** <https://isaiahaltdelete.github.io/Claude/mac/> — the site root is a
 minimal index of projects; the simulator lives at `/mac`.
