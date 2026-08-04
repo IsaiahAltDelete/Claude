@@ -1,0 +1,45 @@
+/* ===========================================================================
+   Registration.
+
+   Runs last. The extension modules only define apps; nothing appears on the
+   home screen until its id is added to a page, so this file is the single
+   place that decides the layout. Ids already in PAGE1 are skipped, which keeps
+   this idempotent if the file is ever loaded twice.
+   =========================================================================== */
+
+/* Page two onward, grouped the way someone would actually arrange them. */
+const EXTRA_APPS = [
+  'calendar', 'reminders', 'contacts', 'files', 'voicememos',
+  'health', 'fitness', 'home', 'findmy', 'facetime',
+  'books', 'podcasts', 'stocks', 'translate', 'compass', 'freeform',
+];
+
+EXTRA_APPS.forEach(id => {
+  if (Apps[id] && !PAGE1.includes(id) && !DOCK.includes(id)) PAGE1.push(id);
+});
+
+/* Reasonable starting badges for the apps that carry them on a real phone. */
+if (!State.badgesSeeded) {
+  State.badgesSeeded = true;
+  const seed = { reminders: 3, facetime: 1 };
+  Object.entries(seed).forEach(([id, count]) => {
+    if (Apps[id] && !State.badges[id]) State.badges[id] = count;
+  });
+  save();
+}
+
+/* A couple of lock-screen notifications from the new apps, so the phone looks
+   lived-in on first boot rather than empty. */
+if (!State.notifsSeeded) {
+  State.notifsSeeded = true;
+  save();
+  LOCK_NOTIFS.push(
+    { app: 'reminders', title: 'Reminders', body: 'Call back ticket 4821 — due in an hour', when: '35m ago' },
+    { app: 'health', title: 'Health', body: 'Your weekly summary is ready', when: '2h ago' },
+  );
+}
+
+/* Rebuild the home screen so the new pages, dots and Search pill appear. */
+renderHome();
+updateBadges();
+renderLockNotifs();

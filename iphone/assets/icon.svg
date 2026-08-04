@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="iPhone">
+  <defs>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4a4a4e"/>
+      <stop offset="1" stop-color="#1c1c1e"/>
+    </linearGradient>
+    <linearGradient id="screen" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0a84ff"/>
+      <stop offset="1" stop-color="#bf5af2"/>
+    </linearGradient>
+  </defs>
+  <rect x="14" y="3" width="36" height="58" rx="9" fill="url(#body)"/>
+  <rect x="17" y="6" width="30" height="52" rx="6.5" fill="url(#screen)"/>
+  <rect x="27" y="8.5" width="10" height="3" rx="1.5" fill="#0a0a0c"/>
+  <rect x="26" y="53.5" width="12" height="1.8" rx="0.9" fill="#fff" opacity=".8"/>
+</svg>
