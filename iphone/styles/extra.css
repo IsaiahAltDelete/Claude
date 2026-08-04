@@ -1,0 +1,115 @@
+/* ===========================================================================
+   Styles for the extension apps.
+
+   The inline stylesheet in index.html carries the whole design system; this
+   only adds what the new screens need. Anything reused (.grp, .row, .tabbar,
+   .ph-grid, .seg, .calc, .note-editor) keeps its original rules.
+   =========================================================================== */
+
+/* ------------------------------------------------------ home screen add-ons */
+
+/* Search pill above the dock, the way iOS shows it. */
+#searchPill {
+  position: absolute;
+  left: 50%;
+  bottom: 112px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 15px;
+  border-radius: 18px;
+  background: rgba(120, 120, 128, .3);
+  backdrop-filter: blur(18px) saturate(160%);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 3;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .22);
+}
+#searchPill svg { width: 15px; height: 15px; }
+#searchPill:active { background: rgba(120, 120, 128, .48); }
+/* The pill would sit under the wobbling icons in edit mode, so it steps aside. */
+#home.jiggle #searchPill { opacity: 0; pointer-events: none; }
+
+/* The App Library page holds folders rather than icons, so it scrolls. */
+#libraryPage { overflow-y: auto; scrollbar-width: none; }
+#libraryPage::-webkit-scrollbar,
+#applibrary::-webkit-scrollbar,
+#spotlight::-webkit-scrollbar { display: none; }
+#applibrary, #spotlight { scrollbar-width: none; }
+#spotlight input::placeholder { color: rgba(255, 255, 255, .55); }
+
+/* ---------------------------------------------------------------- photos */
+
+/* The generated tiles need a backdrop while their data URI decodes. */
+.ph-cell { background-color: var(--bg3); }
+
+/* ---------------------------------------------------------------- weather */
+
+/* The forecast column scrolls on its own so the city-paging bar stays put. */
+.wx { scrollbar-width: none; }
+.wx::-webkit-scrollbar { display: none; }
+.wx-card { margin-top: 12px; }
+.wx-hours > div { flex: none; }
+
+/* ------------------------------------------------------------- calculator */
+
+/* Scientific mode packs six columns in, so keys sit at the bottom and shrink
+   rather than stretching the grid. */
+.calc .keys { align-content: end; }
+.calc button { transition: filter .08s; }
+
+/* ------------------------------------------------------------------ notes */
+
+.note-editor { background: transparent; border: 0; outline: 0; color: var(--txt); font-family: var(--sf); }
+
+/* ---------------------------------------------------------------- compass */
+
+#cpDial text { font-family: var(--sf); }
+
+/* ----------------------------------------------------------------- generic */
+
+/* Sliders appear in Home accessory detail; the default control ignores the
+   design system entirely, so it is restyled here once. */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 26px;
+  background: transparent;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--bg3);
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  margin-top: -8px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .4);
+}
+input[type="range"]::-moz-range-track { height: 6px; border-radius: 3px; background: var(--bg3); }
+input[type="range"]::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .4);
+}
+.row > input[type="range"] { width: 100%; }
+
+/* Notes, Freeform and the Translate field all use textareas. */
+textarea { font-family: var(--sf); }
+
+/* A Freeform note is dragged with a pointer, so it must not select text or
+   let the canvas scroll under the gesture. */
+.ff-note { user-select: none; touch-action: none; }
+
+/* Long right-hand values wrap instead of widening the row. */
+.row .val { max-width: 52%; text-align: right; }

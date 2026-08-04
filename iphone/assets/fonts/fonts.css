@@ -1,0 +1,70 @@
+/* ---------------------------------------------------------------------------
+   Local font pack.
+
+   On a Mac with the real Apple faces installed (Xcode, or the free download
+   from developer.apple.com/fonts) local() wins and the phone is drawn in
+   genuine SF Pro. Everywhere else the bundled Inter faces in this folder take
+   over — the closest free match to SF, and the reason the numerals in Weather,
+   the Clock and the Calculator keep their thin weights offline.
+
+   Six weights are bundled because the design actually uses them: 200 for the
+   large temperature and stopwatch numerals, 300 for the Now Playing timer, and
+   400–700 for body text, labels and titles.
+
+   Inter is licensed under the SIL Open Font License 1.1 — see
+   Inter-LICENSE.txt in this folder.
+   --------------------------------------------------------------------------- */
+
+@font-face {
+  font-family: "Phone System";
+  font-style: normal;
+  font-weight: 200;
+  font-display: swap;
+  src: local("SF Pro Display"), local("SFProDisplay-Thin"), local("SF Pro"),
+       url("inter-latin-200-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Phone System";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: local("SF Pro Display"), local("SFProDisplay-Light"), local("SF Pro"),
+       url("inter-latin-300-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Phone System";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local("SF Pro Text"), local("SFProText-Regular"), local("-apple-system"),
+       local("Helvetica Neue"), url("inter-latin-400-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Phone System";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: local("SF Pro Text Medium"), local("SFProText-Medium"), local("SF Pro Text"),
+       url("inter-latin-500-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Phone System";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local("SF Pro Text Semibold"), local("SFProText-Semibold"), local("SF Pro Text"),
+       url("inter-latin-600-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Phone System";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local("SF Pro Display Bold"), local("SFProDisplay-Bold"), local("SF Pro Display"),
+       url("inter-latin-700-normal.woff2") format("woff2");
+}
