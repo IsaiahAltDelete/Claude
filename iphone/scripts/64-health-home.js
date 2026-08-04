@@ -54,12 +54,12 @@ function healthFormat(id, value) {
 function HL() {
   return slice('health', () => ({
     favourites: ['steps', 'heart', 'sleep', 'energy', 'exercise'],
-    profile: { name: 'Isaiah', dob: '1996-04-14', sex: 'Male', height: `5'11"`, blood: 'O+' },
+    profile: { name: 'Alex Rivera', dob: '1996-04-14', sex: 'Male', height: `5'11"`, blood: 'O+' },
     medications: [
       { id: 1, name: 'Vitamin D3', dose: '2000 IU', when: 'Morning', taken: true },
       { id: 2, name: 'Cetirizine', dose: '10 mg', when: 'Evening', taken: false },
     ],
-    medicalID: { conditions: 'None', allergies: 'Penicillin', contact: 'Karma S — 407-555-0142', organDonor: true },
+    medicalID: { conditions: 'None', allergies: 'Penicillin', contact: 'Nina Okafor — 407-555-0142', organDonor: true },
   }));
 }
 
@@ -102,7 +102,7 @@ function healthSummaryView() {
   return {
     title: 'Summary',
     largeTitle: true,
-    right: [{ html: `<div class="avatar" style="background:#ff2d55;width:30px;height:30px;font-size:13px">I</div>`,
+    right: [{ html: `<div class="avatar" style="background:#ff2d55;width:30px;height:30px;font-size:13px">A</div>`,
       onClick: nav => nav.push(healthProfileView()) }],
     build(body, nav) {
       const state = HL();
@@ -337,7 +337,7 @@ function healthProfileView() {
       const state = HL();
       const profile = state.profile;
       body.appendChild(h(`<div style="text-align:center;padding:10px 0 6px">
-        <div class="avatar" style="background:#ff2d55;width:74px;height:74px;font-size:30px;margin:0 auto 8px">I</div>
+        <div class="avatar" style="background:#ff2d55;width:74px;height:74px;font-size:30px;margin:0 auto 8px">A</div>
         <div style="font-size:21px;font-weight:600">${esc(profile.name)}</div>
         <div style="color:var(--txt2);font-size:14px">Health data from this iPhone</div></div>`));
       const editable = [['name', 'Name'], ['dob', 'Date of Birth'], ['sex', 'Sex'], ['height', 'Height'], ['blood', 'Blood Type']];
@@ -749,7 +749,7 @@ const HOME_KINDS = {
 
 function HM() {
   return slice('home', () => ({
-    name: 'Souffront Home',
+    name: 'Rivera Home',
     rooms: ['Living Room', 'Kitchen', 'Bedroom', 'Office', 'Garage'],
     devices: [
       { id: 1, name: 'Ceiling Light', kind: 'light', room: 'Living Room', on: true, level: 74 },
@@ -1104,7 +1104,7 @@ function addSceneSheet(nav) {
 function FM() {
   return slice('findmy', () => ({
     people: [
-      { id: 'p1', name: 'Karma S', where: 'Winter Park, FL', distance: '4.2 mi', at: Date.now() - 12 * 6e4, colour: '#bf5af2' },
+      { id: 'p1', name: 'Nina Okafor', where: 'Winter Park, FL', distance: '4.2 mi', at: Date.now() - 12 * 6e4, colour: '#bf5af2' },
       { id: 'p2', name: 'Dad', where: 'Kissimmee, FL', distance: '18 mi', at: Date.now() - 46 * 6e4, colour: '#0a84ff' },
     ],
     devices: [
@@ -1269,10 +1269,10 @@ function findMyDetailView(entry, tab) {
 function FT() {
   return slice('facetime', () => ({
     recents: [
-      { id: 1, name: 'Karma S', kind: 'video', outgoing: true, at: Date.now() - 40 * 6e4, missed: false },
+      { id: 1, name: 'Nina Okafor', kind: 'video', outgoing: true, at: Date.now() - 40 * 6e4, missed: false },
       { id: 2, name: 'Dad', kind: 'audio', outgoing: false, at: Date.now() - 5 * 36e5, missed: true },
       { id: 3, name: 'Spectrum Support', kind: 'video', outgoing: false, at: Date.now() - 26 * 36e5, missed: false },
-      { id: 4, name: 'Karma S', kind: 'video', outgoing: false, at: Date.now() - 2 * 864e5, missed: false },
+      { id: 4, name: 'Nina Okafor', kind: 'video', outgoing: false, at: Date.now() - 2 * 864e5, missed: false },
     ],
   }));
 }

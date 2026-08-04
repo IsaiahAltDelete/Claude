@@ -25,7 +25,7 @@ get into and hard to get stuck in:
 | | |
 |---|---|
 | Unlocking | swipe up from the bar at the bottom, or tap it. Face ID succeeds silently |
-| Apple Account | any name, any valid-looking email, any non-empty password. The account starts signed in as `isaiah.s@icloud.com` |
+| Apple Account | any name, any valid-looking email, any non-empty password. The account starts signed in as `alex.rivera@icloud.example` |
 | Wi-Fi | any password of 8 or more characters joins a secured network; anything shorter fails with the real "Unable to Join" alert |
 | Verification codes | arrive as a genuine Messages notification — read the six digits out of it and type them in |
 
@@ -51,9 +51,15 @@ normally, and flicks carry momentum.
 **Shell** — lock screen with notifications, widgets and a working clock; Face ID
 unlock; Dynamic Island that expands for events and shrinks to a call pill;
 Control Centre with live toggles; app switcher with card dismissal; home-screen
-paging with dots, jiggle mode, app deletion and badges; Spotlight searching apps,
-settings, contacts, notes, reminders, events, mail, messages, tickers and cities;
-App Library with category folders.
+paging with dots, jiggle mode, app deletion and badges; App Library with
+category folders you can open or launch straight from.
+
+**Spotlight** — reached from the Search pill above the dock or by swiping down
+on the home screen. Idle it offers Siri Suggestions (most recently used apps
+first), your recent searches and four shortcuts. Typing searches apps, settings,
+contacts, notes, reminders, calendar events, mail, messages, tickers and cities,
+leads with a Top Hit, groups the rest by source, and always offers the web last.
+Punctuation is ignored, so "wifi" finds Wi-Fi and "findmy" finds Find My.
 
 **Phone and Messages** — favourites, recents, contacts, keypad and voicemail;
 outgoing and incoming calls with a real ringtone synthesised in the browser, mute
@@ -202,6 +208,14 @@ The extension apps expose their state the same way — `WX()`, `HL()`,
 `fitnessGoals()`, `HM()`, `MU()`, `NT()`, `ST()`, `TR()`, `PHOTOLIB()` — so a
 scenario can be staged by editing state and calling `save()`.
 
+## The people in it
+
+Everyone and everywhere in the simulator is invented. The phone belongs to Alex
+Rivera; Nina Okafor, Milo Rivera and the rest of the contacts, senders, callers
+and account holders are made up, all the addresses use reserved `.example`
+domains, and every phone number is in the 555 range. Nothing is modelled on a
+real person.
+
 ## Notes
 
 This is an independent educational simulation and is not an Apple product. It is
@@ -209,5 +223,4 @@ not affiliated with or endorsed by Apple Inc. All artwork is drawn from
 primitives in the page itself; the bundled font is Inter under the SIL Open Font
 License 1.1 (the licence is in `assets/fonts/`). On a Mac with the real Apple
 faces installed the interface picks those up first via `local()`, falling back to
-the bundled Inter files everywhere else. The album, book, show and person names
-throughout are invented.
+the bundled Inter files everywhere else.
