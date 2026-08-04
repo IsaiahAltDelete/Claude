@@ -12,8 +12,8 @@ server. Every asset is local, so the simulator runs straight from `file://` —
 the one thing that reaches the network is the browser's optional live web
 access, described below.
 
-**Live:** <https://isaiahaltdelete.github.io/Claude/mac/> — the site root is a
-minimal index of projects; the simulator lives at `/mac`.
+**Live:** <https://isaiahaltdelete.github.io/Claude/mac/>. The site root is an
+index of the simulators in this repository; this one lives at `/mac`.
 
 ## Running it
 
@@ -105,12 +105,12 @@ built-in pages do. `.local` and `.test` hosts always stay simulated.
 
 ## Project layout
 
+Paths are relative to the repository root; everything below `mac/` belongs to
+this simulator.
+
 ```
-index.html                 minimal white-on-black project index (site root)
-404.html                   matching not-found page
-.github/workflows/pages.yml  publishes the site to GitHub Pages on push to main
-mac/                       the simulator, served at /mac
 mac/index.html             shell markup and script order
+mac/README.md              this file
 mac/assets/
   fonts/                   Inter + JetBrains Mono (OFL) with @font-face mapping
   icons/                   41 generated app, document and volume icons
