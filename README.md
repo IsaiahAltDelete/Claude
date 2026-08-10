@@ -21,6 +21,10 @@ clone the repository and open either `index.html`. Every asset is local, so both
 run straight from `file://`; the fonts are bundled and all artwork is generated
 from primitives rather than fetched.
 
+Everyone in both simulators is invented — Alex Rivera's Mac and Alex Rivera's
+iPhone, with the same made-up household around them, reserved `.example`
+addresses and 555 phone numbers throughout.
+
 Neither one reads or changes your actual machine, phone, network, accounts,
 camera, microphone or files. All state lives in the page's `localStorage`, and a
 factory reset clears it.
