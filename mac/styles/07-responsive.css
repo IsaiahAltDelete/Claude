@@ -83,8 +83,32 @@
   .store-detail-head { flex-direction: column; }
   .calc-key { min-height: 34px; font-size: 15px; }
   .launchpad-page { grid-template-columns: repeat(3, 92px); }
+  /* Narrow: the ribbon drops its group labels and the reading pane collapses
+     to a two-column layout, the way the real window reflows. */
   .outlook-ribbon { padding: 5px 6px; }
-  .ribbon-btn { min-width: 44px; font-size: 9px; }
+  .ol-rib-btn { min-width: 44px; font-size: 9px; }
+  .ol-rib-group { padding: 0 5px; }
+  .outlook-rail { width: 54px; }
+  .ol-rail-btn { font-size: 9px; }
+  .outlook-body { grid-template-columns: 168px 280px minmax(220px, 1fr); }
+  .ol-cal-body { grid-template-columns: 168px minmax(220px, 1fr); }
+  .ol-people { grid-template-columns: 260px minmax(220px, 1fr); }
+}
+
+@media (max-width: 720px) {
+  /* Below this the three-pane layout stops working, so the reading pane moves
+     under the list and the ribbon goes compact. */
+  .outlook-body,
+  .outlook-body.pane-off { grid-template-columns: 150px minmax(200px, 1fr); grid-template-rows: 1fr 1fr; }
+  .outlook-body .sidebar { grid-row: 1 / span 2; }
+  .outlook-ribbon .ol-rib-label { display: none; }
+  .outlook-ribbon .ol-rib-btn { grid-auto-flow: column; align-items: center; gap: 5px; min-width: 0; padding: 4px 7px; }
+  .outlook-ribbon .ol-rib-btn.large svg { width: 16px; height: 16px; }
+  .ol-cal-body { grid-template-columns: minmax(200px, 1fr); }
+  .ol-cal-side { display: none; }
+  .ol-people { grid-template-columns: minmax(200px, 1fr); }
+  .ol-people-card { display: none; }
+  .ol-status .ol-quota { display: none; }
 }
 
 @media (max-width: 430px) {

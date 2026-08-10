@@ -14,7 +14,10 @@ window.Mac = window.Mac || {};
   Mac.VERSION = '7.0';
   Mac.OS_VERSION = '26.6';
   Mac.OS_BUILD = '25G88-SIM';
-  Mac.STORAGE_KEY = 'macos-tahoe-simulator-v7';
+  Mac.STORAGE_KEY = 'macos-tahoe-simulator-v8';
+  /* Older keys are removed rather than left orphaned in the browser — v7 and
+     earlier also carried a different, real-looking identity. */
+  Mac.RETIRED_KEYS = ['macos-tahoe-simulator', 'macos-tahoe-simulator-v6', 'macos-tahoe-simulator-v7'];
 
   /* ----------------------------------------------------------------- helpers */
 
@@ -150,6 +153,7 @@ window.Mac = window.Mac || {};
 
     load() {
       try {
+        Mac.RETIRED_KEYS.forEach(key => localStorage.removeItem(key));
         const raw = localStorage.getItem(Mac.STORAGE_KEY);
         if (!raw) return Mac.clone(Mac.DefaultState);
         const saved = JSON.parse(raw);

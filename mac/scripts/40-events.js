@@ -331,13 +331,24 @@
 
       /* ------------------------------------------------------------ Outlook */
       case 'outlook-action': Mac.Outlook.action(arg); break;
-      case 'outlook-view':
-        Mac.state.outlook.view = arg;
+      case 'outlook-module':
+        Mac.state.outlook.module = arg;
+        Mac.state.outlook.search = '';
         Mac.save();
         Mac.wm.refresh('outlook');
         break;
+      case 'outlook-settings': Mac.Outlook.settingsSheet(arg || 'General'); break;
       case 'outlook-send': Mac.Outlook.send(); break;
+      case 'outlook-signature-insert': Mac.Outlook.insertSignature(); break;
       case 'outlook-set-category': Mac.Outlook.setCategory(arg); break;
+      case 'outlook-set-filter': Mac.Outlook.setFilter(arg); break;
+      case 'outlook-move': Mac.Outlook.move(arg); break;
+      case 'outlook-cal-move': Mac.Outlook.calMove(arg); break;
+      case 'outlook-event': Mac.Outlook.showEvent(arg); break;
+      case 'outlook-source': Mac.Outlook.source(); break;
+      case 'outlook-print':
+        Mac.Dialog.info('Print', 'Printing is simulated — no printer is attached to this Mac.', 'printer');
+        break;
 
       /* ---------------------------------------------------------- App Store */
       case 'store-install': Mac.Store2.install(arg); break;
@@ -607,7 +618,7 @@
       }
       case 'app-settings':
         if (Mac.session.activeApp === 'mail') Mac.Mail.settings();
-        else if (Mac.session.activeApp === 'outlook') Mac.run('outlook-view', 'settings');
+        else if (Mac.session.activeApp === 'outlook') Mac.Outlook.settingsSheet();
         else if (Mac.session.activeApp === 'safari') Mac.run('browse', 'settings');
         else Mac.Settings.open('General');
         break;
@@ -678,8 +689,8 @@
           icon: 'person',
           body: UI.group(
             UI.info('Account type', 'Administrator'),
-            UI.info('Short name', 'isaiah'),
-            UI.info('Home folder', '/Users/isaiah'),
+            UI.info('Short name', 'alex'),
+            UI.info('Home folder', '/Users/alex'),
             UI.action('Change Password…', 'change-password', `The lab password is “${Mac.LOGIN_PASSWORD}”.`),
           ),
           buttons: [{ label: 'Done', primary: true }],
@@ -912,6 +923,7 @@
     const outlookFolder = target.closest('[data-outlook-folder]');
     if (outlookFolder) {
       Mac.state.outlook.folder = outlookFolder.dataset.outlookFolder;
+      Mac.state.outlook.folderSection = outlookFolder.dataset.outlookSection || 'fav';
       Mac.state.outlook.selected = null;
       Mac.save();
       Mac.wm.refresh('outlook');
@@ -924,8 +936,47 @@
       Mac.wm.refresh('outlook');
       return;
     }
-    const outlookView = target.closest('[data-outlook-view]');
-    if (outlookView) { Mac.run('outlook-view', outlookView.dataset.outlookView); return; }
+    const outlookModule = target.closest('[data-outlook-module]');
+    if (outlookModule) { Mac.run('outlook-module', outlookModule.dataset.outlookModule); return; }
+    const outlookRibbon = target.closest('[data-outlook-ribbon]');
+    if (outlookRibbon) {
+      Mac.state.outlook.ribbonTab = outlookRibbon.dataset.outlookRibbon;
+      Mac.save();
+      Mac.wm.refresh('outlook');
+      return;
+    }
+    const outlookCollapse = target.closest('[data-outlook-collapse]');
+    if (outlookCollapse) {
+      const key = outlookCollapse.dataset.outlookCollapse;
+      const list = Mac.state.outlook.collapsed;
+      const index = list.indexOf(key);
+      if (index === -1) list.push(key); else list.splice(index, 1);
+      Mac.save();
+      Mac.wm.refresh('outlook');
+      return;
+    }
+    const outlookCalView = target.closest('[data-outlook-calview]');
+    if (outlookCalView) {
+      Mac.state.outlook.calView = outlookCalView.dataset.outlookCalview;
+      Mac.save();
+      Mac.wm.refresh('outlook');
+      return;
+    }
+    const outlookCalendar = target.closest('[data-outlook-calendar]');
+    if (outlookCalendar) { Mac.Outlook.toggleCalendar(outlookCalendar.dataset.outlookCalendar); return; }
+    const outlookContact = target.closest('[data-outlook-contact]');
+    if (outlookContact) {
+      Mac.state.outlook.selectedContact = outlookContact.dataset.outlookContact;
+      Mac.save();
+      Mac.wm.refresh('outlook');
+      return;
+    }
+    const outlookTask = target.closest('[data-outlook-task]');
+    if (outlookTask) { Mac.Outlook.toggleTask(outlookTask.dataset.outlookTask); return; }
+    const outlookRule = target.closest('[data-outlook-rule]');
+    if (outlookRule) { Mac.Outlook.toggleRule(outlookRule.dataset.outlookRule); return; }
+    const outlookSettings = target.closest('[data-outlook-settings]');
+    if (outlookSettings) { Mac.Outlook.settingsSheet(outlookSettings.dataset.outlookSettings); return; }
 
     /* --------------------------------------------------------- App Store */
     const storeSection = target.closest('[data-store-section]');
@@ -1051,7 +1102,7 @@
     const form = event.target;
 
     if (form.id === 'login-form' || form.id === 'login-form-password') {
-      const guest = (Mac.session.loginUser || 'isaiah') === 'guest';
+      const guest = (Mac.session.loginUser || 'alex') === 'guest';
       Mac.Screens.login(Mac.$('#login-password')?.value || '', { guest });
       return;
     }
@@ -1172,6 +1223,7 @@
     if (target.matches('[data-terminal-input]') && win) { win.state.input = target.value; return; }
     if (target.matches('[data-lock-message]')) { Mac.set('settings.lockMessage', target.value, { silent: true }); return; }
     if (target.matches('[data-outlook-signature]')) { Mac.set('outlook.signature', target.value, { silent: true }); return; }
+    if (target.matches('[data-outlook-autoreply]')) { Mac.set('outlook.autoReply.message', target.value, { silent: true }); return; }
     if (target.matches('[data-mail-signature-body]')) {
       const signature = Mac.state.mail.signatures.find(item => item.id === target.dataset.mailSignatureBody);
       if (signature) { signature.body = target.value; Mac.save(); }

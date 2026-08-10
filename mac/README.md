@@ -24,7 +24,7 @@ since all assets are local.
 | | |
 |---|---|
 | Login password | `support` |
-| Apple Account | `isaiah@icloud.example` / `support`, verification code `424242` |
+| Apple Account | `alex.rivera@icloud.example` / `support`, verification code `424242` |
 | Wi-Fi passwords | Spectrum Home `spectrum` · Support Bench 5G `benchpass` · Neighbor 5G `neighbor` · Printer Setup `printer` |
 
 ## What it covers
@@ -47,14 +47,49 @@ Bin with Put Back and Empty), Safari (per-tab history, private browsing,
 bookmarks, downloads, a catalogue of simulated support pages, **real Wikipedia
 browsing**, offline and captive-portal and fraudulent-site error states), Apple Mail (two accounts,
 unified mailboxes, categories, compose/drafts/send, rules, signatures, junk,
-seven-pane settings sheet), Microsoft Outlook (ribbon, folder pane, Focused
-Inbox, calendar, People, its own settings), App Store (sections, app detail
+seven-pane settings sheet), **Microsoft Outlook** (see below), App Store (sections, app detail
 pages, install/update/remove with progress), Notes, TextEdit, Preview,
 Calculator, Terminal (30+ simulated commands), Activity Monitor (CPU / Memory /
 Energy / Disk / Network), Disk Utility (First Aid, mount, erase), Console,
 Screenshot, Time Machine, Passwords, System Information, Migration Assistant,
 plus Messages, Calendar, Reminders, Contacts, Photos, Music, Podcasts, Maps,
 FaceTime, Weather and Freeform.
+
+## Microsoft Outlook
+
+Outlook is a second mail client on purpose: the support flows that differ between
+it and Apple Mail are exactly the ones worth rehearsing, and a client that only
+*looked* like Mail was no use for that. It follows the real app's shape rather
+than Mail's.
+
+**Chrome** — a vertical module rail (Mail, Calendar, People, To Do) instead of a
+row of tabs; a tabbed ribbon (Home / Organise / Tools) with labelled groups and a
+simplified-ribbon toggle; Favourites above the account's own collapsible folder
+tree; and a status bar along the bottom reporting the Exchange connection, item
+counts and mailbox quota — the first place a real user is asked to look.
+
+**Mail** — Focused/Other pivots with an unread count on Other, a filter
+(unread / flagged / has attachment), relative date group headers, an unread
+accent bar, category colour chips, attachment markers, and search scoped to the
+current folder, current mailbox or all mailboxes. Sent Items and Drafts show the
+recipient, not you. The reading pane carries To/Cc lines, a timestamp, an
+external-sender warning and a working reading-pane position (right / bottom /
+off).
+
+**Calendar** — day, week and month views. The week view is a real time grid: an
+hour gutter with events positioned and sized by start time and duration, the
+current day tinted, tentative events hatched and free events outlined. A mini
+month sits in the sidebar with the shown week highlighted, and the My Calendars
+checkboxes genuinely filter what appears.
+
+**People and To Do** — a searchable directory with letter sections and a contact
+card that can start a message, and a task list that flagged items land in.
+
+**Support flows** — **Automatic Replies** (out of office), which announces itself
+in the status bar until you turn it off; **Rules**; Test Account Settings; Repair
+Mailbox; and Work Offline. Sending while offline queues the message in the
+**Outbox** rather than discarding it, and the next Send/Receive flushes it — that
+queued item is usually what a caller needs to be told about.
 
 **System Settings** — 26 top-level panes and 10 sub-panes, all searchable, plus
 a complete Apple Account section: iCloud storage and features, Family Sharing,
@@ -174,6 +209,13 @@ MacSim.reset()                   // Erase All Content and Settings
 `⌃⌘F` full screen · `⌃⌥←/→` tile left/right · `⌃←/→` switch desktop ·
 `⌃⌘Q` lock · `⇧⌘Q` log out · `⌥⌘⎋` Force Quit · `⇧⌘3` screenshot ·
 `⇧⌘⌫` empty the Bin · `Esc` dismiss.
+
+## The people in it
+
+Everyone in the simulator is invented. The Mac belongs to Alex Rivera; Dana
+Whitfield, Milo Rivera and the rest of the senders, contacts and directory
+entries are made up, every address uses a reserved `.example` domain, and phone
+numbers stay in the 555 range. Nothing is modelled on a real person.
 
 ## Notes
 

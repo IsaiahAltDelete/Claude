@@ -21,7 +21,7 @@
     { id: 'dir-library', name: 'Library', kind: 'folder', parent: 'vol-hd', system: true },
     { id: 'dir-system', name: 'System', kind: 'folder', parent: 'vol-hd', system: true },
     { id: 'dir-users', name: 'Users', kind: 'folder', parent: 'vol-hd', system: true },
-    { id: 'dir-home', name: 'isaiah', kind: 'folder', parent: 'dir-users', home: true },
+    { id: 'dir-home', name: 'alex', kind: 'folder', parent: 'dir-users', home: true },
 
     { id: 'dir-desktop', name: 'Desktop', kind: 'folder', parent: 'dir-home' },
     { id: 'dir-documents', name: 'Documents', kind: 'folder', parent: 'dir-home' },
@@ -50,7 +50,7 @@
   ];
 
   Mac.DefaultState = {
-    schema: 7,
+    schema: 8,
 
     /* ------------------------------------------------------------ settings */
     settings: {
@@ -140,7 +140,7 @@
       language: 'English (US)',
       region: 'United States',
       autoTimezone: true,
-      computerName: "Isaiah's MacBook Pro",
+      computerName: "Alex's MacBook Pro",
       airdropVisibility: 'Contacts Only',
       handoff: true,
       screenSharing: false,
@@ -158,10 +158,10 @@
     /* ------------------------------------------------------- Apple Account */
     account: {
       signedIn: true,
-      name: 'Isaiah Souffront',
-      email: 'isaiah@icloud.example',
-      appleId: 'isaiah@icloud.example',
-      initials: 'IS',
+      name: 'Alex Rivera',
+      email: 'alex.rivera@icloud.example',
+      appleId: 'alex.rivera@icloud.example',
+      initials: 'AR',
       twoFactor: true,
       trustedPhone: '+1 (407) •••-••42',
       recoveryContact: 'Not set up',
@@ -192,19 +192,19 @@
       },
       family: {
         enabled: true,
-        organizer: 'Isaiah Souffront',
+        organizer: 'Alex Rivera',
         members: [
-          { name: 'Isaiah Souffront', role: 'Organizer', initials: 'IS' },
+          { name: 'Alex Rivera', role: 'Organizer', initials: 'AR' },
           { name: 'Dana Whitfield', role: 'Adult', initials: 'DW' },
-          { name: 'Milo Souffront', role: 'Child · 11', initials: 'MS' },
+          { name: 'Milo Rivera', role: 'Child · 11', initials: 'MR' },
         ],
         purchaseSharing: true,
         locationSharing: true,
         screenTimeForKids: true,
       },
       devices: [
-        { name: "Isaiah's MacBook Pro", kind: 'This Mac', model: 'MacBook Pro 14-inch, M4 Pro', os: 'macOS 26.6', icon: 'system-info', trusted: true },
-        { name: "Isaiah's iPhone", kind: 'iPhone 17 Pro', model: 'iPhone 17 Pro', os: 'iOS 26.6', icon: 'facetime', trusted: true },
+        { name: "Alex's MacBook Pro", kind: 'This Mac', model: 'MacBook Pro 14-inch, M4 Pro', os: 'macOS 26.6', icon: 'system-info', trusted: true },
+        { name: "Alex's iPhone", kind: 'iPhone 17 Pro', model: 'iPhone 17 Pro', os: 'iOS 26.6', icon: 'facetime', trusted: true },
         { name: 'Studio iPad', kind: 'iPad Air', model: 'iPad Air (M3)', os: 'iPadOS 26.5', icon: 'freeform', trusted: true },
         { name: 'Support Watch', kind: 'Apple Watch', model: 'Apple Watch Series 11', os: 'watchOS 26.4', icon: 'time-machine', trusted: true },
       ],
@@ -310,16 +310,16 @@
     mail: {
       accounts: [
         {
-          id: 'acct-icloud', provider: 'iCloud', name: 'Isaiah Souffront',
-          address: 'isaiah@icloud.example', description: 'iCloud', enabled: true,
+          id: 'acct-icloud', provider: 'iCloud', name: 'Alex Rivera',
+          address: 'alex.rivera@icloud.example', description: 'iCloud', enabled: true,
           color: '#2f7cf6', status: 'Online', lastChecked: 'Just now',
           incoming: { host: 'imap.mail.me.example', port: '993', tls: true, auth: 'Password' },
           outgoing: { host: 'smtp.mail.me.example', port: '587', tls: true, auth: 'Password' },
           mailboxes: { drafts: 'Drafts', sent: 'Sent', junk: 'Junk', trash: 'Bin', archive: 'Archive' },
         },
         {
-          id: 'acct-work', provider: 'Exchange', name: 'Isaiah Souffront',
-          address: 'isaiah.souffront@support.example', description: 'Support Desk', enabled: true,
+          id: 'acct-work', provider: 'Exchange', name: 'Alex Rivera',
+          address: 'alex.rivera@support.example', description: 'Support Desk', enabled: true,
           color: '#0f9d58', status: 'Online', lastChecked: '2 minutes ago',
           incoming: { host: 'outlook.office365.example', port: '993', tls: true, auth: 'OAuth' },
           outgoing: { host: 'smtp.office365.example', port: '587', tls: true, auth: 'OAuth' },
@@ -338,8 +338,8 @@
       junk: { enabled: true, action: 'Move it to the Junk mailbox', exemptContacts: true, trustHeaders: true },
       privacy: { protectActivity: true, hideIP: true, blockRemoteContent: true },
       signatures: [
-        { id: 'sig-1', name: 'Default', accountId: 'acct-icloud', body: 'Isaiah Souffront\nSent from Mail on macOS Tahoe' },
-        { id: 'sig-2', name: 'Support Desk', accountId: 'acct-work', body: 'Isaiah Souffront\nTier 2 Support · Ext. 4412' },
+        { id: 'sig-1', name: 'Default', accountId: 'acct-icloud', body: 'Alex Rivera\nSent from Mail on macOS Tahoe' },
+        { id: 'sig-2', name: 'Support Desk', accountId: 'acct-work', body: 'Alex Rivera\nTier 2 Support · Ext. 4412' },
       ],
       activeSignatureId: 'sig-1',
       rules: [
@@ -348,42 +348,94 @@
       ],
       blocked: ['offers@spam.example'],
       messages: [
-        { id: 'mail-1', accountId: 'acct-icloud', mailbox: 'Inbox', category: 'Primary', from: 'Apple Support', email: 'support@apple.example', subject: 'Welcome to macOS Tahoe', preview: 'A few ways to get comfortable with your new Mac.', body: 'Hi Isaiah,\n\nWelcome to macOS Tahoe. The redesigned desktop keeps every familiar Mac control while bringing the new Liquid Glass material to the Dock, sidebars and toolbars.\n\nA few things worth trying:\n• Press Command-Space for Spotlight\n• Customise Control Center in System Settings\n• Use window tiling by dragging a window to a screen edge\n\nApple Support', date: now - 3600e3, unread: true, flagged: false },
-        { id: 'mail-2', accountId: 'acct-work', mailbox: 'Inbox', category: 'Updates', from: 'Spectrum Learning', email: 'learning@spectrum.example', subject: 'Updated Wi-Fi troubleshooting flow', preview: 'The latest support flow is ready for review.', body: 'Hi Isaiah,\n\nThe updated Wi-Fi troubleshooting flow is ready. Start by confirming the customer is on the expected SSID, verify whether other devices are affected, then renew the connection before escalating.\n\nThe practice checklist is attached.\n\nSpectrum Learning Team', date: now - 5 * 3600e3, unread: true, flagged: true, attachment: 'Wi-Fi Checklist.pdf' },
-        { id: 'mail-3', accountId: 'acct-work', mailbox: 'Inbox', category: 'Primary', from: 'Dana Whitfield', email: 'dana@support.example', subject: 'ESCALATION 4821 — captive portal loop', preview: 'Customer cannot get past the cafe sign-in page.', body: 'Isaiah,\n\nTicket 4821: the customer joins “Cafe Welcome”, gets the sign-in page, accepts the terms and then loses the connection. Can you reproduce it on the bench Mac and confirm whether renewing the lease clears it?\n\nThanks,\nDana', date: now - 8 * 3600e3, unread: false, flagged: false },
+        { id: 'mail-1', accountId: 'acct-icloud', mailbox: 'Inbox', category: 'Primary', from: 'Apple Support', email: 'support@apple.example', subject: 'Welcome to macOS Tahoe', preview: 'A few ways to get comfortable with your new Mac.', body: 'Hi Alex,\n\nWelcome to macOS Tahoe. The redesigned desktop keeps every familiar Mac control while bringing the new Liquid Glass material to the Dock, sidebars and toolbars.\n\nA few things worth trying:\n• Press Command-Space for Spotlight\n• Customise Control Center in System Settings\n• Use window tiling by dragging a window to a screen edge\n\nApple Support', date: now - 3600e3, unread: true, flagged: false },
+        { id: 'mail-2', accountId: 'acct-work', mailbox: 'Inbox', category: 'Updates', from: 'Spectrum Learning', email: 'learning@spectrum.example', subject: 'Updated Wi-Fi troubleshooting flow', preview: 'The latest support flow is ready for review.', body: 'Hi Alex,\n\nThe updated Wi-Fi troubleshooting flow is ready. Start by confirming the customer is on the expected SSID, verify whether other devices are affected, then renew the connection before escalating.\n\nThe practice checklist is attached.\n\nSpectrum Learning Team', date: now - 5 * 3600e3, unread: true, flagged: true, attachment: 'Wi-Fi Checklist.pdf' },
+        { id: 'mail-3', accountId: 'acct-work', mailbox: 'Inbox', category: 'Primary', from: 'Dana Whitfield', email: 'dana@support.example', subject: 'ESCALATION 4821 — captive portal loop', preview: 'Customer cannot get past the cafe sign-in page.', body: 'Alex,\n\nTicket 4821: the customer joins “Cafe Welcome”, gets the sign-in page, accepts the terms and then loses the connection. Can you reproduce it on the bench Mac and confirm whether renewing the lease clears it?\n\nThanks,\nDana', date: now - 8 * 3600e3, unread: false, flagged: false },
         { id: 'mail-4', accountId: 'acct-icloud', mailbox: 'Inbox', category: 'Transactions', from: 'Apple', email: 'no_reply@apple.example', subject: 'Your receipt from Apple', preview: 'iCloud+ 200 GB — $2.99', body: 'Receipt\n\niCloud+ 200 GB monthly plan — $2.99\nBilled to Visa •••• 4412\n\nThis is a simulated receipt.', date: now - DAY, unread: false, flagged: false },
         { id: 'mail-5', accountId: 'acct-work', mailbox: 'Inbox', category: 'Promotions', from: 'Bench Tools', email: 'news@benchtools.example', subject: 'New diagnostics utilities this month', preview: 'Disk, network and battery utilities refreshed.', body: 'This month we refreshed the diagnostics utilities used on the support bench.\n\nSimulated newsletter content.', date: now - 2 * DAY, unread: false, flagged: false },
-        { id: 'mail-6', accountId: 'acct-icloud', mailbox: 'Archive', category: 'Primary', from: 'Milo', email: 'milo@icloud.example', subject: 'Screen time request', preview: 'Can I get 30 more minutes?', body: 'Can I get 30 more minutes on the iPad today?', date: now - 4 * DAY, unread: false, flagged: false },
-        { id: 'mail-7', accountId: 'acct-work', mailbox: 'Sent', category: 'Primary', from: 'Isaiah Souffront', email: 'isaiah.souffront@support.example', to: 'dana@support.example', subject: 'Re: ESCALATION 4821 — captive portal loop', preview: 'Reproduced on the bench Mac. Details inside.', body: 'Dana,\n\nReproduced it. Accepting the portal terms clears the “No Internet” state, but abandoning the portal drops the association entirely. Renewing the lease afterwards recovers it.\n\nIsaiah', date: now - 7 * 3600e3, unread: false, flagged: false },
+        { id: 'mail-6', accountId: 'acct-icloud', mailbox: 'Archive', category: 'Primary', from: 'Milo', email: 'milo.rivera@icloud.example', subject: 'Screen time request', preview: 'Can I get 30 more minutes?', body: 'Can I get 30 more minutes on the iPad today?', date: now - 4 * DAY, unread: false, flagged: false },
+        { id: 'mail-7', accountId: 'acct-work', mailbox: 'Sent', category: 'Primary', from: 'Alex Rivera', email: 'alex.rivera@support.example', to: 'dana@support.example', subject: 'Re: ESCALATION 4821 — captive portal loop', preview: 'Reproduced on the bench Mac. Details inside.', body: 'Dana,\n\nReproduced it. Accepting the portal terms clears the “No Internet” state, but abandoning the portal drops the association entirely. Renewing the lease afterwards recovers it.\n\nAlex', date: now - 7 * 3600e3, unread: false, flagged: false },
         { id: 'mail-8', accountId: 'acct-icloud', mailbox: 'Junk', category: 'Primary', from: 'Offers', email: 'offers@spam.example', subject: 'You have won a device', preview: 'Claim your prize now.', body: 'This message is included to demonstrate junk filtering. It is not a real offer.', date: now - 3 * DAY, unread: true, flagged: false },
       ],
     },
 
     /* --------------------------------------------------------------- Outlook */
     outlook: {
-      account: { name: 'Isaiah Souffront', address: 'isaiah.souffront@support.example', org: 'Support Desk', initials: 'IS' },
-      view: 'mail',
+      /* Outlook for Mac is an Exchange client, so the account is described the
+         way the real Accounts pane describes it — type, server and mailbox
+         quota all show up in support conversations. */
+      account: {
+        name: 'Alex Rivera',
+        address: 'alex.rivera@support.example',
+        org: 'Support Desk',
+        initials: 'AR',
+        type: 'Microsoft Exchange',
+        server: 'outlook.office365.example',
+        quota: 50 * 1024 * 1024 * 1024,
+        used: 21.4 * 1024 * 1024 * 1024,
+      },
+      module: 'mail',
+      ribbonTab: 'Home',
       folder: 'Inbox',
       focused: 'focused',
       selected: 'ol-1',
       search: '',
-      signature: 'Isaiah Souffront | Tier 2 Support | Ext. 4412',
-      settings: { focusedInbox: true, conversationView: true, readReceipts: false, autoArchive: false, darkMode: 'Follow system', notifyDesktop: true, sendSoon: '10 seconds' },
+      searchScope: 'Current Mailbox',
+      collapsed: [],
+      filter: 'All',
+      calView: 'Week',
+      calOffset: 0,
+      signature: 'Alex Rivera | Tier 2 Support | Ext. 4412',
+      settings: {
+        focusedInbox: true, conversationView: true, readReceipts: false, autoArchive: false,
+        darkMode: 'Follow system', notifyDesktop: true, sendSoon: '10 seconds',
+        simplifiedRibbon: false, readingPane: 'Right', markReadOnSelect: true,
+        junkProtection: 'Low', externalWarning: true, weekStart: 'Sunday', workHours: '09:00 – 17:30',
+      },
+      autoReply: { on: false, message: 'I am out of the office until Monday and will reply when I return.\n\nFor anything urgent please contact the Service Desk on ext. 4400.', external: true, until: '' },
+      rules: [
+        { id: 'ru-1', name: 'Service Desk to Inbox', when: 'From contains servicedesk@', then: 'Mark as Focused', on: true },
+        { id: 'ru-2', name: 'Newsletters to Other', when: 'Subject contains digest', then: 'Move to Other', on: true },
+        { id: 'ru-3', name: 'Archive old receipts', when: 'Older than 90 days', then: 'Move to Archive', on: false },
+      ],
+      tasks: [
+        { id: 'td-1', title: 'Call back ticket 4821', due: 'Today', flagged: true, done: false },
+        { id: 'td-2', title: 'Attach diagnostics to escalation', due: 'Today', flagged: false, done: false },
+        { id: 'td-3', title: 'Update the Wi-Fi runbook', due: 'Tomorrow', flagged: false, done: false },
+        { id: 'td-4', title: 'Return the loaner MacBook', due: 'This week', flagged: false, done: true },
+      ],
+      contacts: [
+        { name: 'Dana Whitfield', email: 'dana@support.example', role: 'Tier 3 Support', phone: '+1 (407) 555-0148', office: 'Bench 2' },
+        { name: 'Service Desk', email: 'servicedesk@support.example', role: 'Shared mailbox', phone: '+1 (407) 555-0100', office: 'Floor 1' },
+        { name: 'Facilities', email: 'facilities@support.example', role: 'Distribution list', phone: '+1 (407) 555-0122', office: 'Building A' },
+        { name: 'Grace Hopper', email: 'grace@support.example', role: 'Engineering', phone: '+1 (407) 555-0166', office: 'Floor 3' },
+        { name: 'HR', email: 'hr@support.example', role: 'Distribution list', phone: '+1 (407) 555-0190', office: 'Floor 2' },
+        { name: 'Marcus Bell', email: 'marcus@support.example', role: 'Tier 1 Support', phone: '+1 (407) 555-0102', office: 'Bench 1' },
+        { name: 'Priya Raman', email: 'priya@support.example', role: 'Network Operations', phone: '+1 (407) 555-0173', office: 'Floor 3' },
+      ],
       messages: [
         { id: 'ol-1', folder: 'Inbox', focused: true, from: 'IT Service Desk', email: 'servicedesk@support.example', subject: 'Weekly change window — Thursday 22:00', preview: 'Network maintenance affects the bench VLAN.', body: 'Team,\n\nThursday 22:00–23:30 the bench VLAN will be down for switch firmware. Expect DHCP renewals to fail during the window.\n\nIT Service Desk', date: now - 2 * 3600e3, unread: true, flagged: false, category: 'Blue' },
-        { id: 'ol-2', folder: 'Inbox', focused: true, from: 'Dana Whitfield', email: 'dana@support.example', subject: 'Tier 2 rota for August', preview: 'Attached is the updated rota.', body: 'Hi Isaiah,\n\nAttached is the updated Tier 2 rota for August. You are on the late shift on the 12th and 19th.\n\nDana', date: now - 6 * 3600e3, unread: true, flagged: true, attachment: 'August Rota.pdf' },
+        { id: 'ol-2', folder: 'Inbox', focused: true, from: 'Dana Whitfield', email: 'dana@support.example', subject: 'Tier 2 rota for August', preview: 'Attached is the updated rota.', body: 'Hi Alex,\n\nAttached is the updated Tier 2 rota for August. You are on the late shift on the 12th and 19th.\n\nDana', date: now - 6 * 3600e3, unread: true, flagged: true, attachment: 'August Rota.pdf' },
         { id: 'ol-3', folder: 'Inbox', focused: false, from: 'Bench Tools', email: 'news@benchtools.example', subject: 'Your monthly utilities digest', preview: 'Ten diagnostics tips.', body: 'Simulated newsletter for the Other inbox.', date: now - 26 * 3600e3, unread: false, flagged: false },
         { id: 'ol-4', folder: 'Inbox', focused: false, from: 'Facilities', email: 'facilities@support.example', subject: 'Parking permits renewal', preview: 'Renew before the end of the month.', body: 'Simulated facilities notice.', date: now - 3 * DAY, unread: false, flagged: false },
-        { id: 'ol-5', folder: 'Sent Items', focused: true, from: 'Isaiah Souffront', email: 'isaiah.souffront@support.example', to: 'servicedesk@support.example', subject: 'RE: Weekly change window — Thursday 22:00', preview: 'Bench Mac will be offline, acknowledged.', body: 'Acknowledged — I will pause bench testing during the window.\n\nIsaiah', date: now - 90 * 60e3, unread: false, flagged: false },
-        { id: 'ol-6', folder: 'Drafts', focused: true, from: 'Isaiah Souffront', email: 'isaiah.souffront@support.example', to: 'dana@support.example', subject: 'Captive portal findings', preview: 'Draft — findings from ticket 4821.', body: 'Draft in progress.', date: now - 40 * 60e3, unread: false, flagged: false },
+        { id: 'ol-5', folder: 'Sent Items', focused: true, from: 'Alex Rivera', email: 'alex.rivera@support.example', to: 'servicedesk@support.example', subject: 'RE: Weekly change window — Thursday 22:00', preview: 'Bench Mac will be offline, acknowledged.', body: 'Acknowledged — I will pause bench testing during the window.\n\nAlex', date: now - 90 * 60e3, unread: false, flagged: false },
+        { id: 'ol-6', folder: 'Drafts', focused: true, from: 'Alex Rivera', email: 'alex.rivera@support.example', to: 'dana@support.example', subject: 'Captive portal findings', preview: 'Draft — findings from ticket 4821.', body: 'Draft in progress.', date: now - 40 * 60e3, unread: false, flagged: false },
         { id: 'ol-7', folder: 'Deleted Items', focused: true, from: 'Old Vendor', email: 'sales@vendor.example', subject: 'Quote expiring', preview: 'Deleted item retained for 30 days.', body: 'Simulated deleted message.', date: now - 9 * DAY, unread: false, flagged: false },
         { id: 'ol-8', folder: 'Archive', focused: true, from: 'HR', email: 'hr@support.example', subject: 'Compliance training complete', preview: 'Certificate attached.', body: 'Your compliance training is recorded as complete.', date: now - 21 * DAY, unread: false, flagged: false, attachment: 'Certificate.pdf' },
       ],
+      calendars: [
+        { id: 'cal-work', name: 'Calendar', colour: '#0f6cbd', on: true },
+        { id: 'cal-team', name: 'Tier 2 Support', colour: '#8764b8', on: true },
+        { id: 'cal-hol', name: 'Holidays', colour: '#107c41', on: false },
+      ],
       events: [
-        { id: 'ev-1', title: 'Tier 2 stand-up', day: 0, time: '09:15', minutes: 15 },
-        { id: 'ev-2', title: 'Bench triage', day: 0, time: '11:00', minutes: 60 },
-        { id: 'ev-3', title: 'Escalation review', day: 2, time: '14:00', minutes: 45 },
-        { id: 'ev-4', title: 'Change window', day: 4, time: '22:00', minutes: 90 },
+        { id: 'ev-1', title: 'Tier 2 stand-up', day: 1, start: 9.25, minutes: 15, cal: 'cal-work', where: 'Bench room', busy: 'Busy' },
+        { id: 'ev-2', title: 'Bench triage', day: 1, start: 11, minutes: 60, cal: 'cal-work', where: 'Bench 2', busy: 'Busy' },
+        { id: 'ev-3', title: '1:1 with Dana', day: 2, start: 10, minutes: 30, cal: 'cal-work', where: 'Teams', busy: 'Busy' },
+        { id: 'ev-4', title: 'Escalation review', day: 3, start: 14, minutes: 45, cal: 'cal-team', where: 'Room 4', busy: 'Busy' },
+        { id: 'ev-5', title: 'Runbook workshop', day: 3, start: 15.5, minutes: 90, cal: 'cal-team', where: 'Room 4', busy: 'Tentative' },
+        { id: 'ev-6', title: 'Change window', day: 4, start: 22, minutes: 90, cal: 'cal-work', where: 'Remote', busy: 'Busy' },
+        { id: 'ev-7', title: 'Vendor call — Bench Tools', day: 5, start: 13, minutes: 30, cal: 'cal-work', where: 'Teams', busy: 'Free' },
       ],
     },
 
