@@ -23,7 +23,7 @@
       const wifi = Mac.state.wifi;
       const out = text => { win.state.output += `${text}\n`; };
 
-      win.state.output += `isaiah@mac ~ % ${command}\n`;
+      win.state.output += `alex@mac ~ % ${command}\n`;
       if (command) win.state.history.push(command);
 
       const [name, ...args] = command.split(/\s+/);
@@ -39,7 +39,7 @@
           break;
         case 'clear': win.state.output = ''; break;
         case 'date': out(new Date().toString()); break;
-        case 'whoami': out('isaiah'); break;
+        case 'whoami': out('alex'); break;
         case 'hostname': out(Mac.state.settings.computerName.toLowerCase().replace(/[^a-z0-9]+/g, '-')); break;
         case 'uname':
           out(args.includes('-a')
@@ -52,7 +52,7 @@
           out(`BuildVersion:\t\t${Mac.OS_BUILD}`);
           break;
         case 'uptime': out(`${Mac.formatTime()}  up 3 days, 14:22, 2 users, load averages: 1.42 1.28 1.11`); break;
-        case 'pwd': out('/Users/isaiah'); break;
+        case 'pwd': out('/Users/alex'); break;
         case 'ls':
           out(Mac.FS.children('dir-home').map(node => node.name).join('\t') || '');
           break;
@@ -198,7 +198,7 @@
     size: [760, 470],
     min: [380, 240],
     initialState: () => ({ output: Terminal.banner(), history: [], historyIndex: -1, input: '' }),
-    titleFor: () => 'isaiah — -zsh',
+    titleFor: () => 'alex — -zsh',
     menus: () => ({
       Shell: [
         { label: 'New Window', command: 'new-window', shortcut: '⌘N' },
@@ -207,7 +207,7 @@
     }),
     render: win => `<div class="terminal" data-terminal-view>
       <div class="terminal-out">${esc(win.state.output)}</div>
-      <div class="terminal-line"><span class="terminal-prompt">isaiah@mac ~ %</span>
+      <div class="terminal-line"><span class="terminal-prompt">alex@mac ~ %</span>
         <input class="terminal-in" data-terminal-input value="${esc(win.state.input)}" autocomplete="off"
           spellcheck="false" aria-label="Terminal command"></div></div>`,
     mount(win) {
@@ -874,7 +874,7 @@
           ['Router', Mac.state.wifi.current ? Mac.state.wifi.router : '--'], ['DNS', Mac.state.wifi.dns.join(', ') || 'None']],
         Software: [['System Version', `macOS ${Mac.OS_VERSION}`], ['Kernel Version', 'Darwin 26.6.0'],
           ['Boot Volume', 'Macintosh HD'], ['Boot Mode', Mac.session.safeMode ? 'Safe' : 'Normal'],
-          ['Computer Name', Mac.state.settings.computerName], ['User Name', `${Mac.state.account.name} (isaiah)`],
+          ['Computer Name', Mac.state.settings.computerName], ['User Name', `${Mac.state.account.name} (alex)`],
           ['Secure Virtual Memory', 'Enabled'], ['FileVault', Mac.state.settings.fileVault ? 'Enabled' : 'Disabled']],
         Storage: Mac.state.volumes.map(volume => [volume.name,
           `${Mac.bytes(volume.totalBytes - volume.usedBytes)} free of ${Mac.bytes(volume.totalBytes)}`]),
