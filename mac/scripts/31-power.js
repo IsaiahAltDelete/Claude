@@ -549,7 +549,7 @@
             ? `<div class="row">${row}</div>`
             : `<button class="row tappable" data-command="wifi-join" data-arg="${esc(network.name)}">${row}</button>`;
         }).join('')}</div>
-        <p class="section-note">Lab passwords — Spectrum Home: spectrum · Support Bench 5G: benchpass</p>`;
+        <p class="section-note">Lab passwords — Sablewave Home: sablewave · Support Bench 5G: benchpass</p>`;
       }
 
       if (id === 'account') {

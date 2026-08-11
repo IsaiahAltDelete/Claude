@@ -14,10 +14,11 @@ window.Mac = window.Mac || {};
   Mac.VERSION = '7.0';
   Mac.OS_VERSION = '26.6';
   Mac.OS_BUILD = '25G88-SIM';
-  Mac.STORAGE_KEY = 'macos-tahoe-simulator-v8';
+  Mac.STORAGE_KEY = 'macos-tahoe-simulator-v9';
   /* Older keys are removed rather than left orphaned in the browser — v7 and
      earlier also carried a different, real-looking identity. */
-  Mac.RETIRED_KEYS = ['macos-tahoe-simulator', 'macos-tahoe-simulator-v6', 'macos-tahoe-simulator-v7'];
+  Mac.RETIRED_KEYS = ['macos-tahoe-simulator', 'macos-tahoe-simulator-v6', 'macos-tahoe-simulator-v7',
+    'macos-tahoe-simulator-v8'];
 
   /* ----------------------------------------------------------------- helpers */
 

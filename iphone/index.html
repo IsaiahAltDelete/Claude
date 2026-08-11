@@ -807,15 +807,15 @@ function h(html){const t=document.createElement('template');t.innerHTML=html.tri
 const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 /* ---------- persistent state ---------- */
-const SAVE_KEY='iphone-sim-v3';
+const SAVE_KEY='iphone-sim-v4';
 /* Saves before v3 carried a different, real-looking identity. Rather than
    rewriting them on load — which meant shipping those names in this file — the
    key was bumped and the old entry is dropped. */
-const RETIRED_KEYS=['iphone-sim','iphone-sim-v2'];
+const RETIRED_KEYS=['iphone-sim','iphone-sim-v2','iphone-sim-v3'];
 const DEFAULTS = {
   settings:{
     dark:true, brightness:0.9, wallpaper:0, textSize:1, bold:false,
-    airplane:false, wifi:true, wifiName:'SPECTRUM-5G', bluetooth:true, cellular:true, network:'online',
+    airplane:false, wifi:true, wifiName:'SABLEWAVE-5G', bluetooth:true, cellular:true, network:'online',
     dnd:false, lowpower:false, rotationLock:false, autoLock:'2 Minutes', touchCursor:true,
     searchEngine:'Google', blockPopups:true, preventTracking:true, faceid:true,
     name:"Alex's iPhone", appleID:'alex.rivera@icloud.example',
@@ -1482,7 +1482,7 @@ $('#bMute').onclick=()=>{ State.settings.dnd=!State.settings.dnd; save(); ringer
   if(navigator.vibrate) navigator.vibrate(12); };
 
 let LOCK_NOTIFS=[
-  {app:'mail',   title:'Spectrum',  body:'Your July statement is ready — $189.98 due August 12', when:'2m ago'},
+  {app:'mail',   title:'Sablewave',  body:'Your July statement is ready — $189.98 due August 12', when:'2m ago'},
   {app:'appstore',title:'App Store',body:'2 apps have updates available', when:'18m ago'},
   {app:'messages',title:'Nina',    body:'Call me when you get a chance 💙', when:'1h ago'}
 ];
@@ -1673,8 +1673,8 @@ setInterval(()=>{
    ONE-TIME PASSCODES — arrives by SMS, offers AutoFill, fills a 2FA sheet
    ========================================================================= */
 const OTP_SENDERS=[
-  {id:'spectrum', name:'Spectrum',  short:'Spectrum', from:'89663',
-   body:c=>`${c} is your Spectrum verification code. Do not share it with anyone. It expires in 10 minutes.`},
+  {id:'sablewave', name:'Sablewave',  short:'Sablewave', from:'89663',
+   body:c=>`${c} is your Sablewave verification code. Do not share it with anyone. It expires in 10 minutes.`},
   {id:'apple',    name:'Apple',     short:'Apple ID', from:'Apple',
    body:c=>`Your Apple Account code is: ${c}. Do not share it with anyone.`},
   {id:'netflix',  name:'Netflix',   short:'Netflix',  from:'62913',
@@ -1702,7 +1702,7 @@ function sendOTP(senderId){
 }
 const codeIn = txt => (String(txt).match(/\b(\d{6})\b/)||[])[1] || null;
 /* the 2FA screen the code is meant for */
-function verificationSheet({sender='Spectrum', onDone}={}){
+function verificationSheet({sender='Sablewave', onDone}={}){
   sheet((s,close)=>{
     s.style.height='auto';
     let entered='';
@@ -1740,7 +1740,7 @@ function verificationSheet({sender='Spectrum', onDone}={}){
     wrap.appendChild(verify);
     const resend=el('button','','Didn’t get a code? Resend');
     resend.style.cssText='color:var(--sysblue);font-size:14px;margin-top:14px;display:block;width:100%';
-    resend.onclick=()=>{ sendOTP('spectrum'); toast('New code sent'); };
+    resend.onclick=()=>{ sendOTP('sablewave'); toast('New code sent'); };
     wrap.appendChild(resend);
     const cancel=el('button','','Cancel');
     cancel.style.cssText='color:var(--txt2);font-size:15px;margin-top:12px;display:block;width:100%';
@@ -2423,7 +2423,7 @@ function mediaPurchasesView(){
   return {title:'Media & Purchases', shortTitle:'Media', build(b,nav){
     group(b,{rows:[
       {label:'Purchase History',onClick:()=>nav.push(infoListView('Purchase History','July',
-        ['iCloud+ 200 GB — $2.99','Spectrum TV Premium — $12.99','Wordfall Pro — $3.99'],'Purchases are billed to Visa •••• 0092.'))},
+        ['iCloud+ 200 GB — $2.99','Sablewave TV Premium — $12.99','Wordfall Pro — $3.99'],'Purchases are billed to Visa •••• 0092.'))},
       {label:'Personalised Recommendations',toggle:()=>true,onToggle:()=>{}}]});
     group(b,{rows:[
       {label:'Subscriptions',onClick:()=>nav.push(subscriptionsView())},
@@ -2478,7 +2478,7 @@ function deviceDetailView(name,model,where,isThis){
 }
 function subscriptionsView(){
   const subs=[
-    {n:'Spectrum TV Premium',p:'$12.99/mo',r:'Renews Aug 12'},
+    {n:'Sablewave TV Premium',p:'$12.99/mo',r:'Renews Aug 12'},
     {n:'Netflix Standard',p:'$15.49/mo',r:'Renews Aug 3'},
     {n:'Disney Bundle Duo',p:'$10.99/mo',r:'Renews Aug 19'},
     {n:'iCloud+ 200GB',p:'$2.99/mo',r:'Renews Aug 1'}
@@ -2564,10 +2564,10 @@ function backupView(){
    ========================================================================= */
 /* what the radio can see right now */
 const AIRWAVES=[
-  {ssid:'SPECTRUM-5G',              sec:'WPA3', bars:3},
-  {ssid:'SPECTRUM-2.4G',            sec:'WPA2', bars:3},
-  {ssid:'Spectrum WiFi',            sec:'open', bars:2},
-  {ssid:'SpectrumSetup-A4',         sec:'WPA2', bars:2},
+  {ssid:'SABLEWAVE-5G',              sec:'WPA3', bars:3},
+  {ssid:'SABLEWAVE-2.4G',            sec:'WPA2', bars:3},
+  {ssid:'Sablewave WiFi',            sec:'open', bars:2},
+  {ssid:'SablewaveSetup-A4',         sec:'WPA2', bars:2},
   {ssid:'ATT-WIFI-8821',            sec:'WPA2', bars:2},
   {ssid:'Apt 4B Guest',             sec:'WPA2', bars:2},
   {ssid:'NETGEAR74',                sec:'WPA2', bars:1},
@@ -2579,13 +2579,13 @@ const DAY=864e5;
 function defaultWifi(){
   const now=Date.now();
   return {
-    connected:'SPECTRUM-5G',
+    connected:'SABLEWAVE-5G',
     askToJoin:'Notify',
     autoJoinHotspot:'Ask to Join',
     /* “previous networks” — what the Edit button lists */
     known:[
-      {ssid:'SPECTRUM-5G',   sec:'WPA3', autoJoin:true,  lowData:false, priv:'Rotating', last:now},
-      {ssid:'SPECTRUM-2.4G', sec:'WPA2', autoJoin:true,  lowData:false, priv:'Rotating', last:now-2*DAY},
+      {ssid:'SABLEWAVE-5G',   sec:'WPA3', autoJoin:true,  lowData:false, priv:'Rotating', last:now},
+      {ssid:'SABLEWAVE-2.4G', sec:'WPA2', autoJoin:true,  lowData:false, priv:'Rotating', last:now-2*DAY},
       {ssid:'ATT-WIFI-8821', sec:'WPA2', autoJoin:true,  lowData:false, priv:'Fixed',    last:now-9*DAY},
       {ssid:'Mom & Dad',     sec:'WPA2', autoJoin:true,  lowData:false, priv:'Rotating', last:now-16*DAY},
       {ssid:'MCO Airport Free WiFi', sec:'None', autoJoin:false, lowData:true, priv:'Rotating', last:now-34*DAY},
@@ -2981,7 +2981,7 @@ function BT(){
   if(!State.bt) State.bt={devices:[
     {n:'AirPods Pro',       type:'audio', batt:82, conn:true},
     {n:'Alex’s Apple Watch',type:'watch',batt:64, conn:true},
-    {n:'Spectrum Voice Remote',type:'remote',batt:null,conn:false},
+    {n:'Sablewave Voice Remote',type:'remote',batt:null,conn:false},
     {n:'Honda HR-V',        type:'car',   batt:null,conn:false},
     {n:'JBL Flip 6',        type:'audio', batt:35, conn:false}
   ]};
@@ -3040,7 +3040,7 @@ function btDeviceView(d){
 function CELL(){
   if(!State.cell) State.cell={
     roaming:0, dataMode:'Standard', wifiCalling:true,
-    apps:[['Safari',1.9,true],['Netflix',4.2,true],['Spectrum TV',3.1,true],['YouTube TV',2.4,true],
+    apps:[['Safari',1.9,true],['Netflix',4.2,true],['Sablewave TV',3.1,true],['YouTube TV',2.4,true],
           ['Mail',0.14,true],['App Store',1.1,true],['Maps',0.31,true],['Messages',0.08,true],['Photos',0.62,false]]
   };
   return State.cell;
@@ -3054,7 +3054,7 @@ function cellularView(){
       {label:'Cellular Data Options', value:c.dataMode, onClick:()=>nav.push(cellOptionsView())},
       {label:'Personal Hotspot', value:State.settings.hotspot?'On':'Off', onClick:()=>nav.push(hotspotView())}]});
     group(b,{header:'SIMs',rows:[
-      {label:'Primary', sub:'Spectrum Mobile · '+(noService?'No Service':'(407) 555-0142'),
+      {label:'Primary', sub:'Sablewave Mobile · '+(noService?'No Service':'(407) 555-0142'),
        rightHTML:noService?'<span class="muted" style="font-size:13px">SOS</span>':'',
        onClick:()=>nav.push(simDetailView())},
       {label:'Add eSIM', cls:'blue', onClick:()=>alertBox({title:'Set Up Cellular',
@@ -3096,10 +3096,10 @@ function simDetailView(){
     group(b,{rows:[
       {label:'Wi-Fi Calling',value:CELL().wifiCalling?'On':'Off',onClick:()=>nav.push(wifiCallingView())},
       {label:'Calls on Other Devices',value:'When Nearby',onClick:()=>toast('Simulated')},
-      {label:'Network Selection',value:'Spectrum Mobile',onClick:()=>nav.push(networkSelectView())},
+      {label:'Network Selection',value:'Sablewave Mobile',onClick:()=>nav.push(networkSelectView())},
       {label:'My Number',value:'(407) 555-0142'}]});
     group(b,{rows:[
-      {label:'Carrier',value:'Spectrum Mobile 54.1'},
+      {label:'Carrier',value:'Sablewave Mobile 54.1'},
       {label:'Carrier Services',onClick:()=>toast('Simulated')}]});
     group(b,{rows:[{label:'Remove Cellular Plan',cls:'destructive center',onClick:()=>toast('Plan removal is simulated')}]});
   }};
@@ -3109,7 +3109,7 @@ function wifiCallingView(){
     const c=CELL();
     group(b,{rows:[{label:'Wi-Fi Calling on This iPhone',toggle:()=>c.wifiCalling,onToggle:v=>{c.wifiCalling=v;save();
       if(v) island(SVG.wifi,'#30d158','Wi-Fi Calling','Enabled',1800);}}],
-      footer:'When Wi-Fi calling is available, you’ll see “Spectrum Wi-Fi” in the status bar. Emergency calls will use your emergency address.'});
+      footer:'When Wi-Fi calling is available, you’ll see “Sablewave Wi-Fi” in the status bar. Emergency calls will use your emergency address.'});
     group(b,{rows:[{label:'Update Emergency Address',onClick:()=>toast('Simulated')}]});
   }};
 }
@@ -3117,10 +3117,10 @@ function networkSelectView(){
   let auto=true;
   return {title:'Network Selection', build(b,nav){
     group(b,{rows:[{label:'Automatic',toggle:()=>auto,onToggle:v=>{auto=v;nav.refresh();}}]});
-    if(!auto) group(b,{rows:['Spectrum Mobile','Verizon','T-Mobile','AT&T'].map((n,i)=>({
+    if(!auto) group(b,{rows:['Sablewave Mobile','Verizon','T-Mobile','AT&T'].map((n,i)=>({
       label:n, chevron:false,
       rightHTML:i===0?`<div style="color:var(--sysblue)">${sf('<path d="M4.5 12.5l5 5 10-11"/>',{w:2.4,size:17})}</div>`:'',
-      onClick:()=>toast(i===0?'Already connected':'Only Spectrum Mobile works in this simulator')}))});
+      onClick:()=>toast(i===0?'Already connected':'Only Sablewave Mobile works in this simulator')}))});
   }};
 }
 function hotspotView(){
@@ -3193,7 +3193,7 @@ function vpnView(){
   }};
 }
 function notificationsView(){
-  const list=['Mail','Messages','App Store','Spectrum TV','Netflix','Calendar','Phone','Reminders','Weather'];
+  const list=['Mail','Messages','App Store','Sablewave TV','Netflix','Calendar','Phone','Reminders','Weather'];
   return {title:'Notifications', build(b,nav){
     group(b,{rows:[
       {label:'Show Previews', value:'Always', onClick:()=>nav.push(pickerView('Show Previews',['Always','When Unlocked','Never'],'Always',()=>{}))},
@@ -3254,7 +3254,7 @@ function focusView(){
   }};
 }
 function screenTimeView(){
-  const data=[['Spectrum TV',132],['Safari',96],['Netflix',74],['Mail',41],['App Store',28],['Messages',22]];
+  const data=[['Sablewave TV',132],['Safari',96],['Netflix',74],['Mail',41],['App Store',28],['Messages',22]];
   const max=Math.max(...data.map(d=>d[1]));
   return {title:'Screen Time', build(b,nav){
     const card=el('div','grp'); card.style.padding='16px';
@@ -3311,7 +3311,7 @@ function generalView(){
 function aboutView(){
   const rows=[['Name',State.settings.name],['Software Version','iOS 26.1'],['Model Name','iPhone 15 Pro'],
     ['Model Number','MTQ83LL/A'],['Serial Number','F2LX9K3QW1PZ'],['Wi-Fi Address','8A:2C:19:F0:41:DE'],
-    ['Bluetooth','8A:2C:19:F0:41:DF'],['Carrier','Spectrum Mobile 54.1'],['EID','89049032004008882600'],
+    ['Bluetooth','8A:2C:19:F0:41:DF'],['Carrier','Sablewave Mobile 54.1'],['EID','89049032004008882600'],
     ['Songs','1,204'],['Videos','88'],['Photos','7,431'],['Applications',String(homeApps().length+DOCK.length)],
     ['Capacity','256 GB'],['Available','182.4 GB']];
   return {title:'About', build(b,nav){
@@ -3450,7 +3450,7 @@ function resetOptionsView(){
     group(b,{rows:[
       {label:'Reset All Settings',cls:'blue',onClick:()=>alertBox({title:'Reset All Settings',message:'All settings including Wi-Fi, wallpaper and appearance will be restored to defaults. Your apps and mail stay.',
         buttons:[{text:'Cancel'},{text:'Reset',style:'red bold',onClick:()=>{State.settings=structuredClone(DEFAULTS.settings);save();applyAppearance();nav.popToRoot();toast('All settings reset');}}]})},
-      {label:'Reset Network Settings',cls:'blue',onClick:()=>{State.settings.wifiName='SPECTRUM-5G';State.settings.wifi=true;save();toast('Network settings reset');}},
+      {label:'Reset Network Settings',cls:'blue',onClick:()=>{State.settings.wifiName='SABLEWAVE-5G';State.settings.wifi=true;save();toast('Network settings reset');}},
       {label:'Reset Keyboard Dictionary',cls:'blue',onClick:()=>toast('Keyboard dictionary reset')},
       {label:'Reset Home Screen Layout',cls:'blue',onClick:()=>{renderHome();toast('Home Screen layout reset');}},
       {label:'Reset Location & Privacy',cls:'blue',onClick:()=>toast('Location & Privacy reset')}]});
@@ -3596,7 +3596,7 @@ function batteryView(){
       <div style="display:flex;align-items:flex-end;gap:3px;height:90px">
       ${Array.from({length:24},(_,i)=>`<div style="flex:1;border-radius:2px;background:${i>18?'var(--sysgreen)':'var(--txt2)'};height:${20+Math.abs(Math.sin(i))*70}%"></div>`).join('')}</div>`;
     b.appendChild(card);
-    const apps=[['Spectrum TV',34],['Safari',22],['Netflix',16],['Mail',9],['App Store',7],['Home & Lock Screen',6],['Messages',6]];
+    const apps=[['Sablewave TV',34],['Safari',22],['Netflix',16],['Mail',9],['App Store',7],['Home & Lock Screen',6],['Messages',6]];
     group(b,{header:'Battery Usage by App',rows:apps.map(([n,p])=>({
       label:n,value:p+'%',
       rightHTML:`<div style="width:64px;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-left:8px"><div style="width:${p*2.5}%;max-width:100%;height:100%;background:var(--sysgreen)"></div></div>`}))});
@@ -3606,7 +3606,7 @@ function privacyView(){
   return {title:'Privacy & Security', shortTitle:'Privacy', build(b,nav){
     group(b,{rows:[
       {label:'Location Services',icon:'📍',iconBg:'#0a84ff',value:'On',onClick:()=>nav.push(infoListView('Location Services','Apps',
-        ['Safari Websites — While Using','Weather — Always','Maps — While Using','Spectrum TV — While Using','Camera — Never'],'Location data is simulated.'))},
+        ['Safari Websites — While Using','Weather — Always','Maps — While Using','Sablewave TV — While Using','Camera — Never'],'Location data is simulated.'))},
       {label:'Tracking',icon:'👣',iconBg:'#0a84ff',onClick:()=>nav.push(simpleToggleView('Tracking','Allow Apps to Request to Track','tracking','Apps blocked from tracking cannot access your advertising identifier.'))},
       {label:'Contacts',icon:'👥',iconBg:'#ff9f0a',onClick:()=>toast('Simulated')},
       {label:'Photos',icon:'🌼',iconBg:'#ff9f0a',onClick:()=>toast('Simulated')},
@@ -3616,7 +3616,7 @@ function privacyView(){
       {label:'Analytics & Improvements',onClick:()=>toast('Simulated')},
       {label:'Apple Advertising',onClick:()=>toast('Simulated')},
       {label:'App Privacy Report',onClick:()=>nav.push(infoListView('App Privacy Report','Most Contacted Domains',
-        ['app-measurement.com — 41','doubleclick.net — 27','spectrum.net — 19','nflxvideo.net — 14','googleapis.com — 12'],''))}]});
+        ['app-measurement.com — 41','doubleclick.net — 27','sablewave.example — 19','nflxvideo.net — 14','googleapis.com — 12'],''))}]});
     group(b,{rows:[
       {label:'Lockdown Mode',value:'Off',onClick:()=>toast('Simulated')},
       {label:'Safety Check',onClick:()=>toast('Simulated')}]});
@@ -3640,7 +3640,7 @@ function appStoreSettingsView(){
   }};
 }
 function passwordsView(){
-  const items=[['spectrum.net','alex.rivera@icloud.example'],['netflix.com','alex.rivera@icloud.example'],
+  const items=[['sablewave.example','alex.rivera@icloud.example'],['netflix.com','alex.rivera@icloud.example'],
     ['disneyplus.com','alex.rivera'],['max.com','alex.rivera@icloud.example'],['peacocktv.com','alex.rivera'],
     ['paramountplus.com','alex.rivera@icloud.example']];
   return {title:'Passwords', build(b,nav){
@@ -3714,20 +3714,20 @@ function reboot(){
    APP STORE
    ========================================================================= */
 const BI = {  /* brand-ish icon art (stylized, drawn with CSS/SVG) */
-  spectrum:`<svg viewBox="0 0 100 100" style="width:100%;height:100%;display:block">
-      <defs><linearGradient id="spg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0069c8"/><stop offset="1" stop-color="#00274d"/></linearGradient></defs>
+  sablewave:`<svg viewBox="0 0 100 100" style="width:100%;height:100%;display:block">
+      <defs><linearGradient id="spg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1a9aa2"/><stop offset="1" stop-color="#062a31"/></linearGradient></defs>
       <rect width="100" height="100" fill="url(#spg)"/>
       <path d="M-4 72C22 40 60 30 106 36" stroke="#fff" stroke-width="8" fill="none" stroke-linecap="round"/>
-      <path d="M-4 88C26 50 66 40 106 48" stroke="#3fb4ff" stroke-width="7" fill="none" stroke-linecap="round" opacity=".85"/>
+      <path d="M-4 88C26 50 66 40 106 48" stroke="#63e0dc" stroke-width="7" fill="none" stroke-linecap="round" opacity=".85"/>
       <text x="50" y="34" text-anchor="middle" fill="#fff" font-size="15" font-weight="700"
-        font-family="-apple-system,Inter,Segoe UI,Arial" letter-spacing="-.6">Spectrum</text></svg>`,
-  myspectrum:`<svg viewBox="0 0 100 100" style="width:100%;height:100%;display:block">
-      <defs><linearGradient id="msg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0f8bff"/><stop offset="1" stop-color="#003057"/></linearGradient></defs>
+        font-family="-apple-system,Inter,Segoe UI,Arial" letter-spacing="-.6">Sablewave</text></svg>`,
+  mysablewave:`<svg viewBox="0 0 100 100" style="width:100%;height:100%;display:block">
+      <defs><linearGradient id="msg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2fc4c4"/><stop offset="1" stop-color="#0a3b43"/></linearGradient></defs>
       <rect width="100" height="100" fill="url(#msg)"/>
       <text x="50" y="42" text-anchor="middle" fill="#fff" font-size="17" font-weight="600"
         font-family="-apple-system,Inter,Segoe UI,Arial" opacity=".92">My</text>
       <text x="50" y="60" text-anchor="middle" fill="#fff" font-size="14" font-weight="800"
-        font-family="-apple-system,Inter,Segoe UI,Arial" letter-spacing="-.5">Spectrum</text>
+        font-family="-apple-system,Inter,Segoe UI,Arial" letter-spacing="-.5">Sablewave</text>
       <path d="M18 74C36 64 66 62 84 70" stroke="#fff" stroke-width="6" fill="none" stroke-linecap="round"/></svg>`,
   netflix:`<div style="width:100%;height:100%;background:#000;display:grid;place-items:center">
       <svg viewBox="0 0 40 60" style="height:74%"><defs><linearGradient id="nfg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e50914"/><stop offset="1" stop-color="#8b0000"/></linearGradient></defs>
@@ -3759,18 +3759,18 @@ const BI = {  /* brand-ish icon art (stylized, drawn with CSS/SVG) */
       <div style="font-size:11px;font-weight:700;letter-spacing:-.2px">discovery<span style="color:#4aa8ff">+</span></div></div>`
 };
 const STORE=[
-  {id:'spectrumtv',name:'Spectrum TV',dev:'Charter Communications',sub:'Live TV, On Demand & DVR',cat:'Entertainment',
-   icon:BI.spectrum,bg:'linear-gradient(160deg,#0053a0,#00285a)',rating:4.4,ratings:'1.2M',age:'12+',size:'214.7 MB',version:'9.4.0',
+  {id:'sablewavetv',name:'Sablewave TV',dev:'Sablewave Communications',sub:'Live TV, On Demand & DVR',cat:'Entertainment',
+   icon:BI.sablewave,bg:'linear-gradient(160deg,#12717a,#072b32)',rating:4.4,ratings:'1.2M',age:'12+',size:'214.7 MB',version:'9.4.0',
    rank:1,editorial:'Your whole channel lineup, wherever you are.',
-   colors:['#003057','#0072ce'],
-   desc:`Watch live TV and thousands of On Demand shows and movies included with your Spectrum TV subscription — at home or on the go.\n\n• Stream up to 300 live channels at home\n• Browse a full channel guide and set DVR recordings remotely\n• Pick up where you left off across devices\n• Manage parental controls and favorites\n\nA Spectrum TV subscription is required. Channel availability varies by plan and location.`,
+   colors:['#0a3b43','#17a2a8'],
+   desc:`Watch live TV and thousands of On Demand shows and movies included with your Sablewave TV subscription — at home or on the go.\n\n• Stream up to 300 live channels at home\n• Browse a full channel guide and set DVR recordings remotely\n• Pick up where you left off across devices\n• Manage parental controls and favorites\n\nA Sablewave TV subscription is required. Channel availability varies by plan and location.`,
    whatsnew:`• Faster guide loading and smoother channel surfing\n• Improved DVR conflict handling\n• Bug fixes and performance improvements`,
    shots:['Live Guide','On Demand','My Library','DVR']},
-  {id:'myspectrum',name:'My Spectrum',dev:'Charter Communications',sub:'Account, billing & support',cat:'Utilities',
-   icon:BI.myspectrum,bg:'linear-gradient(160deg,#003057,#0072ce)',rating:4.7,ratings:'2.4M',age:'4+',size:'132.1 MB',version:'12.1.3',
+  {id:'mysablewave',name:'My Sablewave',dev:'Sablewave Communications',sub:'Account, billing & support',cat:'Utilities',
+   icon:BI.mysablewave,bg:'linear-gradient(160deg,#0a3b43,#17a2a8)',rating:4.7,ratings:'2.4M',age:'4+',size:'132.1 MB',version:'12.1.3',
    rank:2,editorial:'Pay the bill, fix the Wi-Fi, skip the phone call.',
-   colors:['#0072ce','#003057'],
-   desc:`Manage every part of your Spectrum account from one place.\n\n• View and pay your bill, set up Auto Pay and paperless billing\n• Troubleshoot your Internet, TV and Voice services\n• Restart your equipment and check for outages in your area\n• Manage your WiFi network name, password and connected devices\n• Chat with support 24/7`,
+   colors:['#17a2a8','#0a3b43'],
+   desc:`Manage every part of your Sablewave account from one place.\n\n• View and pay your bill, set up Auto Pay and paperless billing\n• Troubleshoot your Internet, TV and Voice services\n• Restart your equipment and check for outages in your area\n• Manage your WiFi network name, password and connected devices\n• Chat with support 24/7`,
    whatsnew:`• Redesigned billing summary\n• Faster equipment restarts\n• Accessibility improvements throughout`,
    shots:['Billing','Services','WiFi','Support']},
   {id:'netflix',name:'Netflix',dev:'Netflix, Inc.',sub:'Series, films and games',cat:'Entertainment',
@@ -4031,9 +4031,9 @@ function storeTodayView(){
       b.appendChild(el('div','as-date',d.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'}).toUpperCase()));
       b.appendChild(el('div','as-day','Today'));
 
-      const feature=byId('spectrumtv');
+      const feature=byId('sablewavetv');
       b.appendChild(heroCard({kicker:'OUR PICK',title:'Your whole lineup,\nin your pocket',app:feature,
-        art:`linear-gradient(150deg,#0072ce,#00285a)`,nav}));
+        art:`linear-gradient(150deg,#17a2a8,#072b32)`,nav}));
 
       const story=el('div','as-hero');
       story.innerHTML=`<div class="art" style="background:linear-gradient(160deg,#3b1f9e,#0d1a4a)">
@@ -4052,8 +4052,8 @@ function storeTodayView(){
       g.appendChild(col);
       b.appendChild(g);
 
-      b.appendChild(heroCard({kicker:'FROM THE EDITORS',title:'Manage your account\nin two taps',app:byId('myspectrum'),
-        art:'linear-gradient(150deg,#0072ce,#001c3a)',nav}));
+      b.appendChild(heroCard({kicker:'FROM THE EDITORS',title:'Manage your account\nin two taps',app:byId('mysablewave'),
+        art:'linear-gradient(150deg,#17a2a8,#05222a)',nav}));
 
       const foot=el('div','pad');
       foot.style.cssText='text-align:center;color:var(--txt2);font-size:12px;padding:30px 30px 10px';
@@ -4180,16 +4180,16 @@ function storeStoryView(){
     const p=el('div','pad');
     p.style.cssText='font-size:16px;line-height:1.6;padding:18px 20px;color:var(--txt)';
     p.innerHTML=`Cable used to mean one bill and 300 channels you never watched. Now the lineup is yours to assemble — and the apps below are the ones worth a home-screen slot.<br><br>
-      Start with <b>Spectrum TV</b> if you already have service: your channel guide, DVR and On Demand library come along for free.
+      Start with <b>Sablewave TV</b> if you already have service: your channel guide, DVR and On Demand library come along for free.
       Then layer on the originals. <b>Max</b> and <b>Netflix</b> cover prestige drama, <b>Disney+</b> handles the family, and <b>Peacock</b> and <b>Paramount+</b> carry live sports on the weekends.<br><br>
       Our advice: install two, rotate quarterly, and cancel without guilt.`;
     b.appendChild(p);
     b.appendChild(sectionHeader('The Lineup'));
-    ['spectrumtv','max','netflix','disney','peacock','paramount'].map(byId).forEach(a=>b.appendChild(storeRow(a,nav)));
+    ['sablewavetv','max','netflix','disney','peacock','paramount'].map(byId).forEach(a=>b.appendChild(storeRow(a,nav)));
   }};
 }
 function storeSearchView(){
-  const TRENDING=['spectrum tv','netflix','free movies','live sports','hbo max','peacock','disney plus','paramount plus'];
+  const TRENDING=['sablewave tv','netflix','free movies','live sports','hbo max','peacock','disney plus','paramount plus'];
   return {title:'Search', largeTitle:true, shortTitle:'Search', build(b,nav,view){
     const sfield=el('div','searchfield',`${SVG.search}<input placeholder="Games, Apps, Stories and More" id="storeSearch">`);
     b.appendChild(sfield);
@@ -4212,7 +4212,7 @@ function storeSearchView(){
       }
       const hits=STORE.filter(a=>(a.name+' '+a.dev+' '+a.sub+' '+a.cat).toLowerCase().includes(q));
       if(!hits.length){
-        res.appendChild(h(`<div class="empty"><h3>No Results for “${esc(q)}”</h3><p>This simulator only carries Spectrum and the major streaming apps.</p></div>`));
+        res.appendChild(h(`<div class="empty"><h3>No Results for “${esc(q)}”</h3><p>This simulator only carries Sablewave and the major streaming apps.</p></div>`));
         return;
       }
       hits.forEach(a=>{
@@ -4406,7 +4406,7 @@ const ENGINES={
 };
 const FAVORITES=[
   {n:'Google',u:'https://www.google.com',c:'#fff',t:'<span style="color:#4285f4;font-weight:800">G</span>'},
-  {n:'Spectrum',u:'https://www.spectrum.net',c:'#003057',t:'<span style="color:#fff;font-size:11px;font-weight:700">Spectrum</span>'},
+  {n:'Sablewave',u:'https://www.sablewave.example',c:'#0a3b43',t:'<span style="color:#fff;font-size:11px;font-weight:700">Sablewave</span>'},
   {n:'YouTube',u:'https://www.youtube.com',c:'#ff0000',t:'<span style="color:#fff">▶</span>'},
   {n:'Netflix',u:'https://www.netflix.com',c:'#000',t:'<span style="color:#e50914;font-weight:800">N</span>'},
   {n:'Wikipedia',u:'https://en.wikipedia.org',c:'#fff',t:'<span style="color:#000;font-family:Georgia,serif">W</span>'},
@@ -4779,8 +4779,8 @@ const HOURS=h=>h*3600e3, DAYS=d=>d*864e5;
 function seedInbox(acct){
   const me=acct.address, now=Date.now();
   const base=[
-    {from:{n:'Spectrum',e:'no-reply@spectrum.net'},subject:'Your July statement is ready',date:now-HOURS(2),
-     body:`Hi Alex,\n\nYour Spectrum statement for July is now available.\n\nAccount ending: 4417\nAmount due: $189.98\nDue date: August 12\n\nYour bill includes Spectrum Internet Ultra, Spectrum TV Select and Spectrum Mobile (2 lines). You are enrolled in Auto Pay — no action is needed.\n\nView your full statement in the My Spectrum app.\n\nThank you,\nSpectrum Billing`,
+    {from:{n:'Sablewave',e:'no-reply@sablewave.example'},subject:'Your July statement is ready',date:now-HOURS(2),
+     body:`Hi Alex,\n\nYour Sablewave statement for July is now available.\n\nAccount ending: 4417\nAmount due: $189.98\nDue date: August 12\n\nYour bill includes Sablewave Internet Ultra, Sablewave TV Select and Sablewave Mobile (2 lines). You are enrolled in Auto Pay — no action is needed.\n\nView your full statement in the My Sablewave app.\n\nThank you,\nSablewave Billing`,
      attachments:[{n:'July_Statement.pdf',s:'214 KB'}]},
     {from:{n:'Netflix',e:'info@mailer.netflix.com'},subject:'New device signed in to your account',date:now-HOURS(6),
      body:`We noticed a new sign-in to your Netflix account.\n\nDevice: iPhone 15 Pro\nLocation: Orlando, FL, US\nTime: Today at 3:14 PM\n\nIf this was you, no action is needed. If you don't recognize this activity, change your password immediately.\n\n— The Netflix Team`},
@@ -4789,11 +4789,11 @@ function seedInbox(acct){
     {from:{n:'Max',e:'news@mail.max.com'},subject:'Your weekly picks are here',date:now-DAYS(1)-HOURS(3),
      body:`Because you watched documentaries, we think you'll like:\n\n1. A four-part investigative series\n2. Sunday night's finale — no spoilers\n3. Two classic films just added\n\nStream them all in the Max app.`},
     {from:{n:'Apple',e:'no_reply@email.apple.com'},subject:'Your receipt from Apple',date:now-DAYS(2),
-     body:`APPLE RECEIPT\n\nORDER ID: MTQ8L2K9\nDOCUMENT NO.: 1620394857\n\niCloud+ with 200 GB Storage (Monthly)\nRenews Aug 1 — $2.99\n\nSpectrum TV Premium (In-App)\nMonthly — $12.99\n\nTOTAL: $15.98\n\nReport a problem in the App Store.`,
+     body:`APPLE RECEIPT\n\nORDER ID: MTQ8L2K9\nDOCUMENT NO.: 1620394857\n\niCloud+ with 200 GB Storage (Monthly)\nRenews Aug 1 — $2.99\n\nSablewave TV Premium (In-App)\nMonthly — $12.99\n\nTOTAL: $15.98\n\nReport a problem in the App Store.`,
      attachments:[{n:'Receipt.pdf',s:'88 KB'}]},
     {from:{n:'Peacock',e:'hello@mail.peacocktv.com'},subject:'Sunday Night Football starts this week',date:now-DAYS(2)-HOURS(5),
      body:`Kickoff is back. Stream every Sunday Night Football game live, plus Premier League Saturday mornings and the full Peacock library.\n\nYour plan renews on the 19th.`},
-    {from:{n:'Charter Support',e:'support@spectrum.net'},subject:'Scheduled maintenance in your area',date:now-DAYS(3),
+    {from:{n:'Sablewave Support',e:'support@sablewave.example'},subject:'Scheduled maintenance in your area',date:now-DAYS(3),
      body:`We're performing network maintenance near your service address on Thursday between 1:00 AM and 5:00 AM.\n\nYou may experience brief interruptions to Internet, TV and Voice service during this window. No action is required.\n\nWe appreciate your patience.`},
     {from:{n:'Paramount+',e:'no-reply@paramountplus.com'},subject:'Your subscription renews soon',date:now-DAYS(4),
      body:`Your Paramount+ with SHOWTIME plan renews on the 19th for $12.99/month.\n\nManage or cancel anytime from Settings > Subscriptions.`},
@@ -4806,7 +4806,7 @@ function seedInbox(acct){
   msgs.push(mkMsg({from:{n:acct.name,e:me},to:'nina.okafor@example.com',subject:'Re: Sunday dinner?',box:'sent',read:true,
     date:now-DAYS(5)+HOURS(2),body:`I'll be there around 4. I'll bring the projector and some drinks.\n\n${State.settings.mailSignature}`}));
   msgs.push(mkMsg({from:{n:acct.name,e:me},to:'',subject:'Cancel cable box',box:'drafts',read:true,date:now-DAYS(1),
-    body:`Reminder to myself: call Spectrum about returning the second cable box now that everything is on the app.`}));
+    body:`Reminder to myself: call Sablewave about returning the second cable box now that everything is on the app.`}));
   msgs.push(mkMsg({from:{n:'Deals Weekly',e:'promo@shopnotify.biz'},to:me,subject:'You have been selected!!',box:'junk',read:false,
     date:now-DAYS(2),body:`CONGRATULATIONS! Claim your reward now. This is obviously junk mail.`}));
   return msgs;
@@ -5076,7 +5076,7 @@ function composeMail({reply,forward,draft,account,all,subject,body,to,onSent}={}
       d.appendChild(i);
       if(key==='to'){ const p=el('button','','＋'); p.style.color='var(--sysblue)';
         p.onclick=()=>actionSheet('Suggested Contacts',
-          ['nina.okafor@example.com','support@spectrum.net','alex.work@outlook.example','billing@charter.net'].map(e=>({
+          ['nina.okafor@example.com','support@sablewave.example','alex.work@outlook.example','billing@sablewave.example'].map(e=>({
             text:e,onClick:()=>{ i.value=i.value? i.value+', '+e : e; f.to=i.value; }})));
         d.appendChild(p); }
       fields.appendChild(d); return i;
@@ -5212,8 +5212,8 @@ const KNOWN_HOSTS={
   'aol.com':{i:'imap.aol.com',s:'smtp.aol.com'},
   'outlook.com':{i:'outlook.office365.com',s:'smtp-mail.outlook.com'},
   'hotmail.com':{i:'outlook.office365.com',s:'smtp-mail.outlook.com'},
-  'charter.net':{i:'mobile.charter.net',s:'mobile.charter.net'},
-  'spectrum.net':{i:'mobile.charter.net',s:'mobile.charter.net'},
+  'sablewave.example':{i:'mobile.sablewave.example',s:'mobile.sablewave.example'},
+  'sablewave.example':{i:'mobile.sablewave.example',s:'mobile.sablewave.example'},
   'twc.com':{i:'mail.twc.com',s:'mail.twc.com'},
   'roadrunner.com':{i:'mail.twc.com',s:'mail.twc.com'}
 };
@@ -5652,23 +5652,23 @@ const CHANNELS=[['2','WESH','News at 6'],['4','WKMG','Local News'],['5','WFTV','
   ['31','AMC','Movie: Undertow'],['33','FX','Series Marathon'],['44','HGTV','Home Reno'],
   ['48','Food','Chopped'],['52','Discovery','Deadliest Catch'],['61','CNN','The Lead'],
   ['70','Nick','SpongeBob'],['88','HBO','Sunday Premiere'],['91','Paramount','NFL on CBS']];
-function spectrumShell(app,win){
-  const v=el('div','st-app'); v.style.background='#00142b';
+function sablewaveShell(app,win){
+  const v=el('div','st-app'); v.style.background='#04191f';
   const hours=['7:00 PM','7:30 PM','8:00 PM','8:30 PM'];
   v.innerHTML=`
-    <div class="st-nav" style="background:linear-gradient(to bottom,#003057,rgba(0,20,43,0))">
+    <div class="st-nav" style="background:linear-gradient(to bottom,#0a3b43,rgba(0,20,43,0))">
       ${['Guide','On Demand','My Library','Search','Account'].map((t,i)=>
       `<span style="opacity:${i?'.75':'1'};font-weight:${i?400:700}">${t}</span>`).join('')}</div>
     <div style="padding:0 14px 8px;display:flex;gap:8px;overflow-x:auto">
       ${['All Channels','Favorites','Sports','Movies','Kids','News'].map((c,i)=>
-      `<span style="flex:none;background:${i?'rgba(255,255,255,.12)':'#0072ce'};color:#fff;padding:7px 14px;border-radius:16px;font-size:12px">${c}</span>`).join('')}</div>
+      `<span style="flex:none;background:${i?'rgba(255,255,255,.12)':'#17a2a8'};color:#fff;padding:7px 14px;border-radius:16px;font-size:12px">${c}</span>`).join('')}</div>
     <div style="display:flex;padding:6px 14px 4px;color:#9fb6cc;font-size:11px">
       <div style="width:70px;flex:none">CHANNEL</div>${hours.map(x=>`<div style="flex:1">${x}</div>`).join('')}</div>
     <div id="guide"></div>
     <div class="st-row"><h4 style="color:#fff">Recommended On Demand</h4><div class="st-tiles">${tiles(app,'ondemand',8)}</div></div>
     <div class="st-row"><h4 style="color:#fff">Your DVR — 3 recordings</h4><div class="st-tiles">${tiles(app,'dvr',5)}</div></div>
     <div style="padding:24px 20px 90px;text-align:center;color:#6b87a4;font-size:12px">
-      Simulated Spectrum TV client · guide data is placeholder</div>
+      Simulated Sablewave TV client · guide data is placeholder</div>
     <div class="st-tabbar">${[['📺','Guide'],['▶','On Demand'],['📚','Library'],['🔍','Search']].map((t,i)=>
       `<button class="${i?'':'on'}"><span style="font-size:17px">${t[0]}</span>${t[1]}</button>`).join('')}</div>`;
   const g=$('#guide',v);
@@ -5681,23 +5681,23 @@ function spectrumShell(app,win){
         ${i===0?'outline:2px solid #0ea5ff':''}">${esc(c[2])}</div>
       <div style="flex:1;background:rgba(255,255,255,.07);border-radius:5px;padding:8px;color:#cfe2f5;font-size:12px">${esc(tileTitle(c[1],1))}</div>
       <div style="flex:1;background:rgba(255,255,255,.07);border-radius:5px;padding:8px;color:#cfe2f5;font-size:12px">${esc(tileTitle(c[1],2))}</div>`;
-    row.onclick=()=>island('📺','#0072ce','Spectrum TV','Tuning to '+c[1]+'…',2400);
+    row.onclick=()=>island('📺','#17a2a8','Sablewave TV','Tuning to '+c[1]+'…',2400);
     g.appendChild(row);
   });
-  v.querySelectorAll('.st-tile').forEach(t=>t.onclick=()=>island('▶','#0072ce','Spectrum TV','Starting playback…',2200));
+  v.querySelectorAll('.st-tile').forEach(t=>t.onclick=()=>island('▶','#17a2a8','Sablewave TV','Starting playback…',2200));
   win.appendChild(v);
 }
-function mySpectrumShell(app,win){
+function mySablewaveShell(app,win){
   const v=el('div','st-app'); v.style.background='#f2f4f7'; v.style.color='#111';
   v.innerHTML=`
-    <div style="background:linear-gradient(160deg,#003057,#0072ce);padding:64px 18px 22px;color:#fff">
+    <div style="background:linear-gradient(160deg,#0a3b43,#17a2a8);padding:64px 18px 22px;color:#fff">
       <div style="font-size:13px;opacity:.85">Welcome back,</div>
       <div style="font-size:24px;font-weight:700">Alex</div>
       <div style="margin-top:16px;background:rgba(255,255,255,.14);border-radius:14px;padding:14px">
         <div style="font-size:12px;opacity:.85">Account ending 4417 · Auto Pay on</div>
         <div style="font-size:30px;font-weight:800;margin:4px 0">$189.98</div>
         <div style="font-size:12px;opacity:.85">Due August 12</div>
-        <button style="margin-top:12px;background:#fff;color:#003057;font-weight:700;border-radius:22px;padding:11px 0;width:100%">Pay Now</button>
+        <button style="margin-top:12px;background:#fff;color:#0a3b43;font-weight:700;border-radius:22px;padding:11px 0;width:100%">Pay Now</button>
       </div></div>
     <div style="padding:16px">
       <div style="font-weight:700;margin-bottom:8px">Your Services</div>
@@ -5705,20 +5705,20 @@ function mySpectrumShell(app,win){
       <div style="font-weight:700;margin:18px 0 8px">Quick Actions</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px" id="qa"></div>
       <div style="text-align:center;color:#7d8794;font-size:12px;padding:28px 10px 90px">
-        Simulated My Spectrum client · account data is fictional</div>
+        Simulated My Sablewave client · account data is fictional</div>
     </div>
     <div class="st-tabbar" style="background:#fff;border-top:1px solid #dfe3e8">
       ${[['🏠','Home'],['💳','Billing'],['📶','Services'],['💬','Support']].map((t,i)=>
-      `<button class="${i?'':'on'}" style="color:${i?'#8b95a1':'#0072ce'}"><span style="font-size:17px">${t[0]}</span>${t[1]}</button>`).join('')}</div>`;
+      `<button class="${i?'':'on'}" style="color:${i?'#8b95a1':'#17a2a8'}"><span style="font-size:17px">${t[0]}</span>${t[1]}</button>`).join('')}</div>`;
   const svc=$('#svc',v);
-  [['Internet Ultra','Connected · 512 Mbps','#30d158'],['Spectrum TV Select','215 channels','#0072ce'],
+  [['Internet Ultra','Connected · 512 Mbps','#30d158'],['Sablewave TV Select','215 channels','#17a2a8'],
    ['Mobile — 2 lines','Unlimited data','#5e5ce6'],['Voice','Active','#8e8e93']].forEach(s=>{
     const d=el('div');
     d.style.cssText='background:#fff;border-radius:12px;padding:14px;margin-bottom:8px;display:flex;gap:12px;align-items:center;box-shadow:0 1px 3px rgba(0,0,0,.08)';
     d.innerHTML=`<div style="width:10px;height:10px;border-radius:50%;background:${s[2]}"></div>
       <div style="flex:1"><div style="font-weight:600;font-size:15px">${s[0]}</div>
       <div style="font-size:13px;color:#6b7684">${s[1]}</div></div><div style="color:#9aa4b0">›</div>`;
-    d.onclick=()=>island('📶','#0072ce','My Spectrum',s[0],2000);
+    d.onclick=()=>island('📶','#17a2a8','My Sablewave',s[0],2000);
     svc.appendChild(d);
   });
   const qa=$('#qa',v);
@@ -5727,9 +5727,9 @@ function mySpectrumShell(app,win){
     d.style.cssText='background:#fff;border-radius:12px;padding:16px 12px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.08)';
     d.innerHTML=`<div style="font-size:22px">${a[0]}</div><div style="font-size:13px;margin-top:6px;font-weight:500">${a[1]}</div>`;
     d.onclick=()=>{
-      if(a[1]==='Restart Equipment') island('🔄','#0072ce','My Spectrum','Restarting router… ~5 min',3000);
+      if(a[1]==='Restart Equipment') island('🔄','#17a2a8','My Sablewave','Restarting router… ~5 min',3000);
       else if(a[1]==='View Bill'){ goHome(); setTimeout(()=>openApp('mail'),300); }
-      else island('💬','#0072ce','My Spectrum',a[1],2000);
+      else island('💬','#17a2a8','My Sablewave',a[1],2000);
     };
     qa.appendChild(d);
   });
@@ -5741,8 +5741,8 @@ function registerStoreApps(){
     version:a.version, size:a.size, darkStatus:true,
     mount(win){
       win.style.background='#000';
-      if(a.id==='spectrumtv') spectrumShell(a,win);
-      else if(a.id==='myspectrum') mySpectrumShell(a,win);
+      if(a.id==='sablewavetv') sablewaveShell(a,win);
+      else if(a.id==='mysablewave') mySablewaveShell(a,win);
       else if(a.game) gameShell(a,win);
       else streamShell(a,win);
     }
@@ -6288,7 +6288,7 @@ function gameShell(app,win){
 const CONTACTS=[
   {first:'Nina',last:'Okafor',fav:true,phones:[['mobile','(407) 555-0118'],['home','(407) 555-0192']],email:'nina.okafor@example.com',note:'Sunday dinner at 4'},
   {first:'Jordan',last:'Reyes',fav:true,phones:[['iPhone','(407) 555-0143']],email:'jordan@example.com'},
-  {first:'Spectrum',last:'Support',org:'Charter Communications',fav:true,phones:[['main','(855) 707-7328'],['billing','(833) 267-6094']]},
+  {first:'Sablewave',last:'Support',org:'Sablewave Communications',fav:true,phones:[['main','(855) 555-0100'],['billing','(833) 555-0188']]},
   {first:'Dad',last:'',nick:'Dad',fav:true,phones:[['mobile','(407) 555-0177']],email:'ray.rivera@example.com'},
   {first:'Alicia',last:'Nunez',phones:[['mobile','(321) 555-0164']],email:'alicia.n@example.com'},
   {first:'Ben',last:'Carter',phones:[['work','(407) 555-0136']]},
@@ -6309,14 +6309,14 @@ function defaultRecents(){
   return [
     {who:'Nina Okafor',        type:'missed',   label:'mobile', at:now-14*M},
     {who:'Jordan Reyes',   type:'outgoing', label:'iPhone', at:now-92*M, dur:'4:12'},
-    {who:'Spectrum Support',type:'incoming',label:'main',   at:now-5*60*M, dur:'11:38'},
+    {who:'Sablewave Support',type:'incoming',label:'main',   at:now-5*60*M, dur:'11:38'},
     {who:'(407) 555-0164', type:'outgoing', label:'mobile', at:now-8*60*M, dur:'0:44'},
     {who:'Nina Okafor',        type:'incoming', label:'mobile', at:now-26*60*M, dur:'19:02'},
     {who:'Unknown',        type:'missed',   label:'',       at:now-31*60*M},
     {who:'Dad',            type:'outgoing', label:'mobile', at:now-2*1440*M, dur:'2:35'},
     {who:'Pizza Roma',     type:'outgoing', label:'main',   at:now-3*1440*M, dur:'1:07'},
     {who:'Hannah Kim',     type:'incoming', label:'iPhone', at:now-4*1440*M, dur:'8:20'},
-    {who:'(855) 707-7328', type:'missed',   label:'',       at:now-6*1440*M}
+    {who:'(855) 555-0100', type:'missed',   label:'',       at:now-6*1440*M}
   ];
 }
 function defaultVoicemails(){
@@ -6324,8 +6324,8 @@ function defaultVoicemails(){
   return [
     {who:'Nina Okafor',at:now-14*M,dur:'0:24',unheard:true,
      text:'Hey, it’s Nina. Just checking that you’re still coming Sunday — call me back when you get a minute.'},
-    {who:'Spectrum Support',at:now-2*1440*M,dur:'0:41',unheard:true,
-     text:'This is a courtesy call from Spectrum regarding scheduled maintenance in your area on Thursday between 1 and 5 AM. No action is needed.'},
+    {who:'Sablewave Support',at:now-2*1440*M,dur:'0:41',unheard:true,
+     text:'This is a courtesy call from Sablewave regarding scheduled maintenance in your area on Thursday between 1 and 5 AM. No action is needed.'},
     {who:'Dr. Whitfield',at:now-9*1440*M,dur:'0:18',unheard:false,
      text:'Hello, this is Orlando Family Medicine confirming your appointment next Tuesday at 10:15. Please call if you need to reschedule.'}
   ];
@@ -6685,7 +6685,7 @@ function voicemailView(){
 
 function defaultThreads(){ return [
   {n:'Nina',msgs:[['in','Call me when you get a chance 💙',1],['out','Just got out of work — calling now',0]]},
-  {n:'Spectrum',msgs:[['in','Your appointment is confirmed for Thu 8–10 AM. Reply C to cancel.',1]]},
+  {n:'Sablewave',msgs:[['in','Your appointment is confirmed for Thu 8–10 AM. Reply C to cancel.',1]]},
   {n:'Jordan',msgs:[['in','you get Max working on the tv?',1],['out','yeah installed it on my phone too',0],['in','clutch. game night sunday?',1]]},
   {n:'Delivery',msgs:[['in','Your package was delivered to the front door.',1]]}
 ];}
@@ -7167,7 +7167,7 @@ function timerView(){
 defineApp({id:'notes',name:'Notes',bg:'linear-gradient(180deg,#fff2b8,#ffd60a)',
   glyph:'<div style="font-size:32px">📝</div>',
   mount(win,inst){
-    if(!State.notes) State.notes=[{id:1,t:'Streaming plan',b:'Streaming plan\n\nKeep: Spectrum TV (free with service), Max, Netflix\nRotate: Peacock during football, Paramount+ for CBS\nCancel after the season ends.',d:Date.now()-864e5}];
+    if(!State.notes) State.notes=[{id:1,t:'Streaming plan',b:'Streaming plan\n\nKeep: Sablewave TV (free with service), Max, Netflix\nRotate: Peacock during football, Paramount+ for CBS\nCancel after the season ends.',d:Date.now()-864e5}];
     const nav=new Nav(win); inst.nav=nav;
     nav.setRoot(notesListView(nav));
   }});
@@ -7345,7 +7345,7 @@ function WAL(){
     cards:[
       {id:'applecard',kind:'card',name:'Apple Card',last:'4417',bg:'linear-gradient(150deg,#f6f6f8,#d9d9de)',fg:'#111',
        balance:284.19,limit:2500,daily:12.47,
-       tx:[['Spectrum','Jul 29',189.98,2],['Pizza Roma','Jul 28',24.60,3],['App Store','Jul 27',12.99,3],
+       tx:[['Sablewave','Jul 29',189.98,2],['Pizza Roma','Jul 28',24.60,3],['App Store','Jul 27',12.99,3],
            ['Shell Fuel','Jul 26',48.12,2],['Payment — Thank You','Jul 22',-150.00,0]]},
       {id:'visa',kind:'card',name:'Visa',last:'0092',bg:'linear-gradient(150deg,#1b3fa0,#0b2263)',fg:'#fff',
        balance:null,
@@ -7358,7 +7358,7 @@ function WAL(){
        from:'MCO',to:'JFK',gate:'C14',seat:'12A',flight:'AA 1284',boards:'6:40 PM',date:'Aug 3'},
       {id:'ticket',kind:'event',name:'Concert Ticket',bg:'linear-gradient(150deg,#bf5af2,#4a1063)',fg:'#fff',
        event:'Midnight Static',venue:'Amway Center',section:'104',row:'F',seat:'12',date:'Aug 14 · 8:00 PM'},
-      {id:'loyalty',kind:'loyalty',name:'Spectrum Rewards',bg:'linear-gradient(150deg,#0072ce,#003057)',fg:'#fff',
+      {id:'loyalty',kind:'loyalty',name:'Sablewave Rewards',bg:'linear-gradient(150deg,#17a2a8,#0a3b43)',fg:'#fff',
        points:2480,member:'•••• 4417'}
     ]
   };
@@ -7671,14 +7671,14 @@ const Sim={
     setNetwork('offline');
     this.log('Scenario: no internet connection');
     goHome();
-    setTimeout(()=>{ openApp('safari'); setTimeout(()=>safariGo('spectrum.net'),450); },350);
+    setTimeout(()=>{ openApp('safari'); setTimeout(()=>safariGo('sablewave.example'),450); },350);
     renderPanel();
   },
   newMail(){
     const m=ML(), a=m.accounts[0];
     if(!a) return this.log('No mail account — add one first');
     const samples=[
-      {n:'Spectrum',e:'no-reply@spectrum.net',s:'Your payment was received',b:'Thanks! We received your payment of $189.98. Your next statement will be available on the 12th.'},
+      {n:'Sablewave',e:'no-reply@sablewave.example',s:'Your payment was received',b:'Thanks! We received your payment of $189.98. Your next statement will be available on the 12th.'},
       {n:'Max',e:'news@mail.max.com',s:'Your show is back tonight',b:'The new season starts streaming at 9/8c. Get caught up with the recap in the app.'},
       {n:'Jordan Reyes',e:'jordan@example.com',s:'Game night Sunday?',b:'Bringing the projector again. Want me to grab food on the way over?'},
       {n:'Apple',e:'no_reply@email.apple.com',s:'Your subscription renews tomorrow',b:'iCloud+ with 200 GB Storage renews tomorrow for $2.99.'}
@@ -7704,7 +7704,7 @@ const Sim={
   },
   openMessages(){ openApp('messages'); this.log('Opened Messages'); },
   verify(){
-    const sender=(State.otp&&State.otp.sender)||'Spectrum';
+    const sender=(State.otp&&State.otp.sender)||'Sablewave';
     this.log('Opened optional verify form');
     verificationSheet({sender});
   },
@@ -7752,7 +7752,7 @@ function renderPanel(){
     <h4>Calls</h4>
     <div class="pbtns">
       <button class="pbtn green wide" data-a="ring">📞 Incoming call — Nina</button>
-      <button class="pbtn" data-a="ringspectrum">Call: Spectrum</button>
+      <button class="pbtn" data-a="ringsablewave">Call: Sablewave</button>
       <button class="pbtn" data-a="answer">Answer</button>
       <button class="pbtn red wide" data-a="end">End call${Call.state==='active'?' · '+callDuration():''}</button>
     </div>
@@ -7809,7 +7809,7 @@ function renderPanel(){
   p.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{
     const a=b.dataset.a;
     ({lock:()=>Sim.lock(), home:()=>{goHome();Sim.log('Home');}, reboot:()=>Sim.reboot(),
-      ring:()=>Sim.ring('Nina Okafor'), ringspectrum:()=>Sim.ring('Spectrum Support'), answer:()=>Sim.answer(), end:()=>Sim.end(),
+      ring:()=>Sim.ring('Nina Okafor'), ringsablewave:()=>Sim.ring('Sablewave Support'), answer:()=>Sim.answer(), end:()=>Sim.end(),
       cantconnect:()=>Sim.cantConnect(), newmail:()=>Sim.newMail(), addemail:()=>Sim.addEmail(), addother:()=>Sim.addEmailOther(),
       verify:()=>Sim.verify(), openmsgs:()=>Sim.openMessages(),
       low:()=>Sim.battery(.15), full:()=>Sim.battery(1), charge:()=>Sim.charge(), silent:()=>Sim.silent(),

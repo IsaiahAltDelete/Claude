@@ -1271,7 +1271,7 @@ function FT() {
     recents: [
       { id: 1, name: 'Nina Okafor', kind: 'video', outgoing: true, at: Date.now() - 40 * 6e4, missed: false },
       { id: 2, name: 'Dad', kind: 'audio', outgoing: false, at: Date.now() - 5 * 36e5, missed: true },
-      { id: 3, name: 'Spectrum Support', kind: 'video', outgoing: false, at: Date.now() - 26 * 36e5, missed: false },
+      { id: 3, name: 'Sablewave Support', kind: 'video', outgoing: false, at: Date.now() - 26 * 36e5, missed: false },
       { id: 4, name: 'Nina Okafor', kind: 'video', outgoing: false, at: Date.now() - 2 * 864e5, missed: false },
     ],
   }));
