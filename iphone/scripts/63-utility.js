@@ -611,7 +611,7 @@ function NT() {
     items: [
       {
         id: 1, folder: 'notes', pinned: true, at: Date.now() - 36e5,
-        body: 'Streaming plan\n\nKeep: Spectrum TV (free with service), Max, Netflix\nRotate: Peacock during football, Paramount+ for CBS\nCancel after the season ends.',
+        body: 'Streaming plan\n\nKeep: Sablewave TV (free with service), Max, Netflix\nRotate: Peacock during football, Paramount+ for CBS\nCancel after the season ends.',
       },
       {
         id: 2, folder: 'support', at: Date.now() - 2 * 864e5,
@@ -1317,7 +1317,7 @@ const STOCK_LIST = [
   ['META', 'Meta Platforms, Inc.', 512, 'Communication Services'],
   ['NFLX', 'Netflix, Inc.', 682, 'Entertainment'],
   ['DIS', 'The Walt Disney Company', 94, 'Entertainment'],
-  ['CHTR', 'Charter Communications', 342, 'Telecom'],
+  ['CHTR', 'Sablewave Communications', 342, 'Telecom'],
   ['T', 'AT&T Inc.', 19, 'Telecom'],
   ['VZ', 'Verizon Communications', 41, 'Telecom'],
   ['CMCSA', 'Comcast Corporation', 39, 'Telecom'],

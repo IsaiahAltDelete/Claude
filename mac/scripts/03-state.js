@@ -50,7 +50,7 @@
   ];
 
   Mac.DefaultState = {
-    schema: 8,
+    schema: 9,
 
     /* ------------------------------------------------------------ settings */
     settings: {
@@ -213,11 +213,11 @@
     /* ------------------------------------------------------------- network */
     wifi: {
       enabled: true,
-      current: 'Spectrum Home',
+      current: 'Sablewave Home',
       status: 'connected',
       captive: false,
-      saved: ['Spectrum Home', 'Support Bench 5G'],
-      autoJoin: { 'Spectrum Home': true, 'Support Bench 5G': true },
+      saved: ['Sablewave Home', 'Support Bench 5G'],
+      autoJoin: { 'Sablewave Home': true, 'Support Bench 5G': true },
       dns: ['1.1.1.1', '8.8.8.8'],
       ip: '192.168.1.42',
       router: '192.168.1.1',
@@ -268,7 +268,7 @@
     notes: [
       { id: 'note-welcome', title: 'Start here', body: 'Start here\n\nThis is a full macOS troubleshooting simulator. Nothing here touches your real Mac.\n\nTry these:\n• Turn Wi-Fi off in Control Center, then open Safari\n• Join “Cafe Welcome” and complete the captive portal\n• Run Network Diagnostics from System Settings › Network\n• Move a file to the Bin, then Put It Back\n• Erase All Content and Settings, then walk the Setup Assistant', folder: 'Notes', pinned: true, updated: now - 3600e3 },
       { id: 'note-flow', title: 'Wi-Fi escalation flow', body: 'Wi-Fi escalation flow\n\n1. Confirm the SSID the customer expects\n2. Ask whether other devices are affected\n3. Renew the DHCP lease\n4. Check DNS resolution\n5. Reset the network location if still failing\n6. Escalate with the diagnostics report attached', folder: 'Notes', pinned: false, updated: now - 2 * DAY },
-      { id: 'note-passwords', title: 'Lab credentials', body: 'Lab credentials\n\nLogin password: support\nSpectrum Home: spectrum\nSupport Bench 5G: benchpass\nNeighbor 5G: neighbor\nPrinter Setup: printer', folder: 'Notes', pinned: false, updated: now - 5 * DAY },
+      { id: 'note-passwords', title: 'Lab credentials', body: 'Lab credentials\n\nLogin password: support\nSablewave Home: sablewave\nSupport Bench 5G: benchpass\nNeighbor 5G: neighbor\nPrinter Setup: printer', folder: 'Notes', pinned: false, updated: now - 5 * DAY },
     ],
     appData: {
       textedit: 'Support Call Log\n\nCustomer reports intermittent Wi-Fi on a MacBook Pro running macOS Tahoe 26.6.\n\nSteps taken:\n1. Confirmed Wi-Fi is on in Control Center.\n2. Reconnected to the home network.\n3. Renewed the DHCP lease from Wi-Fi Details.\n\nNext: run Network Diagnostics and capture the report.\n',
@@ -349,7 +349,7 @@
       blocked: ['offers@spam.example'],
       messages: [
         { id: 'mail-1', accountId: 'acct-icloud', mailbox: 'Inbox', category: 'Primary', from: 'Apple Support', email: 'support@apple.example', subject: 'Welcome to macOS Tahoe', preview: 'A few ways to get comfortable with your new Mac.', body: 'Hi Alex,\n\nWelcome to macOS Tahoe. The redesigned desktop keeps every familiar Mac control while bringing the new Liquid Glass material to the Dock, sidebars and toolbars.\n\nA few things worth trying:\n• Press Command-Space for Spotlight\n• Customise Control Center in System Settings\n• Use window tiling by dragging a window to a screen edge\n\nApple Support', date: now - 3600e3, unread: true, flagged: false },
-        { id: 'mail-2', accountId: 'acct-work', mailbox: 'Inbox', category: 'Updates', from: 'Spectrum Learning', email: 'learning@spectrum.example', subject: 'Updated Wi-Fi troubleshooting flow', preview: 'The latest support flow is ready for review.', body: 'Hi Alex,\n\nThe updated Wi-Fi troubleshooting flow is ready. Start by confirming the customer is on the expected SSID, verify whether other devices are affected, then renew the connection before escalating.\n\nThe practice checklist is attached.\n\nSpectrum Learning Team', date: now - 5 * 3600e3, unread: true, flagged: true, attachment: 'Wi-Fi Checklist.pdf' },
+        { id: 'mail-2', accountId: 'acct-work', mailbox: 'Inbox', category: 'Updates', from: 'Sablewave Learning', email: 'learning@sablewave.example', subject: 'Updated Wi-Fi troubleshooting flow', preview: 'The latest support flow is ready for review.', body: 'Hi Alex,\n\nThe updated Wi-Fi troubleshooting flow is ready. Start by confirming the customer is on the expected SSID, verify whether other devices are affected, then renew the connection before escalating.\n\nThe practice checklist is attached.\n\nSablewave Learning Team', date: now - 5 * 3600e3, unread: true, flagged: true, attachment: 'Wi-Fi Checklist.pdf' },
         { id: 'mail-3', accountId: 'acct-work', mailbox: 'Inbox', category: 'Primary', from: 'Dana Whitfield', email: 'dana@support.example', subject: 'ESCALATION 4821 — captive portal loop', preview: 'Customer cannot get past the cafe sign-in page.', body: 'Alex,\n\nTicket 4821: the customer joins “Cafe Welcome”, gets the sign-in page, accepts the terms and then loses the connection. Can you reproduce it on the bench Mac and confirm whether renewing the lease clears it?\n\nThanks,\nDana', date: now - 8 * 3600e3, unread: false, flagged: false },
         { id: 'mail-4', accountId: 'acct-icloud', mailbox: 'Inbox', category: 'Transactions', from: 'Apple', email: 'no_reply@apple.example', subject: 'Your receipt from Apple', preview: 'iCloud+ 200 GB — $2.99', body: 'Receipt\n\niCloud+ 200 GB monthly plan — $2.99\nBilled to Visa •••• 4412\n\nThis is a simulated receipt.', date: now - DAY, unread: false, flagged: false },
         { id: 'mail-5', accountId: 'acct-work', mailbox: 'Inbox', category: 'Promotions', from: 'Bench Tools', email: 'news@benchtools.example', subject: 'New diagnostics utilities this month', preview: 'Disk, network and battery utilities refreshed.', body: 'This month we refreshed the diagnostics utilities used on the support bench.\n\nSimulated newsletter content.', date: now - 2 * DAY, unread: false, flagged: false },
@@ -504,7 +504,7 @@
       { name: 'Activity Monitor', cpu: 1.4, memory: 118, threads: 7, kind: 'app', energy: 'Low' },
     ],
     logs: [
-      { at: now - 30e3, level: 'info', process: 'airportd', message: 'Wi-Fi association complete: Spectrum Home (channel 44, -52 dBm)' },
+      { at: now - 30e3, level: 'info', process: 'airportd', message: 'Wi-Fi association complete: Sablewave Home (channel 44, -52 dBm)' },
       { at: now - 90e3, level: 'debug', process: 'configd', message: 'DHCP lease acquired 192.168.1.42 / 255.255.255.0' },
       { at: now - 240e3, level: 'warn', process: 'mDNSResponder', message: 'Slow response from 8.8.8.8 (642 ms)' },
       { at: now - 620e3, level: 'error', process: 'PrinterProxy', message: 'No printers discovered on subnet 192.168.1.0/24' },
@@ -540,7 +540,7 @@
   /* Wi-Fi networks in range. Not persisted — the airwaves are the same for
      every session, only what you save about them is stored. */
   Mac.NETWORKS = [
-    { name: 'Spectrum Home', security: 'WPA3 Personal', password: 'spectrum', bars: 4, band: '5 GHz', channel: 44 },
+    { name: 'Sablewave Home', security: 'WPA3 Personal', password: 'sablewave', bars: 4, band: '5 GHz', channel: 44 },
     { name: 'Support Bench 5G', security: 'WPA2 Personal', password: 'benchpass', bars: 3, band: '5 GHz', channel: 149 },
     { name: 'Neighbor 5G', security: 'WPA2 Personal', password: 'neighbor', bars: 2, band: '5 GHz', channel: 36 },
     { name: 'Orlando Guest', security: 'Open', password: '', bars: 3, band: '2.4 GHz', channel: 6 },

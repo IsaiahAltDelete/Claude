@@ -25,7 +25,7 @@ since all assets are local.
 |---|---|
 | Login password | `support` |
 | Apple Account | `alex.rivera@icloud.example` / `support`, verification code `424242` |
-| Wi-Fi passwords | Spectrum Home `spectrum` · Support Bench 5G `benchpass` · Neighbor 5G `neighbor` · Printer Setup `printer` |
+| Wi-Fi passwords | Sablewave Home `sablewave` · Support Bench 5G `benchpass` · Neighbor 5G `neighbor` · Printer Setup `printer` |
 
 ## What it covers
 
@@ -216,6 +216,10 @@ Everyone in the simulator is invented. The Mac belongs to Alex Rivera; Dana
 Whitfield, Milo Rivera and the rest of the senders, contacts and directory
 entries are made up, every address uses a reserved `.example` domain, and phone
 numbers stay in the 555 range. Nothing is modelled on a real person.
+
+The internet provider in the seeded mail, Wi-Fi networks and support scenarios —
+**Sablewave** — is invented too, along with its parent, its domain and its
+support numbers.
 
 ## Notes
 

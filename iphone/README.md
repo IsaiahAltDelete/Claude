@@ -197,8 +197,8 @@ runSetupAssistant()              // replay the out-of-box flow
 State.settings.airplane = true; save(); renderStatus()
 WF().current = null; save(); renderStatus()   // drop off Wi-Fi
 incomingCall('Karma S')          // ring the phone, with audio
-sendOTP('spectrum')              // deliver a six-digit code by Messages
-pushNotification('mail', 'Spectrum', 'Your bill is ready')
+sendOTP('sablewave')              // deliver a six-digit code by Messages
+pushNotification('mail', 'Sablewave', 'Your bill is ready')
 setBadge('mail', 12)
 lockPhone()
 factoryReset()                   // wipe localStorage and reload
@@ -215,6 +215,9 @@ Rivera; Nina Okafor, Milo Rivera and the rest of the contacts, senders, callers
 and account holders are made up, all the addresses use reserved `.example`
 domains, and every phone number is in the 555 range. Nothing is modelled on a
 real person.
+
+The internet provider throughout — **Sablewave**, its TV and account apps, its
+Wi-Fi networks and its support line — is invented as well.
 
 ## Notes
 

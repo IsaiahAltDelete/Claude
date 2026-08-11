@@ -749,7 +749,7 @@
         <h1>${esc(node ? node.name.replace(/\.[a-z0-9]+$/i, '') : 'Troubleshooting Wi-Fi')}</h1>
         <p>This sample document demonstrates the Preview workflow. It scrolls, zooms and prints like a real document.</p>
         <h2>1 — Check the radio</h2><p>Open Control Centre and confirm Wi-Fi is on. A dimmed glyph in the menu bar means the radio is off.</p>
-        <h2>2 — Rejoin the network</h2><p>Select the network and enter the training credential. The secured home network uses <b>spectrum</b>.</p>
+        <h2>2 — Rejoin the network</h2><p>Select the network and enter the training credential. The secured home network uses <b>sablewave</b>.</p>
         <h2>3 — Renew the address</h2><p>In Wi-Fi Details, open TCP/IP and renew the DHCP lease. A 169.254.x.x address means DHCP failed.</p>
         <h2>4 — Check DNS</h2><p>Open DNS settings and confirm at least one reachable server is configured.</p>
         <h2>5 — Run diagnostics</h2><p>System Settings can test the interface, address, DNS and internet reachability in one pass.</p>
