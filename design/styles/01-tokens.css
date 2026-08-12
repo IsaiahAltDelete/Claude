@@ -1,0 +1,128 @@
+/* ---------------------------------------------------------------------------
+   Tokens, reset and the base type scale.
+
+   The palette is deliberately achromatic: a stack of neutral grays for both
+   themes, one warm accent used only where a control is live. Nothing here is
+   blue. Dark is the default; light is a full sibling, not an afterthought.
+   --------------------------------------------------------------------------- */
+
+@import url("../assets/fonts/fonts.css");
+
+:root {
+  color-scheme: dark;
+
+  /* Surfaces, darkest to lightest. */
+  --bg-0: #0a0a0b;      /* app ground */
+  --bg-1: #101012;      /* rails, sheets */
+  --bg-2: #17171a;      /* inputs, wells */
+  --bg-3: #1e1e22;      /* hover */
+  --bg-4: #2a2a2f;      /* pressed, filled track */
+
+  --line: #212125;      /* hairline */
+  --line-2: #2f2f35;    /* stronger hairline, focus ring base */
+
+  --fg: #f2f2f3;        /* primary text */
+  --fg-dim: #a3a3a8;    /* secondary text — 7.2:1 on --bg-1 */
+  --fg-faint: #74747a;  /* labels, units — 4.6:1 on --bg-1 */
+  --fg-ghost: #46464c;  /* non-text decoration only */
+
+  --accent: #f2f2f3;    /* monochrome “on” state */
+  --accent-ink: #0a0a0b;
+  --hot: #ff4b2b;       /* recording / destructive only */
+
+  --stage: #141416;     /* the surface the artboard sits on */
+
+  --r-1: 2px;
+  --r-2: 4px;
+  --r-3: 8px;
+
+  --ui: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --rail: 340px;
+  --bar: 46px;
+  --status: 26px;
+
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --bg-0: #eeeeef;
+  --bg-1: #fbfbfc;
+  --bg-2: #f1f1f3;
+  --bg-3: #e7e7ea;
+  --bg-4: #d8d8dd;
+
+  --line: #e0e0e4;
+  --line-2: #cbcbd1;
+
+  --fg: #121214;
+  --fg-dim: #56565c;
+  --fg-faint: #7b7b83;
+  --fg-ghost: #b6b6bd;
+
+  --accent: #121214;
+  --accent-ink: #fbfbfc;
+
+  --stage: #e4e4e6;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+  background: var(--bg-0);
+  color: var(--fg);
+  font-family: var(--ui);
+  font-size: 13px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+}
+
+body { touch-action: manipulation; }
+
+::selection { background: var(--fg); color: var(--bg-0); }
+
+button, input, select, textarea { font: inherit; color: inherit; }
+
+:focus-visible { outline: 1px solid var(--fg); outline-offset: 1px; }
+
+/* Scrollbars — thin, neutral, no chrome. */
+* { scrollbar-width: thin; scrollbar-color: var(--line-2) transparent; }
+*::-webkit-scrollbar { width: 9px; height: 9px; }
+*::-webkit-scrollbar-thumb { background: var(--line-2); border: 3px solid transparent; background-clip: content-box; border-radius: 99px; }
+*::-webkit-scrollbar-track { background: transparent; }
+
+/* ------------------------------------------------------------------- type */
+
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+}
+
+.num { font-family: var(--mono); font-size: 11px; font-variant-numeric: tabular-nums; }
+
+/* --------------------------------------------------------------- utilities */
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+[hidden] { display: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}

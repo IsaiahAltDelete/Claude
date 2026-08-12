@@ -1,0 +1,111 @@
+/* ---------------------------------------------------------------------------
+   Small screens.
+
+   Under 900px the rail leaves the grid and becomes a bottom sheet with three
+   heights: peek (tabs only), half and full. The stage keeps the full viewport
+   underneath so the artboard never gets squeezed by an open panel.
+   --------------------------------------------------------------------------- */
+
+@media (max-width: 900px) {
+  :root { --bar: 44px; --status: 0px; }
+
+  .app {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: var(--bar) minmax(0, 1fr);
+  }
+
+  .stage {
+    grid-column: 1;
+    grid-row: 2;
+    padding: 12px 12px calc(var(--sheet-peek, 116px) + 12px);
+    background-size: 26px 26px;
+  }
+
+  .stage-hud { bottom: calc(var(--sheet-peek, 116px) + 8px); left: 12px; }
+
+  .status { display: none; }
+
+  .rail {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: auto;
+    height: 82dvh;
+    border-left: 0;
+    border-top: 1px solid var(--line-2);
+    box-shadow: 0 -18px 40px rgba(0, 0, 0, 0.42);
+    transform: translateY(calc(100% - var(--sheet-peek, 116px)));
+    transition: transform 0.28s var(--ease);
+    touch-action: pan-y;
+  }
+  .rail[data-sheet="half"] { transform: translateY(42%); }
+  .rail[data-sheet="full"] { transform: translateY(0); }
+
+  .sheet-handle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    height: 20px;
+    cursor: grab;
+    touch-action: none;
+  }
+  .sheet-handle::before {
+    content: "";
+    width: 34px;
+    height: 3px;
+    border-radius: 99px;
+    background: var(--fg-ghost);
+  }
+
+  .rail-tabs { position: sticky; top: 0; background: var(--bg-1); z-index: 2; }
+  .tab { padding: 12px 2px 11px; font-size: 9.5px; }
+
+  .rail-body { padding-bottom: max(34px, env(safe-area-inset-bottom)); }
+
+  .sec { padding: 14px 14px 16px; }
+  .sec-body { gap: 13px; }
+
+  /* Fingers need more than 22px of slider. */
+  .slider { height: 30px; }
+  .slider-knob { height: 19px; width: 4px; margin-left: -2px; }
+  .seg-b { min-height: 32px; font-size: 10px; }
+  .btn { min-height: 34px; }
+  .btn.icon { width: 34px; }
+  .row-value { font-size: 11px; }
+  .pop { max-height: 46dvh; }
+  .picker { width: min(258px, 82vw); }
+  .picker-sv { height: 132px; }
+  .picker-strip { height: 18px; }
+
+  .toast { bottom: calc(var(--sheet-peek, 116px) + 16px); }
+}
+
+@media (max-width: 460px) {
+  .bar { padding: 0 8px 0 12px; gap: 8px; }
+  .wordmark span { display: none; }
+  .stage { padding: 8px 8px calc(var(--sheet-peek, 116px) + 8px); }
+}
+
+/* Landscape phones: the sheet takes a side instead of the bottom. */
+@media (max-width: 900px) and (orientation: landscape) and (max-height: 560px) {
+  .rail {
+    left: auto;
+    top: var(--bar);
+    width: min(320px, 62vw);
+    height: auto;
+    border-top: 0;
+    border-left: 1px solid var(--line-2);
+    transform: translateX(calc(100% - 34px));
+  }
+  .rail[data-sheet="half"], .rail[data-sheet="full"] { transform: translateX(0); }
+  .sheet-handle { display: none; }
+  .stage { padding: 10px; }
+  .stage-hud { bottom: 8px; }
+}
+
+/* Wide desktops get a slightly roomier rail. */
+@media (min-width: 1500px) {
+  :root { --rail: 372px; }
+}
