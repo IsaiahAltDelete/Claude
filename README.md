@@ -15,6 +15,11 @@ access, described below.
 **Live:** <https://isaiahaltdelete.github.io/Claude/mac/> — the site root is a
 minimal index of projects; the simulator lives at `/mac`.
 
+> This repository hosts more than one project. The other is **ISAIART DESIGN**, a
+> type-in-space generator at [`/design`](design/) —
+> <https://isaiahaltdelete.github.io/Claude/design/>. The rest of this file is
+> about the simulator.
+
 ## Running it
 
 Open the live link above, or clone the repository and open `mac/index.html` in
