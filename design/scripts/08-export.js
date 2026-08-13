@@ -24,6 +24,21 @@ function stamp() {
   return `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`;
 }
 
+/** Name files after the words in them, so a folder of exports is readable. */
+function name(app, ext) {
+  const slug = String(app.state.text || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 28);
+  return `isaiart${slug ? "-" + slug : ""}-${stamp()}.${ext}`;
+}
+
+/* still() resizes the render targets and puts them back. Two of those
+   overlapping would restore each other's temporary size, leaving the preview
+   stuck at export resolution — so only one runs at a time. */
+let exporting = false;
+
 /** Render one frame at exactly `multiplier` × the artboard size. */
 async function still(app, multiplier = 1) {
   const s = app.state;
@@ -42,20 +57,36 @@ async function still(app, multiplier = 1) {
 }
 
 async function savePng(app, multiplier) {
-  const blob = await still(app, multiplier);
-  if (!blob) return toast("Export failed");
-  download(blob, `isaiart-${stamp()}.png`);
-  toast(`Saved PNG ${Math.round(app.state.width * multiplier)}×${Math.round(app.state.height * multiplier)}`);
+  if (exporting) return;
+  exporting = true;
+  try {
+    const blob = await still(app, multiplier);
+    if (!blob) return toast("Export failed");
+    download(blob, name(app, "png"));
+    toast(`Saved PNG ${Math.round(app.state.width * multiplier)}×${Math.round(app.state.height * multiplier)}`);
+  } finally {
+    exporting = false;
+  }
 }
 
 async function copyPng(app) {
+  if (exporting) return;
+  exporting = true;
+  try {
+    await copyPngInner(app);
+  } finally {
+    exporting = false;
+  }
+}
+
+async function copyPngInner(app) {
   const blob = await still(app, 1);
   if (!blob) return toast("Export failed");
   try {
     await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
     toast("Copied to clipboard");
   } catch {
-    download(blob, `isaiart-${stamp()}.png`);
+    download(blob, name(app, "png"));
     toast("Clipboard blocked — downloaded instead");
   }
 }
@@ -86,7 +117,7 @@ function record(app, seconds, fps, onState) {
   recorder.onstop = () => {
     stream.getTracks().forEach((t) => t.stop());
     const ext = type.startsWith("video/mp4") ? "mp4" : "webm";
-    download(new Blob(chunks, { type }), `isaiart-${stamp()}.${ext}`);
+    download(new Blob(chunks, { type }), name(app, ext));
     chunks.length = 0;
     onState?.(false);
     toast("Clip saved");

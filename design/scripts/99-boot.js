@@ -18,6 +18,10 @@ const Export = window.ISO.Export;
 
 const SAVE_KEY = "isaiart.design.state";
 const THEME_KEY = "isaiart.design.theme";
+/* Kept out of the state blob on purpose: a preference that lives inside the
+   thing it deletes cannot survive being switched off, and it has no business
+   travelling in a shared link or a settings file. */
+const AUTOSAVE_KEY = "isaiart.design.autosave";
 
 /* Pixel budgets per quality tier. Mobile GPUs fall over well before desktop,
    so this is the single knob that keeps a 4K artboard from melting a phone. */
@@ -47,7 +51,12 @@ function fail(message) {
   $("#artboard").style.opacity = "0.15";
 }
 
+/** Keys that describe the session rather than the artwork, so they never
+    travel in a link or a settings file. */
+const NOT_PORTABLE = ["autosave", "playing"];
+
 function loadInitialState() {
+  State.patch({ autosave: store.get(AUTOSAVE_KEY, true) !== false }, { silent: true });
   const hash = location.hash.replace(/^#\/?/, "");
   if (hash && State.applyEncoded(hash, { silent: true })) {
     history.replaceState(null, "", location.pathname + location.search);
@@ -57,6 +66,11 @@ function loadInitialState() {
   if (saved && typeof saved === "object") {
     State.patch(saved, { silent: true });
     return "saved";
+  }
+  // Someone who has asked their system for less motion should not be met with
+  // a moving canvas; the play button is right there when they want it.
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    State.patch({ playing: false }, { silent: true });
   }
   // First visit on a phone: start at the cheap tier and a portrait canvas.
   if (isSmall()) {
@@ -73,14 +87,33 @@ function loadInitialState() {
 let atlasToken = 0;
 let tileToken = 0;
 
+let lastTruncated = 0;
+
 async function rebuildAtlas() {
   const token = ++atlasToken;
   try {
     const atlas = await Atlas.build(State.data);
     if (token !== atlasToken || !app.renderer) return;
     app.renderer.setAtlas(atlas);
-    app.renderer.setCount(State.get("count"));
+    // No tokens means an empty canvas, so draw nothing at all.
+    app.renderer.setCount(atlas.cells.length ? State.get("count") : 0);
     app.cells = atlas.cells.length;
+
+    $("#stage-empty").hidden = atlas.cells.length > 0;
+
+    // The atlas holds 64 cells. Announce crossing the line once — the count
+    // changes on every keystroke, so keying the toast off it would spam — and
+    // leave a standing note in the status bar for as long as it applies.
+    if (atlas.truncated && !lastTruncated) {
+      toast(`Drawing the first ${Atlas.MAX_CELLS} pieces of ${atlas.total}`);
+    }
+    lastTruncated = atlas.truncated || 0;
+    const note = $("#stat-msg");
+    note.textContent = atlas.truncated ? `${Atlas.MAX_CELLS} of ${atlas.total} pieces` : "";
+    note.title = atlas.truncated
+      ? "The glyph atlas holds 64 pieces; the rest of the text is not drawn"
+      : "";
+
     updateStatus();
     dirty = true;
   } catch (err) {
@@ -135,8 +168,17 @@ function layoutArtboard() {
   if (h > availH) { h = availH; w = h * ratio; }
   board.style.width = `${Math.max(40, Math.floor(w))}px`;
   board.style.height = `${Math.max(40, Math.floor(h))}px`;
+
+  const r = app.renderer;
+  // Say plainly when the quality tier is rendering below the artboard size —
+  // otherwise a soft-looking preview looks like a bug.
+  const scaled = r.width < s.width || r.height < s.height;
   $("#hud-size").textContent = `${s.width} × ${s.height}`;
-  $("#hud-render").textContent = `${app.renderer.width} × ${app.renderer.height} · ${Math.round((w / s.width) * 100)}%`;
+  $("#hud-render").textContent =
+    `${r.width} × ${r.height}${scaled ? " ↓" : ""} · ${Math.round((w / s.width) * 100)}%`;
+  $("#hud-render").title = scaled
+    ? "Rendering below canvas size for speed — exports are still full size"
+    : "Render buffer size and preview zoom";
 }
 
 function applyAspect() {
@@ -156,6 +198,9 @@ function updateStatus(now = 0) {
   $("#stat-fps").textContent = String(Math.min(240, Math.round(1000 / Math.max(frameEma, 1))));
   const dot = $("#stat-dot");
   dot.className = "dot" + (stopRecording ? " rec" : State.get("playing") ? " live" : "");
+  const undo = $("#btn-undo"), redo = $("#btn-redo");
+  if (undo) undo.disabled = !State.canUndo();
+  if (redo) redo.disabled = !State.canRedo();
 }
 
 /* -------------------------------------------------------------- the loop */
@@ -199,16 +244,21 @@ function setupGestures(canvas) {
     return Math.hypot(a.x - b.x, a.y - b.y);
   };
 
-  canvas.addEventListener("pointerdown", (e) => {
-    canvas.setPointerCapture(e.pointerId);
-    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
-    canvas.classList.add("dragging");
+  /** Re-baseline from the live camera for however many fingers remain. */
+  const reseat = () => {
     mode = pointers.size > 1 ? "pinch" : "orbit";
     start = {
       yaw: State.get("yaw"), pitch: State.get("pitch"), dist: State.get("dist"),
       panX: State.get("panX"), panY: State.get("panY"),
       centre: centre(), spread: pointers.size > 1 ? spread() : 0,
     };
+  };
+
+  canvas.addEventListener("pointerdown", (e) => {
+    canvas.setPointerCapture(e.pointerId);
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    canvas.classList.add("dragging");
+    reseat();
   });
 
   canvas.addEventListener("pointermove", (e) => {
@@ -232,11 +282,31 @@ function setupGestures(canvas) {
     }
   });
 
+  let lastTap = 0, lastTapAt = -Infinity;
+
   const end = (e) => {
     pointers.delete(e.pointerId);
-    if (!pointers.size) {
-      canvas.classList.remove("dragging");
-      mode = null;
+    if (pointers.size) {
+      // A pinch usually ends one finger at a time. Hand the gesture back to
+      // the remaining finger from where the camera is now, or it looks hung.
+      reseat();
+      return;
+    }
+    canvas.classList.remove("dragging");
+    mode = null;
+
+    // Double-click recentres on desktop; dblclick is unreliable on touch, so
+    // detect the double-tap ourselves.
+    if (e.pointerType !== "mouse") {
+      const moved = start ? Math.hypot(e.clientX - start.centre.x, e.clientY - start.centre.y) : 99;
+      const now = e.timeStamp;
+      if (moved < 8 && now - lastTapAt < 320 && Math.abs(e.clientX - lastTap) < 24) {
+        recentre();
+        lastTapAt = -Infinity;
+      } else if (moved < 8) {
+        lastTapAt = now;
+        lastTap = e.clientX;
+      }
     }
   };
   canvas.addEventListener("pointerup", end);
@@ -248,9 +318,7 @@ function setupGestures(canvas) {
     State.set("dist", clamp(State.get("dist") * k, 0.2, 14));
   }, { passive: false });
 
-  canvas.addEventListener("dblclick", () => {
-    State.patch({ yaw: 0, pitch: 0, panX: 0, panY: 0 });
-  });
+  canvas.addEventListener("dblclick", recentre);
 }
 
 /* -------------------------------------------------------------- actions */
@@ -291,6 +359,11 @@ function handleAction(id) {
     case "png2": Export.savePng(app, 2); break;
     case "copy": Export.copyPng(app); break;
     case "rec": toggleRecording(); break;
+    case "clear":
+      toast(State.clear().length ? "Canvas cleared — ⌘Z to undo" : "Canvas is already empty");
+      break;
+    case "undo": doUndo(); break;
+    case "redo": doRedo(); break;
     case "share": {
       const url = `${location.origin}${location.pathname}#${State.encode()}`;
       navigator.clipboard?.writeText(url).then(
@@ -298,36 +371,62 @@ function handleAction(id) {
         () => { location.hash = State.encode(); toast("Link is in the address bar"); });
       break;
     }
-    case "save":
-      download(new Blob([JSON.stringify(State.diff(), null, 2)], { type: "application/json" }),
+    case "save": {
+      const doc = State.diff();
+      for (const k of NOT_PORTABLE) delete doc[k];
+      download(new Blob([JSON.stringify(doc, null, 2)], { type: "application/json" }),
         "isaiart-settings.json");
       toast("Settings saved");
       break;
+    }
     case "load": loadFile(); break;
     case "reset":
-      State.reset();
-      toast("Back to defaults");
+      toast(State.reset().length ? "Back to defaults — ⌘Z to undo" : "Already at defaults");
       break;
+  }
+}
+
+async function loadSettingsFile(file) {
+  if (!file) return;
+  try {
+    const obj = JSON.parse(await file.text());
+    if (!obj || typeof obj !== "object" || Array.isArray(obj)) throw new Error("shape");
+    const incoming = { ...State.DEFAULTS, ...obj };
+    // Someone else's file should not flip your session preferences.
+    for (const k of NOT_PORTABLE) incoming[k] = State.get(k);
+    State.patch(incoming, { source: "load" });
+    toast("Settings loaded");
+  } catch {
+    toast("That file is not settings JSON");
   }
 }
 
 function loadFile() {
   const input = el("input", { type: "file", accept: "application/json,.json" });
-  input.addEventListener("change", async () => {
-    const file = input.files?.[0];
-    if (!file) return;
-    try {
-      const obj = JSON.parse(await file.text());
-      State.patch({ ...State.DEFAULTS, ...obj });
-      toast("Settings loaded");
-    } catch {
-      toast("That file is not settings JSON");
-    }
-  });
+  input.addEventListener("change", () => loadSettingsFile(input.files?.[0]));
   input.click();
 }
 
+/** Dropping a settings file anywhere loads it — it is the file we hand out. */
+function setupDrop() {
+  const stop = (e) => { e.preventDefault(); };
+  addEventListener("dragover", stop);
+  addEventListener("drop", (e) => {
+    const file = e.dataTransfer?.files?.[0];
+    if (!file) return;
+    e.preventDefault();
+    if (/\.json$/i.test(file.name) || file.type === "application/json") loadSettingsFile(file);
+    else toast("Drop a settings .json file");
+  });
+}
+
 /* ---------------------------------------------------------------- wiring */
+
+/** One definition of "put the camera back", for every route that offers it. */
+function recentre() {
+  State.patch({ yaw: 0, pitch: 0, panX: 0, panY: 0, dist: State.DEFAULTS.dist },
+    { source: "camera" });
+}
 
 function setupBar() {
   const play = $("#btn-play");
@@ -336,40 +435,93 @@ function setupBar() {
     play.append(icon(State.get("playing") ? "pause" : "play"));
   };
   play.addEventListener("click", () => State.set("playing", !State.get("playing")));
+  $("#btn-undo").append(icon("undo"));
+  $("#btn-redo").append(icon("redo"));
+  $("#btn-undo").addEventListener("click", () => doUndo());
+  $("#btn-redo").addEventListener("click", () => doRedo());
+  $("#hud-recentre").addEventListener("click", recentre);
   $("#btn-random").append(icon("dice"));
   $("#btn-theme").append(icon("contrast"));
   $("#btn-full").append(icon("expand"));
   $("#btn-help").append(icon("help"));
   paint();
 
-  $("#btn-random").addEventListener("click", () => { State.randomize(); toast("Randomised"); });
+  $("#btn-random").addEventListener("click", () => { State.randomize(); toast("Randomised — ⌘Z to undo"); });
   $("#btn-theme").addEventListener("click", () =>
     setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark"));
   $("#btn-full").addEventListener("click", () => {
     if (document.fullscreenElement) document.exitFullscreen();
     else document.documentElement.requestFullscreen?.().catch(() => toast("Fullscreen refused"));
   });
-  $("#btn-help").addEventListener("click", () => { $("#help").hidden = false; });
-  $("#help-close").addEventListener("click", () => { $("#help").hidden = true; });
-  $("#help").addEventListener("click", (e) => { if (e.target.id === "help") $("#help").hidden = true; });
+  const help = $("#help");
+  const openHelp = () => {
+    help.hidden = false;
+    $("#help-close").focus();
+  };
+  const closeHelp = () => {
+    if (help.hidden) return;
+    help.hidden = true;
+    $("#btn-help").focus();
+  };
+  $("#btn-help").addEventListener("click", openHelp);
+  $("#help-close").addEventListener("click", closeHelp);
+  help.addEventListener("click", (e) => { if (e.target.id === "help") closeHelp(); });
+  // The dialog is modal, so Tab stays inside it.
+  help.addEventListener("keydown", (e) => {
+    if (e.key === "Tab") { e.preventDefault(); $("#help-close").focus(); }
+  });
+  app.openHelp = openHelp;
+  app.closeHelp = closeHelp;
   $("#btn-png").addEventListener("click", () => Export.savePng(app, 1));
 
   return paint;
 }
 
+function doUndo() {
+  if (State.undo()) toast("Undo");
+  else toast("Nothing to undo");
+}
+
+function doRedo() {
+  if (State.redo()) toast("Redo");
+  else toast("Nothing to redo");
+}
+
 function setupKeys() {
   addEventListener("keydown", (e) => {
     const t = e.target;
-    if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
-    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    const typing = t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" ||
+      t.isContentEditable || t.closest?.(".pop, .modal"));
     const k = e.key.toLowerCase();
+    const mod = e.metaKey || e.ctrlKey;
+
+    // Undo, redo and clear work even while the cursor is in the text field —
+    // that is exactly where you want them.
+    if (mod && k === "z") {
+      e.preventDefault();
+      e.shiftKey ? doRedo() : doUndo();
+      return;
+    }
+    if (mod && k === "y") { e.preventDefault(); doRedo(); return; }
+    if (mod && (k === "backspace" || k === "delete")) {
+      e.preventDefault();
+      toast(State.clear().length ? "Canvas cleared — ⌘Z to undo" : "Canvas is already empty");
+      return;
+    }
+
+    if (typing) return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    // Key repeat on Randomise or Export would fire dozens of times a second,
+    // evicting the entire undo buffer from a single stuck key.
+    if (e.repeat) return;
     if (k === " ") { State.set("playing", !State.get("playing")); e.preventDefault(); }
-    else if (k === "r") State.randomize();
+    else if (k === "r") { State.randomize(); toast("Randomised — ⌘Z to undo"); }
     else if (k === "e") Export.savePng(app, 1);
     else if (k === "t") setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
     else if (k === "f") $("#btn-full").click();
-    else if (k === "?" || (k === "/" && e.shiftKey)) $("#help").hidden = !$("#help").hidden;
-    else if (k === "escape") { $("#help").hidden = true; window.ISO.closePop?.(); }
+    else if (k === "?" || (k === "/" && e.shiftKey)) {
+      if ($("#help").hidden) app.openHelp?.(); else app.closeHelp?.();
+    } else if (k === "escape") { app.closeHelp?.(); window.ISO.closePop?.(); }
     else if (k >= "1" && k <= "5") {
       const panel = State.SCHEMA[+k - 1];
       if (panel) rail.select(panel.id);
@@ -384,11 +536,23 @@ function weightControl() {
   return $$("iso-seg").find((n) => n.cfg?.k === "weight");
 }
 
+/**
+ * Each typeface ships different weights, so the Weight control is rebuilt
+ * whenever the face changes.
+ *
+ * The descriptor has to be *mutated*, not copied: State.FIELDS holds the
+ * original object and normalise() validates against its `opts`. Handing the
+ * element a fresh copy left the store validating against the old single-entry
+ * list, which silently rejected every weight but 400 — the control looked
+ * fine and did nothing.
+ */
 function syncWeights() {
   const face = State.FONT_BY_ID[State.get("font")];
   const node = weightControl();
   if (!face || !node) return;
-  node.config = { ...node.cfg, opts: face.weights.map((w) => [w, String(w)]) };
+  const field = State.FIELDS.get("weight");
+  field.opts = face.weights.map((w) => [w, String(w)]);
+  node.config = field;
   if (!face.weights.includes(+State.get("weight"))) State.set("weight", face.weights[0]);
 }
 
@@ -396,6 +560,12 @@ const persist = debounce(() => {
   if (State.get("autosave")) store.set(SAVE_KEY, State.diff());
   else store.del(SAVE_KEY);
 }, 700);
+
+function rememberAutosave() {
+  const on = State.get("autosave");
+  store.set(AUTOSAVE_KEY, on);
+  if (!on) store.del(SAVE_KEY);
+}
 
 function onChange({ keys, fx, source }) {
   if (fx.has("atlas")) scheduleAtlas();
@@ -405,6 +575,7 @@ function onChange({ keys, fx, source }) {
   if (fx.has("size")) applySize();
   if (keys.includes("font")) syncWeights();
   if (keys.includes("playing")) paintPlay();
+  if (keys.includes("autosave")) rememberAutosave();
   if (keys.includes("bgType") && State.get("bgType") === "pattern") scheduleTile();
   Rail.refreshDeps();
   updateStatus();
@@ -430,7 +601,8 @@ function boot() {
   $("#rail").addEventListener("iso-action", (e) => handleAction(e.detail));
   $("#rail").addEventListener("iso-preset", (e) => {
     State.applyPreset(e.detail);
-    toast(State.PRESETS.find((p) => p.id === e.detail)?.name || "Preset");
+    const preset = State.PRESETS.find((p) => p.id === e.detail);
+    toast(`${preset?.name || "Preset"} — ⌘Z to undo`);
   });
 
   try {
@@ -459,6 +631,7 @@ function boot() {
   if ("ResizeObserver" in window) new ResizeObserver(relayout).observe($("#stage"));
 
   setupGestures($("#gl"));
+  setupDrop();
   requestAnimationFrame(loop);
   window.ISO.app = app;
 }

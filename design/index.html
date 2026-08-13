@@ -34,6 +34,8 @@
     <h1 class="wordmark"><b>ISAIART</b><span>Design</span></h1>
     <div class="bar-spacer"></div>
     <div class="bar-tools">
+      <button class="btn icon" id="btn-undo" type="button" title="Undo — ⌘Z" aria-label="Undo" disabled></button>
+      <button class="btn icon" id="btn-redo" type="button" title="Redo — ⇧⌘Z" aria-label="Redo" disabled></button>
       <button class="btn icon" id="btn-play" type="button" title="Play / pause — Space" aria-label="Play or pause"></button>
       <button class="btn icon" id="btn-random" type="button" title="Randomise — R" aria-label="Randomise"></button>
       <button class="btn icon" id="btn-theme" type="button" title="Light / dark — T" aria-label="Toggle theme"></button>
@@ -50,8 +52,10 @@
     <div class="stage-hud">
       <span id="hud-size">—</span>
       <span id="hud-render">—</span>
+      <button class="hud-btn" id="hud-recentre" type="button" title="Recentre the camera">Recentre</button>
     </div>
     <p class="stage-msg" id="stage-msg" hidden></p>
+    <p class="stage-msg soft" id="stage-empty" hidden>Canvas cleared — type to bring it back</p>
   </main>
 
   <aside class="rail" id="rail" data-sheet="peek">
@@ -75,19 +79,22 @@
   <div class="modal-card" role="dialog" aria-modal="true" aria-label="Shortcuts">
     <h2>Shortcuts</h2>
     <dl>
+      <dt>⌘Z / ⇧⌘Z</dt><dd>Undo, redo — including Randomise and presets</dd>
       <dt>Space</dt><dd>Play / pause</dd>
-      <dt>Drag</dt><dd>Orbit the camera</dd>
+      <dt>Scroll a slider</dt><dd>Adjust it; Shift for fine steps</dd>
+      <dt>Drag a value</dt><dd>Scrub it; click it to type a number</dd>
+      <dt>Double-click</dt><dd>Reset a control to its default</dd>
+      <dt>Drag canvas</dt><dd>Orbit — double-click to recentre</dd>
       <dt>Scroll / pinch</dt><dd>Dolly in and out</dd>
       <dt>Two fingers</dt><dd>Pan the frame</dd>
       <dt>R</dt><dd>Randomise everything but the words</dd>
       <dt>E</dt><dd>Export a PNG at canvas size</dd>
-      <dt>T</dt><dd>Light / dark</dd>
-      <dt>F</dt><dd>Fullscreen</dd>
+      <dt>⌘⌫</dt><dd>Clear the canvas</dd>
+      <dt>T · F</dt><dd>Light / dark · fullscreen</dd>
       <dt>1 – 5</dt><dd>Jump to a panel</dd>
-      <dt>Shift + drag</dt><dd>Fine-tune a slider</dd>
-      <dt>Double-click</dt><dd>Reset a control</dd>
     </dl>
-    <p>Everything runs on your device. Nothing is uploaded.</p>
+    <p>Drop a settings <code>.json</code> anywhere on the page to load it. Everything
+      runs on your device; nothing is uploaded.</p>
     <button class="btn" type="button" id="help-close">Close</button>
   </div>
 </div>
@@ -108,6 +115,11 @@
     <symbol id="i-save" viewBox="0 0 24 24"><path d="M12 4v10m0 0 3.5-3.5M12 14l-3.5-3.5"/><path d="M5 17v1.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V17"/></symbol>
     <symbol id="i-load" viewBox="0 0 24 24"><path d="M12 20V10m0 0 3.5 3.5M12 10 8.5 13.5"/><path d="M5 7V5.5A1.5 1.5 0 0 1 6.5 4h11A1.5 1.5 0 0 1 19 5.5V7"/></symbol>
     <symbol id="i-reset" viewBox="0 0 24 24"><path d="M4.5 12a7.5 7.5 0 1 0 2.3-5.4"/><path d="M4.2 5.5v4h4"/></symbol>
+    <symbol id="i-undo" viewBox="0 0 24 24"><path d="M4 9h10a5.5 5.5 0 0 1 0 11h-5"/><path d="M7.5 5.5 4 9l3.5 3.5"/></symbol>
+    <symbol id="i-redo" viewBox="0 0 24 24"><path d="M20 9H10a5.5 5.5 0 0 0 0 11h5"/><path d="m16.5 5.5 3.5 3.5-3.5 3.5"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6.5 6.5 11 11M17.5 6.5l-11 11"/></symbol>
+    <symbol id="i-dropper" viewBox="0 0 24 24"><path d="M14.5 5.5a2.6 2.6 0 0 1 3.7 3.7l-1.4 1.4 1 1-2.1 2.1-4.6-4.6 2.1-2.1 1 1z"/><path d="m10.6 9.9-5.3 5.3a2 2 0 0 0-.5 1v2.3h2.3a2 2 0 0 0 1-.5l5.3-5.3"/></symbol>
+    <symbol id="i-centre" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></symbol>
   </defs>
 </svg>
 
