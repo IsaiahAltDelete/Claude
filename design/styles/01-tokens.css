@@ -42,6 +42,7 @@
   --rail: 340px;
   --bar: 46px;
   --status: 26px;
+  --sheet-peek: 116px;   /* how much of the mobile sheet stays on screen */
 
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
 }

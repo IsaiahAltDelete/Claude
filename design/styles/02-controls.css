@@ -51,6 +51,12 @@ iso-slider, iso-seg, iso-select, iso-color, iso-pad, iso-text, iso-vec {
   display: block;
 }
 
+/* Dragging a control should never start selecting the labels around it. */
+.slider, .row-value, .pad, .picker-sv, .picker-strip, .seg, .swatch {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
 /* ----------------------------------------------------------------- slider */
 
 .slider {
@@ -58,7 +64,9 @@ iso-slider, iso-seg, iso-select, iso-color, iso-pad, iso-text, iso-vec {
   height: 22px;
   margin-top: 5px;
   cursor: ew-resize;
-  touch-action: none;
+  /* Horizontal drags belong to the slider; vertical ones belong to the panel,
+     which is how you scroll past a rail made mostly of sliders on a phone. */
+  touch-action: pan-y;
   display: flex;
   align-items: center;
 }
@@ -102,7 +110,7 @@ iso-slider, iso-seg, iso-select, iso-color, iso-pad, iso-text, iso-vec {
 .slider.bipolar .slider-track::before {
   content: "";
   position: absolute;
-  left: 50%;
+  left: var(--mid, 50%);
   top: 0;
   bottom: 0;
   width: 1px;
@@ -239,9 +247,35 @@ iso-slider, iso-seg, iso-select, iso-color, iso-pad, iso-text, iso-vec {
   cursor: pointer;
 }
 .pop-item:hover, .pop-item.active { background: var(--bg-3); color: var(--fg); }
+.pop-item:focus { outline: none; background: var(--bg-4); color: var(--fg); box-shadow: inset 2px 0 0 var(--fg); }
 .pop-item[aria-selected="true"] { color: var(--fg); }
 .pop-item[aria-selected="true"]::after { content: "●"; font-size: 7px; color: var(--fg); }
 .pop-tag { font-family: var(--mono); font-size: 9px; color: var(--fg-faint); text-transform: uppercase; letter-spacing: 0.08em; }
+
+/* Filter row for the long lists (typefaces, effects, formations). */
+.pop-filter {
+  position: sticky;
+  top: -3px;
+  z-index: 1;
+  width: 100%;
+  margin-bottom: 3px;
+  padding: 7px 9px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-2);
+  color: var(--fg);
+  font-size: 12.5px;
+}
+.pop-filter:focus { outline: none; background: var(--bg-3); }
+.pop-empty {
+  margin: 0;
+  padding: 12px 9px;
+  color: var(--fg-faint);
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
 
 /* ----------------------------------------------------------------- colour */
 
@@ -328,8 +362,10 @@ iso-slider, iso-seg, iso-select, iso-color, iso-pad, iso-text, iso-vec {
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.55);
   pointer-events: none;
 }
+.picker-row { display: flex; gap: 6px; align-items: stretch; }
 .picker-hex {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   padding: 5px 6px;
   border: 1px solid var(--line-2);
   background: var(--bg-2);
@@ -337,11 +373,19 @@ iso-slider, iso-seg, iso-select, iso-color, iso-pad, iso-text, iso-vec {
   font-size: 11px;
   text-transform: uppercase;
 }
+.picker-row .btn.icon { min-height: 0; width: 28px; flex: none; }
+.picker-sv:focus-visible, .picker-strip:focus-visible { outline: 1px solid var(--fg); outline-offset: 2px; }
 .picker-swatches {
   display: grid;
   grid-template-columns: repeat(9, 1fr);
   gap: 3px;
   margin-top: 8px;
+}
+.picker-swatches.recent { margin-top: 8px; }
+.picker-swatches.recent + .picker-swatches {
+  margin-top: 6px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
 }
 .picker-swatches button {
   aspect-ratio: 1;
@@ -351,6 +395,18 @@ iso-slider, iso-seg, iso-select, iso-color, iso-pad, iso-text, iso-vec {
 }
 
 /* ------------------------------------------------------------------- text */
+
+.field-clear {
+  display: flex;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--fg-faint);
+  cursor: pointer;
+}
+.field-clear:hover { color: var(--fg); }
+.field-clear .ico { width: 12px; height: 12px; }
 
 .field {
   width: 100%;
@@ -404,7 +460,10 @@ textarea.field { min-height: 62px; line-height: 1.4; font-family: var(--mono); f
   background: var(--fg);
   border-radius: 99px;
   pointer-events: none;
+  transition: transform 0.12s var(--ease);
 }
+.pad.live, .pad:focus-visible { border-color: var(--fg-ghost); }
+.pad.live .pad-dot, .pad:focus-visible .pad-dot { transform: scale(1.4); }
 
 /* ---------------------------------------------------------------- buttons */
 

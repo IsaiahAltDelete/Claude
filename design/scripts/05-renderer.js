@@ -228,7 +228,7 @@ class Renderer {
    */
   setCount(count) {
     const gl = this.gl;
-    const n = Math.max(1, Math.floor(count));
+    const n = Math.max(0, Math.floor(count));   // zero is legal: an empty canvas
     if (n === this.instCount && this.instData) {
       this.assignCells(n);
       return;
@@ -267,6 +267,7 @@ class Renderer {
   }
 
   uploadInstances(n) {
+    if (!n || !this.instData) return;
     const gl = this.gl;
     gl.bindBuffer(gl.ARRAY_BUFFER, this.instBuf);
     gl.bufferSubData(gl.ARRAY_BUFFER, 0, this.instData, 0, n * 6);
@@ -411,11 +412,12 @@ class Renderer {
     gl.uniform1f(u.uPatJitter, s.patJitter);
     gl.uniform1f(u.uPatOpacity, s.patOpacity);
     gl.uniform1f(u.uPatDrift, s.patDrift);
-    if (this.patternTex) {
-      gl.activeTexture(gl.TEXTURE0);
-      gl.bindTexture(gl.TEXTURE_2D, this.patternTex);
-      gl.uniform1i(u.uPattern, 0);
-    }
+    // Bind something to the pattern sampler even when there is no pattern:
+    // whatever is left over on unit 0 could be this pass's own render target,
+    // which is a feedback loop the driver will (rightly) refuse to draw.
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, this.patternTex);
+    gl.uniform1i(u.uPattern, 0);
     gl.bindVertexArray(this.quadVao);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   }
@@ -564,7 +566,11 @@ class Renderer {
 
     gl.bindVertexArray(this.quadVao);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+    // Leave no render-target texture bound into the next frame's passes.
+    gl.bindTexture(gl.TEXTURE_2D, null);
     gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, null);
   }
 
   /** One complete frame. `time` is in seconds. */
