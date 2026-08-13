@@ -39,6 +39,8 @@
     transition: transform 0.28s var(--ease);
     touch-action: pan-y;
   }
+  /* While a finger is on the handle the sheet tracks it directly. */
+  .rail.dragging { transition: none; }
   .rail[data-sheet="half"] { transform: translateY(42%); }
   .rail[data-sheet="full"] { transform: translateY(0); }
 
@@ -74,6 +76,16 @@
   .btn { min-height: 34px; }
   .btn.icon { width: 34px; }
   .row-value { font-size: 11px; }
+
+  /* Under 16px, iOS Safari zooms the page on focus — and with a 100dvh
+     overflow-hidden layout it never zooms back out. Tighten the padding so
+     the extra type does not change the rhythm of the rail. */
+  .field, textarea.field, .vec input, .pop-filter, .row-value.editing {
+    font-size: 16px;
+  }
+  .vec input { padding: 6px 4px; letter-spacing: -0.02em; }
+  textarea.field { line-height: 1.35; }
+  .row-value.editing { width: 84px; }
   .pop { max-height: 46dvh; }
   .picker { width: min(258px, 82vw); }
   .picker-sv { height: 132px; }
@@ -86,6 +98,13 @@
   .bar { padding: 0 8px 0 12px; gap: 8px; }
   .wordmark span { display: none; }
   .stage { padding: 8px 8px calc(var(--sheet-peek, 116px) + 8px); }
+
+  /* Eight tools do not fit across a phone. Fullscreen goes first: mobile
+     browsers are already fullscreen, and iOS Safari refuses the API anyway. */
+  #btn-full { display: none; }
+  .bar-tools { gap: 5px; }
+  .bar-tools .btn.icon { width: 32px; }
+  .bar-tools .btn.solid { padding: 0 9px; }
 }
 
 /* Landscape phones: the sheet takes a side instead of the bottom. */

@@ -92,6 +92,8 @@ const SCHEMA = [
             opts: [["phrase", "Phrase"], ["words", "Words"], ["chars", "Chars"], ["lines", "Lines"]] },
           { k: "case", t: "seg", l: "Case", d: "upper", fx: "atlas",
             opts: [["asis", "As is"], ["upper", "AA"], ["lower", "aa"], ["title", "Aa"]] },
+          { k: "contentBtns", t: "buttons", l: "Canvas",
+            items: [["clear", "Clear"], ["undo", "Undo"], ["redo", "Redo"]] },
         ],
       },
       {
@@ -373,6 +375,45 @@ const PRESETS = [
 const state = { ...DEFAULTS };
 const listeners = new Set();
 
+/* ---------------------------------------------------------------- history
+
+   Randomise, presets and Reset can wipe out a look in one keystroke, so every
+   change is undoable. Snapshots are whole states — this object is a few dozen
+   numbers, so the memory is trivial next to being able to get your work back.
+
+   Consecutive edits to the same control coalesce: dragging a slider for three
+   seconds leaves one undo step, not three hundred. A pause longer than the
+   coalescing window, or touching a different control, starts a new step. */
+
+const HISTORY_LIMIT = 80;
+const COALESCE_MS = 650;
+
+const past = [];
+const future = [];
+let restoring = false;
+let notifying = 0;
+let lastMark = "";
+let lastMarkAt = -Infinity;
+
+function record(keys, source) {
+  const now = performance.now();
+  if (source === "app") {
+    // Control edits coalesce while you stay on the same control.
+    const mark = keys.slice().sort().join(",");
+    const continuing = mark === lastMark && now - lastMarkAt < COALESCE_MS;
+    lastMark = mark;
+    lastMarkAt = now;
+    if (continuing) return;
+  } else {
+    // Randomise, presets, reset and file loads are always their own step.
+    lastMark = "";
+    lastMarkAt = now;
+  }
+  past.push({ ...state });
+  if (past.length > HISTORY_LIMIT) past.shift();
+  future.length = 0;
+}
+
 function normalise(k, v) {
   const f = FIELDS.get(k);
   if (!f) return v;
@@ -410,20 +451,65 @@ const State = {
   get: (k) => state[k],
 
   /** Apply one or many keys. `silent` skips notification (used while loading). */
-  patch(obj, { silent = false, source = "app" } = {}) {
-    const changed = [];
+  patch(obj, { silent = false, source = "app", history = true } = {}) {
+    const pending = [];
     for (const [k, raw] of Object.entries(obj)) {
       if (!(k in DEFAULTS)) continue;
       const v = normalise(k, raw);
       if (state[k] === v) continue;
+      pending.push([k, v]);
+    }
+    if (!pending.length) return [];
+
+    /* Snapshot before mutating, so undo lands on the state you could see.
+       A patch raised from inside a notification — the weight clamped to one
+       the new typeface actually has, the canvas size following a ratio — is a
+       consequence of the change already being recorded, not a step of its
+       own; folding it in is what makes one undo reverse one user action. */
+    if (history && !restoring && !silent && notifying === 0) {
+      record(pending.map(([k]) => k), source);
+    }
+
+    const changed = [];
+    for (const [k, v] of pending) {
       state[k] = v;
       changed.push(k);
     }
-    if (changed.length && !silent) {
+    if (!silent) {
       const payload = { keys: changed, fx: fxOf(changed), source };
-      listeners.forEach((fn) => fn(payload));
+      notifying++;
+      try {
+        listeners.forEach((fn) => fn(payload));
+      } finally {
+        notifying--;
+      }
     }
     return changed;
+  },
+
+  canUndo: () => past.length > 0,
+  canRedo: () => future.length > 0,
+
+  undo() {
+    if (!past.length) return false;
+    future.push({ ...state });
+    const snapshot = past.pop();
+    restoring = true;
+    lastMark = "";
+    State.patch(snapshot, { source: "undo" });
+    restoring = false;
+    return true;
+  },
+
+  redo() {
+    if (!future.length) return false;
+    past.push({ ...state });
+    const snapshot = future.pop();
+    restoring = true;
+    lastMark = "";
+    State.patch(snapshot, { source: "redo" });
+    restoring = false;
+    return true;
   },
 
   set(k, v, opts) { return State.patch({ [k]: v }, opts); },
@@ -446,7 +532,11 @@ const State = {
     return true;
   },
 
-  reset(opts) { State.patch({ ...DEFAULTS }, opts); },
+  /** Both return the keys they changed, so callers can tell you the truth. */
+  reset(opts) { return State.patch({ ...DEFAULTS }, { source: "reset", ...opts }); },
+
+  /** Empty the canvas without touching anything else you have set up. */
+  clear() { return State.patch({ text: "" }, { source: "clear" }); },
 
   randomize() {
     const patch = {};

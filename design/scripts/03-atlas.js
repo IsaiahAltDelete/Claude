@@ -69,9 +69,10 @@ function tokenise(text, split, caseMode) {
   else if (split === "words") tokens = src.split(/\s+/);
   else if (split === "chars") tokens = graphemes(src.replace(/\s+/g, " ")).filter((c) => c !== " ");
   else tokens = [src];
-  tokens = tokens.map((t) => t.replace(/\s+$/g, "")).filter((t) => t.length);
-  if (!tokens.length) tokens = ["·"];
-  return tokens.slice(0, MAX_CELLS);
+  // No text means an empty canvas, not a placeholder mark: clearing the field
+  // is how you clear the artboard. Callers slice to MAX_CELLS themselves so
+  // they can tell the user what was left out.
+  return tokens.map((t) => t.replace(/\s+$/g, "")).filter((t) => t.length);
 }
 
 /* -------------------------------------------------------------- measuring */
@@ -429,7 +430,14 @@ async function ensureFont(fontId, weight, sample) {
  * { u0, v0, u1, v1, aspect } in texture space.
  */
 async function build(s) {
-  const tokens = tokenise(s.text, s.split, s.case);
+  const all = tokenise(s.text, s.split, s.case);
+  const tokens = all.slice(0, MAX_CELLS);
+  const truncated = all.length - tokens.length;
+  if (!tokens.length) {
+    atlasCanvas.width = atlasCanvas.height = 1;
+    atlasCtx.clearRect(0, 0, 1, 1);
+    return { canvas: atlasCanvas, cells: [], width: 1, height: 1, tokens, truncated: 0, total: 0 };
+  }
   await ensureFont(s.font, s.weight, tokens.join(""));
 
   const spec = fontSpec(s.font, s.weight, REF);
@@ -493,7 +501,7 @@ async function build(s) {
   // Release the scratch surface; the atlas itself is uploaded then reused.
   cellCanvas.width = cellCanvas.height = 1;
 
-  return { canvas: atlasCanvas, cells, width: atlasW, height: atlasH, tokens };
+  return { canvas: atlasCanvas, cells, width: atlasW, height: atlasH, tokens, truncated, total: all.length };
 }
 
 /* -------------------------------------------------------- pattern tiling */

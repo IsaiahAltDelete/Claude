@@ -63,10 +63,27 @@ Five panels — Type, Space, Motion, Look, Out — generated from a single schem
 the pipeline it invalidates, and the rail, the URL codec, the presets and the
 randomiser all read from that one table.
 
-Sliders jump on press and drag from there; hold Shift for quarter-speed;
-double-click any control to restore its default; click a value to type it. On
-the canvas, drag to orbit, scroll or pinch to dolly, two fingers to pan,
-double-click to re-centre.
+Sliders jump on press and drag from there. Park the pointer on one and scroll
+to adjust it — a wheel gesture belongs to whatever sat under the pointer when
+it started, so flicking through the panel past a slider keeps scrolling instead
+of nudging a value. Hold Shift for quarter-speed, mid-drag as well as before
+it; drag the number to scrub, click it to type; double-click, Backspace or Home
+restores a default. Arrows step, Page steps cover a hundredth of the range.
+
+Lists take arrow keys, Home/End, Enter and type-ahead, and the long ones carry
+a filter field; focus moves in on open and back to the trigger on close. While
+a list is open it owns the keyboard, so typing to find a typeface cannot
+trigger a global shortcut.
+
+⌘Z and ⇧⌘Z undo and redo everything, including Randomise, presets, Reset and
+Clear — a continuous drag collapses into one step, and each of those commands
+is always its own. Clearing the text clears the canvas (⌘⌫, or the ✕ on the
+field), and undo brings it back.
+
+On the canvas, drag to orbit, scroll or pinch to dolly, two fingers to pan,
+double-click or double-tap to recentre. On a phone the rail is a bottom sheet
+that tracks your finger and takes a flick; a vertical swipe that starts on a
+slider scrolls the panel rather than overwriting the setting.
 
 ## Layout
 
