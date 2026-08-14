@@ -555,9 +555,13 @@ function CON() {
       { id: 'c5', first: 'Ada', last: 'Lovelace', phone: '+1 (407) 555-0177', email: 'ada@analytical.example', org: 'Engineering', fav: false },
       { id: 'c6', first: 'Grace', last: 'Hopper', phone: '+1 (407) 555-0166', email: 'grace@navy.example', org: 'Engineering', fav: false },
       { id: 'c7', first: 'Facilities', last: '', phone: '+1 (407) 555-0122', email: 'facilities@support.example', org: 'Building', fav: false },
+      /* The demo caller. She has to exist here, or the incoming-call screen
+         shows a name that Recents, Messages and Contacts have never heard
+         of and the trainee cannot follow the call anywhere afterwards. */
+      { id: 'c8', first: 'Nina', last: 'Okafor', phone: '+1 (407) 555-0139', email: 'nina.okafor@icloud.example', org: 'Family', fav: true },
     ],
-    next: 8,
-  }));
+    next: 9,
+  }), 2);
 }
 
 const personName = person => `${person.first} ${person.last}`.trim();
