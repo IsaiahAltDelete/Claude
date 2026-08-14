@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#0a0a0b">
+<title>ISAIART DESIGN</title>
+<meta name="description" content="A type-in-space generator: text and emoji thrown through 3D formations, with real text treatments and a defined canvas.">
+<link rel="icon" href="../favicon.svg">
+
+<link rel="preload" href="assets/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/anton-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+
+<link rel="stylesheet" href="styles/01-tokens.css">
+<link rel="stylesheet" href="styles/02-controls.css">
+<link rel="stylesheet" href="styles/03-layout.css">
+<link rel="stylesheet" href="styles/04-responsive.css">
+
+<script defer src="scripts/01-util.js"></script>
+<script defer src="scripts/02-state.js"></script>
+<script defer src="scripts/03-atlas.js"></script>
+<script defer src="scripts/04-shaders.js"></script>
+<script defer src="scripts/05-renderer.js"></script>
+<script defer src="scripts/06-controls.js"></script>
+<script defer src="scripts/07-panels.js"></script>
+<script defer src="scripts/08-export.js"></script>
+<script defer src="scripts/99-boot.js"></script>
+</head>
+<body>
+
+<div class="app">
+  <header class="bar">
+    <h1 class="wordmark"><b>ISAIART</b><span>Design</span></h1>
+    <div class="bar-spacer"></div>
+    <div class="bar-tools">
+      <button class="btn icon" id="btn-undo" type="button" title="Undo — ⌘Z" aria-label="Undo" disabled></button>
+      <button class="btn icon" id="btn-redo" type="button" title="Redo — ⇧⌘Z" aria-label="Redo" disabled></button>
+      <button class="btn icon" id="btn-play" type="button" title="Play / pause — Space" aria-label="Play or pause"></button>
+      <button class="btn icon" id="btn-presets" type="button" title="Presets — P" aria-label="Presets" aria-haspopup="menu" aria-expanded="false"></button>
+      <button class="btn icon" id="btn-canvas" type="button" title="Canvas size — C" aria-label="Canvas size" aria-haspopup="menu" aria-expanded="false"></button>
+      <button class="btn icon" id="btn-random" type="button" title="Randomise — R" aria-label="Randomise"></button>
+      <button class="btn icon" id="btn-theme" type="button" title="Light / dark — T" aria-label="Toggle theme"></button>
+      <button class="btn icon" id="btn-full" type="button" title="Fullscreen — F" aria-label="Fullscreen"></button>
+      <button class="btn icon" id="btn-help" type="button" title="Shortcuts — ?" aria-label="Shortcuts"></button>
+      <button class="btn solid" id="btn-png" type="button" title="Export PNG — E" aria-label="Export PNG"><span>PNG</span></button>
+    </div>
+  </header>
+
+  <main class="stage" id="stage">
+    <div class="artboard" id="artboard">
+      <canvas id="gl" aria-label="Generated type in space"></canvas>
+    </div>
+    <div class="stage-hud">
+      <span id="hud-size">—</span>
+      <span id="hud-render">—</span>
+      <button class="hud-btn" id="hud-recentre" type="button" title="Recentre the camera">Recentre</button>
+    </div>
+    <p class="stage-msg" id="stage-msg" hidden></p>
+    <p class="stage-msg soft" id="stage-empty" hidden>Canvas cleared — type to bring it back</p>
+  </main>
+
+  <aside class="rail" id="rail" data-sheet="peek">
+    <div class="sheet-handle" id="sheet-handle" role="separator" aria-label="Resize panel"></div>
+    <div class="rail-tabs" id="tabs" role="tablist" aria-label="Controls"></div>
+    <div class="rail-body" id="rail-body"></div>
+  </aside>
+
+  <footer class="status">
+    <span class="dot" id="stat-dot"></span>
+    <span>Copies <b id="stat-count">0</b></span>
+    <span>Cells <b id="stat-cells">0</b></span>
+    <span><b id="stat-fps">0</b> fps</span>
+    <span id="stat-msg"></span>
+  </footer>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<div class="modal" id="help" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-label="Shortcuts">
+    <h2>Shortcuts</h2>
+    <dl>
+      <dt>⌘Z / ⇧⌘Z</dt><dd>Undo, redo — including Randomise and presets</dd>
+      <dt>Space</dt><dd>Play / pause</dd>
+      <dt>Scroll a slider</dt><dd>Adjust it; Shift for fine steps</dd>
+      <dt>Drag a value</dt><dd>Scrub it; click it to type a number</dd>
+      <dt>Double-click</dt><dd>Reset a control to its default</dd>
+      <dt>Drag canvas</dt><dd>Orbit — double-click to recentre</dd>
+      <dt>Scroll / pinch</dt><dd>Dolly in and out</dd>
+      <dt>Two fingers</dt><dd>Pan the frame</dd>
+      <dt>R</dt><dd>Randomise everything but the words</dd>
+      <dt>E</dt><dd>Export a PNG at canvas size</dd>
+      <dt>⌘⌫</dt><dd>Clear the canvas</dd>
+      <dt>P · C</dt><dd>Presets · canvas size</dd>
+      <dt>T · F</dt><dd>Light / dark · fullscreen</dd>
+      <dt>1 – 5</dt><dd>Jump to a panel</dd>
+    </dl>
+    <p>Drop a settings <code>.json</code> anywhere on the page to load it. Everything
+      runs on your device; nothing is uploaded.</p>
+    <button class="btn" type="button" id="help-close">Close</button>
+  </div>
+</div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M9 5v14M15 5v14"/></symbol>
+    <symbol id="i-dice" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="9" cy="9" r="1.1"/><circle cx="15" cy="15" r="1.1"/><circle cx="15" cy="9" r="1.1"/><circle cx="9" cy="15" r="1.1"/></symbol>
+    <symbol id="i-contrast" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-expand" viewBox="0 0 24 24"><path d="M4 9V4h5M20 15v5h-5M20 9V4h-5M4 15v5h5"/></symbol>
+    <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.4a2.5 2.5 0 1 1 3.3 2.4c-.6.2-.9.7-.9 1.4v.4"/><circle cx="12" cy="16.7" r="0.9" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></symbol>
+    <symbol id="i-image" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2"/><circle cx="9" cy="10" r="1.4"/><path d="m4 17 4.5-4.5 3.5 3.5 3-2.5L20 17"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M15 6.5V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h.5"/></symbol>
+    <symbol id="i-record" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="8.5"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10.5 13.5a4 4 0 0 0 5.7 0l2.3-2.3a4 4 0 0 0-5.7-5.7L11.6 6.7"/><path d="M13.5 10.5a4 4 0 0 0-5.7 0l-2.3 2.3a4 4 0 0 0 5.7 5.7l1.2-1.2"/></symbol>
+    <symbol id="i-save" viewBox="0 0 24 24"><path d="M12 4v10m0 0 3.5-3.5M12 14l-3.5-3.5"/><path d="M5 17v1.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V17"/></symbol>
+    <symbol id="i-load" viewBox="0 0 24 24"><path d="M12 20V10m0 0 3.5 3.5M12 10 8.5 13.5"/><path d="M5 7V5.5A1.5 1.5 0 0 1 6.5 4h11A1.5 1.5 0 0 1 19 5.5V7"/></symbol>
+    <symbol id="i-reset" viewBox="0 0 24 24"><path d="M4.5 12a7.5 7.5 0 1 0 2.3-5.4"/><path d="M4.2 5.5v4h4"/></symbol>
+    <symbol id="i-undo" viewBox="0 0 24 24"><path d="M4 9h10a5.5 5.5 0 0 1 0 11h-5"/><path d="M7.5 5.5 4 9l3.5 3.5"/></symbol>
+    <symbol id="i-redo" viewBox="0 0 24 24"><path d="M20 9H10a5.5 5.5 0 0 0 0 11h5"/><path d="m16.5 5.5 3.5 3.5-3.5 3.5"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6.5 6.5 11 11M17.5 6.5l-11 11"/></symbol>
+    <symbol id="i-dropper" viewBox="0 0 24 24"><path d="M14.5 5.5a2.6 2.6 0 0 1 3.7 3.7l-1.4 1.4 1 1-2.1 2.1-4.6-4.6 2.1-2.1 1 1z"/><path d="m10.6 9.9-5.3 5.3a2 2 0 0 0-.5 1v2.3h2.3a2 2 0 0 0 1-.5l5.3-5.3"/></symbol>
+    <symbol id="i-centre" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></symbol>
+    <symbol id="i-canvas" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="1.5"/><path d="M3 10.5h3M18 13.5h3"/></symbol>
+    <symbol id="i-presets" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></symbol>
+    <symbol id="i-swap" viewBox="0 0 24 24"><path d="M4 8h13l-3-3M20 16H7l3 3"/></symbol>
+  </defs>
+</svg>
+
+<noscript>
+  <p style="padding:24px;font-family:system-ui">ISAIART DESIGN is a live WebGL tool — it needs JavaScript.</p>
+</noscript>
+
+</body>
+</html>

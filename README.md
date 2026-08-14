@@ -10,6 +10,7 @@ rehearse one, without touching a real machine.
 |---|---|---|
 | [macOS Troubleshooting Simulator](mac/README.md) | [`/mac`](https://isaiahaltdelete.github.io/Claude/mac/) | A full macOS Tahoe desktop — window manager, Finder, Safari, Mail, Outlook, System Settings, Recovery |
 | [iPhone Simulator](iphone/README.md) | [`/iphone`](https://isaiahaltdelete.github.io/Claude/iphone/) | A full iOS phone — lock screen, Control Centre, Spotlight, App Library and 51 apps |
+| [ISAIART DESIGN](design/README.md) | [`/design`](https://isaiahaltdelete.github.io/Claude/design/) | A type-in-space generator — not a simulator, but it lives here too |
 
 Each folder has its own README with credentials, a feature list, its layout and
 the console commands for staging scenarios.
@@ -44,8 +45,27 @@ index.html                   the index page at the site root
 .github/workflows/pages.yml  publishes the site to GitHub Pages on push to main
 mac/                         the macOS simulator, served at /mac
 iphone/                      the iPhone simulator, served at /iphone
+design/                      ISAIART DESIGN, served at /design
 tools/build-assets.py        regenerates the Mac's icons and wallpapers
+tools/check-syntax.py        parses every script, alone and merged into one scope
+tools/check-refs.py          resolves every icon, pane and command reference
+tools/smoke.mjs              opens every app in a real browser and asserts on it
 ```
+
+## Checks
+
+Neither simulator has a build step, so nothing sits between a typo and the
+deployed site. Three gates run on every push and block the deploy:
+
+```
+python3 tools/check-syntax.py   parse, including the iPhone's shared global scope
+python3 tools/check-refs.py     every glyph, pane, command and app id resolves
+node tools/smoke.mjs            all 82 apps open in Chromium with no console errors
+```
+
+The smoke test also checks the HTML sanitiser, keyboard reachability, colour
+contrast, the scenario definitions, and that both simulators still boot against
+a save written by an older build.
 
 ## Notes
 

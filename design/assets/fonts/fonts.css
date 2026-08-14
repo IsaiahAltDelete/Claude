@@ -1,0 +1,79 @@
+/* ---------------------------------------------------------------------------
+   Bundled type pack.
+
+   Every face here is a latin subset taken from @fontsource and ships under the
+   SIL Open Font License 1.1 — see LICENSES.md. Nothing is fetched at runtime,
+   so the generator works offline and renders identically on every machine.
+
+   Interface faces: Inter (UI text) and JetBrains Mono (numerics, labels).
+   Everything else exists to be set in the canvas.
+   --------------------------------------------------------------------------- */
+
+@font-face { font-family: "Inter"; font-style: normal; font-weight: 400; font-display: swap;
+  src: url("inter-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Inter"; font-style: normal; font-weight: 500; font-display: swap;
+  src: url("inter-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "Inter"; font-style: normal; font-weight: 700; font-display: swap;
+  src: url("inter-latin-700-normal.woff2") format("woff2"); }
+
+@font-face { font-family: "JetBrains Mono"; font-style: normal; font-weight: 400; font-display: swap;
+  src: url("jetbrains-mono-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "JetBrains Mono"; font-style: normal; font-weight: 600; font-display: swap;
+  src: url("jetbrains-mono-latin-600-normal.woff2") format("woff2"); }
+
+@font-face { font-family: "Space Grotesk"; font-style: normal; font-weight: 400; font-display: swap;
+  src: url("space-grotesk-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Space Grotesk"; font-style: normal; font-weight: 700; font-display: swap;
+  src: url("space-grotesk-latin-700-normal.woff2") format("woff2"); }
+
+@font-face { font-family: "Oswald"; font-style: normal; font-weight: 400; font-display: swap;
+  src: url("oswald-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Oswald"; font-style: normal; font-weight: 700; font-display: swap;
+  src: url("oswald-latin-700-normal.woff2") format("woff2"); }
+
+@font-face { font-family: "Anton"; font-style: normal; font-weight: 400; font-display: swap;
+  src: url("anton-latin-400-normal.woff2") format("woff2"); }
+
+@font-face { font-family: "Archivo Black"; font-style: normal; font-weight: 400; font-display: swap;
+  src: url("archivo-black-latin-400-normal.woff2") format("woff2"); }
+
+@font-face { font-family: "Bebas Neue"; font-style: normal; font-weight: 400; font-display: swap;
+  src: url("bebas-neue-latin-400-normal.woff2") format("woff2"); }
+
+@font-face { font-family: "Syne"; font-style: normal; font-weight: 400; font-display: swap;
+  src: url("syne-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Syne"; font-style: normal; font-weight: 800; font-display: swap;
+  src: url("syne-latin-800-normal.woff2") format("woff2"); }
+
+@font-face { font-family: "Playfair Display"; font-style: normal; font-weight: 400; font-display: swap;
+  src: url("playfair-display-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Playfair Display"; font-style: normal; font-weight: 700; font-display: swap;
+  src: url("playfair-display-latin-700-normal.woff2") format("woff2"); }
+@font-face { font-family: "Playfair Display"; font-style: normal; font-weight: 900; font-display: swap;
+  src: url("playfair-display-latin-900-normal.woff2") format("woff2"); }
+
+@font-face { font-family: "DM Serif Display"; font-style: normal; font-weight: 400; font-display: swap;
+  src: url("dm-serif-display-latin-400-normal.woff2") format("woff2"); }
+
+@font-face { font-family: "Instrument Serif"; font-style: normal; font-weight: 400; font-display: swap;
+  src: url("instrument-serif-latin-400-normal.woff2") format("woff2"); }
+
+@font-face { font-family: "Major Mono Display"; font-style: normal; font-weight: 400; font-display: swap;
+  src: url("major-mono-display-latin-400-normal.woff2") format("woff2"); }
+
+@font-face { font-family: "VT323"; font-style: normal; font-weight: 400; font-display: swap;
+  src: url("vt323-latin-400-normal.woff2") format("woff2"); }
+
+@font-face { font-family: "Orbitron"; font-style: normal; font-weight: 500; font-display: swap;
+  src: url("orbitron-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "Orbitron"; font-style: normal; font-weight: 900; font-display: swap;
+  src: url("orbitron-latin-900-normal.woff2") format("woff2"); }
+
+@font-face { font-family: "Bungee"; font-style: normal; font-weight: 400; font-display: swap;
+  src: url("bungee-latin-400-normal.woff2") format("woff2"); }
+
+@font-face { font-family: "Monoton"; font-style: normal; font-weight: 400; font-display: swap;
+  src: url("monoton-latin-400-normal.woff2") format("woff2"); }
+
+@font-face { font-family: "Rubik Glitch"; font-style: normal; font-weight: 400; font-display: swap;
+  src: url("rubik-glitch-latin-400-normal.woff2") format("woff2"); }
