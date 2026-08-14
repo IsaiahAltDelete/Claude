@@ -989,32 +989,40 @@ defineApp({
     };
     window.addEventListener('deviceorientation', onOrientation);
 
-    /* One interval for the life of the app. It stops itself if the window is
-       ever torn down, and idles while the app is in the background. */
+    /* The needle animates at ~16fps, which is far too hot to leave running
+       against a hidden window — so it starts and stops with the app rather than
+       guarding on visibility inside the callback. */
     let step = 0;
-    inst.timer = setInterval(() => {
-      if (!win.isConnected) {
-        clearInterval(inst.timer);
-        window.removeEventListener('deviceorientation', onOrientation);
-        return;
-      }
-      if (win.style.display === 'none') return;
-      step += 1;
-      if (!usingSensor) {
-        target = (34 + Math.sin(step / 22) * 26 + Math.sin(step / 7) * 3 + 360) % 360;
-        tilt = { x: Math.sin(step / 15) * 7, y: Math.cos(step / 19) * 5 };
-      }
-      // Shortest-path easing so the needle never spins the long way round 0°.
-      let delta = ((target - heading + 540) % 360) - 180;
-      heading = (heading + delta * 0.16 + 360) % 360;
-      draw();
-    }, 60);
+    inst.start = () => {
+      if (inst.timer) return;
+      inst.timer = setInterval(() => {
+        step += 1;
+        if (!usingSensor) {
+          target = (34 + Math.sin(step / 22) * 26 + Math.sin(step / 7) * 3 + 360) % 360;
+          tilt = { x: Math.sin(step / 15) * 7, y: Math.cos(step / 19) * 5 };
+        }
+        // Shortest-path easing so the needle never spins the long way round 0°.
+        const delta = ((target - heading + 540) % 360) - 180;
+        heading = (heading + delta * 0.16 + 360) % 360;
+        draw();
+      }, 60);
+    };
+    inst.stop = () => { clearInterval(inst.timer); inst.timer = null; };
+    inst.start();
     draw();
 
     /* Tapping the dial locks a bearing, like holding a course in the real app. */
     dial.onclick = () => {
       island(SF.compass, '#ff453a', 'Compass', `Bearing locked at ${Math.round(heading)}° ${cardinalOf(heading)}`);
     };
+
+    inst.onOrientation = onOrientation;
+  },
+  onShow(inst) { inst.start && inst.start(); },
+  onHide(inst) { inst.stop && inst.stop(); },
+  onQuit(inst) {
+    inst.stop && inst.stop();
+    window.removeEventListener('deviceorientation', inst.onOrientation);
   },
 });
 
