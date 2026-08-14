@@ -1,0 +1,342 @@
+/* ===========================================================================
+   Home screen: the left menu, the channel grid, the tiles themselves, and the
+   options panel the * button opens over the top of them.
+   =========================================================================== */
+
+.hs { position: absolute; inset: 0; }
+
+/* ------------------------------------------------------------------- top bar */
+
+.topbar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 76px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 var(--safe-x);
+  z-index: 6;
+  pointer-events: none;
+}
+.topbar .spacer { flex: 1; }
+.topbar .clock {
+  font-size: 22px; font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+  letter-spacing: 0.01em;
+}
+.topbar .tb-chip {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.32);
+  color: var(--tx-2);
+  font-size: 15px;
+}
+.topbar .tb-chip svg { width: 16px; height: 16px; fill: currentColor; }
+.topbar .tb-chip.warn { color: var(--warn); }
+
+/* The wordmark sits above the menu, the way the account tile does on a real
+   home screen. It fades out when the menu collapses. */
+.brandmark {
+  position: absolute;
+  left: 30px; top: 22px;
+  display: flex; align-items: center; gap: 11px;
+  z-index: 7;
+  transition: opacity 0.18s linear;
+}
+.brandmark .bm-logo {
+  width: 34px; height: 34px; border-radius: 8px;
+  background: linear-gradient(150deg, var(--purple-lit), var(--purple));
+  display: grid; place-items: center;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+.brandmark .bm-logo svg { width: 20px; height: 20px; fill: #fff; }
+.brandmark .bm-text { font-size: 20px; font-weight: 600; letter-spacing: 0.02em; }
+.brandmark .bm-sub { font-size: 14px; color: var(--tx-3); }
+.hs[data-focus="grid"] .brandmark .bm-text,
+.hs[data-focus="grid"] .brandmark .bm-sub { opacity: 0; }
+.brandmark .bm-text, .brandmark .bm-sub { transition: opacity 0.18s linear; }
+
+/* --------------------------------------------------------------------- menu */
+
+.side {
+  position: absolute;
+  left: 0; top: 76px; bottom: 0;
+  width: 336px;
+  padding: 4px 14px 20px;
+  overflow: hidden;
+  transition: width 0.2s cubic-bezier(0.22, 0.61, 0.36, 1);
+  z-index: 5;
+}
+.hs[data-focus="grid"] .side { width: 92px; }
+
+/* A soft scrim under the menu keeps the labels readable over bright artwork. */
+.side::before {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, rgba(6, 4, 10, 0.86) 0%, rgba(6, 4, 10, 0.6) 62%, transparent 100%);
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.2s linear;
+}
+.hs[data-focus="grid"] .side::before { opacity: 0.45; }
+
+.side-list { position: relative; }
+
+.mrow {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  height: 56px;
+  padding: 0 16px;
+  margin-bottom: 2px;
+  border-radius: 5px;
+  color: var(--tx-2);
+  font-size: 24px;
+  font-weight: 400;
+  white-space: nowrap;
+  transition: background 0.13s linear, color 0.13s linear;
+}
+.mrow svg { width: 26px; height: 26px; flex: none; fill: currentColor; }
+.mrow .mrow-t { transition: opacity 0.16s linear; }
+.hs[data-focus="grid"] .mrow .mrow-t { opacity: 0; }
+
+/* Where the highlight has been left while focus is out in the grid. */
+.mrow.here { color: #fff; background: rgba(255, 255, 255, 0.08); }
+.mrow.on {
+  background: linear-gradient(90deg, var(--purple) 0%, var(--purple-lit) 100%);
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* --------------------------------------------------------------------- grid */
+
+.gridwrap {
+  position: absolute;
+  left: 92px; right: 0; top: 76px; bottom: 0;
+  padding: 12px var(--safe-x) 22px 26px;
+  overflow: hidden;
+  transition: transform 0.2s cubic-bezier(0.22, 0.61, 0.36, 1), opacity 0.2s linear;
+}
+.hs[data-focus="menu"] .gridwrap { transform: translateX(132px); opacity: 0.5; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(5, 196px);
+  gap: 22px;
+  align-content: start;
+}
+
+.tile {
+  width: 196px;
+  height: 147px;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 5px 16px rgba(0, 0, 0, 0.45);
+}
+.tile.on { box-shadow: var(--focus-shadow); }
+
+/* The tile being carried around by "Move channel" pulses in place. */
+.tile.moving { animation: tile-move 0.9s ease-in-out infinite; }
+@keyframes tile-move { 50% { transform: scale(1.13); } }
+.tile.moving::after {
+  content: "";
+  position: absolute; inset: 0;
+  box-shadow: inset 0 0 0 4px var(--gold);
+  border-radius: 6px;
+}
+
+/* Freshly installed channels land at the end with a "new" flag, as they do on
+   a real box until you open them once. */
+.tile .new-flag {
+  position: absolute;
+  left: 0; top: 0;
+  padding: 3px 9px 4px;
+  border-radius: 6px 0 6px 0;
+  background: var(--gold);
+  color: #221a05;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  z-index: 2;
+}
+
+/* -------------------------------------------------------------- channel art */
+
+/* Every logo is composed here rather than fetched: a brand gradient, an
+   optional texture, a geometric mark and the wordmark itself. Five shapes of
+   layout across forty-odd channels is enough that the grid never looks like
+   one template repeated. */
+.art {
+  position: relative;
+  width: 100%; height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(150deg, var(--c1) 0%, var(--c2) 100%);
+  color: var(--ink, #fff);
+  overflow: hidden;
+}
+.art .tex { position: absolute; inset: 0; opacity: 0.5; pointer-events: none; }
+.art .inner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  padding: 8%;
+  text-align: center;
+  /* --fit is written per channel so a ten-letter wordmark and a four-letter
+     one both sit inside the tile instead of running off the edge. */
+  font-size: calc(1em * var(--fit, 1));
+}
+.art .wordwrap { display: flex; flex-direction: column; align-items: center; min-width: 0; }
+.art.lay-stack .inner  { flex-direction: column; gap: 0.34em; }
+.art.lay-inline .inner { flex-direction: row; }
+.art.lay-word .inner   { flex-direction: column; }
+
+.art .mark { width: 2.2em; height: 2.2em; flex: none; fill: currentColor; }
+.art.lay-inline .mark { width: 1.5em; height: 1.5em; }
+
+.art .word {
+  font-size: 1em;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.02;
+  white-space: nowrap;
+}
+.art .word .thin { font-weight: 300; }
+.art .word .plus { font-weight: 400; }
+.art.lay-word .word { font-size: 1.24em; letter-spacing: -0.02em; }
+
+.art .tag {
+  display: block;
+  margin-top: 0.35em;
+  font-size: 0.34em;
+  font-weight: 600;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  opacity: 0.72;
+  white-space: nowrap;
+}
+
+/* A boxed wordmark, the way a lot of broadcaster logos are set. */
+.art.lay-box .inner {
+  flex-direction: column;
+  padding: 0;
+}
+.art.lay-box .word {
+  padding: 0.22em 0.5em;
+  border: 0.09em solid currentColor;
+  border-radius: 0.1em;
+}
+
+/* One logo, every size.
+
+   Each box that holds channel artwork is a size container, and the art sets
+   its type from the box rather than from a hard-coded pixel value: 13.8cqw is
+   the width the 6.05-em wordmark budget works out to, and 26cqh keeps a short,
+   wide box (the brand bar inside a channel) from overflowing vertically. The
+   fixed sizes below are the fallback for a browser without container queries. */
+.tile .art       { font-size: 27px; }
+.store-tile .art { font-size: 26px; }
+.hero-art .art   { font-size: 36px; }
+.cp-art .art     { font-size: 40px; }
+.poster .art     { font-size: 30px; }
+.art.sz-s        { font-size: 11px; }
+
+.tile, .store-tile, .poster, .hero-art, .rr-art, .gch-art,
+.wr-art, .cb-logo, .cp-art, .cs-logo {
+  container-type: size;
+}
+
+@supports (container-type: size) {
+  .art { font-size: min(13.8cqw, 26cqh); }
+}
+
+/* --------------------------------------------------------- the * options panel */
+
+.optpanel {
+  position: absolute;
+  right: 0; top: 0; bottom: 0;
+  width: 470px;
+  padding: 46px 34px;
+  background: linear-gradient(90deg, rgba(10, 7, 15, 0.5) 0%, rgba(16, 11, 24, 0.97) 12%, rgba(16, 11, 24, 0.99) 100%);
+  box-shadow: -30px 0 60px rgba(0, 0, 0, 0.55);
+  animation: from-right 0.18s ease both;
+}
+.optpanel h2 { font-size: 30px; font-weight: 600; margin-bottom: 4px; }
+.optpanel .sub { color: var(--tx-3); font-size: 18px; margin-bottom: 26px; }
+.optpanel .hintline {
+  position: absolute; left: 34px; right: 34px; bottom: 34px;
+  color: var(--tx-3); font-size: 16px; line-height: 1.5;
+}
+
+/* A dimming scrim behind any right-hand panel. */
+.scrim { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.45); animation: fade-in 0.16s ease both; }
+
+/* -------------------------------------------------------------- art textures */
+
+/* Six overlays, applied over the brand gradient so forty channels don't read
+   as one template. All CSS — no image is ever requested. */
+.tex-rays {
+  background: repeating-conic-gradient(from 210deg at 18% 120%,
+    rgba(255, 255, 255, 0.16) 0deg 7deg, transparent 7deg 17deg);
+}
+.tex-grid {
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.11) 0 1px, transparent 1px 15px),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.11) 0 1px, transparent 1px 15px);
+}
+.tex-dots {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.2) 1.4px, transparent 1.5px);
+  background-size: 13px 13px;
+}
+.tex-diag {
+  background: repeating-linear-gradient(58deg,
+    rgba(255, 255, 255, 0.1) 0 8px, transparent 8px 22px);
+}
+.tex-arc {
+  background:
+    radial-gradient(circle at 84% 108%, transparent 26%, rgba(255, 255, 255, 0.14) 26.6%, transparent 27.4%),
+    radial-gradient(circle at 84% 108%, transparent 44%, rgba(255, 255, 255, 0.12) 44.6%, transparent 45.4%),
+    radial-gradient(circle at 84% 108%, transparent 62%, rgba(255, 255, 255, 0.1) 62.6%, transparent 63.4%);
+}
+.tex-glow {
+  background: radial-gradient(70% 90% at 24% 8%, rgba(255, 255, 255, 0.26), transparent 62%);
+}
+.tex-none { background: none; }
+
+/* The band across the bottom of a few broadcaster-style marks. */
+.art .stripe {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  height: 0.26em;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.25));
+}
+
+/* ------------------------------------------------- the rail on inner screens */
+
+/* Every screen reached from the menu keeps the menu, collapsed to icons. It
+   opens over the content while the highlight is inside it. */
+.siderail {
+  position: absolute;
+  left: 0; top: 76px; bottom: 0;
+  width: 92px;
+  padding: 4px 14px 20px;
+  overflow: hidden;
+  z-index: 8;
+  transition: width 0.2s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.siderail::before {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, rgba(6, 4, 10, 0.9) 0%, rgba(6, 4, 10, 0.6) 62%, transparent 100%);
+  pointer-events: none;
+  opacity: 0.5;
+  transition: opacity 0.2s linear;
+}
+.siderail .mrow .mrow-t { opacity: 0; transition: opacity 0.16s linear; }
+.siderail.open { width: 336px; }
+.siderail.open::before { opacity: 1; background: linear-gradient(90deg, rgba(6, 4, 10, 0.97) 0%, rgba(6, 4, 10, 0.86) 74%, transparent 100%); }
+.siderail.open .mrow .mrow-t { opacity: 1; }
