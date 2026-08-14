@@ -47,6 +47,18 @@
     { id: 'f-installer', name: 'PrinterDriver.pkg', kind: 'file', ext: 'pkg', parent: 'dir-downloads', size: 15728640, modified: now - 8 * DAY },
     { id: 'f-shared', name: 'Read Me First.txt', kind: 'file', ext: 'txt', parent: 'dir-public', size: 2048, modified: now - 40 * DAY },
     { id: 'f-old', name: 'Old Ticket Export.csv', kind: 'file', ext: 'csv', parent: 'trash', trashedFrom: 'dir-documents', size: 71680, modified: now - 15 * DAY },
+
+    /* The external disk. It is always in the file system; whether Finder
+       shows it is decided by `mounted` on the matching entry in `volumes`,
+       so plugging it in and ejecting it are one flag rather than two
+       parallel models that can disagree. */
+    { id: 'vol-backup', name: 'Time Machine Backup', kind: 'volume', parent: null, external: true },
+    { id: 'dir-backups', name: 'Backups.backupdb', kind: 'folder', parent: 'vol-backup', system: true },
+    { id: 'dir-backup-mac', name: "Alex's MacBook Pro", kind: 'folder', parent: 'dir-backups' },
+    { id: 'f-backup-latest', name: 'Latest.backup', kind: 'file', ext: 'backup', parent: 'dir-backup-mac', size: 182536110080, modified: now - 3 * 3600e3 },
+    { id: 'dir-backup-archive', name: 'Archive', kind: 'folder', parent: 'vol-backup' },
+    { id: 'f-backup-tickets', name: 'Ticket Exports 2025.csv', kind: 'file', ext: 'csv', parent: 'dir-backup-archive', size: 3421184, modified: now - 120 * DAY },
+    { id: 'f-backup-photos', name: 'Photo Library Archive.zip', kind: 'file', ext: 'zip', parent: 'dir-backup-archive', size: 24696061952, modified: now - 90 * DAY },
   ];
 
   Mac.DefaultState = {
