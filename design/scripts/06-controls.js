@@ -893,6 +893,7 @@ customElements.define("iso-buttons", Buttons);
 customElements.define("iso-presets", Presets);
 
 window.ISO.closePop = closePop;
+window.ISO.showPop = showPop;
 window.ISO.CONTROL_TAG = {
   slider: "iso-slider", seg: "iso-seg", toggle: "iso-toggle", select: "iso-select",
   color: "iso-color", pad: "iso-pad", vec: "iso-vec", text: "iso-text",

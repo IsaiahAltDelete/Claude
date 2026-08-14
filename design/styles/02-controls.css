@@ -500,3 +500,56 @@ textarea.field { min-height: 62px; line-height: 1.4; font-family: var(--mono); f
 
 .ico { width: 14px; height: 14px; display: block; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 .ico.filled { fill: currentColor; stroke: none; }
+
+/* ----------------------------------------------------------- bar menus
+
+   The canvas and preset menus. Same popover shell as the listboxes, with
+   room for chips and a footer of actions. */
+
+.pop.menu { width: 252px; padding: 8px; }
+
+.menu-title {
+  margin: 0 0 6px;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+}
+.menu-title + * + .menu-title { margin-top: 12px; }
+
+.menu-chips { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+
+.chip {
+  padding: 7px 2px;
+  border: 1px solid var(--line-2);
+  background: var(--bg-2);
+  color: var(--fg-dim);
+  font-family: var(--mono);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: color 0.12s var(--ease), background 0.12s var(--ease);
+}
+.chip:hover { color: var(--fg); background: var(--bg-3); }
+.chip[aria-checked="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+
+.menu-list .pop-item { padding: 6px 7px; }
+.menu-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+}
+.menu-grid .pop-item { padding: 7px; font-size: 12px; }
+
+.menu-foot {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 9px;
+  border-top: 1px solid var(--line);
+}

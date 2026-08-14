@@ -422,6 +422,104 @@ function setupDrop() {
 
 /* ---------------------------------------------------------------- wiring */
 
+/* ------------------------------------------------------------ bar menus
+
+   Canvas size and presets both used to live at the bottom of the last panel.
+   They are the two things you reach for most often and neither belongs to a
+   panel, so they get their own buttons and their own small menus. */
+
+/** Named pixel sizes worth one press. Ratios come from the schema. */
+const SIZES = [
+  ["HD", 1920, 1080],
+  ["QHD", 2560, 1440],
+  ["4K", 3840, 2160],
+  ["Square", 1080, 1080],
+  ["Story", 1080, 1920],
+  ["Portrait", 1440, 1800],
+];
+
+/** The last preset applied, cleared as soon as anything else is touched. */
+let activePreset = null;
+
+function menu(anchor, title, body) {
+  const pop = el("div", { class: "pop menu", role: "menu", "aria-label": title }, body);
+  anchor.setAttribute("aria-expanded", "true");
+  window.ISO.showPop(pop, anchor, () => {
+    anchor.setAttribute("aria-expanded", "false");
+    anchor.focus({ preventScroll: true });
+  });
+  return pop;
+}
+
+function openCanvasMenu() {
+  const s = State.data;
+  const chips = State.ASPECTS.map(([id, w, h]) => el("button", {
+    class: "chip", type: "button", role: "menuitemradio",
+    "aria-checked": String(s.aspect === id && s.width === w && s.height === h),
+    onclick: () => { State.patch({ aspect: id, width: w, height: h }); window.ISO.closePop(); },
+  }, id));
+
+  const sizes = SIZES.map(([name, w, h]) => el("button", {
+    class: "pop-item", type: "button", role: "menuitem",
+    "aria-selected": String(s.width === w && s.height === h),
+    onclick: () => { State.patch({ width: w, height: h }); window.ISO.closePop(); },
+  }, el("span", { text: name }), el("span", { class: "pop-tag", text: `${w}×${h}` })));
+
+  menu($("#btn-canvas"), "Canvas size",
+    [
+      el("p", { class: "menu-title", text: "Ratio" }),
+      el("div", { class: "menu-chips" }, chips),
+      el("p", { class: "menu-title", text: "Size" }),
+      el("div", { class: "menu-list" }, sizes),
+      el("div", { class: "menu-foot" },
+        el("button", {
+          class: "btn", type: "button",
+          onclick: () => {
+            State.patch({ width: State.get("height"), height: State.get("width") });
+            window.ISO.closePop();
+            toast("Canvas turned");
+          },
+        }, icon("swap"), el("span", { text: "Turn" })),
+        el("button", {
+          class: "btn", type: "button",
+          onclick: () => {
+            window.ISO.closePop();
+            toast(State.clear().length ? "Canvas cleared — ⌘Z to undo" : "Canvas is already empty");
+          },
+        }, icon("close"), el("span", { text: "Clear" }))),
+    ]);
+}
+
+function openPresetMenu() {
+  const items = State.PRESETS.map((p) => el("button", {
+    class: "pop-item", type: "button", role: "menuitem",
+    "aria-selected": String(p.id === activePreset),
+    onclick: () => {
+      State.applyPreset(p.id);
+      activePreset = p.id;
+      window.ISO.closePop();
+      toast(`${p.name} — ⌘Z to undo`);
+    },
+  }, el("span", { text: p.name })));
+
+  menu($("#btn-presets"), "Presets", [
+    el("p", { class: "menu-title", text: `Presets · ${State.PRESETS.length}` }),
+    el("div", { class: "menu-grid" }, items),
+    el("div", { class: "menu-foot" },
+      el("button", {
+        class: "btn", type: "button",
+        onclick: () => { window.ISO.closePop(); State.randomize(); toast("Randomised — ⌘Z to undo"); },
+      }, icon("dice"), el("span", { text: "Random" })),
+      el("button", {
+        class: "btn", type: "button",
+        onclick: () => {
+          window.ISO.closePop();
+          toast(State.reset().length ? "Back to defaults — ⌘Z to undo" : "Already at defaults");
+        },
+      }, icon("reset"), el("span", { text: "Reset" }))),
+  ]);
+}
+
 /** One definition of "put the camera back", for every route that offers it. */
 function recentre() {
   State.patch({ yaw: 0, pitch: 0, panX: 0, panY: 0, dist: State.DEFAULTS.dist },
@@ -437,6 +535,10 @@ function setupBar() {
   play.addEventListener("click", () => State.set("playing", !State.get("playing")));
   $("#btn-undo").append(icon("undo"));
   $("#btn-redo").append(icon("redo"));
+  $("#btn-presets").append(icon("presets"));
+  $("#btn-canvas").append(icon("canvas"));
+  $("#btn-presets").addEventListener("click", openPresetMenu);
+  $("#btn-canvas").addEventListener("click", openCanvasMenu);
   $("#btn-undo").addEventListener("click", () => doUndo());
   $("#btn-redo").addEventListener("click", () => doRedo());
   $("#hud-recentre").addEventListener("click", recentre);
@@ -444,6 +546,7 @@ function setupBar() {
   $("#btn-theme").append(icon("contrast"));
   $("#btn-full").append(icon("expand"));
   $("#btn-help").append(icon("help"));
+  $("#btn-png").prepend(icon("image"));   // the label drops away on small phones
   paint();
 
   $("#btn-random").addEventListener("click", () => { State.randomize(); toast("Randomised — ⌘Z to undo"); });
@@ -519,6 +622,8 @@ function setupKeys() {
     else if (k === "e") Export.savePng(app, 1);
     else if (k === "t") setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
     else if (k === "f") $("#btn-full").click();
+    else if (k === "p") openPresetMenu();
+    else if (k === "c") openCanvasMenu();
     else if (k === "?" || (k === "/" && e.shiftKey)) {
       if ($("#help").hidden) app.openHelp?.(); else app.closeHelp?.();
     } else if (k === "escape") { app.closeHelp?.(); window.ISO.closePop?.(); }
@@ -568,6 +673,9 @@ function rememberAutosave() {
 }
 
 function onChange({ keys, fx, source }) {
+  // The preset tick means "this is what you last applied", so anything else
+  // touching the state clears it rather than leaving a stale claim.
+  if (source !== "preset") activePreset = null;
   if (fx.has("atlas")) scheduleAtlas();
   if (fx.has("tile")) scheduleTile();
   if (fx.has("inst")) app.renderer.setCount(State.get("count"));
@@ -601,6 +709,7 @@ function boot() {
   $("#rail").addEventListener("iso-action", (e) => handleAction(e.detail));
   $("#rail").addEventListener("iso-preset", (e) => {
     State.applyPreset(e.detail);
+    activePreset = e.detail;
     const preset = State.PRESETS.find((p) => p.id === e.detail);
     toast(`${preset?.name || "Preset"} — ⌘Z to undo`);
   });
