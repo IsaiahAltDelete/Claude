@@ -870,6 +870,7 @@ const DEFAULTS = {
   phone:null,     // recents + voicemail
   threads:null,   // Messages conversations
   otp:null,       // live one-time passcode
+  osUpdate:null,  // OS update progress (stage + percentage)
   badges:{},
   switches:{}     // every Settings switch that only remembers its own position
 };
@@ -2538,9 +2539,15 @@ function settingsRoot(){
     idRow.style.padding='14px';
     const g0=el('div','grp'); g0.appendChild(idRow); content.appendChild(g0);
 
-    if((State.updatesAvailable||[]).length || State.softwareUpdate!==false){
+    /* Only while there is genuinely an update left to install — the banner
+       used to be permanent, so the badge survived running the update. */
+    if(updatePending() && State.softwareUpdate!==false){
       const up=el('div','grp'); up.style.marginTop='-6px';
-      const r=makeRow({label:'Software Update Available', sub:'iOS 26.2 · 2.14 GB',
+      const stage=OSU().stage;
+      const r=makeRow({label:'Software Update Available',
+        sub:stage==='downloaded'? `iOS ${IOS_UPDATE.version} · Ready to install`
+          : stage==='downloading'? `iOS ${IOS_UPDATE.version} · Downloading…`
+          : `iOS ${IOS_UPDATE.version} · ${IOS_UPDATE.size}`,
         icon:'⚙️', iconBg:'#8e8e93', rightHTML:'<div class="badge" style="position:static">1</div>',
         onClick:()=>nav.push(softwareUpdateView())});
       up.appendChild(r); content.appendChild(up);
@@ -2876,7 +2883,7 @@ function deviceDetailView(name,model,where,isThis){
     group(b,{rows:[
       {label:'Model',value:model},
       {label:'Serial Number',value:isThis?'F2LX9K3QW1PZ':'••••••••••'},
-      ...(isThis?[{label:'iOS Version',value:'26.1'}]:[])]});
+      ...(isThis?[{label:'iOS Version',value:osVersion()}]:[])]});
     if(isThis) group(b,{rows:[{label:'iCloud Backup',value:'Today, 3:14 AM',onClick:()=>toast('Backups are simulated')}]});
     group(b,{rows:[
       {label:'Find My',value:'On',chevron:false},
@@ -3747,7 +3754,7 @@ function aboutView(){
   return {title:'About', build(b,nav){
     group(b,{rows:[{label:'Name',value:State.settings.name,onClick:()=>nav.push(renameView())}]});
     group(b,{rows:[
-      {label:'Software Version',value:'iOS 26.1'},
+      {label:'Software Version',value:'iOS '+osVersion()},
       {label:'Model Name',value:'iPhone 15 Pro'},
       {label:'Model Number',value:'MTQ83LL/A'},
       {label:'Carrier',value:'Sablewave Mobile 54.1'}]});
@@ -3779,25 +3786,130 @@ function renameView(){
     b.appendChild(el('div','grp-f','This name is used by AirDrop, Personal Hotspot and your computer.'));
   }};
 }
+/* ---------- Software Update ----------
+   "Download and Install" used to show a toast and change nothing: the badge
+   never cleared, the version never moved, and running the update — the whole
+   reason anyone opens this screen — was the one thing that could not be done.
+   It now downloads, installs and restarts, and the phone comes back on the
+   new version with the badge gone. */
+const IOS_SHIPPED='26.1';
+const IOS_UPDATE={version:'26.2', size:'2.14 GB',
+  notes:'This update refines Liquid Glass across the system, improves Apple Intelligence summaries in Mail, and includes bug fixes and security updates for your iPhone.'};
+
+function osVersion(){ return State.settings.iosVersion || IOS_SHIPPED; }
+function updatePending(){ return osVersion()!==IOS_UPDATE.version; }
+function OSU(){
+  if(!State.osUpdate) State.osUpdate={stage:'available',progress:0};
+  return State.osUpdate;
+}
+
 function softwareUpdateView(){
   return {title:'Software Update', build(b,nav){
+    const u=OSU();
+
+    if(!updatePending()){
+      const done=el('div','grp'); done.style.cssText='padding:26px 16px;text-align:center';
+      done.innerHTML=`<div style="font-size:34px">✅</div>
+        <div style="font-size:17px;font-weight:600;margin-top:8px">iOS ${esc(osVersion())}</div>
+        <div class="muted" style="font-size:13.5px;margin-top:5px">Your iPhone is up to date.</div>`;
+      b.appendChild(done);
+      group(b,{header:'Automatic Updates',rows:[
+        sw('Download iOS Updates','softwareUpdate.downloadIosUpdates',true),
+        sw('Install iOS Updates','softwareUpdate.installIosUpdates',true)]});
+      b.appendChild(el('div','grp-f','Checked just now.'));
+      return;
+    }
+
     const card=el('div','grp'); card.style.padding='16px';
     card.innerHTML=`<div style="display:flex;gap:12px;align-items:center">
       <div style="width:44px;height:44px;border-radius:10px;background:#8e8e93;display:grid;place-items:center;font-size:22px">⚙️</div>
-      <div><div style="font-size:17px;font-weight:600">iOS 26.2</div>
-      <div class="muted" style="font-size:13px">Apple Inc. · 2.14 GB</div></div></div>
-      <div style="margin-top:12px;font-size:14px;line-height:1.45">This update refines Liquid Glass across the system, improves Apple Intelligence summaries in Mail, and includes bug fixes and security updates for your iPhone.</div>`;
+      <div><div style="font-size:17px;font-weight:600">iOS ${IOS_UPDATE.version}</div>
+      <div class="muted" style="font-size:13px">Apple Inc. · ${IOS_UPDATE.size}</div></div></div>
+      <div style="margin-top:12px;font-size:14px;line-height:1.45">${IOS_UPDATE.notes}</div>`;
     b.appendChild(card);
-    group(b,{rows:[{label:'Download and Install', cls:'blue center', onClick:()=>{
-      if(!isOnline()) return alertBox({title:'Unable to Check for Update',message:netReason(),buttons:[{text:'OK'}]});
-      island('⚙️','#8e8e93','Software Update','Downloading iOS 26.2…',3000);
-      toast('Update download simulated');
-    }}]});
+
+    if(u.stage==='downloading'||u.stage==='installing'){
+      const busy=el('div','grp'); busy.style.padding='16px';
+      busy.innerHTML=`<div style="font-size:14px;font-weight:600">${u.stage==='downloading'?'Downloading':'Preparing Update'}</div>
+        <div style="height:4px;border-radius:2px;background:var(--bg3);margin:10px 0 6px;overflow:hidden">
+          <i id="osu-bar" style="display:block;height:100%;width:${u.progress}%;background:var(--sysblue);transition:width .35s"></i></div>
+        <div class="muted" id="osu-pct" style="font-size:12.5px">${u.progress}%</div>`;
+      b.appendChild(busy);
+    }else{
+      const label = u.stage==='downloaded' ? 'Install Now' : 'Download and Install';
+      group(b,{rows:[{label, cls:'blue center', onClick:()=>{
+        if(u.stage==='downloaded') return installOSUpdate(nav);
+        if(!isOnline()) return alertBox({title:'Unable to Check for Update',message:netReason(),buttons:[{text:'OK'}]});
+        if(!State.settings.wifi && State.settings.cellular)
+          return alertBox({title:'Wi-Fi Required',
+            message:`This ${IOS_UPDATE.size} update is too large to download over cellular. Connect to Wi-Fi and try again.`,
+            buttons:[{text:'OK'}]});
+        if(batteryLevel<0.2 && !charging)
+          return alertBox({title:'Low Battery',
+            message:'Connect your iPhone to power, or charge it to at least 20%, before installing an update.',
+            buttons:[{text:'OK'}]});
+        downloadOSUpdate(nav);
+      }}]});
+      if(u.stage==='downloaded')
+        b.appendChild(el('div','grp-f',`iOS ${IOS_UPDATE.version} has been downloaded. Your iPhone will restart during installation.`));
+    }
+
     group(b,{header:'Automatic Updates',rows:[
       sw('Download iOS Updates','softwareUpdate.downloadIosUpdates',true),
       sw('Install iOS Updates','softwareUpdate.installIosUpdates',true)]});
-    b.appendChild(el('div','grp-f','iOS 26.1 · Your iPhone is currently running the latest released build in this simulator.'));
+    b.appendChild(el('div','grp-f',`iOS ${esc(osVersion())} · This iPhone restarts to finish installing.`));
   }};
+}
+
+/* Held here rather than on State.osUpdate: that object is serialised into
+   the save, and an interval id is meaningless once the page reloads. */
+let osUpdateTimer=null;
+
+/** Step the progress bar in place, so leaving the pane does not lose it. */
+function stepUpdate(nav,onDone){
+  const u=OSU();
+  clearInterval(osUpdateTimer);
+  osUpdateTimer=setInterval(()=>{
+    u.progress=Math.min(100,u.progress+ (u.stage==='downloading'? 7 : 12));
+    const bar=$('#osu-bar'), pct=$('#osu-pct');
+    if(bar) bar.style.width=u.progress+'%';
+    if(pct) pct.textContent=u.progress+'%';
+    if(u.progress>=100){
+      clearInterval(osUpdateTimer); osUpdateTimer=null;
+      onDone();
+    }
+  },320);
+}
+
+function downloadOSUpdate(nav){
+  const u=OSU();
+  u.stage='downloading'; u.progress=0; save();
+  nav.refresh();
+  island('⚙️','#8e8e93','Software Update',`Downloading iOS ${IOS_UPDATE.version}…`,2600);
+  stepUpdate(nav,()=>{
+    u.stage='downloaded'; u.progress=0; save();
+    nav.refresh();
+    pushNotification('settings','Software Update',`iOS ${IOS_UPDATE.version} is ready to install`);
+  });
+}
+
+function installOSUpdate(nav){
+  alertBox({title:`Install iOS ${IOS_UPDATE.version} Now?`,
+    message:'Your iPhone will restart to finish installing. This takes a few minutes and the phone cannot be used while it runs.',
+    buttons:[{text:'Later'},{text:'Install Now',style:'bold',onClick:()=>{
+      const u=OSU();
+      u.stage='installing'; u.progress=0; save();
+      nav.refresh();
+      stepUpdate(nav,()=>{
+        State.settings.iosVersion=IOS_UPDATE.version;
+        State.osUpdate={stage:'installed',progress:100};
+        setBadge('settings',0);
+        save();
+        /* The restart is the visible part — an update that changes a version
+           string with no reboot is the tell that nothing really happened. */
+        reboot();
+      });
+    }}]});
 }
 function storageView(){
   const base=[['iOS','11.4 GB','#8e8e93'],['Photos','23.8 GB','#ff9f0a'],['Media','8.9 GB','#ff2d55'],['Mail','1.2 GB','#0a84ff'],['System Data','5.9 GB','#5e5ce6']];

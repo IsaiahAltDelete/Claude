@@ -25,6 +25,9 @@
       size: [820, 560],
       min: [320, 220],
       singleton: false,
+      /* The shipped constant, not Mac.OS.version(): registerApp runs while
+         the app scripts load, before 31-power.js defines Mac.OS — and an
+         app's bundled version would not change with the OS anyway. */
       version: Mac.OS_VERSION,
       hidden: false,
     }, definition);

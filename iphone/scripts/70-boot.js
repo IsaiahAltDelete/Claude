@@ -46,6 +46,15 @@ function bootSimulator() {
   });
   save();
 
+  /* A download or install that was in flight when the page closed cannot
+     resume — its interval is gone — so it rewinds to a state the user can
+     act on rather than sitting at a percentage that will never move. */
+  const update = OSU();
+  if (update.stage === 'downloading') { update.stage = 'available'; update.progress = 0; }
+  if (update.stage === 'installing') { update.stage = 'downloaded'; update.progress = 0; }
+  setBadge('settings', updatePending() ? 1 : 0);
+  save();
+
   applyAppearance();
   renderHome();
   renderCC();
