@@ -149,6 +149,13 @@
       case 'finder-put-back': Mac.Dialog.close(); Mac.Finder.putBack(win?.appId === 'finder' ? win : appWin('finder')); break;
       case 'finder-delete': Mac.Dialog.close(); Mac.Finder.deleteForever(win?.appId === 'finder' ? win : appWin('finder')); break;
       case 'finder-duplicate': Mac.Dialog.close(); Mac.Finder.duplicate(win?.appId === 'finder' ? win : appWin('finder')); break;
+      case 'finder-copy': Mac.Dialog.close(); Mac.Finder.copyToClipboard(win?.appId === 'finder' ? win : appWin('finder')); break;
+      case 'finder-cut': Mac.Dialog.close(); Mac.Finder.copyToClipboard(win?.appId === 'finder' ? win : appWin('finder'), { cut: true }); break;
+      case 'finder-paste': Mac.Dialog.close(); Mac.Finder.paste(win?.appId === 'finder' ? win : appWin('finder')); break;
+      case 'finder-move-to': Mac.Dialog.close(); Mac.Finder.transferTo(win?.appId === 'finder' ? win : appWin('finder'), 'move'); break;
+      case 'finder-copy-to': Mac.Dialog.close(); Mac.Finder.transferTo(win?.appId === 'finder' ? win : appWin('finder'), 'copy'); break;
+      case 'finder-go-folder': Mac.Dialog.close(); Mac.Finder.goToFolder(win?.appId === 'finder' ? win : appWin('finder')); break;
+      case 'disk-eject': Mac.Finder.eject(arg); break;
       case 'finder-open': {
         const target = win?.appId === 'finder' ? win : appWin('finder');
         Mac.Dialog.close();
@@ -1337,6 +1344,19 @@
     if (cmd && key === 'n' && !inField) { event.preventDefault(); Mac.run('new-window'); return; }
     if (cmd && key === ',' && !inField) { event.preventDefault(); Mac.run('app-settings'); return; }
     if (cmd && event.ctrlKey && key === 'f') { event.preventDefault(); Mac.wm.toggleFullscreen(); return; }
+
+    /* Finder file operations. Guarded on the active window being Finder so
+       ⌘C in Mail still copies text, and skipped inside a field for the same
+       reason. */
+    const finderWin = Mac.wm.windows.get(Mac.session.activeWindow);
+    if (finderWin?.appId === 'finder' && !inField) {
+      if (cmd && event.shiftKey && key === 'g') { event.preventDefault(); Mac.Finder.goToFolder(finderWin); return; }
+      if (cmd && !event.shiftKey && key === 'c') { event.preventDefault(); Mac.Finder.copyToClipboard(finderWin); return; }
+      if (cmd && !event.shiftKey && key === 'x') { event.preventDefault(); Mac.Finder.copyToClipboard(finderWin, { cut: true }); return; }
+      if (cmd && !event.shiftKey && key === 'v') { event.preventDefault(); Mac.Finder.paste(finderWin); return; }
+      if (cmd && !event.shiftKey && key === 'd') { event.preventDefault(); Mac.Finder.duplicate(finderWin); return; }
+      if (cmd && !event.shiftKey && key === 'e') { event.preventDefault(); Mac.Finder.eject('vol-backup'); return; }
+    }
 
     // Trap focus inside an open dialog.
     if (Mac.Dialog.current && event.key === 'Tab') {

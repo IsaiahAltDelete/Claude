@@ -446,10 +446,12 @@
         Mac.Dialog.info('The startup volume cannot be unmounted', 'Restart in Recovery to work on Macintosh HD.', 'warning');
         return;
       }
-      volume.mounted = volume.mounted === false;
-      Mac.save();
+      /* Through Finder, which also has to move any window left sitting
+         inside the volume — a Finder window pointed at an unmounted disk
+         renders an empty list that reads as data loss. */
+      if (volume.mounted === false) Mac.Finder.mount(id);
+      else Mac.Finder.eject(id);
       Mac.wm.refresh('disk-utility');
-      Mac.Notify.show('Disk Utility', `${volume.name} was ${volume.mounted ? 'mounted' : 'unmounted'}.`, { app: 'disk-utility' });
     },
 
     async erase(id) {
