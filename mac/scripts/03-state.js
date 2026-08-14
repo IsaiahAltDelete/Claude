@@ -275,6 +275,10 @@
       { id: 'outlook', version: '16.92', size: 604897280, notes: 'Adds Focused Inbox controls and resolves a sync stall on shared mailboxes.' },
     ],
     storeInstalls: [],
+    /* The scenario in progress: which one, when it started, what has been
+       done, and which goals have been met. Persisted so a reload does not
+       lose a half-finished exercise. */
+    scenario: { id: null, startedAt: 0, log: [], done: [] },
     /* The pending macOS update. `stage` walks available → downloading →
        downloaded → installing, and installing ends in a restart. */
     osUpdate: { stage: 'available', progress: 0 },

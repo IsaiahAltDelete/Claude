@@ -29,6 +29,12 @@
   Mac.run = async (command, arg, element) => {
     const win = winFor(element);
 
+    /* One place records what the trainee did, because one place sees
+       everything: instrumenting individual handlers would only ever cover
+       the ones somebody remembered. Only records while a scenario is
+       running, and skips the commands that fire on their own. */
+    Mac.Scenarios?.record(command, arg);
+
     switch (command) {
       /* ------------------------------------------------------------ shell */
       case 'open-app': Mac.wm.open(arg); Mac.Surfaces.close(); break;
@@ -109,6 +115,13 @@
       case 'renew-dhcp': Mac.Network.renewLease(); break;
       case 'edit-dns': Mac.Network.editDNS(); break;
       case 'clear-proxy': Mac.Network.clearProxy(); break;
+
+      /* ------------------------------------------------------- scenarios */
+      case 'scenarios': Mac.Scenarios.panel(); break;
+      case 'scenario-start': Mac.Dialog.close(); Mac.Scenarios.start(arg); break;
+      case 'scenario-stop': Mac.Scenarios.stop(); break;
+      case 'scenario-hint': Mac.Scenarios.hint(); break;
+      case 'scenario-transcript': Mac.Scenarios.showTranscript(); break;
       case 'run-diagnostics': Mac.Dialog.close(); Mac.Surfaces.close(); Mac.Network.diagnostics(); break;
       case 'reset-network': Mac.Network.resetNetwork(); break;
       case 'portal-agree': Mac.Network.portalAgree(); break;

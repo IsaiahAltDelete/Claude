@@ -54,6 +54,12 @@
     Mac.Shell.renderMenuBar();
     Mac.Shell.renderDock();
     Mac.Shell.renderDesktop();
+
+    /* Scenario goals are re-checked here because sync already runs after
+       every state change — so progress keeps itself up to date without each
+       scenario having to know which settings the trainee is going to touch. */
+    Mac.Scenarios?.evaluate();
+    Mac.Scenarios?.renderProgress();
   };
 
   /* ------------------------------------------------------------------ menus */
@@ -155,6 +161,8 @@
         { label: 'App Store…', command: 'open-app', arg: 'appstore' },
         'sep',
         { label: 'Recent Items', command: 'recent-items' },
+        'sep',
+        { label: 'Training Scenarios…', command: 'scenarios' },
         'sep',
         { label: 'Force Quit…', command: 'force-quit-dialog', shortcut: '⌥⌘⎋' },
         'sep',

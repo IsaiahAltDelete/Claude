@@ -198,8 +198,50 @@ async function testMac(browser, base) {
   await page.waitForTimeout(600);
 
   await testSanitizer(page);
+  await testScenarios(page);
 
   await context.close();
+}
+
+/**
+ * Every scenario must set up and evaluate cleanly.
+ *
+ * A scenario's `setup` and its `done()` predicates read state from all over
+ * the simulator — Wi-Fi, the file system, browser history, the account — so
+ * they are exactly the thing that rots quietly when one of those shapes
+ * changes. A scenario that throws in `done()` is silently treated as
+ * unfinished, which reads to the trainee as a goal they cannot complete.
+ */
+async function testScenarios(page) {
+  const results = await page.evaluate(() => {
+    const out = [];
+    for (const scenario of Mac.Scenarios.all) {
+      const record = { id: scenario.id, checks: scenario.checks.length, errors: [] };
+      if (!scenario.title || !scenario.brief) record.errors.push('missing title or brief');
+      if (!scenario.checks.length) record.errors.push('has no goals');
+      if (!scenario.hints?.length) record.errors.push('has no hints');
+      try {
+        Mac.Scenarios.start(scenario.id);
+        Mac.Dialog.close();
+      } catch (error) { record.errors.push(`setup threw: ${error.message}`); }
+      scenario.checks.forEach(check => {
+        try { check.done(); } catch (error) { record.errors.push(`${check.id}.done() threw: ${error.message}`); }
+        if (!check.label) record.errors.push(`${check.id} has no label`);
+      });
+      /* The fault has to actually be present: a scenario whose goals are all
+         satisfied the moment it starts is not a scenario. */
+      const met = Mac.state.scenario.done.length;
+      if (met === scenario.checks.length) record.errors.push('every goal was already met at setup');
+      out.push(record);
+    }
+    Mac.Scenarios.stop();
+    return out;
+  });
+
+  results.forEach(result => {
+    result.errors.forEach(problem => note(`mac scenario ${result.id}: ${problem}`));
+  });
+  console.log(`  mac: ${results.length} scenarios, ${results.reduce((n, r) => n + r.checks, 0)} goals`);
 }
 
 async function testIphone(browser, base) {
