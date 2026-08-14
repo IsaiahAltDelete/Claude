@@ -678,3 +678,77 @@
 .hud-caption { margin-top: 8px; font-size: calc(11.5px * var(--text-scale)); opacity: 0.8; }
 
 .context-menu { position: absolute; z-index: 9400; min-width: 208px; }
+
+/* --------------------------------------------------------------- scenarios */
+/* The progress card sits opposite the widgets — top right, clear of the Dock
+   and of anything the trainee is likely to be dragging. It is deliberately
+   not a window: it has to stay visible while they work through the apps, and
+   a window would be minimised or buried within a minute. */
+#scenario-layer {
+  position: absolute;
+  top: 34px;
+  right: 14px;
+  z-index: 3;
+  width: 268px;
+  pointer-events: none;
+}
+#scenario-layer > * { pointer-events: auto; }
+
+.scenario-card {
+  padding: 13px 14px 11px;
+  border-radius: 16px;
+  color: #fff;
+  background: rgba(28, 30, 38, 0.42);
+  border: 0.5px solid rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(26px) saturate(160%);
+  -webkit-backdrop-filter: blur(26px) saturate(160%);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+}
+.scenario-card header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: calc(13px * var(--text-scale));
+  line-height: 1.25;
+}
+.scenario-card header .tool-btn { color: #fff; opacity: 0.6; flex: none; }
+.scenario-card header .tool-btn:hover { opacity: 1; }
+.scenario-card > p {
+  margin: 7px 0 10px;
+  font-size: calc(11.5px * var(--text-scale));
+  line-height: 1.45;
+  opacity: 0.78;
+}
+.scenario-checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; }
+.scenario-checks li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: calc(11.5px * var(--text-scale));
+  line-height: 1.35;
+  opacity: 0.72;
+}
+.scenario-checks li.done { opacity: 1; }
+.scenario-checks li.done > span:last-child { text-decoration: line-through; text-decoration-color: rgba(255, 255, 255, 0.4); }
+.scenario-mark {
+  flex: none;
+  width: 15px;
+  height: 15px;
+  margin-top: 1px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  border: 1.2px solid rgba(255, 255, 255, 0.45);
+}
+.scenario-checks li.done .scenario-mark { background: var(--ok); border-color: var(--ok); color: #06240f; }
+.scenario-card footer { display: flex; gap: 6px; margin-top: 11px; }
+.scenario-card footer .btn {
+  flex: 1;
+  font-size: calc(11px * var(--text-scale));
+  padding: 4px 6px;
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+.scenario-card footer .btn:hover { background: rgba(255, 255, 255, 0.28); }

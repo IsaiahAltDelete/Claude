@@ -207,7 +207,12 @@ window.Mac = window.Mac || {};
     },
   };
 
-  Mac.save = () => Mac.Store.save();
+  /* Persisting is also the moment to re-check scenario goals: every fix a
+     trainee applies ends in a save, whereas only some of them end in a sync. */
+  Mac.save = () => {
+    Mac.Store.save();
+    Mac.Scenarios?.evaluate();
+  };
 
   /** Write a value at `path` and refresh whatever depends on it. */
   Mac.set = (path, value, { silent = false } = {}) => {
