@@ -1744,9 +1744,32 @@ function quitApp(id){
 const DOCK=['phone','safari','mail','music'];
 const PAGE1=['settings','appstore','photos','camera','weather','clock','notes','calculator','messages','maps','tv','wallet'];
 function homeApps(){ return [...PAGE1, ...State.installed]; }
-function renderHome(){
-  const pagesEl=$('#pages'); pagesEl.innerHTML='';
+/* The set of icons currently on screen, so a repaint that would produce the
+   identical grid can be skipped. */
+let homeSignature=null;
+
+/**
+ * Paint the home screen and dock.
+ *
+ * Called on every press of the home bar, which used to mean rebuilding
+ * roughly thirty-five tiles — each one an inline SVG icon plus four event
+ * listeners — every single time, purely to end up with the same grid. It
+ * also destroyed keyboard focus on each return, so tabbing to an icon and
+ * pressing Escape put you back at the top of the page.
+ *
+ * The badge counts still update every time; those are patched in place by
+ * updateBadges rather than rebuilt.
+ *
+ * @param {object} [options]
+ * @param {boolean} [options.force] rebuild even if the icon set is unchanged
+ */
+function renderHome({force=false}={}){
   const list=homeApps().filter(id=>Apps[id]);
+  const signature=list.join(',')+'|'+DOCK.filter(id=>Apps[id]).join(',');
+  if(!force && signature===homeSignature){ updateBadges(); return; }
+  homeSignature=signature;
+
+  const pagesEl=$('#pages'); pagesEl.innerHTML='';
   const perPage=24, pages=[];
   for(let i=0;i<list.length;i+=perPage) pages.push(list.slice(i,i+perPage));
   if(!pages.length) pages.push([]);
@@ -4321,7 +4344,7 @@ function resetNetworkSettings(){
    apps sit in their registered order with anything installed appended. The
    reset repaints and reports honestly rather than claiming to undo something
    that was never possible. */
-function resetHomeLayout(){ renderHome(); }
+function resetHomeLayout(){ renderHome({force:true}); }
 
 function eraseConfirm(){ eraseFlow(); }
 

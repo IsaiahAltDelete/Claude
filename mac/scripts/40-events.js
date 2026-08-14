@@ -1165,6 +1165,31 @@
     }
   };
 
+  /**
+   * The search fields, which were eight near-identical blocks.
+   *
+   * `apply` writes the query wherever that app keeps it; `app` is set for
+   * the two whose query lives in persisted state rather than on the window,
+   * so the field can be typed into from a window other than the one that
+   * has to re-render.
+   */
+  const SEARCH_FIELDS = [
+    { attr: 'data-settings-search', apply: (win, value) => { win.state.query = value; } },
+    { attr: 'data-finder-search', apply: (win, value) => { win.state.query = value; } },
+    { attr: 'data-store-search', apply: (win, value) => { win.state.query = value; win.state.detail = null; } },
+    { attr: 'data-activity-search', apply: (win, value) => { win.state.query = value; } },
+    { attr: 'data-console-search', apply: (win, value) => { win.state.query = value; } },
+    { attr: 'data-notes-search', apply: (win, value) => { win.state.query = value; } },
+    { attr: 'data-mail-search', app: 'mail', apply: (win, value) => { Mac.state.mail.search = value; Mac.save(); } },
+    { attr: 'data-outlook-search', app: 'outlook', apply: (win, value) => { Mac.state.outlook.search = value; Mac.save(); } },
+  ];
+
+  /* One shared debounce: only one field can be typed into at a time. */
+  const rerenderSearch = Mac.debounce(
+    (win, selector) => { if (Mac.wm.windows.has(win.id)) rerenderKeepingCaret(win, selector); },
+    130,
+  );
+
   document.addEventListener('input', event => {
     const target = event.target;
     const win = winFor(target);
@@ -1182,49 +1207,16 @@
       return;
     }
 
-    if (target.matches('[data-settings-search]') && win) {
-      win.state.query = target.value;
-      rerenderKeepingCaret(win, '[data-settings-search]');
-      return;
-    }
-    if (target.matches('[data-finder-search]') && win) {
-      win.state.query = target.value;
-      rerenderKeepingCaret(win, '[data-finder-search]');
-      return;
-    }
-    if (target.matches('[data-store-search]') && win) {
-      win.state.query = target.value;
-      win.state.detail = null;
-      rerenderKeepingCaret(win, '[data-store-search]');
-      return;
-    }
-    if (target.matches('[data-activity-search]') && win) {
-      win.state.query = target.value;
-      rerenderKeepingCaret(win, '[data-activity-search]');
-      return;
-    }
-    if (target.matches('[data-console-search]') && win) {
-      win.state.query = target.value;
-      rerenderKeepingCaret(win, '[data-console-search]');
-      return;
-    }
-    if (target.matches('[data-notes-search]') && win) {
-      win.state.query = target.value;
-      rerenderKeepingCaret(win, '[data-notes-search]');
-      return;
-    }
-    if (target.matches('[data-mail-search]')) {
-      Mac.state.mail.search = target.value;
-      Mac.save();
-      const host = Mac.wm.forApp('mail')[0];
-      if (host) rerenderKeepingCaret(host, '[data-mail-search]');
-      return;
-    }
-    if (target.matches('[data-outlook-search]')) {
-      Mac.state.outlook.search = target.value;
-      Mac.save();
-      const host = Mac.wm.forApp('outlook')[0];
-      if (host) rerenderKeepingCaret(host, '[data-outlook-search]');
+    const search = SEARCH_FIELDS.find(field => target.matches(`[${field.attr}]`));
+    if (search) {
+      const host = search.app ? Mac.wm.forApp(search.app)[0] : win;
+      if (!host) return;
+      search.apply(host, target.value);
+      /* Debounced: the field is a real <input> and keeps its own text
+         without any help, so only the filtered result waits. Every keystroke
+         used to re-render the whole window, which in Mail means rebuilding a
+         message list of several hundred rows per character typed. */
+      rerenderSearch(host, `[${search.attr}]`);
       return;
     }
     if (target.id === 'launchpad-input') {
