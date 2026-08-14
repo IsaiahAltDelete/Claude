@@ -28,6 +28,10 @@
     'downloads.local': { title: 'Downloads', color: '#8e98a5' },
   };
 
+  /* Pages Safari serves from its own state, so they open regardless of the
+     network — the same ones a real Safari shows with the cable unplugged. */
+  const LOCAL_PAGES = ['start', 'history', 'bookmarks', 'downloads', 'settings'];
+
   const Browser = Mac.Browser = {
     newTab(win, url = 'start', { activate = true } = {}) {
       const tab = { id: Mac.uid('tab'), url, stack: [url], index: 0, loading: false, title: this.titleFor(url), bypass: false };
@@ -75,14 +79,21 @@
     navigate(win, input, { replace = false, bypass = false, searchTerm = '' } = {}) {
       const tab = this.tab(win);
       let url = this.normalize(input);
-      const wifi = Mac.state.wifi;
 
-      if (!wifi.enabled || !wifi.current) {
-        if (!['start', 'history', 'bookmarks', 'downloads', 'settings'].includes(url)) {
-          url = `offline:${url.replace(/^offline:/, '')}`;
-        }
-      } else if (wifi.captive && !['portal.local', 'start', 'history', 'bookmarks', 'downloads', 'settings'].includes(url)) {
-        url = 'portal.local';
+      /* Reachability comes from Mac.Network, which is the only thing that
+         decides it. Safari used to test Wi-Fi and the captive portal itself
+         and stop there, so a cleared DNS list or a bad proxy — both settable
+         from the pane this very page links to — changed nothing here at all.
+         Each fault now fails the way the real one does: a name that will not
+         resolve is not the same page as a Mac that is off Wi-Fi, and a
+         trainee who cannot tell them apart has not learned anything. */
+      const reason = Mac.Network.offlineReason();
+      const bare = url.replace(/^(offline|dnsfail|proxyfail):/, '');
+      if (reason && !LOCAL_PAGES.includes(url)) {
+        if (reason === 'captive') url = 'portal.local';
+        else if (reason === 'no-dns') url = `dnsfail:${bare}`;
+        else if (reason === 'proxy') url = `proxyfail:${bare}`;
+        else url = `offline:${bare}`;
       }
 
       if (replace) tab.stack[tab.index] = url;
@@ -131,7 +142,7 @@
     /** Add the finished load to history, unless private browsing is on. */
     record(tab) {
       if (Mac.state.browser.private) return;
-      if (tab.url.startsWith('offline:') || tab.url.startsWith('unreachable:')) return;
+      if (/^(offline|unreachable|dnsfail|proxyfail):/.test(tab.url)) return;
       if (tab.live?.kind === 'error') return;
       Mac.state.browser.history.unshift({ title: tab.title, url: tab.url, at: Date.now() });
       Mac.state.browser.history = Mac.state.browser.history.slice(0, 60);
@@ -182,6 +193,8 @@
       if (url === 'settings') return 'Safari Settings';
       if (url.startsWith('offline:')) return 'You are not connected to the internet';
       if (url.startsWith('unreachable:')) return 'Cannot find the server';
+      if (url.startsWith('dnsfail:')) return 'Cannot find the server';
+      if (url.startsWith('proxyfail:')) return 'Cannot open the page';
       if (url.startsWith('search:')) return `${url.slice(7)} — Search`;
       if (url.startsWith('live:')) {
         const target = Mac.Web.parse(url.slice(5));
@@ -216,8 +229,8 @@
     render(win) {
       const tab = this.tab(win);
       const wifi = Mac.state.wifi;
-      const secure = wifi.enabled && wifi.current && !wifi.captive
-        && !tab.url.startsWith('offline:') && !tab.url.startsWith('unreachable:')
+      const secure = Mac.Network.online()
+        && !/^(offline|unreachable|dnsfail|proxyfail):/.test(tab.url)
         && tab.live?.kind !== 'error';
 
       return `<div class="browser">
@@ -282,6 +295,39 @@
             <button class="btn primary" data-command="browse" data-arg="start">Back to Start Page</button>
             <button class="btn" data-command="browse" data-arg="kb.local">Open Knowledge Base</button>
             <button class="btn" data-command="edit-dns">Check DNS Settings</button>
+          </div></div></div>`;
+      }
+
+      /* Deliberately not the offline page. The Wi-Fi bars are full and the
+         router is reachable; it is only name resolution that is broken. A
+         trainee who reads this and goes to Network › DNS has diagnosed it. */
+      if (url.startsWith('dnsfail:')) {
+        return `<div class="error-page"><div>
+          <div class="error-art">${glyph('globe', { size: 54 })}</div>
+          <h1>Safari can’t find the server</h1>
+          <p>Safari cannot open “${esc(url.slice(8))}” because the server’s address could not be
+             resolved. This Mac is connected to ${esc(wifi.current || 'a network')} but has no DNS
+             servers configured, so no hostname will resolve.</p>
+          <div class="error-actions">
+            <button class="btn primary" data-command="edit-dns">Edit DNS Servers</button>
+            <button class="btn" data-command="renew-dhcp">Renew DHCP Lease</button>
+            <button class="btn" data-command="run-diagnostics">Run Diagnostics</button>
+            <button class="btn" data-command="browser-retry">Try Again</button>
+          </div></div></div>`;
+      }
+
+      if (url.startsWith('proxyfail:')) {
+        return `<div class="error-page"><div>
+          <div class="error-art">${glyph('lock', { size: 54 })}</div>
+          <h1>Safari can’t open the page</h1>
+          <p>Safari cannot open “${esc(url.slice(10))}” because the proxy server configured for
+             ${esc(wifi.current || 'this network')} is refusing connections. Check the proxy
+             settings, or turn the proxy off.</p>
+          <div class="error-actions">
+            <button class="btn primary" data-command="open-setting" data-arg="Network">Open Network Settings</button>
+            <button class="btn" data-command="clear-proxy">Turn Off Proxy</button>
+            <button class="btn" data-command="run-diagnostics">Run Diagnostics</button>
+            <button class="btn" data-command="browser-retry">Try Again</button>
           </div></div></div>`;
       }
 
@@ -546,14 +592,22 @@
           </div></div>`,
 
         'network.test': () => {
-          const online = wifi.enabled && wifi.current && !wifi.captive;
+          const reason = Mac.Network.offlineReason();
+          const online = reason === null;
+          const verdict = {
+            'wifi-off': 'Unavailable — Wi-Fi is off',
+            'no-network': 'Unavailable — no network joined',
+            captive: 'Sign-in required',
+            'no-dns': 'Unavailable — no DNS servers configured',
+            proxy: 'Unavailable — proxy refusing connections',
+          }[reason] || 'Reachable';
           return `<div class="web-page"><div class="web-wrap">
             <p class="web-eyebrow">Connection check</p>
             <h1>${online ? 'Your internet connection is working' : 'Action required'}</h1>
             <div class="web-card"><dl class="web-kv">
               <dt>Wi-Fi</dt><dd>${wifi.enabled ? 'On' : 'Off'}</dd>
               <dt>Network</dt><dd>${esc(wifi.current || 'Not connected')}</dd>
-              <dt>Internet</dt><dd>${online ? 'Reachable' : wifi.captive ? 'Sign-in required' : 'Unavailable'}</dd>
+              <dt>Internet</dt><dd>${verdict}</dd>
               <dt>IP address</dt><dd>${esc(wifi.current ? wifi.ip : '--')}</dd>
               <dt>Router</dt><dd>${esc(wifi.current ? wifi.router : '--')}</dd>
               <dt>DNS</dt><dd>${esc(wifi.dns.join(', ') || 'None configured')}</dd>

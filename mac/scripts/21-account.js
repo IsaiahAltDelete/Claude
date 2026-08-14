@@ -237,8 +237,15 @@
               const error = document.getElementById('aid-error');
               if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { error.textContent = 'Enter a valid Apple Account address.'; return; }
               if (password !== Mac.LOGIN_PASSWORD) { error.textContent = 'Incorrect password. The lab password is “support”.'; return; }
-              const online = Mac.state.wifi.enabled && Mac.state.wifi.current && !Mac.state.wifi.captive;
-              if (!online) { error.textContent = 'Sign-in requires an internet connection.'; return; }
+              const reason = Mac.Network.offlineReason();
+              if (reason) {
+                error.textContent = reason === 'no-dns'
+                  ? 'Sign-in failed: the server address could not be resolved. Check DNS in Network settings.'
+                  : reason === 'proxy'
+                    ? 'Sign-in failed: the configured proxy refused the connection.'
+                    : 'Sign-in requires an internet connection.';
+                return;
+              }
               if (this.data().twoFactor) { Mac.Dialog.close(); this.twoFactorPrompt(email); return; }
               Mac.Dialog.close();
               this.completeSignIn(email);
