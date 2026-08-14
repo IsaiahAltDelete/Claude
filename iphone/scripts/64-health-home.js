@@ -54,7 +54,7 @@ function healthFormat(id, value) {
 function HL() {
   return slice('health', () => ({
     favourites: ['steps', 'heart', 'sleep', 'energy', 'exercise'],
-    profile: { name: 'Alex Rivera', dob: '1996-04-14', sex: 'Male', height: `5'11"`, blood: 'O+' },
+    profile: { name: PERSONA.name, dob: '1996-04-14', sex: 'Male', height: `5'11"`, blood: 'O+' },
     medications: [
       { id: 1, name: 'Vitamin D3', dose: '2000 IU', when: 'Morning', taken: true },
       { id: 2, name: 'Cetirizine', dose: '10 mg', when: 'Evening', taken: false },

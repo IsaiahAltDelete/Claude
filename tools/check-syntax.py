@@ -167,11 +167,68 @@ def check_duplicate_functions(iphone_source: str) -> None:
         failures.append("duplicate function names within a Mac script: " + ", ".join(mac_duplicates))
 
 
+APP_ID = re.compile(r"defineApp\(\{\s*(?:/\*(?:(?!\*/).)*?\*/\s*)?id\s*:\s*'([a-z0-9-]+)'", re.S)
+TOP_LEVEL = re.compile(r"^(?:function\s+([A-Za-z_$][\w$]*)\s*\(|const\s+([A-Za-z_$][\w$]*)\s*=)", re.M)
+
+
+def check_shadowed_apps() -> None:
+    """An inline app that a later extension script redefines is unreachable.
+
+    `defineApp` is overwrite-by-id, and index.html is parsed before every
+    script in scripts/. So an app defined in both places keeps the inline
+    definition — and every helper only it calls — resident in the shared
+    global scope with no way to reach it. Six of these had accumulated,
+    accounting for roughly 230 lines, and the only symptom was that editing
+    the inline version changed nothing.
+    """
+    html = (IPHONE / "index.html").read_text()
+    inline_ids = APP_ID.findall(inline_script_body(html))
+    script_ids = {app for path in loaded_scripts(html) for app in APP_ID.findall(path.read_text())}
+    print(f"iPhone apps: {len(inline_ids)} inline, {len(script_ids)} from scripts, "
+          f"{len(set(inline_ids) & script_ids)} shadowed")
+    for path in loaded_scripts(html):
+        for app in APP_ID.findall(path.read_text()):
+            if app in inline_ids:
+                failures.append(
+                    f"iphone/index.html defines the '{app}' app, which "
+                    f"{path.relative_to(ROOT)} then overwrites — the inline one is dead code"
+                )
+
+
+def check_unreferenced(iphone_source: str) -> None:
+    """Top-level names in index.html that nothing anywhere refers to.
+
+    Only the inline block is scanned for declarations: the extension scripts
+    are the live code and are expected to export into the shared scope for
+    each other. This catches the helpers left stranded when an app is
+    superseded, which is the shape the dead code actually takes.
+    """
+    inline = inline_script_body((IPHONE / "index.html").read_text())
+    orphans = []
+    for match in TOP_LEVEL.finditer(inline):
+        name = match.group(1) or match.group(2)
+        # `$` and `$$` are not word characters, so a boundary match is unreliable.
+        if name in {"$", "$$"}:
+            continue
+        uses = re.findall(rf"(?<![\w$]){re.escape(name)}(?![\w$])", iphone_source)
+        if len(uses) <= 1:
+            line = inline.count("\n", 0, match.start()) + 1
+            orphans.append(f"{name} (inline line ~{line})")
+    print(f"iPhone inline scope: {len(TOP_LEVEL.findall(inline))} top-level names, "
+          f"{len(orphans)} unreferenced")
+    if orphans:
+        failures.append(
+            "unreferenced top-level declarations in iphone/index.html: " + ", ".join(orphans)
+        )
+
+
 def main() -> int:
     print("Checking simulator sources…")
     check_each_file()
     combined = check_iphone_global_scope()
     check_duplicate_functions(combined)
+    check_shadowed_apps()
+    check_unreferenced(combined)
 
     if failures:
         print(f"\nFAILED — {len(failures)} problem(s):\n", file=sys.stderr)

@@ -857,6 +857,26 @@ ul{list-style:none}
    ========================================================================= */
 const $ = (s,r=document)=>r.querySelector(s);
 const $$ = (s,r=document)=>[...r.querySelectorAll(s)];
+/**
+ * The invented person this simulated iPhone belongs to.
+ *
+ * Fictional, and every address is `.example` — reserved by RFC 2606, so it
+ * can never be registered and no address here can reach a real inbox.
+ *
+ * Centralised because it was not: the same name and address were typed out
+ * in more than twenty places across both simulators, so changing the
+ * persona meant a find-and-replace through seed data. The seeded message
+ * bodies still spell the name out; a signature at the foot of a message is
+ * prose, and threading a variable through it would read worse.
+ */
+const PERSONA = {
+  name: 'Alex Rivera',
+  first: 'Alex',
+  initials: 'AR',
+  handle: 'alex.rivera',
+  email: 'alex.rivera@icloud.example',
+  device: "Alex's iPhone",
+};
 function el(tag,cls,html){const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e;}
 function h(html){const t=document.createElement('template');t.innerHTML=html.trim();return t.content.firstElementChild;}
 
@@ -972,7 +992,7 @@ const DEFAULTS = {
        fallback is to be able to cause it. */
     faceid:true, faceIDFails:false,
     passcodeOn:true, passcode:'482913', wrongPasscodes:0, lockedOutUntil:0,
-    name:"Alex's iPhone", appleID:'alex.rivera@icloud.example',
+    name:PERSONA.device, appleID:PERSONA.email,
     autoUpdates:true, cellDownloads:false, offloadUnused:false, hapticFeedback:true, appleIntelligence:true,
     ringer:75, mailPreview:2, mailSignature:'Sent from my iPhone', mailThread:true
   },
@@ -1076,7 +1096,7 @@ function factoryReset(){ localStorage.removeItem(SAVE_KEY); location.reload(); }
 function ACC(){
   if(!State.accounts) State.accounts={
     signedIn:1,
-    list:[{id:1,name:'Alex Rivera',email:'alex.rivera@icloud.example',initials:'AR',
+    list:[{id:1,name:PERSONA.name,email:PERSONA.email,initials:'AR',
            color:'linear-gradient(135deg,#5e5ce6,#0a84ff)',storage:47.2,plan:'200 GB'}]
   };
   return State.accounts;
@@ -1264,7 +1284,6 @@ const SF={
   get plane(){return sf('<path d="M21 15.6v-1.8l-7.6-4.6V3.9a1.4 1.4 0 10-2.8 0v5.3L3 13.8v1.8l7.6-2.3v4.9l-2 1.4v1.3l3.4-.9 3.4.9v-1.3l-2-1.4v-4.9z" fill="currentColor" stroke="none"/>',{fill:true,size:15})}
 };
 /* coloured rounded-square container used by settings rows */
-function icoBox(glyph,bg){ return {icon:glyph, iconBg:bg}; }
 
 /* ---------- SVG bits ---------- */
 const SVG = {
@@ -2734,7 +2753,6 @@ const WALLPAPERS=[
   {n:'Orchid',c:'linear-gradient(140deg,#c471f5,#fa71cd 60%,#3b0a58)'}
 ];
 
-function settingsIcon(bg,glyph){ return {icon:glyph, iconBg:bg}; }
 
 defineApp({
   id:'settings', name:'Settings', bg:'linear-gradient(180deg,#c8c9cd,#7c7f86)',
@@ -3039,7 +3057,7 @@ function appleIDView(){
 function personalInfoView(){
   return {title:'Personal Information', shortTitle:'Personal', build(b,nav){
     group(b,{rows:[
-      {label:'Name',value:'Alex Rivera',onClick:()=>toast('Name changes are simulated')},
+      {label:'Name',value:PERSONA.name,onClick:()=>toast('Name changes are simulated')},
       {label:'Date of Birth',value:'••/••/••••',onClick:()=>toast('Hidden in the simulator')}]});
     group(b,{header:'Reachable At',rows:[
       {label:State.settings.appleID,sub:'Apple Account & contact email',chevron:false},
@@ -3102,7 +3120,7 @@ function findMyView(){
   }};
 }
 function familyView(){
-  const members=[['Alex Rivera','Organiser','AR','#0a84ff'],['Nina Okafor','Parent/Guardian','NO','#bf5af2'],
+  const members=[[PERSONA.name,'Organiser','AR','#0a84ff'],['Nina Okafor','Parent/Guardian','NO','#bf5af2'],
     ['Dad','Adult','D','#30d158'],['Jordan Reyes','Adult','JR','#ff9f0a']];
   return {title:'Family', build(b,nav){
     group(b,{rows:members.map(([n,role,init,color])=>({
@@ -4549,9 +4567,9 @@ function appStoreSettingsView(){
   }};
 }
 function passwordsView(){
-  const items=[['sablewave.example','alex.rivera@icloud.example'],['netflix.com','alex.rivera@icloud.example'],
-    ['disneyplus.com','alex.rivera'],['max.com','alex.rivera@icloud.example'],['peacocktv.com','alex.rivera'],
-    ['paramountplus.com','alex.rivera@icloud.example']];
+  const items=[['sablewave.example',PERSONA.email],['netflix.com',PERSONA.email],
+    ['disneyplus.com',PERSONA.handle],['max.com',PERSONA.email],['peacocktv.com',PERSONA.handle],
+    ['paramountplus.com',PERSONA.email]];
   return {title:'Passwords', build(b,nav){
     b.appendChild(el('div','searchfield',`${SVG.search}<input placeholder="Search">`));
     group(b,{rows:items.map(([site,user])=>({
@@ -5733,7 +5751,7 @@ function seedInbox(acct){
   return msgs;
 }
 function defaultMail(){
-  const a={id:1,name:'Alex Rivera',address:State.settings.appleID,provider:'gmail',color:'#ea4335',
+  const a={id:1,name:PERSONA.name,address:State.settings.appleID,provider:'gmail',color:'#ea4335',
     desc:'Gmail',imap:'imap.gmail.com',smtp:'smtp.gmail.com',type:'IMAP',
     enabled:{mail:true,contacts:true,calendars:true,notes:false}};
   a.messages=seedInbox(a);
@@ -7375,10 +7393,10 @@ function contactsView(picking){
       b.appendChild(sf2);
       const me=el('div','grp');
       const meRow=el('div','wf-row');
-      meRow.innerHTML=`${avatarFor('Alex Rivera')}
+      meRow.innerHTML=`${avatarFor(PERSONA.name)}
         <div class="wf-name">Alex Rivera<div class="sub">My Card</div></div>
         <div class="chev">${SVG.chev}</div>`;
-      meRow.onclick=()=>nav.push(contactDetailView('Alex Rivera'));
+      meRow.onclick=()=>nav.push(contactDetailView(PERSONA.name));
       me.appendChild(meRow);
       b.appendChild(me);
       const holder=el('div'); b.appendChild(holder);
@@ -7411,7 +7429,7 @@ function contactDetailView(name){
   return {title:'', backLabel:'Back', shortTitle:'Contact',
     right:[{text:'Edit',onClick:()=>toast('Editing contacts is simulated')}],
     build(b,nav){
-      const me = name==='Alex Rivera';
+      const me = name===PERSONA.name;
       const c = contactBy(name);
       const phones = c? c.phones : (me? [['mobile','(407) 555-0142']] : [['mobile',numberFor(name)||name]]);
       const head=el('div'); head.style.cssText='text-align:center;padding:4px 20px 18px';
@@ -7702,154 +7720,6 @@ function threadView(t){
   }};
 }
 /* =========================================================================
-   PHOTOS — real photography via picsum.photos (seeded, stable URLs) with a
-   graceful gradient fallback when offline. Albums for Nature and Animals use
-   loremflickr keyword feeds.
-   ========================================================================= */
-const PHOTO_SEEDS=['forest','mountain','lake','coast','desert','meadow','canyon','falls','glacier','reef',
-  'aurora','dunes','valley','ridge','grove','marsh','cliff','fjord','prairie','tundra',
-  'oak','pine','fern','moss','river','creek','summit','shore','trail','bloom',
-  'mist','dawn','dusk','storm','snow','rain'];
-function photoURL(i,size=400){ return `https://picsum.photos/seed/${PHOTO_SEEDS[i%PHOTO_SEEDS.length]}${Math.floor(i/PHOTO_SEEDS.length)||''}/${size}/${size}`; }
-function animalURL(i,size=400){ return `https://loremflickr.com/${size}/${size}/animal,wildlife?lock=${i+7}`; }
-function photoCell(src,i,fallbackHue){
-  const c=el('div','ph-cell');
-  c.style.background=`linear-gradient(${i*29}deg,hsl(${(fallbackHue+i*31)%360} 45% 40%),hsl(${(fallbackHue+i*31+60)%360} 45% 25%))`;
-  const img=el('img');
-  img.loading='lazy'; img.src=src;
-  img.style.cssText='width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .4s';
-  img.onload=()=>img.style.opacity='1';
-  img.onerror=()=>img.remove();     // offline → tasteful gradient stays
-  c.appendChild(img);
-  return c;
-}
-defineApp({id:'photos',name:'Photos',bg:'linear-gradient(135deg,#fff,#f2f2f2)',
-  glyph:`<svg viewBox="0 0 100 100" style="width:82%">
-    ${['#f9c22e','#f68b1f','#ee3b3b','#c2379b','#7b3fd4','#2f7ee0','#22b5c8','#4cc35a'].map((c,i)=>
-      `<ellipse cx="50" cy="50" rx="7.4" ry="19" transform="rotate(${i*45} 50 32)" fill="${c}" opacity=".82"/>`).join('')}</svg>`,
-  mount(win,inst){
-    const nav=new Nav(win); inst.nav=nav;
-    nav.setRoot(photosLibraryView());
-  },
-  onShow(inst){ inst.nav.refresh(); }
-});
-function photosLibraryView(){
-  let mode='Years'; // display only
-  return {title:'Library', largeTitle:true, shortTitle:'Library',
-    right:[{text:'Select',onClick:()=>toast('Selection is simulated')}],
-    build(b,nav){
-      /* albums rail */
-      b.appendChild(sectionHeader('Albums',()=>{}));
-      const rail=el('div','hscroll'); rail.style.padding='0 20px 12px';
-      [['Recents',photoURL(3,300),()=>nav.push(photoGridView('Recents',36,photoURL))],
-       ['Nature',photoURL(0,300),()=>nav.push(photoGridView('Nature',24,photoURL))],
-       ['Animals',animalURL(1,300),()=>nav.push(photoGridView('Animals',18,animalURL))],
-       ['Favourites',photoURL(11,300),()=>nav.push(photoGridView('Favourites',9,photoURL))]]
-      .forEach(([name,src,go],i)=>{
-        const c=el('div','hcard'); c.style.minWidth='128px';
-        const cell=photoCell(src,i+2,120);
-        cell.style.cssText+='height:128px;border-radius:14px;overflow:hidden;aspect-ratio:auto';
-        c.appendChild(cell);
-        c.appendChild(h(`<div style="font-size:calc(14px * var(--tsize));font-weight:500;margin-top:6px">${name}</div>
-          <div class="muted" style="font-size:calc(12px * var(--tsize))">${[36,24,18,9][i]} items</div>`));
-        c.onclick=go;
-        rail.appendChild(c);
-      });
-      b.appendChild(rail);
-      /* main grid */
-      b.appendChild(sectionHeader('Days'));
-      const g=el('div','ph-grid');
-      for(let i=0;i<36;i++){
-        const c=photoCell(photoURL(i),i,80);
-        c.onclick=()=>nav.push(photoDetailView(photoURL(i,900),i,'Recents'));
-        g.appendChild(c);
-      }
-      b.appendChild(g);
-      b.appendChild(el('div','grp-f','Photography via picsum.photos / loremflickr — offline you’ll see placeholder tiles.'));
-    }};
-}
-function photoGridView(title,count,urlFn){
-  return {title, shortTitle:title, build(b,nav){
-    const g=el('div','ph-grid');
-    for(let i=0;i<count;i++){
-      const c=photoCell(urlFn(i),i,title==='Animals'?30:200);
-      c.onclick=()=>nav.push(photoDetailView(urlFn(i,900),i,title));
-      g.appendChild(c);
-    }
-    b.appendChild(g);
-  }};
-}
-function photoDetailView(src,i,from){
-  return {title:'', backLabel:from,
-    right:[{html:SF.share,onClick:()=>toast('Share sheet is simulated')}],
-    build(b,nav){
-      const stage=el('div');
-      stage.style.cssText='height:470px;background:#000;display:grid;place-items:center;overflow:hidden';
-      const img=el('img'); img.src=src;
-      img.style.cssText='max-width:100%;max-height:100%;object-fit:contain';
-      img.onerror=()=>{ stage.innerHTML='<div class="muted" style="font-size:calc(13px * var(--tsize))">Photo unavailable offline</div>'; };
-      stage.appendChild(img); b.appendChild(stage);
-      const d=new Date(Date.now()-i*864e5);
-      group(b,{rows:[
-        {label:d.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'}),
-         sub:d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'}), chevron:false},
-        {label:'Camera',value:'iPhone 15 Pro · f/1.8'},
-        {label:'Resolution',value:'4032 × 3024'}]});
-      const bar=el('div');
-      bar.style.cssText='display:flex;justify-content:space-around;padding:14px 20px;color:var(--sysblue)';
-      [['Favourite',SF.star],['Adjust',SF.sliders],['Delete',SF.trash]].forEach(([l,ic])=>{
-        const x=el('button','',`${ic}`); x.title=l;
-        x.onclick=()=>toast(l==='Delete'?'Moved to Recently Deleted':'Simulated');
-        bar.appendChild(x);
-      });
-      b.appendChild(bar);
-    }};
-}
-defineApp({id:'camera',name:'Camera',bg:'linear-gradient(160deg,#4a4a4c,#1c1c1e)',
-  glyph:'<div style="font-size:calc(32px * var(--tsize))">📷</div>', darkStatus:true,
-  mount(win){
-    win.style.background='#000';
-    const v=el('div');
-    v.style.cssText='position:absolute;inset:0;display:flex;flex-direction:column;color:#fff';
-    v.innerHTML=`<div style="flex:1;background:radial-gradient(120% 80% at 50% 30%,#2a2f3a,#0a0a0c);display:grid;place-items:center;margin:60px 0 0">
-        <div style="text-align:center;opacity:.5"><div style="font-size:calc(52px * var(--tsize))">📷</div>
-        <div style="font-size:calc(13px * var(--tsize));margin-top:8px">Camera preview unavailable<br>in the simulator</div></div></div>
-      <div style="padding:16px 0 40px;text-align:center">
-        <div style="display:flex;gap:20px;justify-content:center;font-size:calc(12px * var(--tsize));color:#ffd60a;margin-bottom:14px">
-          <span>VIDEO</span><span style="color:#ffd60a;font-weight:700">PHOTO</span><span style="color:#fff;opacity:.7">PORTRAIT</span></div>
-        <div style="width:70px;height:70px;border-radius:50%;border:4px solid #fff;margin:0 auto;background:#fff" id="shutter"></div></div>`;
-    win.appendChild(v);
-    $('#shutter',v).onclick=()=>{ const f=el('div'); f.style.cssText='position:absolute;inset:0;background:#fff;z-index:9';
-      win.appendChild(f); setTimeout(()=>f.remove(),120); toast('Photo saved to Library'); };
-  }});
-defineApp({id:'weather',name:'Weather',bg:'linear-gradient(180deg,#5ac8fa,#0a63e8)',
-  glyph:'<div style="font-size:calc(32px * var(--tsize))">🌤</div>', darkStatus:true,
-  mount(win){
-    win.style.background='linear-gradient(180deg,#3a7bd5,#0d1b3e)';
-    const v=el('div','wx');
-    const hrs=Array.from({length:9},(_,i)=>{const h=(new Date().getHours()+i)%24;
-      return `<div><div>${i?((h%12||12)+(h<12?'AM':'PM')):'Now'}</div><div style="font-size:calc(20px * var(--tsize));margin:6px 0">${['☀','⛅','☁','🌤','⛅','☀','🌙','🌙','🌙'][i]}</div><div><b>${78-i}°</b></div></div>`;}).join('');
-    v.innerHTML=`<div style="font-size:calc(32px * var(--tsize));font-weight:500">Orlando</div>
-      <div style="font-size:calc(88px * var(--tsize));font-weight:200;line-height:1">78°</div>
-      <div style="font-size:calc(19px * var(--tsize));opacity:.9">Partly Cloudy</div>
-      <div style="opacity:.85">H:91° L:74°</div>
-      <div class="wx-card"><div style="font-size:calc(12px * var(--tsize));opacity:.75;margin-bottom:10px">HOURLY FORECAST</div>
-        <div class="wx-hours">${hrs}</div></div>
-      <div class="wx-card"><div style="font-size:calc(12px * var(--tsize));opacity:.75;margin-bottom:10px">10-DAY FORECAST</div>
-        ${['Today','Wed','Thu','Fri','Sat','Sun','Mon'].map((d,i)=>
-        `<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:${i<6?'.5px solid rgba(255,255,255,.2)':'none'}">
-          <div style="width:50px">${d}</div><div style="font-size:calc(18px * var(--tsize))">${['⛅','🌧','⛈','☀','☀','🌤','🌧'][i]}</div>
-          <div style="opacity:.7;width:34px;text-align:right">${72+i}°</div>
-          <div style="flex:1;height:4px;border-radius:2px;background:linear-gradient(90deg,#ffd60a,#ff9f0a)"></div>
-          <div style="width:34px;text-align:right">${88+i}°</div></div>`).join('')}</div>
-      <div style="display:flex;gap:12px"><div class="wx-card" style="flex:1"><div style="font-size:calc(12px * var(--tsize));opacity:.75">UV INDEX</div>
-        <div style="font-size:calc(28px * var(--tsize));font-weight:600">7</div><div style="font-size:calc(13px * var(--tsize))">High</div></div>
-        <div class="wx-card" style="flex:1"><div style="font-size:calc(12px * var(--tsize));opacity:.75">HUMIDITY</div>
-        <div style="font-size:calc(28px * var(--tsize));font-weight:600">64%</div><div style="font-size:calc(13px * var(--tsize))">Dew point 68°</div></div></div>
-      <div style="height:40px"></div>`;
-    win.appendChild(v);
-  }});
-/* =========================================================================
    CLOCK — World Clock / Alarms / Stopwatch / Timer, all live
    ========================================================================= */
 const WORLD_CITIES=[
@@ -8103,86 +7973,6 @@ function timerView(){
       group(b,{rows:[{label:'When Timer Ends',value:'Radial',onClick:()=>toast('Timer sounds are simulated')}]});
     }};
 }
-defineApp({id:'notes',name:'Notes',bg:'linear-gradient(180deg,#fff2b8,#ffd60a)',
-  glyph:'<div style="font-size:calc(32px * var(--tsize))">📝</div>',
-  mount(win,inst){
-    if(!State.notes) State.notes=[{id:1,t:'Streaming plan',b:'Streaming plan\n\nKeep: Sablewave TV (free with service), Max, Netflix\nRotate: Peacock during football, Paramount+ for CBS\nCancel after the season ends.',d:Date.now()-864e5}];
-    const nav=new Nav(win); inst.nav=nav;
-    nav.setRoot(notesListView(nav));
-  }});
-function notesListView(nav){
-  return {title:'Notes',largeTitle:true,
-    right:[{html:'✎',onClick:n=>{ const note={id:Date.now(),t:'New Note',b:'',d:Date.now()};
-      State.notes.unshift(note); save(); n.push(noteEditor(note,n)); }}],
-    build(b,n){
-      b.appendChild(el('div','searchfield',`${SVG.search}<input placeholder="Search">`));
-      if(!State.notes.length) b.appendChild(h('<div class="empty"><h3>No Notes</h3><p>Tap ✎ to write one.</p></div>'));
-      group(b,{rows:State.notes.map(note=>({
-        label:note.b.split('\n')[0]||'New Note',
-        sub:new Date(note.d).toLocaleDateString()+'  '+(note.b.split('\n')[1]||'No additional text'),
-        onClick:()=>n.push(noteEditor(note,n))
-      }))});
-    }};
-}
-function noteEditor(note,parent){
-  return {title:'', backLabel:'Notes',
-    right:[{html:'🗑',onClick:n=>{ State.notes=State.notes.filter(x=>x.id!==note.id); save(); n.pop(); n.refresh(); }},
-           {html:'✓',onClick:n=>{ n.pop(); n.refresh(); }}],
-    build(b){
-      const ta=el('textarea','note-editor'); ta.value=note.b; ta.placeholder='Start typing…';
-      ta.style.minHeight='100%';
-      ta.oninput=()=>{ note.b=ta.value; note.d=Date.now(); save(); };
-      b.appendChild(ta); setTimeout(()=>ta.focus(),350);
-    },
-    onPop(){ save(); }};
-}
-defineApp({id:'calculator',name:'Calculator',bg:'linear-gradient(180deg,#3a3a3c,#1c1c1e)',
-  glyph:'<div style="font-size:calc(30px * var(--tsize))">🧮</div>', darkStatus:true,
-  mount(win){
-    const c=el('div','calc');
-    const out=el('div','out','0'); c.appendChild(out);
-    const keys=el('div','keys'); c.appendChild(keys);
-    let cur='0', prev=null, op=null, fresh=true;
-    const show=()=>out.textContent = cur.length>9? Number(cur).toPrecision(7): cur;
-    const calc=()=>{ const a=parseFloat(prev), b=parseFloat(cur);
-      return String(op==='+'?a+b:op==='−'?a-b:op==='×'?a*b:op==='÷'?(b?a/b:'Error'):b); };
-    [['AC','fn'],['+/−','fn'],['%','fn'],['÷','op'],
-     ['7'],['8'],['9'],['×','op'],['4'],['5'],['6'],['−','op'],
-     ['1'],['2'],['3'],['+','op'],['0','zero'],['.'],['=','op']].forEach(([k,cls])=>{
-      const b=el('button',cls||'',k);
-      b.onclick=()=>{
-        if(/[0-9]/.test(k)){ cur = (fresh||cur==='0')? k : cur+k; fresh=false; }
-        else if(k==='.'){ if(!cur.includes('.')) cur+='.'; fresh=false; }
-        else if(k==='AC'){ cur='0'; prev=null; op=null; fresh=true; }
-        else if(k==='+/−'){ cur=String(parseFloat(cur)*-1); }
-        else if(k==='%'){ cur=String(parseFloat(cur)/100); }
-        else if(k==='='){ if(op){ cur=calc(); op=null; prev=null; fresh=true; } }
-        else { if(op&&!fresh) cur=calc(); prev=cur; op=k; fresh=true; }
-        show();
-      };
-      keys.appendChild(b);
-    });
-    win.appendChild(c);
-  }});
-defineApp({id:'music',name:'Music',bg:'linear-gradient(180deg,#fa5f6d,#e8305f)',
-  glyph:'<div style="font-size:calc(32px * var(--tsize))">🎵</div>',
-  mount(win,inst){
-    const nav=new Nav(win); inst.nav=nav;
-    nav.setRoot({title:'Listen Now',largeTitle:true,build(b){
-      const hs=el('div','hscroll');
-      ['Chill Mix','Get Up!','New Music','Favorites','Late Night'].forEach((n,i)=>{
-        const c=el('div','hcard'); c.style.minWidth='190px';
-        c.innerHTML=`<div style="height:190px;border-radius:12px;background:linear-gradient(${i*60}deg,hsl(${i*57} 80% 55%),hsl(${i*57+50} 70% 35%));
-          display:flex;align-items:flex-end;padding:12px;color:#fff;font-weight:700">${n}</div>`;
-        c.onclick=()=>island('🎵','#e8305f','Music','Playing '+n,2400);
-        hs.appendChild(c);
-      });
-      b.appendChild(sectionHeader('Made for You'));
-      b.appendChild(hs);
-      group(b,{header:'Recently Played',rows:['Weekend Playlist','Focus Sounds','Road Trip','Throwbacks'].map(t=>({
-        label:t,sub:'Playlist',icon:'♪',iconBg:'#e8305f',onClick:()=>island('🎵','#e8305f','Music','Playing '+t,2200)}))});
-    }});
-  }});
 /* =========================================================================
    MAPS — a real map: OpenStreetMap embed + Nominatim search
    ========================================================================= */
