@@ -1,0 +1,58 @@
+/* ---------------------------------------------------------------------------
+   Local font pack for the Roku simulator.
+
+   Roku's own interface is set in a geometric humanist sans. Inter is the
+   closest free match and is bundled here in full, so the TV looks identical
+   with no network at all — the simulator runs straight from file://.
+
+   Unlike the other simulators in this repository there is no local() lookup:
+   a TV never borrows the host machine's system font, and falling through to
+   SF Pro or Segoe UI would immediately read as "a computer", not "a TV".
+
+   Five weights, because the design uses them: 300 for the big clock on the
+   screensaver, 400 for body copy, 500 for menu rows, 600 for headings and
+   700 for the wordmarks baked into channel artwork.
+
+   Inter is licensed under the SIL Open Font License 1.1 — see
+   Inter-LICENSE.txt in this folder.
+   --------------------------------------------------------------------------- */
+
+@font-face {
+  font-family: "TV System";
+  font-style: normal;
+  font-weight: 300;
+  font-display: block;
+  src: url("inter-latin-300-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "TV System";
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url("inter-latin-400-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "TV System";
+  font-style: normal;
+  font-weight: 500;
+  font-display: block;
+  src: url("inter-latin-500-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "TV System";
+  font-style: normal;
+  font-weight: 600;
+  font-display: block;
+  src: url("inter-latin-600-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "TV System";
+  font-style: normal;
+  font-weight: 700;
+  font-display: block;
+  src: url("inter-latin-700-normal.woff2") format("woff2");
+}

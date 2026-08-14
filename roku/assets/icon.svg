@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Streaming player simulator">
+  <rect width="64" height="64" rx="14" fill="#662d91"/>
+  <rect x="10" y="15" width="44" height="27" rx="3" fill="#fff" opacity=".14"/>
+  <circle cx="32" cy="28.5" r="9.5" fill="none" stroke="#fff" stroke-width="3"/>
+  <circle cx="32" cy="28.5" r="3.1" fill="#fff"/>
+  <rect x="24" y="49" width="16" height="4" rx="2" fill="#fff" opacity=".55"/>
+</svg>

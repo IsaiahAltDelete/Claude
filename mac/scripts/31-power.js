@@ -73,15 +73,15 @@
       Mac.$('#login-actions').innerHTML = s.showPowerButtons ? this.powerActions(['sleep', 'restart', 'shutdown']) : '';
 
       const users = s.guestUser
-        ? [{ name: account.name, initials: account.initials, id: 'isaiah' }, { name: 'Guest User', initials: 'G', id: 'guest' }]
-        : [{ name: account.name, initials: account.initials, id: 'isaiah' }];
+        ? [{ name: account.name, initials: account.initials, id: 'alex' }, { name: 'Guest User', initials: 'G', id: 'guest' }]
+        : [{ name: account.name, initials: account.initials, id: 'alex' }];
 
       if (s.loginWindowShows === 'Name and password') {
         Mac.$('#login-body').innerHTML = `<div class="auth-card centered">
           ${UI.avatar(account.name, { initials: account.initials })}
           <h1>Log in to ${esc(s.computerName)}</h1>
           <form class="auth-form" id="login-form" style="width:250px;margin-bottom:8px">
-            <input id="login-user" value="isaiah" aria-label="User name" autocomplete="off"></form>
+            <input id="login-user" value="alex" aria-label="User name" autocomplete="off"></form>
           <form class="auth-form" id="login-form-password">
             <input id="login-password" type="password" placeholder="Password" aria-label="Password" autocomplete="off">
             <button type="submit" aria-label="Log in">${glyph('forward', { size: 13 })}</button></form>
@@ -91,11 +91,11 @@
       }
 
       Mac.$('#login-body').innerHTML = `<div style="display:grid;gap:26px;justify-items:center">
-        <div class="user-list">${users.map(user => `<button class="user-choice ${user.id === (Mac.session.loginUser || 'isaiah') ? 'on' : ''}"
+        <div class="user-list">${users.map(user => `<button class="user-choice ${user.id === (Mac.session.loginUser || 'alex') ? 'on' : ''}"
           data-command="login-user" data-arg="${user.id}">
           ${UI.avatar(user.name, { initials: user.initials })}<span>${esc(user.name)}</span></button>`).join('')}</div>
         <div class="auth-card centered">
-          ${(Mac.session.loginUser || 'isaiah') === 'guest'
+          ${(Mac.session.loginUser || 'alex') === 'guest'
             ? '<form class="auth-form" id="login-form"><input value="No password required" disabled aria-label="Guest"><button type="submit" aria-label="Log in">→</button></form>'
             : `<form class="auth-form" id="login-form">
                 <input id="login-password" type="password" placeholder="Enter Password" aria-label="Password" autocomplete="off">
@@ -199,7 +199,7 @@
 
       if (type === 'logout') {
         this.closeEverything();
-        Mac.session.loginUser = 'isaiah';
+        Mac.session.loginUser = 'alex';
         Screens.show('login-screen');
         return;
       }
@@ -549,7 +549,7 @@
             ? `<div class="row">${row}</div>`
             : `<button class="row tappable" data-command="wifi-join" data-arg="${esc(network.name)}">${row}</button>`;
         }).join('')}</div>
-        <p class="section-note">Lab passwords — Spectrum Home: spectrum · Support Bench 5G: benchpass</p>`;
+        <p class="section-note">Lab passwords — Sablewave Home: sablewave · Support Bench 5G: benchpass</p>`;
       }
 
       if (id === 'account') {
@@ -558,7 +558,7 @@
             <p>${Mac.state.account.signedIn ? esc(Mac.state.account.email) : 'Not signed in'}</p></div>
             <button class="btn primary" data-command="account-signin">${Mac.state.account.signedIn ? 'Change…' : 'Sign In…'}</button></div>`,
           UI.info('Skip for now', 'You can sign in later', 'iCloud, the App Store and Find My stay off until you do.'),
-        )}<p class="section-note">Lab credentials — isaiah@icloud.example / support, verification code 424242.</p>`;
+        )}<p class="section-note">Lab credentials — alex.rivera@icloud.example / support, verification code 424242.</p>`;
       }
 
       if (id === 'appearance') {

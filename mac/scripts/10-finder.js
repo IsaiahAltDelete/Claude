@@ -195,7 +195,7 @@
       { id: 'dir-pictures', name: 'Pictures', glyph: 'photo' },
       { id: 'dir-music', name: 'Music', glyph: 'play' },
       { id: 'dir-movies', name: 'Movies', glyph: 'gallery' },
-      { id: 'dir-home', name: 'isaiah', glyph: 'person' },
+      { id: 'dir-home', name: 'alex', glyph: 'person' },
       { id: 'applications', name: 'Applications', glyph: 'apps' },
     ] },
     { label: 'iCloud', items: [
