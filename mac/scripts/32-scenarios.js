@@ -135,8 +135,59 @@
     },
   ];
 
+  /**
+   * Individual faults, for demonstrating one thing rather than running a
+   * whole exercise.
+   *
+   * The iPhone has a control drawer down the side of the screen for this.
+   * The Mac deliberately does not copy that: a permanent side rail fights
+   * the desktop metaphor the rest of this is built on, and the Mac fills
+   * the window. Same capability, reached from the same place as the
+   * scenarios, and each one is a single named state change so it can be
+   * undone as easily as it is applied.
+   */
+  const FAULTS = [
+    { id: 'offline', label: 'Turn Wi-Fi off', apply: () => Mac.Network.toggle(false) },
+    { id: 'online', label: 'Restore the connection', apply: () => {
+      Mac.state.wifi = Mac.clone(Mac.DefaultState.wifi);
+      Mac.Network.toggle(true);
+    } },
+    { id: 'captive', label: 'Join a portal network', apply: () => {
+      Mac.state.wifi.current = (Mac.NETWORKS.find(n => n.captive) || {}).name || 'Cafe Welcome';
+      Mac.state.wifi.captive = true;
+    } },
+    { id: 'no-dns', label: 'Clear the DNS servers', apply: () => { Mac.state.wifi.dns = []; } },
+    { id: 'proxy', label: 'Configure a dead proxy', apply: () => { Mac.state.wifi.proxy = true; } },
+    { id: 'low-battery', label: 'Drop the battery to 8%', apply: () => {
+      Mac.state.battery.percent = 8;
+      Mac.state.battery.charging = false;
+    } },
+    { id: 'sign-out', label: 'Sign out of the Apple Account', apply: () => { Mac.state.account.signedIn = false; } },
+    { id: 'updates', label: 'Queue app and OS updates', apply: () => {
+      Mac.state.appUpdates = Mac.clone(Mac.DefaultState.appUpdates);
+      Mac.state.osVersion = null;
+      Mac.state.osUpdate = { stage: 'available', progress: 0 };
+    } },
+    { id: 'fill-bin', label: 'Fill the Bin', apply: () => {
+      ['f-notes', 'f-report', 'f-checklist'].forEach(id => Mac.FS.trash(id));
+    } },
+  ];
+
   const Scenarios = Mac.Scenarios = {
     all: SCENARIOS,
+    faults: FAULTS,
+
+    /** Apply one fault and say what happened, so the change is never silent. */
+    inject(id) {
+      const fault = FAULTS.find(candidate => candidate.id === id);
+      if (!fault) return;
+      fault.apply();
+      Mac.save();
+      Mac.sync();
+      Mac.wm.refreshAll();
+      Mac.Shell.renderDock();
+      Mac.Notify.show('Simulator', `${fault.label}.`, { app: 'settings', transient: true, duration: 2600 });
+    },
 
     find(id) { return SCENARIOS.find(scenario => scenario.id === id) || null; },
 
@@ -282,7 +333,13 @@
             <div class="row-text"><strong>${esc(scenario.title)}</strong><p>${esc(scenario.brief)}</p></div>
             <div class="row-action"><button class="btn ${scenario.id === running.id ? '' : 'primary'}"
               data-command="scenario-start" data-arg="${esc(scenario.id)}">
-              ${scenario.id === running.id ? 'Restart' : 'Start'}</button></div></div>`).join('')}</div>`,
+              ${scenario.id === running.id ? 'Restart' : 'Start'}</button></div></div>`).join('')}</div>
+          <div class="section-title">Individual faults</div>
+          <p style="margin:0 0 8px;font-size:12px;color:var(--text-2)">
+            For demonstrating one thing rather than running a whole exercise. Each is a single named
+            change, so it can be undone as easily as it is applied.</p>
+          <div class="fault-grid">${FAULTS.map(fault =>
+            `<button class="btn" data-command="scenario-fault" data-arg="${esc(fault.id)}">${esc(fault.label)}</button>`).join('')}</div>`,
         buttons: running.id
           ? [{ label: 'Stop the current scenario', danger: true, action: () => this.stop() },
              { label: 'Close', primary: true }]

@@ -752,3 +752,12 @@
   color: #fff;
 }
 .scenario-card footer .btn:hover { background: rgba(255, 255, 255, 0.28); }
+
+/* The individual-fault buttons in the scenario panel. Two columns, because
+   the labels are short phrases and a single column wastes a dialog's width. */
+.fault-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+  gap: 6px;
+}
+.fault-grid .btn { justify-content: flex-start; text-align: left; }
