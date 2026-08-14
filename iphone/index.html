@@ -834,7 +834,8 @@ const DEFAULTS = {
   phone:null,     // recents + voicemail
   threads:null,   // Messages conversations
   otp:null,       // live one-time passcode
-  badges:{}
+  badges:{},
+  switches:{}     // every Settings switch that only remembers its own position
 };
 /**
  * Merge a saved profile over the defaults, recursively and by type.
@@ -878,9 +879,42 @@ function load(){
   }catch(e){ return structuredClone(DEFAULTS); }
 }
 let saveTimer;
-function save(){ clearTimeout(saveTimer); saveTimer=setTimeout(()=>{
-  try{ localStorage.setItem(SAVE_KEY, JSON.stringify(State)); }catch(e){}
-},250); }
+let storageBlocked=false;
+/**
+ * Write the profile to disk, once, after the caller stops changing it.
+ *
+ * Two things beyond the debounce:
+ *
+ * Failures are reported. A blocked localStorage — private browsing, a full
+ * quota, a `file://` origin in some browsers — used to be swallowed here, so
+ * the phone kept working, kept saying "Saved", and lost everything on
+ * reload. That is the worst possible failure for a troubleshooting exercise,
+ * because it teaches that the fix did not stick when in fact it was never
+ * written. Say so once and stop pretending.
+ *
+ * And the pending write is flushed on the way out. A 250ms debounce means a
+ * change made just before the tab closes never reaches disk at all.
+ */
+function save(){ clearTimeout(saveTimer); saveTimer=setTimeout(flushSave,250); }
+function flushSave(){
+  clearTimeout(saveTimer); saveTimer=null;
+  try{
+    localStorage.setItem(SAVE_KEY, JSON.stringify(State));
+    storageBlocked=false;
+  }catch(error){
+    if(storageBlocked) return;          // one warning is enough
+    storageBlocked=true;
+    console.warn('iPhone simulator cannot save', error);
+    if(typeof toast==='function')
+      toast('Storage is blocked — changes will be lost on reload');
+  }
+}
+/* `pagehide` rather than `beforeunload`: it fires on mobile tab eviction and
+   on bfcache navigations, both of which `beforeunload` misses. */
+window.addEventListener('pagehide',()=>{ if(saveTimer) flushSave(); });
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='hidden' && saveTimer) flushSave();
+});
 function factoryReset(){ localStorage.removeItem(SAVE_KEY); location.reload(); }
 
 /* ---------- Apple Accounts (sign in / out / switch) ---------- */
@@ -1348,6 +1382,33 @@ function makeRow(r){
   if(r.onClick) row.onclick=()=>r.onClick(row);
   else if(!r.toggle) row.classList.add('static');
   return row;
+}
+/**
+ * A Settings switch whose only job is to remember its own position.
+ *
+ * Most switches in Settings have no consequence beyond persistence — flipping
+ * "Auto-Correction" cannot change anything in a simulator that has no
+ * keyboard autocorrect. They still have to survive a re-render and a reload,
+ * though. A switch that springs back the moment you leave the pane is the
+ * single most obvious tell that a screen is a mock-up, and it teaches a
+ * trainee that the setting does not stick — the opposite of the lesson.
+ *
+ * Anything with an actual side effect (Airplane Mode, Wi-Fi, Bluetooth) keeps
+ * its own handler and its own key in State.settings. This is for the long
+ * tail, which is most of them.
+ *
+ * @param {string}  label     row label, shown to the user
+ * @param {string}  key       stable dotted key under State.switches; scoped by
+ *                            pane, because several labels repeat across panes
+ * @param {boolean} fallback  position on a fresh device
+ * @param {object}  [extra]   additional row fields (icon, sub, cls, …)
+ */
+function sw(label,key,fallback,extra){
+  return Object.assign({
+    label,
+    toggle:()=> key in State.switches ? !!State.switches[key] : fallback,
+    onToggle:v=>{ State.switches[key]=v; save(); }
+  }, extra||{});
 }
 function segmented(options,current,onPick){
   const s=el('div','seg');
@@ -2327,10 +2388,10 @@ function appleIntelligenceView(){
         {label:'Siri Responses',onClick:()=>toast('Simulated')},
         {label:'Announce Notifications',value:'On',onClick:()=>toast('Simulated')}]});
       group(b,{header:'Apple Intelligence Features',rows:[
-        {label:'Writing Tools',toggle:()=>true,onToggle:()=>{}},
-        {label:'Image Playground',toggle:()=>true,onToggle:()=>{}},
-        {label:'Priority Notifications',toggle:()=>true,onToggle:()=>{}},
-        {label:'Mail Summaries',toggle:()=>true,onToggle:()=>{}}]});
+        sw('Writing Tools','appleIntelligence.writingTools',true),
+        sw('Image Playground','appleIntelligence.imagePlayground',true),
+        sw('Priority Notifications','appleIntelligence.priorityNotifications',true),
+        sw('Mail Summaries','appleIntelligence.mailSummaries',true)]});
       group(b,{rows:[{label:'ChatGPT',value:'Off',onClick:()=>toast('Extensions are simulated')}]});
     }
     b.appendChild(el('div','grp-f','Apple Intelligence is simulated here — the toggles persist but no model runs.'));
@@ -2344,14 +2405,19 @@ function cameraSettingsView(){
       {label:'Record Slo-mo',value:'1080p at 240 fps',onClick:()=>toast('Simulated')},
       {label:'Preserve Settings',onClick:()=>toast('Simulated')}]});
     group(b,{rows:[
-      {label:'Grid',toggle:()=>false,onToggle:()=>{}},
-      {label:'Level',toggle:()=>true,onToggle:()=>{}},
-      {label:'Mirror Front Camera',toggle:()=>true,onToggle:()=>{}},
-      {label:'View Outside the Frame',toggle:()=>false,onToggle:()=>{}}]});
+      /* Grid and Level are the same setting the Camera app's own top bar
+         flips, so they read and write the camera slice rather than a switch
+         of their own — otherwise Settings and the viewfinder disagree, which
+         is exactly the sort of thing a trainee is being taught to notice. */
+      {label:'Grid',toggle:()=>!!CAM().grid,onToggle:v=>{CAM().grid=v;save();}},
+      {label:'Level',toggle:()=>CAM().level!==false,onToggle:v=>{CAM().level=v;save();}},
+      {label:'Mirror Front Camera',toggle:()=>CAM().mirrorFront!==false,
+       onToggle:v=>{CAM().mirrorFront=v;save();}},
+      sw('View Outside the Frame','camera.viewOutsideTheFrame',false)]});
     group(b,{header:'Photo Capture',rows:[
-      {label:'Prioritize Faster Shooting',toggle:()=>true,onToggle:()=>{}},
-      {label:'Lens Correction',toggle:()=>true,onToggle:()=>{}},
-      {label:'Macro Control',toggle:()=>true,onToggle:()=>{}}]});
+      sw('Prioritize Faster Shooting','camera.prioritizeFasterShooting',true),
+      sw('Lens Correction','camera.lensCorrection',true),
+      sw('Macro Control','camera.macroControl',true)]});
   }};
 }
 function phoneSettingsView(){
@@ -2362,8 +2428,8 @@ function phoneSettingsView(){
       {label:'Calls on Other Devices',value:'When Nearby',onClick:()=>toast('Simulated')}]});
     group(b,{header:'Calls',rows:[
       {label:'Announce Calls',value:'Never',onClick:()=>toast('Simulated')},
-      {label:'Silence Unknown Callers',toggle:()=>false,onToggle:()=>{}},
-      {label:'Live Voicemail',toggle:()=>true,onToggle:()=>{}},
+      sw('Silence Unknown Callers','phone.silenceUnknownCallers',false),
+      sw('Live Voicemail','phone.liveVoicemail',true),
       {label:'Call Blocking & Identification',onClick:()=>toast('Simulated')}]});
     group(b,{rows:[{label:'Simulate an Incoming Call',cls:'blue center',onClick:()=>{
       goHome(); setTimeout(()=>incomingCall('Nina Okafor','mobile'),400); }}]});
@@ -2456,8 +2522,8 @@ function personalInfoView(){
       {label:'(407) 555-0142',sub:'Phone',chevron:false},
       {label:'Add Email or Phone Number…',cls:'blue',onClick:()=>toast('Simulated')}]});
     group(b,{header:'Announcements',rows:[
-      {label:'Apple News & Announcements',toggle:()=>false,onToggle:()=>{}},
-      {label:'Apps, Music, TV and More',toggle:()=>true,onToggle:()=>{}}]});
+      sw('Apple News & Announcements','personalInfo.appleNewsAnnouncements',false),
+      sw('Apps, Music, TV and More','personalInfo.appsMusicTvAndMore',true)]});
   }};
 }
 function signInSecurityView(){
@@ -2492,7 +2558,7 @@ function mediaPurchasesView(){
     group(b,{rows:[
       {label:'Purchase History',onClick:()=>nav.push(infoListView('Purchase History','July',
         ['iCloud+ 200 GB — $2.99','Sablewave TV Premium — $12.99','Wordfall Pro — $3.99'],'Purchases are billed to Visa •••• 0092.'))},
-      {label:'Personalised Recommendations',toggle:()=>true,onToggle:()=>{}}]});
+      sw('Personalised Recommendations','mediaPurchases.personalisedRecommendations',true)]});
     group(b,{rows:[
       {label:'Subscriptions',onClick:()=>nav.push(subscriptionsView())},
       {label:'Pre-Orders',value:'None',chevron:false},
@@ -2503,11 +2569,11 @@ function findMyView(){
   return {title:'Find My', build(b,nav){
     group(b,{rows:[
       {label:'Find My iPhone',toggle:()=>true,onToggle:()=>toast('Always on in the simulator')},
-      {label:'Find My network',toggle:()=>true,onToggle:()=>{}},
-      {label:'Send Last Location',toggle:()=>true,onToggle:()=>{}}],
+      sw('Find My network','findMy.findMyNetwork',true),
+      sw('Send Last Location','findMy.sendLastLocation',true)],
       footer:'Find My iPhone helps you locate, lock or erase this iPhone if it’s lost — even when it’s offline.'});
     group(b,{header:'My Location',rows:[
-      {label:'Share My Location',toggle:()=>false,onToggle:()=>{}},
+      sw('Share My Location','findMy.shareMyLocation',false),
       {label:'This Device',value:'Orlando, FL',chevron:false}]});
   }};
 }
@@ -2616,8 +2682,8 @@ function storagePlanView(acct,PLANS){
 function backupView(){
   return {title:'iCloud Backup', shortTitle:'Backup', build(b,nav){
     group(b,{rows:[
-      {label:'Back Up This iPhone',toggle:()=>true,onToggle:()=>{}},
-      {label:'Back Up Over Cellular',toggle:()=>false,onToggle:()=>{}}],
+      sw('Back Up This iPhone','backup.backUpThisIphone',true),
+      sw('Back Up Over Cellular','backup.backUpOverCellular',false)],
       footer:'Automatically back up data when this iPhone is locked, plugged in and on Wi-Fi.'});
     group(b,{rows:[{label:'Back Up Now',cls:'blue center',onClick:()=>{
       island('☁️','#0a84ff','iCloud Backup','Backing up…',3000); toast('Backup started'); }}]});
@@ -3010,7 +3076,10 @@ function networkDetailView(ssid){
         nav.push(wifiPicker('Private Wi-Fi Address',['Off','Fixed','Rotating'],k.priv,v=>{k.priv=v;save();},
           'Using a private address helps reduce tracking of your iPhone across different Wi-Fi networks.'));}},
       {label:'Wi-Fi Address',value:k&&k.priv!=='Off'?net.mac:'8A:2C:19:F0:41:DE'},
-      {label:'Limit IP Address Tracking',toggle:()=>true,onToggle:()=>{}}
+      /* Per network, like Auto-Join and Low Data Mode above it — this pane is
+         rebuilt for whichever network was tapped. */
+      {label:'Limit IP Address Tracking',toggle:()=>k?k.limitIP!==false:true,
+       onToggle:v=>{ if(k){k.limitIP=v;save();} else toast('Join the network first'); }}
     ],footer:'Limit IP address tracking by hiding your IP address from known trackers in Mail and Safari.'});
 
     if(connected){
@@ -3093,7 +3162,7 @@ function btDeviceView(d){
     if(d.type==='audio') group(b,{rows:[
       {label:'Noise Control',value:'Noise Cancellation',onClick:()=>nav.push(wifiPicker('Noise Control',
         ['Off','Transparency','Adaptive','Noise Cancellation'],'Noise Cancellation',()=>{},''))},
-      {label:'Ear Detection',toggle:()=>true,onToggle:()=>{}},
+      {label:'Ear Detection',toggle:()=>d.earDetect!==false,onToggle:v=>{d.earDetect=v;save();}},
       {label:'Connect to This iPhone',value:'Automatically',onClick:()=>toast('Simulated')}]});
     group(b,{rows:[
       {label:'Device Type',value:{audio:'Headphone',watch:'Watch',remote:'Remote',car:'Car Stereo'}[d.type]||'Other',
@@ -3152,7 +3221,7 @@ function cellOptionsView(){
       {label:'Data Mode',value:c.dataMode,onClick:()=>nav.push(wifiPicker('Data Mode',
         ['Allow More Data on 5G','Standard','Low Data Mode'],c.dataMode,v=>{c.dataMode=v;save();},''))},
       {label:'Data Roaming',toggle:()=>false,onToggle:()=>toast('Roaming is simulated')}]});
-    group(b,{rows:[{label:'Limit IP Address Tracking',toggle:()=>true,onToggle:()=>{}}],
+    group(b,{rows:[sw('Limit IP Address Tracking','cellOptions.limitIpAddressTracking',true)],
       footer:'Limit IP address tracking by hiding your IP address from known trackers in Mail and Safari.'});
   }};
 }
@@ -3295,7 +3364,7 @@ function soundsView(){
     sl.oninput=e=>{s.ringer=+e.target.value; save();};
     g.innerHTML='<div style="font-size:13px;color:var(--txt2);margin-bottom:8px">RINGER AND ALERTS</div>';
     g.appendChild(sl); b.appendChild(g);
-    group(b,{rows:[{label:'Change with Buttons', toggle:()=>true, onToggle:()=>{}}]});
+    group(b,{rows:[sw('Change with Buttons','sounds.changeWithButtons',true)]});
     group(b,{header:'Sounds and Haptic Patterns',rows:[
       {label:'Ringtone', value:'Reflection', onClick:()=>nav.push(pickerView('Ringtone',['Reflection','Opening','Radiate','Signal','Rejoice','Chimes','Bulletin'],'Reflection',()=>{}))},
       {label:'Text Tone', value:'Note', onClick:()=>nav.push(pickerView('Text Tone',['Note','Aurora','Bamboo','Chord','Circles','Complete'],'Note',()=>{}))},
@@ -3303,7 +3372,7 @@ function soundsView(){
       {label:'Sent Mail', value:'Swoosh', onClick:()=>toast('Simulated')}]});
     group(b,{rows:[
       {label:'Keyboard Feedback', value:'Sound', onClick:()=>toast('Simulated')},
-      {label:'Lock Sound', toggle:()=>true, onToggle:()=>{}},
+      sw('Lock Sound','sounds.lockSound',true),
       {label:'System Haptics', toggle:()=>State.settings.hapticFeedback, onToggle:v=>{State.settings.hapticFeedback=v;save();}}]});
   }};
 }
@@ -3317,7 +3386,7 @@ function focusView(){
       {label:'Work', icon:'💼', iconBg:'#5e5ce6', onClick:()=>toast('Simulated')}],
       footer:'Focus filters what notifications you receive. Tap Do Not Disturb to toggle it here.'});
     group(b,{rows:[
-      {label:'Share Across Devices', toggle:()=>true, onToggle:()=>{}},
+      sw('Share Across Devices','focus.shareAcrossDevices',true),
       {label:'Focus Status', value:'On', onClick:()=>toast('Simulated')}]});
   }};
 }
@@ -3419,8 +3488,8 @@ function softwareUpdateView(){
       toast('Update download simulated');
     }}]});
     group(b,{header:'Automatic Updates',rows:[
-      {label:'Download iOS Updates', toggle:()=>true, onToggle:()=>{}},
-      {label:'Install iOS Updates', toggle:()=>true, onToggle:()=>{}}]});
+      sw('Download iOS Updates','softwareUpdate.downloadIosUpdates',true),
+      sw('Install iOS Updates','softwareUpdate.installIosUpdates',true)]});
     b.appendChild(el('div','grp-f','iOS 26.1 · Your iPhone is currently running the latest released build in this simulator.'));
   }};
 }
@@ -3482,13 +3551,13 @@ function keyboardView(){
   return {title:'Keyboards', build(b,nav){
     group(b,{rows:[{label:'Keyboards',value:'2',onClick:()=>nav.push(infoListView('Keyboards','',['English (US)','Emoji','Add New Keyboard…'],''))}]});
     group(b,{header:'All Keyboards',rows:[
-      {label:'Auto-Capitalization',toggle:()=>true,onToggle:()=>{}},
-      {label:'Auto-Correction',toggle:()=>true,onToggle:()=>{}},
-      {label:'Check Spelling',toggle:()=>true,onToggle:()=>{}},
-      {label:'Enable Caps Lock',toggle:()=>true,onToggle:()=>{}},
-      {label:'Predictive',toggle:()=>true,onToggle:()=>{}},
-      {label:'Smart Punctuation',toggle:()=>true,onToggle:()=>{}},
-      {label:'Slide to Type',toggle:()=>true,onToggle:()=>{}}]});
+      sw('Auto-Capitalization','keyboard.autoCapitalization',true),
+      sw('Auto-Correction','keyboard.autoCorrection',true),
+      sw('Check Spelling','keyboard.checkSpelling',true),
+      sw('Enable Caps Lock','keyboard.enableCapsLock',true),
+      sw('Predictive','keyboard.predictive',true),
+      sw('Smart Punctuation','keyboard.smartPunctuation',true),
+      sw('Slide to Type','keyboard.slideToType',true)]});
   }};
 }
 function languageView(){
@@ -3552,10 +3621,10 @@ function displayView(){
     bg.appendChild(sl); b.appendChild(bg);
 
     group(b,{rows:[
-      {label:'True Tone',toggle:()=>true,onToggle:()=>{}},
+      sw('True Tone','display.trueTone',true),
       {label:'Night Shift',value:'Off',onClick:()=>toast('Simulated')},
       {label:'Auto-Lock',value:s.autoLock,onClick:()=>nav.push(pickerView('Auto-Lock',['30 Seconds','1 Minute','2 Minutes','3 Minutes','4 Minutes','5 Minutes','Never'],s.autoLock,v=>{s.autoLock=v;save();nav.pop();nav.refresh();}))},
-      {label:'Raise to Wake',toggle:()=>true,onToggle:()=>{}}]});
+      sw('Raise to Wake','display.raiseToWake',true)]});
     group(b,{header:'Text Size',rows:[
       {label:'Text Size',value:Math.round(s.textSize*100)+'%',onClick:()=>nav.push(textSizeView())},
       {label:'Bold Text',toggle:()=>s.bold,onToggle:v=>{s.bold=v;save();applyAppearance();}}]});
@@ -3584,7 +3653,7 @@ function homeScreenView(){
       {label:'Add to Home Screen',rightHTML:'<div style="color:var(--sysblue)">✓</div>'},
       {label:'App Library Only'}]});
     group(b,{rows:[
-      {label:'Show in App Library',toggle:()=>true,onToggle:()=>{}},
+      sw('Show in App Library','homeScreen.showInAppLibrary',true),
       {label:'Show Notification Badges',toggle:()=>true,onToggle:v=>{ if(!v){$$('.badge').forEach(x=>x.remove());} else updateBadges(); }}]});
     group(b,{rows:[{label:'Large App Icons',toggle:()=>false,onToggle:()=>toast('Simulated')}]});
   }};
@@ -3621,8 +3690,8 @@ function wallpaperView(){
     });
     g.appendChild(grid); b.appendChild(g);
     group(b,{rows:[
-      {label:'Dark Appearance Dims Wallpaper',toggle:()=>true,onToggle:()=>{}},
-      {label:'Perspective Zoom',toggle:()=>false,onToggle:()=>{}}]});
+      sw('Dark Appearance Dims Wallpaper','wallpaper.darkAppearanceDimsWallpaper',true),
+      sw('Perspective Zoom','wallpaper.perspectiveZoom',false)]});
   }};
 }
 function faceIDView(){
@@ -3630,9 +3699,9 @@ function faceIDView(){
     const s=State.settings;
     group(b,{header:'Use Face ID For',rows:[
       {label:'iPhone Unlock',toggle:()=>s.faceid,onToggle:v=>{s.faceid=v;save();}},
-      {label:'iTunes & App Store',toggle:()=>true,onToggle:()=>{}},
-      {label:'Wallet & Apple Pay',toggle:()=>true,onToggle:()=>{}},
-      {label:'Password AutoFill',toggle:()=>true,onToggle:()=>{}}]});
+      sw('iTunes & App Store','faceID.itunesAppStore',true),
+      sw('Wallet & Apple Pay','faceID.walletApplePay',true),
+      sw('Password AutoFill','faceID.passwordAutofill',true)]});
     group(b,{rows:[
       {label:'Set Up an Alternate Appearance',cls:'blue',onClick:()=>{island('😀','#30d158','Face ID','Move your head in a circle',2600);toast('Simulated scan');}},
       {label:'Reset Face ID',cls:'blue',onClick:()=>toast('Face ID reset')}]});
@@ -3640,12 +3709,12 @@ function faceIDView(){
       {label:'Turn Passcode Off',cls:'blue',onClick:()=>toast('Simulated')},
       {label:'Change Passcode',cls:'blue',onClick:()=>toast('Simulated')}]});
     group(b,{header:'Allow Access When Locked',rows:[
-      {label:'Today View and Search',toggle:()=>true,onToggle:()=>{}},
-      {label:'Notification Center',toggle:()=>true,onToggle:()=>{}},
-      {label:'Control Center',toggle:()=>true,onToggle:()=>{}},
-      {label:'Reply with Message',toggle:()=>true,onToggle:()=>{}},
-      {label:'Accessories',toggle:()=>false,onToggle:()=>{}}]});
-    group(b,{rows:[{label:'Erase Data',toggle:()=>false,onToggle:()=>{}}],
+      sw('Today View and Search','faceID.todayViewAndSearch',true),
+      sw('Notification Center','faceID.notificationCenter',true),
+      sw('Control Center','faceID.controlCenter',true),
+      sw('Reply with Message','faceID.replyWithMessage',true),
+      sw('Accessories','faceID.accessories',false)]});
+    group(b,{rows:[sw('Erase Data','faceID.eraseData',false)],
       footer:'Erase all data on this iPhone after 10 failed passcode attempts.'});
   }};
 }
@@ -3694,15 +3763,15 @@ function appStoreSettingsView(){
   return {title:'App Store', build(b,nav){
     const s=State.settings;
     group(b,{header:'Automatic Downloads',rows:[
-      {label:'Apps',toggle:()=>true,onToggle:()=>{}},
+      sw('Apps','appStore.apps',true),
       {label:'App Updates',toggle:()=>s.autoUpdates,onToggle:v=>{s.autoUpdates=v;save();}},
-      {label:'In-App Content',toggle:()=>true,onToggle:()=>{}}]});
+      sw('In-App Content','appStore.inAppContent',true)]});
     group(b,{header:'Cellular Data',rows:[
       {label:'Automatic Downloads',toggle:()=>s.cellDownloads,onToggle:v=>{s.cellDownloads=v;save();}},
       {label:'App Downloads',value:'Ask If Over 200 MB',onClick:()=>nav.push(pickerView('App Downloads',['Always Allow','Ask If Over 200 MB','Always Ask'],'Ask If Over 200 MB',()=>{}))}]});
     group(b,{rows:[
       {label:'Video Autoplay',value:'On',onClick:()=>nav.push(pickerView('Video Autoplay',['On','Wi-Fi Only','Off'],'On',()=>{}))},
-      {label:'In-App Ratings & Reviews',toggle:()=>true,onToggle:()=>{}},
+      sw('In-App Ratings & Reviews','appStore.inAppRatingsReviews',true),
       {label:'Offload Unused Apps',toggle:()=>s.offloadUnused,onToggle:v=>{s.offloadUnused=v;save();}}]});
     group(b,{rows:[{label:'Open App Store',cls:'blue center',onClick:()=>openApp('appstore')}]});
   }};
@@ -3732,14 +3801,14 @@ function thirdPartyAppSettings(id){
   return {title:def.name, build(b,nav){
     group(b,{header:`Allow ${def.name} to Access`,rows:[
       {label:'Location',value:'While Using',onClick:()=>toast('Simulated')},
-      {label:'Cellular Data',toggle:()=>true,onToggle:()=>{}},
+      sw('Cellular Data',`app.${id}.cellularData`,true),
       {label:'Notifications',value:'Banners, Sounds',onClick:()=>nav.push(appNotifView(def.name))},
-      {label:'Background App Refresh',toggle:()=>true,onToggle:()=>{}},
+      sw('Background App Refresh',`app.${id}.backgroundRefresh`,true),
       {label:'Siri & Search',onClick:()=>toast('Simulated')}]});
     group(b,{header:'Playback',rows:[
       {label:'Cellular Data Usage',value:'Automatic',onClick:()=>toast('Simulated')},
       {label:'Downloads',value:'Standard',onClick:()=>toast('Simulated')},
-      {label:'Autoplay Next Episode',toggle:()=>true,onToggle:()=>{}}]});
+      sw('Autoplay Next Episode',`app.${id}.autoplayNext`,true)]});
     group(b,{rows:[{label:'Delete App',cls:'destructive center',onClick:()=>{confirmDelete(id);nav.pop();}}]});
   }};
 }
@@ -4358,7 +4427,7 @@ function storeAccountView(){
       {label:'Redeem Gift Card or Code', onClick:()=>toast('Simulated')},
       {label:'Add Funds to Apple ID', value:'$25.00', onClick:()=>toast('Simulated')}]});
     group(b,{rows:[
-      {label:'Personalized Recommendations', toggle:()=>true, onToggle:()=>{}},
+      sw('Personalized Recommendations','storeAccount.personalizedRecommendations',true),
       {label:'App Store Settings', onClick:()=>{ goHome(); setTimeout(()=>openApp('settings'),320); }}]});
     group(b,{rows:[{label:'Sign Out', cls:'blue center', onClick:()=>toast('Simulated')}]});
   }};
@@ -4797,8 +4866,8 @@ function safariSettingsView(){
           rightHTML:e===s.searchEngine?'<div style="color:var(--sysblue)">✓</div>':'',
           onClick:()=>{ s.searchEngine=e; save(); nav.refresh(); toast('Search engine: '+e); }}))});
       }})},
-      {label:'Search Engine Suggestions',toggle:()=>true,onToggle:()=>{}},
-      {label:'Safari Suggestions',toggle:()=>true,onToggle:()=>{}},
+      sw('Search Engine Suggestions','safari.searchEngineSuggestions',true),
+      sw('Safari Suggestions','safari.safariSuggestions',true),
       {label:'Quick Website Search',value:'On',onClick:()=>toast('Simulated')}]});
     group(b,{header:'General',rows:[
       {label:'AutoFill',onClick:()=>toast('Simulated')},
@@ -4808,7 +4877,7 @@ function safariSettingsView(){
     group(b,{header:'Privacy & Security',rows:[
       {label:'Prevent Cross-Site Tracking',toggle:()=>s.preventTracking,onToggle:v=>{s.preventTracking=v;save();}},
       {label:'Hide IP Address',value:'From Trackers',onClick:()=>toast('Simulated')},
-      {label:'Fraudulent Website Warning',toggle:()=>true,onToggle:()=>{}}]});
+      sw('Fraudulent Website Warning','safari.fraudulentWebsiteWarning',true)]});
     group(b,{rows:[{label:'Clear History and Website Data',cls:'blue',onClick:()=>alertBox({
       title:'Clear History and Data',message:'Clearing will remove history, cookies and other browsing data from this simulator.',
       buttons:[{text:'Cancel'},{text:'Clear History and Data',style:'red bold',onClick:()=>{
@@ -5478,7 +5547,7 @@ function imapMailboxesView(d){
       done();
       const a={id:m.seq++, name:d.name.trim(), address:d.email.trim(), provider:'other',
         color:colorFor(d.email), desc:d.desc.trim()||d.email.split('@')[1], imap:d.in.host, smtp:d.out.host,
-        type:d.type, enabled:{mail:true,contacts:false,calendars:false,notes:d.notes}};
+        type:d.type, enabled:{mail:d.mail!==false,contacts:false,calendars:false,notes:d.notes}};
       a.messages=seedInbox(a);
       m.accounts.push(a); save(); syncMailBadge();
       island('✉️','#0a84ff','Mail',a.address+' added',2600);
@@ -5495,7 +5564,7 @@ function imapMailboxesView(d){
     build(b,nav,vw){
       view=vw;
       group(b,{rows:[
-        {label:'Mail',icon:'✉️',iconBg:'#0a84ff',toggle:()=>true,onToggle:()=>{}},
+        {label:'Mail',icon:'✉️',iconBg:'#0a84ff',toggle:()=>d.mail!==false,onToggle:v=>d.mail=v},
         {label:'Notes',icon:'📝',iconBg:'#ffd60a',toggle:()=>d.notes,onToggle:v=>d.notes=v}
       ],footer:'Choose which services to use with this account.'});
       const sum=el('div','grp'); sum.style.padding='14px';
@@ -5580,7 +5649,7 @@ function mailSettingsView(){
     group(b,{header:'Allow Mail to Access',rows:[
       {label:'Siri & Search',onClick:()=>toast('Simulated')},
       {label:'Notifications',sub:'Badges, Sounds, Banners',onClick:()=>nav.push(appNotifView('Mail'))},
-      {label:'Cellular Data',toggle:()=>true,onToggle:()=>{}}]});
+      sw('Cellular Data','mail.cellularData',true)]});
     group(b,{rows:[{label:'Accounts',value:ML().accounts.length+' accounts',onClick:()=>nav.push(mailAccountsView())}]});
     group(b,{header:'Message List',rows:[
       {label:'Preview',value:s.mailPreview+' Lines',onClick:()=>nav.push({title:'Preview',build(bb){
@@ -5595,9 +5664,9 @@ function mailSettingsView(){
        onClick:()=>nav.push(mailSwipeView())}]});
     group(b,{header:'Threading',rows:[
       {label:'Organise by Thread',toggle:()=>s.mailThread,onToggle:v=>{s.mailThread=v;save();}},
-      {label:'Collapse Read Messages',toggle:()=>true,onToggle:()=>{}},
-      {label:'Most Recent Message on Top',toggle:()=>true,onToggle:()=>{}},
-      {label:'Complete Threads',toggle:()=>false,onToggle:()=>{}},
+      sw('Collapse Read Messages','mail.collapseReadMessages',true),
+      sw('Most Recent Message on Top','mail.mostRecentMessageOnTop',true),
+      sw('Complete Threads','mail.completeThreads',false),
       {label:'Muted Thread Action',value:s.mutedAction||'Mark as Read',
        onClick:()=>nav.push(wifiPicker('Muted Thread Action',['Mark as Read','Archive or Delete'],
          s.mutedAction||'Mark as Read',v=>{s.mutedAction=v;save();},''))}]});
@@ -5607,7 +5676,7 @@ function mailSettingsView(){
       {label:'Blocked',value:String((s.blockedSenders||[]).length||'None'),onClick:()=>nav.push(blockedSendersView())},
       {label:'Blocked Sender Options',value:'Leave in Inbox',onClick:()=>nav.push(wifiPicker('Blocked Sender Options',
         ['None','Mark as Blocked, Leave in Inbox','Move to Trash'],'Mark as Blocked, Leave in Inbox',()=>{},''))},
-      {label:'Follow Up Suggestions',toggle:()=>true,onToggle:()=>{}}]});
+      sw('Follow Up Suggestions','mail.followUpSuggestions',true)]});
     group(b,{header:'Composing',rows:[
       {label:'Signature',value:s.mailSignature,onClick:()=>nav.push({title:'Signature',build(bb){
         const g=el('div','grp'); const ta=el('textarea','note-editor'); ta.style.minHeight='120px'; ta.value=s.mailSignature;
@@ -5623,7 +5692,7 @@ function mailSettingsView(){
           );
          bb.appendChild(el('div','grp-f','Messages created outside of Mail will be sent from this account.'));
        }})},
-      {label:'Always Bcc Myself',toggle:()=>false,onToggle:()=>{}},
+      sw('Always Bcc Myself','mail.alwaysBccMyself',false),
       {label:'Mark Addresses',value:'Off',onClick:()=>toast('Simulated')},
       {label:'Increase Quote Level',value:'On',onClick:()=>toast('Simulated')},
       {label:'Include Attachments with Replies',value:'Never',onClick:()=>nav.push(wifiPicker('Include Attachments',
@@ -5649,8 +5718,8 @@ function mailPrivacyView(){
       footer:'Protect Mail Activity hides your IP address and loads remote content privately in the background, even when you don’t open the message.'});
     if(s.mailPrivacy===false)
       group(b,{rows:[
-        {label:'Hide IP Address',toggle:()=>false,onToggle:()=>{}},
-        {label:'Block All Remote Content',toggle:()=>false,onToggle:()=>{}}]});
+        sw('Hide IP Address','mailPrivacy.hideIpAddress',false),
+        sw('Block All Remote Content','mailPrivacy.blockAllRemoteContent',false)]});
   }};
 }
 function blockedSendersView(){
@@ -7576,8 +7645,8 @@ function passDetailView(p){
       {label:'Points',value:p.points.toLocaleString()},{label:'Member',value:p.member},
       {label:'Redeem Points',cls:'blue',onClick:()=>toast('Redemption is simulated')}]});
     group(b,{rows:[
-      {label:'Automatic Updates',toggle:()=>true,onToggle:()=>{}},
-      {label:'Suggest on Lock Screen',toggle:()=>true,onToggle:()=>{}},
+      sw('Automatic Updates',`pass.${p.id}.automaticUpdates`,true),
+      sw('Suggest on Lock Screen',`pass.${p.id}.suggestOnLockScreen`,true),
       {label:'Remove Pass',cls:'destructive',onClick:()=>alertBox({title:'Remove “'+p.name+'”?',
         message:'This pass will be deleted from Wallet.',
         buttons:[{text:'Cancel'},{text:'Remove',style:'red bold',onClick:()=>{

@@ -205,10 +205,25 @@ function clockDuration(seconds) {
   return `${m}:${String(s).padStart(2, '0')}`;
 }
 
-/** Lazily create and return a slice of persisted state. */
-function slice(key, build) {
-  if (!State[key]) {
-    State[key] = build();
+/**
+ * Lazily create and return a slice of persisted state.
+ *
+ * `build` runs once, on creation, and never again — several builders seed
+ * dozens of records (the photo library alone builds 48) and are reached from
+ * inside render loops, so they must stay off the hot path.
+ *
+ * That laziness is also why `version` exists. Once a slice is on disk the
+ * builder can never correct it, so adding a field to a builder used to reach
+ * only devices that had never opened the app; everyone else kept a slice
+ * missing the field and the app read `undefined`. Bumping `version` rebuilds
+ * the slice instead. It is deliberately a rebuild rather than a merge: none
+ * of this is user data worth preserving across a shape change, and a
+ * half-migrated slice is harder to reason about than a fresh one.
+ */
+function slice(key, build, version = 1) {
+  const stored = State[key];
+  if (!stored || typeof stored !== 'object' || (stored.__v || 1) !== version) {
+    State[key] = Object.assign(build(), { __v: version });
     save();
   }
   return State[key];
