@@ -105,13 +105,56 @@
   --glass: #1c1d23;
 }
 
+/* Increase contrast.
+   It used to raise the hairline colour and the muted text colour and stop
+   there, which is invisible on most of the interface — the translucent
+   materials, the barely-there fills and the low-contrast secondary text
+   were all untouched. macOS's own setting does three things: it darkens
+   text, it makes every border a real border, and it drops the transparency
+   that puts wallpaper behind the text. All three, here. */
 .high-contrast {
-  --hair: rgba(20, 22, 28, 0.42);
-  --muted: #4a4a4f;
+  --text: #000;
+  --text-2: #1a1a1e;
+  --muted: #3a3a40;
+  --faint: #4a4a52;
+  --hair: rgba(20, 22, 28, 0.55);
+  --hair-strong: rgba(20, 22, 28, 0.75);
+  --fill: rgba(120, 124, 132, 0.24);
+  --fill-hover: rgba(120, 124, 132, 0.38);
+  --card-2: rgba(120, 124, 132, 0.2);
+  --glass-border: rgba(20, 22, 28, 0.45);
+  /* Opaque surfaces: wallpaper showing through text is the single biggest
+     contrast problem in the whole interface. */
+  --window: #f4f4f6;
+  --sidebar: #e6e8ee;
+  --content: #fff;
+  --card: #fff;
+  --glass: #eef1f6;
+  --popover: #f2f4f8;
 }
 [data-theme="dark"].high-contrast {
-  --hair: rgba(255, 255, 255, 0.42);
-  --muted: #c8c8ce;
+  --text: #fff;
+  --text-2: #f2f2f7;
+  --muted: #d4d4dc;
+  --faint: #b8b8c2;
+  --hair: rgba(255, 255, 255, 0.5);
+  --hair-strong: rgba(255, 255, 255, 0.72);
+  --fill: rgba(150, 154, 165, 0.3);
+  --fill-hover: rgba(150, 154, 165, 0.45);
+  --card-2: rgba(150, 154, 165, 0.26);
+  --glass-border: rgba(255, 255, 255, 0.4);
+  --window: #1c1d23;
+  --sidebar: #17181d;
+  --content: #202127;
+  --card: #262730;
+  --glass: #1a1b21;
+  --popover: #2a2b33;
+}
+/* Focus has to be unmissable when contrast is turned up, and the outline is
+   the one indicator that is guaranteed not to be a translucent material. */
+.high-contrast :focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
 }
 
 /* --------------------------------------------------------------------- reset */

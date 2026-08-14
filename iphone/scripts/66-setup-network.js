@@ -71,7 +71,7 @@ function captivePortalSheet() {
     /* A portal is a web page, so it is drawn as one — chrome and all, because
        recognising that framing is half of diagnosing it. */
     box.appendChild(h(`<div style="display:flex;align-items:center;gap:8px;padding:12px 16px;
-        border-bottom:.5px solid var(--sep);color:var(--txt2);font-size:12px">
+        border-bottom:.5px solid var(--sep);color:var(--txt2);font-size:calc(12px * var(--tsize))">
         <span style="display:grid;place-items:center">${SF.wifi}</span>
         <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
           ${esc(settings.wifiName)}</span>
@@ -82,8 +82,8 @@ function captivePortalSheet() {
     page.innerHTML = `
       <div style="width:54px;height:54px;border-radius:14px;margin:0 auto 12px;
         background:linear-gradient(135deg,#0a84ff,#5e5ce6);display:grid;place-items:center;color:#fff">${SF.plane}</div>
-      <div style="font-size:21px;font-weight:700">Orlando International</div>
-      <div style="color:var(--txt2);font-size:14px;margin-top:4px;line-height:1.45">
+      <div style="font-size:calc(21px * var(--tsize));font-weight:700">Orlando International</div>
+      <div style="color:var(--txt2);font-size:calc(14px * var(--tsize));margin-top:4px;line-height:1.45">
         Complimentary Wi-Fi, 45 minutes. Accept the terms to continue.</div>`;
     box.appendChild(page);
 
@@ -114,7 +114,7 @@ function captivePortalSheet() {
         row.querySelector('.check').textContent = accepted ? '☑' : '☐';
       },
     });
-    terms.insertBefore(h('<div class="check" style="font-size:19px;margin-right:10px">☐</div>'), terms.firstChild);
+    terms.insertBefore(h('<div class="check" style="font-size:calc(19px * var(--tsize));margin-right:10px">☐</div>'), terms.firstChild);
     const termsGroup = el('div', 'grp');
     termsGroup.style.margin = '0 16px';
     termsGroup.appendChild(terms);
@@ -141,7 +141,7 @@ function captivePortalSheet() {
     box.appendChild(connect);
 
     const later = el('button', '', 'Not now');
-    later.style.cssText = 'color:var(--txt2);font-size:15px;display:block;width:100%;padding:0 0 18px';
+    later.style.cssText = 'color:var(--txt2);font-size:calc(15px * var(--tsize));display:block;width:100%;padding:0 0 18px';
     later.onclick = closeOverlay;
     box.appendChild(later);
   }, { full: true });
@@ -160,11 +160,11 @@ wifiView = function wifiViewWithPortal() {
     build.call(this, body, nav, self);
     if (!captiveActive()) return;
     const banner = h(`<div style="margin:10px 16px 0;padding:12px 14px;border-radius:12px;
-      background:rgba(255,159,10,.16);border:.5px solid rgba(255,159,10,.45);font-size:13px;line-height:1.45">
+      background:rgba(255,159,10,.16);border:.5px solid rgba(255,159,10,.45);font-size:calc(13px * var(--tsize));line-height:1.45">
       <b>Sign-in required.</b> “${esc(State.settings.wifiName)}” is connected but has no internet access until the
       sign-in page is completed.</div>`);
     const open = el('button', '', 'Open the sign-in page');
-    open.style.cssText = 'color:var(--sysblue);font-size:13px;margin-top:8px;display:block';
+    open.style.cssText = 'color:var(--sysblue);font-size:calc(13px * var(--tsize));margin-top:8px;display:block';
     open.onclick = () => captivePortalSheet();
     banner.appendChild(open);
     body.insertBefore(banner, body.firstChild);
@@ -239,8 +239,8 @@ function runSetupAssistant() {
     const head = el('div');
     head.style.cssText = 'flex:none;padding:74px 30px 18px;text-align:center';
     head.innerHTML = `${glyph ? `<div style="display:grid;place-items:center;color:var(--sysblue);margin-bottom:16px">${glyph}</div>` : ''}
-      <div style="font-size:27px;font-weight:700;letter-spacing:-.02em">${esc(title)}</div>
-      ${subtitle ? `<div style="color:var(--txt2);font-size:14.5px;line-height:1.5;margin-top:10px">${esc(subtitle)}</div>` : ''}`;
+      <div style="font-size:calc(27px * var(--tsize));font-weight:700;letter-spacing:-.02em">${esc(title)}</div>
+      ${subtitle ? `<div style="color:var(--txt2);font-size:calc(14.5px * var(--tsize));line-height:1.5;margin-top:10px">${esc(subtitle)}</div>` : ''}`;
     const body = el('div');
     body.style.cssText = 'flex:1;overflow-y:auto;padding-bottom:8px';
     const foot = el('div');
@@ -258,7 +258,7 @@ function runSetupAssistant() {
 
   const secondary = (foot, label, onClick) => {
     const button = el('button', '', label);
-    button.style.cssText = 'color:var(--sysblue);font-size:15px;display:block;width:100%;padding:14px 0 0';
+    button.style.cssText = 'color:var(--sysblue);font-size:calc(15px * var(--tsize));display:block;width:100%;padding:14px 0 0';
     button.onclick = onClick;
     foot.appendChild(button);
     return button;
@@ -278,8 +278,8 @@ function runSetupAssistant() {
       hello.style.cssText = `flex:1;width:100%;display:grid;place-items:center;background:#000;color:#fff;
         border:0;font:inherit;cursor:pointer`;
       hello.innerHTML = `<div style="text-align:center">
-        <div style="font-size:56px;font-weight:200;letter-spacing:-.03em">hello</div>
-        <div style="opacity:.5;font-size:13px;margin-top:18px">tap to set up</div></div>`;
+        <div style="font-size:calc(56px * var(--tsize));font-weight:200;letter-spacing:-.03em">hello</div>
+        <div style="opacity:.5;font-size:calc(13px * var(--tsize));margin-top:18px">tap to set up</div></div>`;
       hello.onclick = next;
       layer.appendChild(hello);
       return;
@@ -317,7 +317,7 @@ function runSetupAssistant() {
           border:2px solid ${on ? 'var(--sysblue)' : 'transparent'}`;
         tile.innerHTML = `<div style="height:96px;border-radius:10px;background:${colour === '#fff' ? '#000' : '#fff'};
             border:.5px solid rgba(128,128,128,.4);margin-bottom:10px"></div>
-          <div style="font-size:15px;font-weight:600">${label}</div>`;
+          <div style="font-size:calc(15px * var(--tsize));font-weight:600">${label}</div>`;
         tile.onclick = () => {
           choices.appearance = label;
           State.settings.dark = label === 'Dark';
@@ -341,7 +341,7 @@ function runSetupAssistant() {
         const row = el('div', 'row static');
         row.innerHTML = `<div style="display:grid;place-items:center;margin-right:10px;color:var(--sysblue)">${SF.wifi}</div>
           <div class="lbl"><div>${esc(choices.wifi)}</div><div class="sub">Connected</div></div>
-          <div style="color:var(--sysgreen);font-size:13px">Joined</div>`;
+          <div style="color:var(--sysgreen);font-size:calc(13px * var(--tsize))">Joined</div>`;
         joined.appendChild(row);
         body.appendChild(joined);
       }
@@ -355,8 +355,8 @@ function runSetupAssistant() {
           onClick: () => {
             if (air.sec === 'open') { join(air.ssid); return; }
             sheet(box => {
-              box.appendChild(h(`<div style="font-size:19px;font-weight:700;margin-bottom:4px">Enter the password for “${esc(air.ssid)}”</div>
-                <div style="color:var(--txt2);font-size:13px;margin-bottom:12px">Passwords for ${esc(air.sec)} networks are at least 8 characters.</div>`));
+              box.appendChild(h(`<div style="font-size:calc(19px * var(--tsize));font-weight:700;margin-bottom:4px">Enter the password for “${esc(air.ssid)}”</div>
+                <div style="color:var(--txt2);font-size:calc(13px * var(--tsize));margin-bottom:12px">Passwords for ${esc(air.sec)} networks are at least 8 characters.</div>`));
               const wrap = el('div', 'compose-field');
               const input = el('input');
               input.type = 'password';
@@ -406,7 +406,7 @@ function runSetupAssistant() {
 
     if (name === 'privacy') {
       const { body, foot } = shell('Data & Privacy', '', SF.hand);
-      body.appendChild(h(`<div style="padding:4px 26px;color:var(--txt2);font-size:14.5px;line-height:1.6">
+      body.appendChild(h(`<div style="padding:4px 26px;color:var(--txt2);font-size:calc(14.5px * var(--tsize));line-height:1.6">
         This icon appears when an Apple feature asks to use your personal information.<br><br>
         You will see it before that information is collected or used.<br><br>
         This simulator collects nothing at all. Everything it shows is generated on
@@ -454,7 +454,7 @@ function runSetupAssistant() {
         if (!key) { pad.appendChild(el('div')); return; }
         const button = el('button', '', key);
         button.style.cssText = `height:64px;border-radius:50%;background:var(--bg3);color:var(--txt);
-          font-size:26px;font-weight:400`;
+          font-size:calc(26px * var(--tsize));font-weight:400`;
         button.onclick = () => {
           if (key === '⌫') choices.passcode = choices.passcode.slice(0, -1);
           else if (choices.passcode.length < 6) choices.passcode += key;
@@ -562,7 +562,7 @@ function runSetupAssistant() {
     const { body, foot } = shell('Welcome to iPhone', '', '');
     body.appendChild(h(`<div style="display:grid;place-items:center;padding:10px 0 18px;color:var(--sysblue)">
       ${sf('<path d="M4 12.5l5 5L20 6.5"/>', { w: 2.2, size: 84 })}</div>
-      <div style="padding:0 30px;color:var(--txt2);font-size:14.5px;line-height:1.6;text-align:center">
+      <div style="padding:0 30px;color:var(--txt2);font-size:calc(14.5px * var(--tsize));line-height:1.6;text-align:center">
         Setup is complete.<br><br>
         ${choices.wifi ? `Wi-Fi: ${esc(choices.wifi)}` : 'Using cellular data'}<br>
         ${choices.account ? `Signed in as ${esc(choices.account)}` : 'No Apple Account'}<br>

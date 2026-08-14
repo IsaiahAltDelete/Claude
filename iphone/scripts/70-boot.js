@@ -99,10 +99,10 @@ try {
     const boot = $('#boot');
     if (boot) {
       boot.innerHTML = `<div style="max-width:280px;text-align:center;color:#fff;font-family:var(--sf)">
-        <div style="font-size:19px;font-weight:600;margin-bottom:8px">iPhone Simulator could not start</div>
-        <div style="font-size:13px;opacity:.7;line-height:1.5">Its saved data has already been cleared once.
+        <div style="font-size:calc(19px * var(--tsize));font-weight:600;margin-bottom:8px">iPhone Simulator could not start</div>
+        <div style="font-size:calc(13px * var(--tsize));opacity:.7;line-height:1.5">Its saved data has already been cleared once.
           Reload the page, or open it with <b>?reset</b> on the end of the address.</div>
-        <div style="font-size:11px;opacity:.45;margin-top:14px">${esc(String(error && error.message || error))}</div></div>`;
+        <div style="font-size:calc(11px * var(--tsize));opacity:.45;margin-top:14px">${esc(String(error && error.message || error))}</div></div>`;
     }
   }
 }

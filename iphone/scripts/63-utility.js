@@ -225,23 +225,23 @@ defineApp({
 function buildWeatherPage(body, forecast, inst) {
   const unit = () => (WX().unit === 'C' ? '°' : '°');
   body.appendChild(h(`<div>
-    <div style="font-size:34px;font-weight:400;letter-spacing:-.2px">${esc(forecast.name)}</div>
-    <div style="font-size:96px;font-weight:200;line-height:1.05;margin-left:14px">${wxTemp(forecast.now.temp)}${unit()}</div>
-    <div style="font-size:20px;opacity:.92;margin-top:-4px">${esc(forecast.now.night ? forecast.now.condition.night : forecast.now.condition.label)}</div>
-    <div style="opacity:.86;font-size:19px">H:${wxTemp(forecast.days[0].high)}° L:${wxTemp(forecast.days[0].low)}°</div>
-    <div style="opacity:.6;font-size:13px;margin-top:6px">${esc(forecast.region)} · ${timeStr(forecast.localNow)} local</div>
+    <div style="font-size:calc(34px * var(--tsize));font-weight:400;letter-spacing:-.2px">${esc(forecast.name)}</div>
+    <div style="font-size:calc(96px * var(--tsize));font-weight:200;line-height:1.05;margin-left:14px">${wxTemp(forecast.now.temp)}${unit()}</div>
+    <div style="font-size:calc(20px * var(--tsize));opacity:.92;margin-top:-4px">${esc(forecast.now.night ? forecast.now.condition.night : forecast.now.condition.label)}</div>
+    <div style="opacity:.86;font-size:calc(19px * var(--tsize))">H:${wxTemp(forecast.days[0].high)}° L:${wxTemp(forecast.days[0].low)}°</div>
+    <div style="opacity:.6;font-size:calc(13px * var(--tsize));margin-top:6px">${esc(forecast.region)} · ${timeStr(forecast.localNow)} local</div>
   </div>`));
 
   /* Hourly */
   const hourly = el('div', 'wx-card');
-  hourly.appendChild(h(`<div style="font-size:12px;opacity:.75;margin-bottom:10px;letter-spacing:.4px">
+  hourly.appendChild(h(`<div style="font-size:calc(12px * var(--tsize));opacity:.75;margin-bottom:10px;letter-spacing:.4px">
     ${esc(forecast.now.night ? 'Overnight' : 'Hourly')} forecast — ${esc(forecast.days[0].condition.label.toLowerCase())} through the day`.toUpperCase() + '</div>'));
   const hours = el('div', 'wx-hours');
   forecast.hours.slice(0, 24).forEach(entry => {
     hours.appendChild(h(`<div style="text-align:center;flex:none;min-width:44px">
-      <div style="font-size:14px;opacity:.85">${entry.first ? 'Now' : esc(wxHourLabel(entry.hour))}</div>
+      <div style="font-size:calc(14px * var(--tsize));opacity:.85">${entry.first ? 'Now' : esc(wxHourLabel(entry.hour))}</div>
       <div style="display:grid;place-items:center;margin:7px 0">${wxGlyph(entry.condition.id, 24, entry.night)}</div>
-      <div style="font-size:17px;font-weight:500">${wxTemp(entry.temp)}°</div></div>`));
+      <div style="font-size:calc(17px * var(--tsize));font-weight:500">${wxTemp(entry.temp)}°</div></div>`));
   });
   hourly.appendChild(hours);
   body.appendChild(hourly);
@@ -251,20 +251,20 @@ function buildWeatherPage(body, forecast, inst) {
   const highs = Math.max(...forecast.days.map(d => d.high));
   const span = highs - lows || 1;
   const ten = el('div', 'wx-card');
-  ten.appendChild(h('<div style="font-size:12px;opacity:.75;margin-bottom:6px;letter-spacing:.4px">10-DAY FORECAST</div>'));
+  ten.appendChild(h('<div style="font-size:calc(12px * var(--tsize));opacity:.75;margin-bottom:6px;letter-spacing:.4px">10-DAY FORECAST</div>'));
   forecast.days.forEach((day, index) => {
     const left = ((day.low - lows) / span) * 100;
     const width = ((day.high - day.low) / span) * 100;
     const row = h(`<div style="display:flex;align-items:center;gap:10px;padding:9px 0;
       border-bottom:${index < 9 ? '.5px solid rgba(255,255,255,.16)' : 'none'}">
-      <div style="width:44px;font-size:17px">${index ? esc(shortDay(day.date)) : 'Today'}</div>
+      <div style="width:44px;font-size:calc(17px * var(--tsize))">${index ? esc(shortDay(day.date)) : 'Today'}</div>
       <div style="width:30px;display:grid;place-items:center">${wxGlyph(day.condition.id, 22)}</div>
-      <div style="width:34px;font-size:11px;opacity:.75;text-align:center">${day.rain > 24 ? `${day.rain}%` : ''}</div>
-      <div style="width:34px;text-align:right;opacity:.7;font-size:17px">${wxTemp(day.low)}°</div>
+      <div style="width:34px;font-size:calc(11px * var(--tsize));opacity:.75;text-align:center">${day.rain > 24 ? `${day.rain}%` : ''}</div>
+      <div style="width:34px;text-align:right;opacity:.7;font-size:calc(17px * var(--tsize))">${wxTemp(day.low)}°</div>
       <div style="flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,.22);position:relative">
         <div style="position:absolute;left:${left.toFixed(1)}%;width:${Math.max(6, width).toFixed(1)}%;top:0;bottom:0;
           border-radius:3px;background:linear-gradient(90deg,#5ac8fa,#ffd60a,#ff9f0a)"></div></div>
-      <div style="width:34px;text-align:right;font-size:17px">${wxTemp(day.high)}°</div></div>`);
+      <div style="width:34px;text-align:right;font-size:calc(17px * var(--tsize))">${wxTemp(day.high)}°</div></div>`);
     row.style.cursor = 'pointer';
     const when = index ? shortDate(day.date) : 'Today';
     row.onclick = () => island(wxGlyph(day.condition.id, 18), '#0a84ff', forecast.name,
@@ -295,12 +295,12 @@ function buildWeatherPage(body, forecast, inst) {
   grid.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px';
   tiles.forEach(([label, value, sub]) => {
     grid.appendChild(h(`<div class="wx-card" style="margin:0">
-      <div style="font-size:12px;opacity:.75;letter-spacing:.4px">${esc(label.toUpperCase())}</div>
-      <div style="font-size:27px;font-weight:500;margin:4px 0 2px">${esc(value)}</div>
-      <div style="font-size:12px;opacity:.8;line-height:1.35">${esc(sub)}</div></div>`));
+      <div style="font-size:calc(12px * var(--tsize));opacity:.75;letter-spacing:.4px">${esc(label.toUpperCase())}</div>
+      <div style="font-size:calc(27px * var(--tsize));font-weight:500;margin:4px 0 2px">${esc(value)}</div>
+      <div style="font-size:calc(12px * var(--tsize));opacity:.8;line-height:1.35">${esc(sub)}</div></div>`));
   });
   body.appendChild(grid);
-  body.appendChild(h(`<div style="opacity:.55;font-size:12px;padding:20px 4px 40px;line-height:1.5">
+  body.appendChild(h(`<div style="opacity:.55;font-size:calc(12px * var(--tsize));padding:20px 4px 40px;line-height:1.5">
     Simulated forecast data, generated on device. Tap the list button to add or remove cities.</div>`));
   inst.at = forecast.name;
 }
@@ -311,7 +311,7 @@ function weatherCityList(inst) {
     box.style.padding = '0';
     const head = el('div');
     head.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:16px 18px 6px';
-    head.innerHTML = '<div style="font-size:26px;font-weight:700">Weather</div>';
+    head.innerHTML = '<div style="font-size:calc(26px * var(--tsize));font-weight:700">Weather</div>';
     const unitToggle = segmented(['°F', '°C'], `°${state.unit}`, choice => {
       state.unit = choice.slice(1); save(); refresh(); inst.render();
     });
@@ -363,19 +363,19 @@ function weatherCityList(inst) {
         const row = h(`<div style="margin:8px 16px;border-radius:18px;padding:14px 16px;color:#fff;
             background:${wxSky(forecast)};display:flex;align-items:flex-start;gap:10px;cursor:pointer">
           <div style="flex:1;min-width:0">
-            <div style="font-size:22px;font-weight:500">${esc(name)}</div>
-            <div style="font-size:13px;opacity:.85">${esc(timeStr(forecast.localNow))}</div>
-            <div style="font-size:13px;opacity:.9;margin-top:16px">${esc(forecast.now.night ? forecast.now.condition.night : forecast.now.condition.label)}</div>
+            <div style="font-size:calc(22px * var(--tsize));font-weight:500">${esc(name)}</div>
+            <div style="font-size:calc(13px * var(--tsize));opacity:.85">${esc(timeStr(forecast.localNow))}</div>
+            <div style="font-size:calc(13px * var(--tsize));opacity:.9;margin-top:16px">${esc(forecast.now.night ? forecast.now.condition.night : forecast.now.condition.label)}</div>
           </div>
           <div style="text-align:right">
-            <div style="font-size:36px;font-weight:200">${wxTemp(forecast.now.temp)}°</div>
-            <div style="font-size:12px;opacity:.85;margin-top:14px">H:${wxTemp(forecast.days[0].high)}° L:${wxTemp(forecast.days[0].low)}°</div>
+            <div style="font-size:calc(36px * var(--tsize));font-weight:200">${wxTemp(forecast.now.temp)}°</div>
+            <div style="font-size:calc(12px * var(--tsize));opacity:.85;margin-top:14px">H:${wxTemp(forecast.days[0].high)}° L:${wxTemp(forecast.days[0].low)}°</div>
           </div></div>`);
         row.onclick = () => { state.page = index; save(); closeOverlay(); inst.render(); };
         if (state.cities.length > 1) {
           const remove = el('button', '', '×');
           remove.style.cssText = `position:absolute;top:6px;right:8px;width:24px;height:24px;border-radius:50%;
-            background:rgba(0,0,0,.34);color:#fff;font-size:16px;line-height:1`;
+            background:rgba(0,0,0,.34);color:#fff;font-size:calc(16px * var(--tsize));line-height:1`;
           remove.onclick = event => {
             event.stopPropagation();
             state.cities.splice(index, 1);
@@ -580,7 +580,7 @@ defineApp({
 
 function calculatorTape(onClear) {
   sheet(box => {
-    box.appendChild(h('<div style="font-size:22px;font-weight:700;margin-bottom:4px">Calculation History</div>'));
+    box.appendChild(h('<div style="font-size:calc(22px * var(--tsize));font-weight:700;margin-bottom:4px">Calculation History</div>'));
     const tape = CALC().tape;
     if (!tape.length) {
       box.appendChild(emptyState(SF.history, 'No History', 'Completed calculations are recorded here.'));
@@ -590,9 +590,9 @@ function calculatorTape(onClear) {
     list.style.cssText = 'max-height:46vh;overflow-y:auto;margin:6px -4px';
     tape.forEach(entry => {
       const row = h(`<div style="padding:11px 6px;border-bottom:.5px solid var(--sep);cursor:pointer">
-        <div style="font-size:13px;color:var(--txt2)">${esc(entry.line)}</div>
-        <div style="font-size:22px;font-weight:500">${esc(entry.value)}</div>
-        <div style="font-size:11px;color:var(--txt3);margin-top:2px">${esc(timeStr(new Date(entry.at)))}</div></div>`);
+        <div style="font-size:calc(13px * var(--tsize));color:var(--txt2)">${esc(entry.line)}</div>
+        <div style="font-size:calc(22px * var(--tsize));font-weight:500">${esc(entry.value)}</div>
+        <div style="font-size:calc(11px * var(--tsize));color:var(--txt3);margin-top:2px">${esc(timeStr(new Date(entry.at)))}</div></div>`);
       row.onclick = () => {
         navigator.clipboard && navigator.clipboard.writeText(entry.value).catch(() => {});
         toast('Result copied');
@@ -717,7 +717,7 @@ function notesFoldersView() {
 
 function newFolderSheet(nav) {
   sheet(box => {
-    box.appendChild(h('<div style="font-size:20px;font-weight:700;margin-bottom:10px">New Folder</div>'));
+    box.appendChild(h('<div style="font-size:calc(20px * var(--tsize));font-weight:700;margin-bottom:10px">New Folder</div>'));
     const field = el('div', 'compose-field');
     const input = el('input');
     input.placeholder = 'Name';
@@ -762,7 +762,7 @@ function notesListView2(folder) {
         });
         row.oncontextmenu = event => { event.preventDefault(); noteActions(note, nav); };
         const more = el('button', '', '⋯');
-        more.style.cssText = 'color:var(--txt2);font-size:18px;padding:0 6px';
+        more.style.cssText = 'color:var(--txt2);font-size:calc(18px * var(--tsize));padding:0 6px';
         more.onclick = event => { event.stopPropagation(); noteActions(note, nav); };
         row.insertBefore(more, row.querySelector('.chev'));
         return row;
@@ -852,7 +852,7 @@ function noteEditorView(note) {
     ],
     build(body) {
       const meta = el('div');
-      meta.style.cssText = 'text-align:center;font-size:12px;color:var(--txt3);padding:4px 0 2px';
+      meta.style.cssText = 'text-align:center;font-size:calc(12px * var(--tsize));color:var(--txt3);padding:4px 0 2px';
       meta.textContent = `${relativeDay(note.at)} at ${timeStr(new Date(note.at))}`;
       body.appendChild(meta);
 
@@ -871,7 +871,7 @@ function noteEditorView(note) {
       const insert = (prefix, label) => {
         const button = el('button', '', label);
         button.style.cssText = `flex:1;min-width:56px;background:var(--bg3);color:var(--txt);border-radius:9px;
-          padding:9px 6px;font-size:13px`;
+          padding:9px 6px;font-size:calc(13px * var(--tsize))`;
         button.onclick = () => {
           const start = area.value.lastIndexOf('\n', Math.max(0, area.selectionStart - 1)) + 1;
           area.value = `${area.value.slice(0, start)}${prefix}${area.value.slice(start)}`;
@@ -890,7 +890,7 @@ function noteEditorView(note) {
       );
       const toggle = el('button', '', 'Toggle ☐/☑');
       toggle.style.cssText = `flex:1;min-width:56px;background:var(--bg3);color:var(--txt);border-radius:9px;
-        padding:9px 6px;font-size:13px`;
+        padding:9px 6px;font-size:calc(13px * var(--tsize))`;
       toggle.onclick = () => {
         const lineStart = area.value.lastIndexOf('\n', Math.max(0, area.selectionStart - 1)) + 1;
         const lineEnd = area.value.indexOf('\n', lineStart) === -1 ? area.value.length : area.value.indexOf('\n', lineStart);
@@ -923,8 +923,8 @@ defineApp({
     wrap.style.cssText = 'position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;color:#fff;padding:64px 20px 30px;overflow-y:auto';
     wrap.innerHTML = `
       <div id="cpDial" style="position:relative;width:min(300px,86vw);aspect-ratio:1;flex:none"></div>
-      <div id="cpRead" style="font-size:44px;font-weight:200;margin-top:14px;letter-spacing:1px"></div>
-      <div id="cpPlace" style="color:rgba(235,235,245,.6);font-size:14px;text-align:center;line-height:1.5;margin-top:6px"></div>
+      <div id="cpRead" style="font-size:calc(44px * var(--tsize));font-weight:200;margin-top:14px;letter-spacing:1px"></div>
+      <div id="cpPlace" style="color:rgba(235,235,245,.6);font-size:calc(14px * var(--tsize));text-align:center;line-height:1.5;margin-top:6px"></div>
       <div id="cpLevel" style="margin-top:18px;width:100%;max-width:320px"></div>`;
     win.appendChild(wrap);
 
@@ -976,13 +976,13 @@ defineApp({
       rose.setAttribute('transform', `rotate(${-heading} 100 100)`);
       readout.textContent = `${Math.round(heading)}° ${cardinalOf(heading)}`;
       place.innerHTML = `Orlando, Florida<br>28°32'18" N, 81°22'44" W · 82 ft elevation
-        <br><span style="color:rgba(235,235,245,.3);font-size:12px">${usingSensor ? 'Live device orientation' : 'Simulated heading — no magnetometer available'}</span>`;
+        <br><span style="color:rgba(235,235,245,.3);font-size:calc(12px * var(--tsize))">${usingSensor ? 'Live device orientation' : 'Simulated heading — no magnetometer available'}</span>`;
 
       const bubbleX = Math.max(-1, Math.min(1, tilt.x / 30));
       const bubbleY = Math.max(-1, Math.min(1, tilt.y / 30));
       const flat = Math.abs(bubbleX) < 0.06 && Math.abs(bubbleY) < 0.06;
       level.innerHTML = `
-        <div style="font-size:11px;letter-spacing:.5px;color:rgba(235,235,245,.4);margin-bottom:8px;text-align:center">LEVEL</div>
+        <div style="font-size:calc(11px * var(--tsize));letter-spacing:.5px;color:rgba(235,235,245,.4);margin-bottom:8px;text-align:center">LEVEL</div>
         <div style="position:relative;height:120px;border-radius:16px;background:rgba(255,255,255,.06);
             border:.5px solid rgba(255,255,255,.12);overflow:hidden">
           <div style="position:absolute;left:0;right:0;top:50%;height:1px;background:rgba(255,255,255,.16)"></div>
@@ -991,7 +991,7 @@ defineApp({
             width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;
             background:${flat ? 'rgba(48,209,88,.85)' : 'rgba(255,255,255,.28)'};
             border:1px solid rgba(255,255,255,.4);transition:left .12s linear,top .12s linear,background .2s"></div>
-          <div style="position:absolute;inset:auto 0 8px;text-align:center;font-size:13px;color:rgba(235,235,245,.6)">
+          <div style="position:absolute;inset:auto 0 8px;text-align:center;font-size:calc(13px * var(--tsize));color:rgba(235,235,245,.6)">
             ${flat ? 'Level' : `${Math.round(Math.hypot(tilt.x, tilt.y))}° off level`}</div>
         </div>`;
     }
@@ -1123,7 +1123,7 @@ defineApp({
   id: 'translate',
   name: 'Translate',
   bg: 'linear-gradient(180deg,#5ac8fa,#0a63e8)',
-  glyph: `<div style="display:grid;place-items:center;height:100%;color:#fff;font-size:26px;font-weight:600">文</div>`,
+  glyph: `<div style="display:grid;place-items:center;height:100%;color:#fff;font-size:calc(26px * var(--tsize));font-weight:600">文</div>`,
   mount(win, inst) {
     TR();
     const nav = new Nav(win);
@@ -1159,8 +1159,8 @@ function translateView() {
       picker.style.cssText = `display:flex;align-items:center;gap:8px;margin:0 16px 12px;padding:10px 12px;
         border-radius:14px;background:var(--group)`;
       const sideButton = (code, key) => {
-        const button = el('button', '', `<div style="font-size:15px;font-weight:600">${esc(trName(code))}</div>
-          <div style="font-size:11px;color:var(--txt3)">${state.downloaded.includes(code) || code === 'en' ? 'On device' : 'Not downloaded'}</div>`);
+        const button = el('button', '', `<div style="font-size:calc(15px * var(--tsize));font-weight:600">${esc(trName(code))}</div>
+          <div style="font-size:calc(11px * var(--tsize));color:var(--txt3)">${state.downloaded.includes(code) || code === 'en' ? 'On device' : 'Not downloaded'}</div>`);
         button.style.cssText = 'flex:1;min-width:0;text-align:left;color:var(--txt)';
         button.onclick = () => actionSheet(key === 'from' ? 'Translate From' : 'Translate To',
           TR_LANGUAGES.map(language => ({
@@ -1170,13 +1170,13 @@ function translateView() {
         return button;
       };
       const swap = el('button', '', '⇄');
-      swap.style.cssText = 'width:38px;height:38px;border-radius:50%;background:var(--bg3);color:var(--sysblue);font-size:18px;flex:none';
+      swap.style.cssText = 'width:38px;height:38px;border-radius:50%;background:var(--bg3);color:var(--sysblue);font-size:calc(18px * var(--tsize));flex:none';
       swap.onclick = () => { const from = state.from; state.from = state.to; state.to = from; save(); nav.refresh(); };
       picker.append(sideButton(state.from, 'from'), swap, sideButton(state.to, 'to'));
       body.appendChild(picker);
 
       if (tab === 'Conversation') {
-        body.appendChild(h(`<div style="margin:0 16px 10px;font-size:13px;color:var(--txt2);line-height:1.5">
+        body.appendChild(h(`<div style="margin:0 16px 10px;font-size:calc(13px * var(--tsize));color:var(--txt2);line-height:1.5">
           Conversation mode alternates languages automatically. Type a line and it is translated into the other
           language, then the sides swap.</div>`));
       }
@@ -1185,7 +1185,7 @@ function translateView() {
       const input = el('textarea');
       input.placeholder = `Enter text in ${trName(state.from)}`;
       input.style.cssText = `width:calc(100% - 32px);margin:0 16px;min-height:96px;background:var(--group);
-        border-radius:14px;padding:14px;font-size:20px;color:var(--txt);resize:none;line-height:1.35`;
+        border-radius:14px;padding:14px;font-size:calc(20px * var(--tsize));color:var(--txt);resize:none;line-height:1.35`;
       body.appendChild(input);
 
       const result = el('div');
@@ -1198,7 +1198,7 @@ function translateView() {
         if (state.to !== 'en' && !state.downloaded.includes(state.to)) {
           result.appendChild(h(`<div style="margin:14px 16px;padding:14px;border-radius:14px;background:var(--group)">
             <div style="font-weight:600;margin-bottom:4px">${esc(trName(state.to))} is not downloaded</div>
-            <div style="font-size:14px;color:var(--txt2);line-height:1.45">On-device translation needs the language pack.
+            <div style="font-size:calc(14px * var(--tsize));color:var(--txt2);line-height:1.45">On-device translation needs the language pack.
               Download it in the settings button at the top right.</div></div>`));
           return;
         }
@@ -1206,7 +1206,7 @@ function translateView() {
         if (!output) {
           result.appendChild(h(`<div style="margin:14px 16px;padding:14px;border-radius:14px;background:var(--group)">
             <div style="font-weight:600;margin-bottom:4px">No on-device translation</div>
-            <div style="font-size:14px;color:var(--txt2);line-height:1.45">The offline pack covers common phrases only.
+            <div style="font-size:calc(14px * var(--tsize));color:var(--txt2);line-height:1.45">The offline pack covers common phrases only.
               Try “hello”, “thank you”, “where is the bathroom” or “the wifi is not working”.</div></div>`));
           return;
         }
@@ -1216,8 +1216,8 @@ function translateView() {
 
         const card2 = el('div');
         card2.style.cssText = 'margin:14px 16px;padding:16px;border-radius:14px;background:var(--group)';
-        card2.innerHTML = `<div style="font-size:12px;color:var(--txt3);margin-bottom:6px">${esc(trName(state.to)).toUpperCase()}</div>
-          <div style="font-size:26px;line-height:1.3">${esc(output)}</div>`;
+        card2.innerHTML = `<div style="font-size:calc(12px * var(--tsize));color:var(--txt3);margin-bottom:6px">${esc(trName(state.to)).toUpperCase()}</div>
+          <div style="font-size:calc(26px * var(--tsize));line-height:1.3">${esc(output)}</div>`;
         const tools = el('div');
         tools.style.cssText = 'display:flex;gap:16px;margin-top:14px;color:var(--sysblue)';
         const tool = (label, onClick) => { const b = el('button', '', label); b.style.color = 'var(--sysblue)'; b.style.fontSize = '14px'; b.onclick = onClick; return b; };
@@ -1254,7 +1254,7 @@ function translateView() {
       chips.style.cssText = 'display:flex;flex-wrap:wrap;gap:8px;padding:0 16px';
       suggestions.forEach(phrase => {
         const chip = el('button', '', esc(phrase));
-        chip.style.cssText = 'background:var(--bg3);color:var(--txt);border-radius:16px;padding:7px 13px;font-size:13px';
+        chip.style.cssText = 'background:var(--bg3);color:var(--txt);border-radius:16px;padding:7px 13px;font-size:calc(13px * var(--tsize))';
         chip.onclick = () => { input.value = phrase; translate(); };
         chips.appendChild(chip);
       });
@@ -1302,8 +1302,8 @@ function translateLanguagesView() {
           label: language.name,
           sub: state.downloaded.includes(language.code) ? 'Downloaded · 41 MB' : 'Not downloaded',
           rightHTML: state.downloaded.includes(language.code)
-            ? '<span style="color:var(--sysblue);font-size:14px">Remove</span>'
-            : '<span style="color:var(--sysblue);font-size:14px">Download</span>',
+            ? '<span style="color:var(--sysblue);font-size:calc(14px * var(--tsize))">Remove</span>'
+            : '<span style="color:var(--sysblue);font-size:calc(14px * var(--tsize))">Download</span>',
           chevron: false,
           onClick: () => {
             if (state.downloaded.includes(language.code)) {
@@ -1428,7 +1428,7 @@ function stocksListView() {
     right: [{ html: SF.plusCircle, onClick: nav => addStockSheet(nav) }],
     build(body, nav) {
       const state = ST();
-      body.appendChild(h(`<div style="padding:0 20px 10px;color:var(--txt2);font-size:13px">
+      body.appendChild(h(`<div style="padding:0 20px 10px;color:var(--txt2);font-size:calc(13px * var(--tsize))">
         ${esc(new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' }))} ·
         simulated market data</div>`));
 
@@ -1441,13 +1441,13 @@ function stocksListView() {
         row.style.alignItems = 'center';
         row.innerHTML = `
           <div style="flex:1;min-width:0">
-            <div style="font-size:17px;font-weight:600">${esc(symbol)}</div>
-            <div style="font-size:13px;color:var(--txt2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(quote.name)}</div>
+            <div style="font-size:calc(17px * var(--tsize));font-weight:600">${esc(symbol)}</div>
+            <div style="font-size:calc(13px * var(--tsize));color:var(--txt2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(quote.name)}</div>
           </div>
           <div style="width:76px;flex:none;padding:0 8px">${lineSVG(quote.series, { colour: up ? '#30d158' : '#ff453a', w: 76, h: 34, fill: false })}</div>
           <div style="text-align:right;flex:none;min-width:92px">
-            <div style="font-size:17px;font-weight:500">${esc(stockPrice(quote.price))}</div>
-            <div style="display:inline-block;margin-top:3px;font-size:13px;font-weight:600;color:#fff;
+            <div style="font-size:calc(17px * var(--tsize));font-weight:500">${esc(stockPrice(quote.price))}</div>
+            <div style="display:inline-block;margin-top:3px;font-size:calc(13px * var(--tsize));font-weight:600;color:#fff;
               background:${up ? '#30d158' : '#ff453a'};border-radius:6px;padding:2px 6px;min-width:64px;text-align:center">
               ${up ? '+' : ''}${quote.percent.toFixed(2)}%</div>
           </div>`;
@@ -1476,9 +1476,9 @@ function stocksListView() {
           `What ${quote.name}’s move means for the sector`,
         ][index % 4];
         const item = h(`<div style="margin:10px 16px;padding:14px;border-radius:14px;background:var(--group);cursor:pointer">
-          <div style="font-size:12px;color:var(--txt3);margin-bottom:5px">SIMULATED WIRE · ${esc(timeStr(new Date(Date.now() - index * 42e5)))}</div>
-          <div style="font-size:16px;font-weight:600;line-height:1.35">${esc(headline)}</div>
-          <div style="margin-top:8px;font-size:13px;color:var(--txt2)">${esc(quote.symbol)} ${up ? '+' : ''}${quote.percent.toFixed(2)}%</div></div>`);
+          <div style="font-size:calc(12px * var(--tsize));color:var(--txt3);margin-bottom:5px">SIMULATED WIRE · ${esc(timeStr(new Date(Date.now() - index * 42e5)))}</div>
+          <div style="font-size:calc(16px * var(--tsize));font-weight:600;line-height:1.35">${esc(headline)}</div>
+          <div style="margin-top:8px;font-size:calc(13px * var(--tsize));color:var(--txt2)">${esc(quote.symbol)} ${up ? '+' : ''}${quote.percent.toFixed(2)}%</div></div>`);
         item.onclick = () => nav.push(stockDetailView(quote.symbol));
         body.appendChild(item);
       });
@@ -1490,7 +1490,7 @@ function stocksListView() {
 function addStockSheet(nav) {
   sheet(box => {
     box.style.padding = '0';
-    box.appendChild(h('<div style="font-size:22px;font-weight:700;padding:16px 18px 2px">Add to Watchlist</div>'));
+    box.appendChild(h('<div style="font-size:calc(22px * var(--tsize));font-weight:700;padding:16px 18px 2px">Add to Watchlist</div>'));
     const results = el('div');
     results.style.cssText = 'max-height:52vh;overflow-y:auto;padding-bottom:16px';
     let query = '';
@@ -1540,14 +1540,14 @@ function stockDetailView(symbol) {
       const colour = up ? '#30d158' : '#ff453a';
 
       body.appendChild(h(`<div style="padding:4px 20px 10px">
-        <div style="font-size:26px;font-weight:700">${esc(symbol)}</div>
-        <div style="font-size:14px;color:var(--txt2)">${esc(info[1])} · ${esc(info[3])}</div>
+        <div style="font-size:calc(26px * var(--tsize));font-weight:700">${esc(symbol)}</div>
+        <div style="font-size:calc(14px * var(--tsize));color:var(--txt2)">${esc(info[1])} · ${esc(info[3])}</div>
         <div style="display:flex;align-items:flex-end;gap:12px;margin-top:12px">
-          <div style="font-size:42px;font-weight:300;line-height:1">${esc(stockPrice(quote.price))}</div>
-          <div style="color:${colour};font-size:16px;font-weight:600;padding-bottom:5px">
+          <div style="font-size:calc(42px * var(--tsize));font-weight:300;line-height:1">${esc(stockPrice(quote.price))}</div>
+          <div style="color:${colour};font-size:calc(16px * var(--tsize));font-weight:600;padding-bottom:5px">
             ${up ? '+' : ''}${rangeChange.toFixed(2)} (${up ? '+' : ''}${((rangeChange / series[0]) * 100).toFixed(2)}%)</div>
         </div>
-        <div style="font-size:12px;color:var(--txt3);margin-top:4px">At close · simulated data, generated on device</div>
+        <div style="font-size:calc(12px * var(--tsize));color:var(--txt3);margin-top:4px">At close · simulated data, generated on device</div>
       </div>`));
 
       const chart = el('div');
@@ -1560,7 +1560,7 @@ function stockDetailView(symbol) {
       STOCK_RANGES.forEach(range => {
         const button = el('button', '', range);
         const on = state.range === range;
-        button.style.cssText = `flex:1;padding:7px 0;border-radius:8px;font-size:13px;font-weight:600;
+        button.style.cssText = `flex:1;padding:7px 0;border-radius:8px;font-size:calc(13px * var(--tsize));font-weight:600;
           color:${on ? '#fff' : 'var(--txt2)'};background:${on ? colour : 'transparent'}`;
         button.onclick = () => { state.range = range; save(); nav.refresh(); };
         ranges.appendChild(button);
@@ -1584,8 +1584,8 @@ function stockDetailView(symbol) {
       stats.forEach(([label, value]) => {
         grid.appendChild(h(`<div style="padding:12px 14px;display:flex;justify-content:space-between;
           border-bottom:.5px solid var(--sep)">
-          <span style="color:var(--txt2);font-size:14px">${esc(label)}</span>
-          <span style="font-size:14px;font-weight:600">${esc(value)}</span></div>`));
+          <span style="color:var(--txt2);font-size:calc(14px * var(--tsize))">${esc(label)}</span>
+          <span style="font-size:calc(14px * var(--tsize));font-weight:600">${esc(value)}</span></div>`));
       });
       body.appendChild(grid);
 

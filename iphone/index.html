@@ -111,12 +111,12 @@ ul{list-style:none}
 #status{
   position:absolute;top:0;left:0;right:0;height:54px;z-index:400;
   display:flex;align-items:flex-start;justify-content:space-between;
-  padding:16px 22px 0;font-size:15px;font-weight:600;pointer-events:none;
+  padding:16px 22px 0;font-size:calc(15px * var(--tsize));font-weight:600;pointer-events:none;
   letter-spacing:.1px;color:#fff;
 }
 #st-time{min-width:54px}
 #status .right{max-width:126px;overflow:hidden}
-#status .noservice{font-size:10px;font-weight:600;letter-spacing:-.1px;white-space:nowrap}
+#status .noservice{font-size:calc(10px * var(--tsize));font-weight:600;letter-spacing:-.1px;white-space:nowrap}
 #status.dark-ui{color:#000}
 #status .right{display:flex;align-items:center;gap:5px}
 #status svg{display:block}
@@ -128,16 +128,16 @@ ul{list-style:none}
 }
 #island.expanded{width:340px;height:78px;border-radius:26px}
 #island.call{width:172px;cursor:pointer;pointer-events:auto}
-#island.call .il-content{opacity:1;padding:0 12px;font-size:12px}
+#island.call .il-content{opacity:1;padding:0 12px;font-size:calc(12px * var(--tsize))}
 #island.call.expanded{width:340px}
 .il-wave{display:flex;align-items:center;gap:2px;height:14px}
 .il-wave i{width:2px;background:#30d158;border-radius:1px;animation:wv .9s ease-in-out infinite}
 .il-wave i:nth-child(2){animation-delay:.15s}.il-wave i:nth-child(3){animation-delay:.3s}
 .il-wave i:nth-child(4){animation-delay:.45s}.il-wave i:nth-child(5){animation-delay:.6s}
 @keyframes wv{0%,100%{height:4px}50%{height:14px}}
-#island .il-content{opacity:0;transition:opacity .2s;display:flex;align-items:center;gap:10px;width:100%;padding:0 16px;color:#fff;font-size:13px}
+#island .il-content{opacity:0;transition:opacity .2s;display:flex;align-items:center;gap:10px;width:100%;padding:0 16px;color:#fff;font-size:calc(13px * var(--tsize))}
 #island.expanded .il-content{opacity:1;transition-delay:.12s}
-.il-badge{width:36px;height:36px;border-radius:9px;flex:none;display:grid;place-items:center;font-size:16px}
+.il-badge{width:36px;height:36px;border-radius:9px;flex:none;display:grid;place-items:center;font-size:calc(16px * var(--tsize))}
 
 /* ---------- Home bar ---------- */
 #homebar{
@@ -167,15 +167,15 @@ ul{list-style:none}
 #lock>#lk-wall{z-index:0}
 #lk-lockicon{position:absolute;top:62px;left:0;right:0;display:flex;justify-content:center;color:#fff;opacity:.9}
 #lock .lk-time{position:absolute;top:88px;left:0;right:0;text-align:center;color:#fff;padding:0 16px}
-#lk-date{font-size:17px;font-weight:600;opacity:.92}
-#lk-clock{font-size:76px;font-weight:590;letter-spacing:-2px;line-height:1.06;text-shadow:0 2px 24px rgba(0,0,0,.35);
+#lk-date{font-size:calc(17px * var(--tsize));font-weight:600;opacity:.92}
+#lk-clock{font-size:calc(76px * var(--tsize));font-weight:590;letter-spacing:-2px;line-height:1.06;text-shadow:0 2px 24px rgba(0,0,0,.35);
   white-space:nowrap;overflow:hidden}
 #lock .lk-widgets{position:absolute;top:216px;left:18px;right:18px;display:flex;gap:10px}
 .lk-w{flex:1;min-width:0;background:rgba(255,255,255,.15);backdrop-filter:var(--blur);border-radius:18px;padding:11px 12px;color:#fff;
   border:.5px solid rgba(255,255,255,.14)}
-.lk-w b{display:block;font-size:11px;opacity:.7;text-transform:uppercase;letter-spacing:.4px}
-.lk-w s{display:block;font-size:21px;font-weight:600;text-decoration:none;margin-top:3px}
-.lk-w .sm{font-size:11.5px;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lk-w b{display:block;font-size:calc(11px * var(--tsize));opacity:.7;text-transform:uppercase;letter-spacing:.4px}
+.lk-w s{display:block;font-size:calc(21px * var(--tsize));font-weight:600;text-decoration:none;margin-top:3px}
+.lk-w .sm{font-size:calc(11.5px * var(--tsize));opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* iOS 26 stacks notifications at the BOTTOM of the Lock Screen */
 #lock .lk-notifs{position:absolute;left:12px;right:12px;bottom:104px;top:300px;
   display:flex;flex-direction:column;justify-content:flex-end;gap:8px;overflow-y:auto;scrollbar-width:none;
@@ -185,15 +185,15 @@ ul{list-style:none}
   padding:11px 14px;color:#fff;display:flex;gap:11px;align-items:center;cursor:pointer;animation:pop .3s;
   border:.5px solid rgba(255,255,255,.09);box-shadow:0 4px 18px rgba(0,0,0,.18)}
 .lk-n .ic{width:38px;height:38px;border-radius:9px;flex:none;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.3)}
-.lk-n .tt{font-size:15px;font-weight:600;letter-spacing:-.1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.lk-n .bb{font-size:14px;opacity:.95;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.lk-n .tm{font-size:12px;opacity:.6;flex:none;margin-left:8px}
+.lk-n .tt{font-size:calc(15px * var(--tsize));font-weight:600;letter-spacing:-.1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lk-n .bb{font-size:calc(14px * var(--tsize));opacity:.95;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.lk-n .tm{font-size:calc(12px * var(--tsize));opacity:.6;flex:none;margin-left:8px}
 @keyframes pop{from{opacity:0;transform:scale(.94) translateY(8px)}to{opacity:1;transform:none}}
 #lock .lk-bottom{position:absolute;bottom:38px;left:0;right:0;display:flex;justify-content:space-between;padding:0 40px;color:#fff}
 .lk-btn{width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,.2);backdrop-filter:var(--blur);
-  display:grid;place-items:center;font-size:20px;border:.5px solid rgba(255,255,255,.14)}
+  display:grid;place-items:center;font-size:calc(20px * var(--tsize));border:.5px solid rgba(255,255,255,.14)}
 .lk-btn:active{background:rgba(255,255,255,.35)}
-#lk-hint{position:absolute;bottom:16px;left:0;right:0;text-align:center;color:rgba(255,255,255,.72);font-size:11.5px;letter-spacing:.3px}
+#lk-hint{position:absolute;bottom:16px;left:0;right:0;text-align:center;color:rgba(255,255,255,.72);font-size:calc(11.5px * var(--tsize));letter-spacing:.3px}
 
 /* ---------- Passcode ----------
    Sits above #lock (350) and below the call UI (380), because a call has to
@@ -203,8 +203,8 @@ ul{list-style:none}
   -webkit-backdrop-filter:blur(28px) saturate(140%)}
 #pass.on{display:flex}
 #pass .pc-face{margin-top:96px;height:44px;display:grid;place-items:center;opacity:.9}
-#pass .pc-title{margin-top:12px;font-size:17px;font-weight:600;letter-spacing:-.2px}
-#pass .pc-sub{margin-top:6px;font-size:13px;color:rgba(255,255,255,.62);height:17px;text-align:center;padding:0 30px}
+#pass .pc-title{margin-top:12px;font-size:calc(17px * var(--tsize));font-weight:600;letter-spacing:-.2px}
+#pass .pc-sub{margin-top:6px;font-size:calc(13px * var(--tsize));color:rgba(255,255,255,.62);height:17px;text-align:center;padding:0 30px}
 #pass .pc-dots{display:flex;gap:19px;margin-top:26px}
 #pass .pc-dot{width:13px;height:13px;border-radius:50%;border:1.4px solid #fff;transition:background .12s}
 #pass .pc-dot.on{background:#fff}
@@ -216,11 +216,11 @@ ul{list-style:none}
   display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;
   border:.5px solid rgba(255,255,255,.08);transition:background .1s}
 #pass .pc-key:active{background:rgba(255,255,255,.42)}
-#pass .pc-key b{font-size:34px;font-weight:400;line-height:1;font-variant-numeric:tabular-nums}
-#pass .pc-key span{font-size:9px;font-weight:600;letter-spacing:1.6px;margin-top:3px;height:11px;opacity:.85}
+#pass .pc-key b{font-size:calc(34px * var(--tsize));font-weight:400;line-height:1;font-variant-numeric:tabular-nums}
+#pass .pc-key span{font-size:calc(9px * var(--tsize));font-weight:600;letter-spacing:1.6px;margin-top:3px;height:11px;opacity:.85}
 #pass .pc-foot{display:flex;justify-content:space-between;align-items:center;width:274px;
-  margin:22px 0 40px;font-size:16px;color:#fff}
-#pass .pc-foot button{color:#fff;font-size:16px}
+  margin:22px 0 40px;font-size:calc(16px * var(--tsize));color:#fff}
+#pass .pc-foot button{color:#fff;font-size:calc(16px * var(--tsize))}
 #pass .pc-foot button:disabled{opacity:.35}
 
 /* ---------- Home screen ---------- */
@@ -237,11 +237,11 @@ ul{list-style:none}
   box-shadow:0 2px 8px rgba(0,0,0,.35);transition:transform .12s;
   display:grid;place-items:center;color:#fff;font-weight:800;
 }
-.applabel{font-size:11.5px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.55);max-width:82px;text-align:center;
+.applabel{font-size:calc(11.5px * var(--tsize));color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.55);max-width:82px;text-align:center;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:400;letter-spacing:-.1px}
 .iconwrap{position:relative;display:block;line-height:0}
 .badge{position:absolute;top:-5px;right:-6px;min-width:20px;height:20px;border-radius:10px;background:#ff3b30;color:#fff;
-  font-size:12.5px;font-weight:600;line-height:20px;text-align:center;padding:0 5px;z-index:4;
+  font-size:calc(12.5px * var(--tsize));font-weight:600;line-height:20px;text-align:center;padding:0 5px;z-index:4;
   box-shadow:0 0 0 1.5px rgba(0,0,0,.22),0 1px 3px rgba(0,0,0,.35);font-variant-numeric:tabular-nums}
 #dots{display:flex;justify-content:center;gap:7px;padding:10px 0 6px}
 .dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.35)}
@@ -252,9 +252,9 @@ ul{list-style:none}
 #home.jiggle .app{animation:jig .3s infinite}
 #home.jiggle .app:nth-child(2n){animation-delay:.08s}
 @keyframes jig{0%{transform:rotate(-1.1deg)}50%{transform:rotate(1.1deg)}100%{transform:rotate(-1.1deg)}}
-.delx{position:absolute;top:-6px;left:-2px;width:22px;height:22px;border-radius:50%;background:#e9e9eb;color:#000;display:none;place-items:center;font-size:15px;font-weight:700;z-index:4;line-height:1}
+.delx{position:absolute;top:-6px;left:-2px;width:22px;height:22px;border-radius:50%;background:#e9e9eb;color:#000;display:none;place-items:center;font-size:calc(15px * var(--tsize));font-weight:700;z-index:4;line-height:1}
 #home.jiggle .app.removable .delx{display:grid}
-#doneJiggle{display:none;position:absolute;top:60px;right:20px;z-index:200;background:rgba(255,255,255,.22);backdrop-filter:var(--blur);border-radius:16px;padding:6px 14px;font-size:14px;font-weight:600;color:#fff}
+#doneJiggle{display:none;position:absolute;top:60px;right:20px;z-index:200;background:rgba(255,255,255,.22);backdrop-filter:var(--blur);border-radius:16px;padding:6px 14px;font-size:calc(14px * var(--tsize));font-weight:600;color:#fff}
 #home.jiggle ~ #doneJiggle{display:block}
 
 /* ---------- App window ---------- */
@@ -288,31 +288,31 @@ ul{list-style:none}
   border-bottom:.5px solid transparent;transition:border-color .2s;
 }
 .navbar.scrolled{border-bottom-color:var(--sep)}
-.navbar .nb-title{position:absolute;left:0;right:0;text-align:center;font-size:17px;font-weight:600;pointer-events:none;
+.navbar .nb-title{position:absolute;left:0;right:0;text-align:center;font-size:calc(17px * var(--tsize));font-weight:600;pointer-events:none;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 76px}
-.nb-btn{color:var(--sysblue);font-size:17px;display:flex;align-items:center;gap:2px;padding:6px 8px;z-index:2;white-space:nowrap}
+.nb-btn{color:var(--sysblue);font-size:calc(17px * var(--tsize));display:flex;align-items:center;gap:2px;padding:6px 8px;z-index:2;white-space:nowrap}
 .nb-btn:active{opacity:.4}
 .nb-btn.dis{color:var(--txt3)}
 .nb-right{margin-left:auto;display:flex;align-items:center;gap:2px}
 .nb-icon{width:34px;height:34px;display:grid;place-items:center;border-radius:50%}
 .body{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:36px}
 .body::-webkit-scrollbar{width:0}
-.lg-title{font-size:34px;font-weight:700;letter-spacing:-.6px;padding:0 20px 8px}
+.lg-title{font-size:calc(34px * var(--tsize));font-weight:700;letter-spacing:-.6px;padding:0 20px 8px}
 
 /* ---------- Lists ---------- */
 .grp{margin:18px 16px;background:var(--group);border-radius:11px;overflow:hidden}
-.grp-h{font-size:13px;color:var(--txt2);text-transform:uppercase;padding:0 16px 7px;margin:24px 16px -12px;letter-spacing:.3px}
-.grp-f{font-size:13px;color:var(--txt2);padding:8px 16px 0;margin:-10px 16px 0;line-height:1.35}
+.grp-h{font-size:calc(13px * var(--tsize));color:var(--txt2);text-transform:uppercase;padding:0 16px 7px;margin:24px 16px -12px;letter-spacing:.3px}
+.grp-f{font-size:calc(13px * var(--tsize));color:var(--txt2);padding:8px 16px 0;margin:-10px 16px 0;line-height:1.35}
 .row{display:flex;align-items:center;gap:12px;padding:11px 14px;min-height:44px;position:relative;cursor:pointer;background:var(--group)}
 .row:active{background:color-mix(in srgb,var(--group) 80%,#8888)}
 .row.static,.row.static:active{cursor:default;background:var(--group)}
 .row+.row::before{content:"";position:absolute;top:0;left:14px;right:0;height:.5px;background:var(--sep)}
 .row.noSep+.row::before,.row+.row.noSep::before{display:none}
-.row .ic{width:29px;height:29px;border-radius:7px;flex:none;display:grid;place-items:center;color:#fff;font-size:15px}
-.row .lbl{flex:1;font-size:17px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.row .sub{font-size:13px;color:var(--txt2);margin-top:1px}
-.row .val{color:var(--txt2);font-size:17px;max-width:46%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right}
-.chev{color:var(--txt3);flex:none;font-size:15px;transform:translateY(-1px)}
+.row .ic{width:29px;height:29px;border-radius:7px;flex:none;display:grid;place-items:center;color:#fff;font-size:calc(15px * var(--tsize))}
+.row .lbl{flex:1;font-size:calc(17px * var(--tsize));overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .sub{font-size:calc(13px * var(--tsize));color:var(--txt2);margin-top:1px}
+.row .val{color:var(--txt2);font-size:calc(17px * var(--tsize));max-width:46%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right}
+.chev{color:var(--txt3);flex:none;font-size:calc(15px * var(--tsize));transform:translateY(-1px)}
 .row.destructive .lbl{color:var(--sysred)}
 .row.blue .lbl{color:var(--sysblue)}
 .row.center{justify-content:center}
@@ -329,14 +329,14 @@ ul{list-style:none}
 .slider{-webkit-appearance:none;appearance:none;width:100%;height:30px;border-radius:9px;background:var(--bg3);outline:none;position:relative;cursor:pointer}
 .slider::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.4);cursor:grab}
 .seg{display:flex;background:var(--bg3);border-radius:9px;padding:2px;margin:0}
-.seg button{flex:1;padding:7px 0;border-radius:7px;font-size:13px;font-weight:500;color:var(--txt)}
+.seg button{flex:1;padding:7px 0;border-radius:7px;font-size:calc(13px * var(--tsize));font-weight:500;color:var(--txt)}
 .seg button.on{background:var(--group);box-shadow:0 1px 3px rgba(0,0,0,.3)}
 .light .seg{background:#e9e9eb}.light .seg button.on{background:#fff}
 
 /* search field */
 .searchfield{margin:8px 16px;background:var(--bg3);border-radius:10px;display:flex;align-items:center;gap:6px;padding:8px 10px;color:var(--txt2)}
 .light .searchfield{background:rgba(118,118,128,.12)}
-.searchfield input{flex:1;color:var(--txt);font-size:17px}
+.searchfield input{flex:1;color:var(--txt);font-size:calc(17px * var(--tsize))}
 .searchfield input::placeholder{color:var(--txt2)}
 
 /* tab bar — iOS 26 floating glass capsule */
@@ -345,7 +345,7 @@ ul{list-style:none}
   box-shadow:0 8px 26px rgba(0,0,0,.34),inset 0 1px 0 rgba(255,255,255,.16);
   border:.5px solid rgba(255,255,255,.14)}
 .light .tabbar{background:rgba(255,255,255,.62);border-color:rgba(0,0,0,.06);box-shadow:0 8px 26px rgba(0,0,0,.14),inset 0 1px 0 #fff}
-.tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--txt2);font-size:10px;font-weight:500;
+.tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--txt2);font-size:calc(10px * var(--tsize));font-weight:500;
   height:100%;border-radius:26px}
 .tabbar button.on{color:var(--sysblue)}
 .tabbar button.on::before{content:"";position:absolute;width:56px;height:44px;border-radius:22px;background:color-mix(in srgb,var(--sysblue) 16%,transparent)}
@@ -356,7 +356,7 @@ ul{list-style:none}
 .spinner{width:18px;height:18px;border:2px solid var(--txt3);border-top-color:var(--sysblue);border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .toast{position:absolute;left:50%;bottom:110px;transform:translateX(-50%);background:rgba(40,40,44,.94);backdrop-filter:var(--blur);
-  color:#fff;padding:11px 18px;border-radius:22px;font-size:14px;z-index:900;animation:tin .25s;max-width:80%;text-align:center}
+  color:#fff;padding:11px 18px;border-radius:22px;font-size:calc(14px * var(--tsize));z-index:900;animation:tin .25s;max-width:80%;text-align:center}
 @keyframes tin{from{opacity:0;transform:translate(-50%,12px)}to{opacity:1;transform:translate(-50%,0)}}
 
 /* sheet / alert */
@@ -369,10 +369,10 @@ ul{list-style:none}
   backdrop-filter:var(--blur);border-radius:14px;overflow:hidden;text-align:center;opacity:0;transition:.22s}
 .light .alert{background:rgba(250,250,250,.96);color:#000}
 .alert.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
-.alert .at{padding:18px 16px 6px;font-size:17px;font-weight:600}
-.alert .am{padding:0 16px 16px;font-size:13px;color:var(--txt2);line-height:1.35}
+.alert .at{padding:18px 16px 6px;font-size:calc(17px * var(--tsize));font-weight:600}
+.alert .am{padding:0 16px 16px;font-size:calc(13px * var(--tsize));color:var(--txt2);line-height:1.35}
 .alert .ab{display:flex;border-top:.5px solid var(--sep)}
-.alert .ab button{flex:1;padding:12px;font-size:17px;color:var(--sysblue)}
+.alert .ab button{flex:1;padding:12px;font-size:calc(17px * var(--tsize));color:var(--sysblue)}
 .alert .ab button+button{border-left:.5px solid var(--sep)}
 .alert .ab button.bold{font-weight:600}
 .alert .ab button.red{color:var(--sysred)}
@@ -380,11 +380,11 @@ ul{list-style:none}
 .actionsheet.on{transform:none}
 .as-grp{background:rgba(50,50,54,.92);backdrop-filter:var(--blur);border-radius:14px;overflow:hidden;margin-bottom:8px}
 .light .as-grp{background:rgba(250,250,250,.94);color:#000}
-.as-grp button{display:block;width:100%;padding:16px;font-size:20px;color:var(--sysblue)}
+.as-grp button{display:block;width:100%;padding:16px;font-size:calc(20px * var(--tsize));color:var(--sysblue)}
 .light .as-grp button{color:#007aff}
 .as-grp button+button{border-top:.5px solid var(--sep)}
 .as-grp button.red{color:var(--sysred)}
-.as-grp .as-title{padding:14px;font-size:13px;color:var(--txt2)}
+.as-grp .as-title{padding:14px;font-size:calc(13px * var(--tsize));color:var(--txt2)}
 .as-cancel{margin-bottom:22px}
 .as-cancel button{font-weight:600}
 
@@ -396,7 +396,7 @@ ul{list-style:none}
 .cc-tile{background:rgba(120,120,128,.4);border-radius:22px;padding:14px;display:grid;place-items:center;gap:8px;color:#fff}
 .cc-tile.span2{grid-column:span 2}
 .cc-tile.row2{grid-row:span 2}
-.cc-circ{width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.22);display:grid;place-items:center;font-size:19px;cursor:pointer}
+.cc-circ{width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,.22);display:grid;place-items:center;font-size:calc(19px * var(--tsize));cursor:pointer}
 .cc-circ.on{background:var(--sysblue)}
 .cc-circ.on.green{background:var(--sysgreen)}
 .cc-slider{background:rgba(120,120,128,.4);border-radius:22px;width:100%;height:150px;position:relative;overflow:hidden;cursor:pointer}
@@ -404,7 +404,7 @@ ul{list-style:none}
 .cc-slider i{position:absolute;bottom:14px;left:0;right:0;display:flex;justify-content:center;color:#8e8e93;font-style:normal;mix-blend-mode:difference}
 .cc-ic{display:grid;place-items:center;color:#fff}
 .cc-tile[style*="#ffd60a"] .cc-ic,.cc-tile[style*="#fff"] .cc-ic{color:#000}
-.cc-label{font-size:11px;text-align:center;line-height:1.2}
+.cc-label{font-size:calc(11px * var(--tsize));text-align:center;line-height:1.2}
 
 /* app switcher */
 #switcher{position:absolute;inset:0;z-index:620;display:none;overflow:hidden}
@@ -415,7 +415,7 @@ ul{list-style:none}
   padding:0 86px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
 #switcher .sw-rail::-webkit-scrollbar{display:none}
 .sw-wrap{flex:none;scroll-snap-align:center;width:224px}
-.sw-label{display:flex;align-items:center;gap:8px;color:#fff;font-size:13.5px;font-weight:500;
+.sw-label{display:flex;align-items:center;gap:8px;color:#fff;font-size:calc(13.5px * var(--tsize));font-weight:500;
   margin:0 4px 12px;text-shadow:0 1px 4px rgba(0,0,0,.5)}
 .sw-card{width:224px;height:486px;border-radius:34px;overflow:hidden;background:var(--page);
   box-shadow:0 22px 46px rgba(0,0,0,.55),0 0 0 .5px rgba(255,255,255,.14);position:relative;cursor:pointer;
@@ -428,18 +428,18 @@ ul{list-style:none}
   opacity:0;transition:opacity .18s}
 .sw-wrap:hover .sw-x{opacity:1}
 #switcher .sw-hint{position:absolute;bottom:26px;left:0;right:0;text-align:center;color:rgba(255,255,255,.55);
-  font-size:12px;pointer-events:none}
+  font-size:calc(12px * var(--tsize));pointer-events:none}
 
 /* ---------- Wi-Fi ---------- */
 .wf-row{display:flex;align-items:center;gap:10px;padding:11px 14px;min-height:44px;position:relative;cursor:pointer;background:var(--group)}
 .wf-row:active{background:color-mix(in srgb,var(--group) 82%,#8888)}
 .wf-row+.wf-row::before{content:"";position:absolute;top:0;left:14px;right:0;height:.5px;background:var(--sep)}
 .wf-check{width:16px;flex:none;color:var(--sysblue);display:grid;place-items:center}
-.wf-name{flex:1;min-width:0;font-size:17px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.wf-name .sub{font-size:12px;color:var(--txt2);margin-top:1px;white-space:normal}
+.wf-name{flex:1;min-width:0;font-size:calc(17px * var(--tsize));overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wf-name .sub{font-size:calc(12px * var(--tsize));color:var(--txt2);margin-top:1px;white-space:normal}
 .wf-meta{display:flex;align-items:center;gap:7px;color:var(--txt);flex:none}
 .wf-info{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--sysblue);color:var(--sysblue);
-  display:grid;place-items:center;font-size:13px;font-weight:600;font-style:italic;flex:none;font-family:Georgia,serif}
+  display:grid;place-items:center;font-size:calc(13px * var(--tsize));font-weight:600;font-style:italic;flex:none;font-family:Georgia,serif}
 .wf-info:active{opacity:.5}
 /* Edit → Known Networks, with the iOS delete affordance */
 .kn-row{position:relative;overflow:hidden;background:var(--group);display:flex;align-items:center;min-height:52px}
@@ -449,8 +449,8 @@ ul{list-style:none}
 .kn-inner .sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .kn-row.open .kn-inner{transform:translateX(-84px)}
 .kn-minus{width:22px;height:22px;border-radius:50%;background:var(--sysred);color:#fff;display:grid;place-items:center;
-  flex:none;font-size:19px;font-weight:700;line-height:.6;cursor:pointer;padding-bottom:3px}
-.kn-del{position:absolute;top:0;right:0;bottom:0;width:84px;background:var(--sysred);color:#fff;font-size:16px;
+  flex:none;font-size:calc(19px * var(--tsize));font-weight:700;line-height:.6;cursor:pointer;padding-bottom:3px}
+.kn-del{position:absolute;top:0;right:0;bottom:0;width:84px;background:var(--sysred);color:#fff;font-size:calc(16px * var(--tsize));
   display:grid;place-items:center;transform:translateX(100%);transition:transform .26s cubic-bezier(.25,.9,.3,1);z-index:4}
 .kn-row.open .kn-del{transform:none}
 .kn-row.removing{transition:height .3s,opacity .25s;height:0!important;min-height:0;opacity:0}
@@ -461,30 +461,30 @@ ul{list-style:none}
 .muted{color:var(--txt2)}
 .pad{padding:16px}
 .empty{padding:60px 30px;text-align:center;color:var(--txt2)}
-.empty h3{font-size:20px;color:var(--txt);margin-bottom:6px;font-weight:600}
-.btn-primary{background:var(--sysblue);color:#fff;border-radius:12px;padding:13px;width:100%;font-size:17px;font-weight:600}
+.empty h3{font-size:calc(20px * var(--tsize));color:var(--txt);margin-bottom:6px;font-weight:600}
+.btn-primary{background:var(--sysblue);color:#fff;border-radius:12px;padding:13px;width:100%;font-size:calc(17px * var(--tsize));font-weight:600}
 .btn-primary:active{opacity:.8}
-.avatar{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:600;font-size:16px;flex:none}
+.avatar{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:600;font-size:calc(16px * var(--tsize));flex:none}
 
 /* ---------- App Store ---------- */
 .as-hero{margin:10px 16px 0;border-radius:18px;overflow:hidden;background:var(--group);box-shadow:0 8px 24px rgba(0,0,0,.4);cursor:pointer}
 .as-hero .art{height:200px;position:relative;display:flex;flex-direction:column;justify-content:flex-end;padding:16px;color:#fff}
-.as-hero .kicker{font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase;opacity:.85}
-.as-hero .ttl{font-size:24px;font-weight:800;line-height:1.1;margin-top:4px;text-shadow:0 2px 14px rgba(0,0,0,.5)}
+.as-hero .kicker{font-size:calc(12px * var(--tsize));font-weight:800;letter-spacing:1px;text-transform:uppercase;opacity:.85}
+.as-hero .ttl{font-size:calc(24px * var(--tsize));font-weight:800;line-height:1.1;margin-top:4px;text-shadow:0 2px 14px rgba(0,0,0,.5)}
 .as-hero .foot{display:flex;align-items:center;gap:11px;padding:12px}
-.as-date{padding:14px 20px 2px;color:var(--txt2);font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
-.as-day{padding:0 20px 6px;font-size:30px;font-weight:800;letter-spacing:-.5px;display:flex;justify-content:space-between;align-items:center}
+.as-date{padding:14px 20px 2px;color:var(--txt2);font-size:calc(13px * var(--tsize));font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+.as-day{padding:0 20px 6px;font-size:calc(30px * var(--tsize));font-weight:800;letter-spacing:-.5px;display:flex;justify-content:space-between;align-items:center}
 .as-sec-h{display:flex;align-items:baseline;justify-content:space-between;padding:22px 20px 8px}
-.as-sec-h h3{font-size:22px;font-weight:700;letter-spacing:-.3px}
-.as-sec-h button{color:var(--sysblue);font-size:15px}
+.as-sec-h h3{font-size:calc(22px * var(--tsize));font-weight:700;letter-spacing:-.3px}
+.as-sec-h button{color:var(--sysblue);font-size:calc(15px * var(--tsize))}
 .as-row{display:flex;align-items:center;gap:12px;padding:9px 20px;cursor:pointer}
 .as-row .meta{flex:1;min-width:0}
-.as-row .nm{font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.as-row .sb{font-size:13px;color:var(--txt2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.as-row .nm{font-size:calc(15px * var(--tsize));font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.as-row .sb{font-size:calc(13px * var(--tsize));color:var(--txt2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .storeicon{width:62px;height:62px;border-radius:14px;flex:none;overflow:hidden;position:relative;display:grid;place-items:center;box-shadow:0 1px 4px rgba(0,0,0,.3)}
 .storeicon.sm{width:52px;height:52px;border-radius:12px}
 .storeicon.lg{width:118px;height:118px;border-radius:26px}
-.getbtn{background:rgba(120,120,128,.24);color:var(--sysblue);font-weight:700;font-size:15px;border-radius:16px;padding:6px 20px;min-width:76px;text-align:center;flex:none}
+.getbtn{background:rgba(120,120,128,.24);color:var(--sysblue);font-weight:700;font-size:calc(15px * var(--tsize));border-radius:16px;padding:6px 20px;min-width:76px;text-align:center;flex:none}
 .light .getbtn{background:rgba(120,120,128,.16)}
 .getbtn:active{opacity:.6}
 .getbtn.installing{padding:6px;min-width:32px}
@@ -501,19 +501,19 @@ ul{list-style:none}
 .ad-stats::-webkit-scrollbar{display:none}
 .ad-stat{min-width:96px;text-align:center;border-right:.5px solid var(--sep);padding:0 12px}
 .ad-stat:last-child{border:none}
-.ad-stat b{display:block;font-size:11px;color:var(--txt2);text-transform:uppercase;letter-spacing:.4px;font-weight:600}
-.ad-stat s{display:block;text-decoration:none;font-size:17px;font-weight:600;color:var(--txt2);margin-top:5px}
+.ad-stat b{display:block;font-size:calc(11px * var(--tsize));color:var(--txt2);text-transform:uppercase;letter-spacing:.4px;font-weight:600}
+.ad-stat s{display:block;text-decoration:none;font-size:calc(17px * var(--tsize));font-weight:600;color:var(--txt2);margin-top:5px}
 .shots{display:flex;gap:12px;overflow-x:auto;padding:6px 20px 14px;scroll-snap-type:x mandatory}
 .shots::-webkit-scrollbar{display:none}
 .shot-card{min-width:210px;height:400px;border-radius:16px;scroll-snap-align:start;overflow:hidden;position:relative;box-shadow:0 2px 10px rgba(0,0,0,.4)}
-.stars{color:var(--txt2);letter-spacing:1px;font-size:13px}
+.stars{color:var(--txt2);letter-spacing:1px;font-size:calc(13px * var(--tsize))}
 .rating-big{display:flex;align-items:flex-end;gap:20px;padding:6px 20px 12px}
 .bars{flex:1}
-.bar{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--txt2)}
+.bar{display:flex;align-items:center;gap:6px;font-size:calc(11px * var(--tsize));color:var(--txt2)}
 .bar .tr{flex:1;height:4px;border-radius:2px;background:var(--bg3);overflow:hidden}
 .bar .fl{height:100%;background:var(--txt2)}
 .review{padding:14px 20px;border-top:.5px solid var(--sep)}
-.pill{display:inline-block;background:var(--bg3);border-radius:20px;padding:5px 12px;font-size:13px;color:var(--txt2);margin:0 6px 6px 0}
+.pill{display:inline-block;background:var(--bg3);border-radius:20px;padding:5px 12px;font-size:calc(13px * var(--tsize));color:var(--txt2);margin:0 6px 6px 0}
 
 /* ---------- Safari ---------- */
 .sf-wrap{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--page)}
@@ -525,24 +525,24 @@ ul{list-style:none}
   border-top:.5px solid var(--sep);padding:8px 12px 26px}
 .sf-url{display:flex;align-items:center;gap:8px;background:var(--bg3);border-radius:12px;padding:9px 12px;margin-bottom:6px}
 .light .sf-url{background:rgba(118,118,128,.12)}
-.sf-url input{flex:1;font-size:16px;text-align:center;color:var(--txt)}
+.sf-url input{flex:1;font-size:calc(16px * var(--tsize));text-align:center;color:var(--txt)}
 .sf-url input:focus{text-align:left}
 .sf-tools{display:flex;justify-content:space-between;align-items:center;padding:0 6px}
-.sf-tools button{color:var(--sysblue);font-size:20px;width:44px;height:34px;display:grid;place-items:center}
+.sf-tools button{color:var(--sysblue);font-size:calc(20px * var(--tsize));width:44px;height:34px;display:grid;place-items:center}
 .sf-tools button.dis{color:var(--txt3)}
 .sf-start{position:absolute;inset:0;overflow-y:auto;background:var(--page);padding:20px 16px 20px}
 .sf-fav{display:grid;grid-template-columns:repeat(4,1fr);gap:18px 8px;margin-bottom:24px}
-.sf-fav .f{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;font-size:11px;color:var(--txt2);text-align:center}
-.sf-fav .fi{width:60px;height:60px;border-radius:16px;background:var(--group);display:grid;place-items:center;font-size:24px;font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.sf-fav .f{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;font-size:calc(11px * var(--tsize));color:var(--txt2);text-align:center}
+.sf-fav .fi{width:60px;height:60px;border-radius:16px;background:var(--group);display:grid;place-items:center;font-size:calc(24px * var(--tsize));font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.25)}
 .sf-blocked{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:34px;text-align:center;background:var(--page);color:var(--txt)}
 .sf-sugg{position:absolute;top:0;left:0;right:0;bottom:0;background:var(--page);z-index:3;overflow-y:auto}
 .sf-tabsview{position:absolute;inset:0;background:var(--page);z-index:4;overflow-y:auto;padding:70px 16px 100px}
 .sf-tabgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .sf-tabcard{border-radius:14px;overflow:hidden;background:var(--group);box-shadow:0 2px 10px rgba(0,0,0,.4);cursor:pointer;position:relative}
 .sf-tabcard.active{outline:2px solid var(--sysblue)}
-.sf-tabcard .th{height:150px;display:grid;place-items:center;font-size:34px;background:linear-gradient(160deg,#3a3a3c,#1c1c1e);color:#fff}
-.sf-tabcard .tl{padding:8px;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sf-tabcard .x{position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;display:grid;place-items:center;font-size:13px}
+.sf-tabcard .th{height:150px;display:grid;place-items:center;font-size:calc(34px * var(--tsize));background:linear-gradient(160deg,#3a3a3c,#1c1c1e);color:#fff}
+.sf-tabcard .tl{padding:8px;font-size:calc(12px * var(--tsize));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sf-tabcard .x{position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;display:grid;place-items:center;font-size:calc(13px * var(--tsize))}
 
 /* ---------- Mail ---------- */
 .ml-row{display:flex;gap:10px;padding:10px 14px 10px 8px;position:relative;cursor:pointer;background:var(--page);overflow:hidden}
@@ -551,49 +551,49 @@ ul{list-style:none}
 .ml-row.unread .ml-dot{visibility:visible}
 .ml-row.unread .ml-from{font-weight:700}
 .ml-main{flex:1;min-width:0}
-.ml-from{font-size:16px;font-weight:600;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
-.ml-from span{color:var(--txt2);font-size:14px;font-weight:400;flex:none;display:flex;align-items:center;gap:4px}
-.ml-subj{font-size:15px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ml-prev{font-size:14px;color:var(--txt2);line-height:1.25;max-height:2.5em;overflow:hidden;margin-top:2px}
+.ml-from{font-size:calc(16px * var(--tsize));font-weight:600;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.ml-from span{color:var(--txt2);font-size:calc(14px * var(--tsize));font-weight:400;flex:none;display:flex;align-items:center;gap:4px}
+.ml-subj{font-size:calc(15px * var(--tsize));margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ml-prev{font-size:calc(14px * var(--tsize));color:var(--txt2);line-height:1.25;max-height:2.5em;overflow:hidden;margin-top:2px}
 .ml-actions{position:absolute;top:0;right:0;bottom:0;display:flex;transform:translateX(100%);transition:transform .25s}
 .ml-row.swiped .ml-actions{transform:none}
 .ml-row.swiped .ml-main{opacity:.55}
-.ml-actions button{width:74px;color:#fff;font-size:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px}
+.ml-actions button{width:74px;color:#fff;font-size:calc(12px * var(--tsize));display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px}
 .ml-flag{color:var(--sysorange)}
 .msg-head{padding:14px 16px;border-bottom:.5px solid var(--sep)}
-.msg-subject{font-size:22px;font-weight:700;line-height:1.2;margin-bottom:12px}
-.msg-body{padding:18px 16px;font-size:16px;line-height:1.55;white-space:pre-wrap;word-break:break-word}
+.msg-subject{font-size:calc(22px * var(--tsize));font-weight:700;line-height:1.2;margin-bottom:12px}
+.msg-body{padding:18px 16px;font-size:calc(16px * var(--tsize));line-height:1.55;white-space:pre-wrap;word-break:break-word}
 .msg-body a{color:var(--sysblue)}
 .msg-toolbar{flex:none;height:84px;padding-bottom:26px;display:flex;justify-content:space-around;align-items:center;
   background:color-mix(in srgb,var(--page) 85%,transparent);backdrop-filter:var(--blur);border-top:.5px solid var(--sep)}
-.msg-toolbar button{color:var(--sysblue);font-size:20px;padding:8px 14px}
+.msg-toolbar button{color:var(--sysblue);font-size:calc(20px * var(--tsize));padding:8px 14px}
 .compose-field{display:flex;gap:8px;padding:11px 16px;border-bottom:.5px solid var(--sep);align-items:center}
-.compose-field .k{color:var(--txt2);font-size:16px;min-width:52px}
-.compose-field input{flex:1;font-size:16px}
-.attach{display:inline-flex;align-items:center;gap:8px;background:var(--bg3);border-radius:10px;padding:10px 12px;margin:6px 16px 0;font-size:14px}
+.compose-field .k{color:var(--txt2);font-size:calc(16px * var(--tsize));min-width:52px}
+.compose-field input{flex:1;font-size:calc(16px * var(--tsize))}
+.attach{display:inline-flex;align-items:center;gap:8px;background:var(--bg3);border-radius:10px;padding:10px 12px;margin:6px 16px 0;font-size:calc(14px * var(--tsize))}
 
 /* ---------- Streaming app shells ---------- */
 .st-app{position:absolute;inset:0;overflow-y:auto;color:#fff;padding-bottom:40px}
 .st-hero{height:420px;position:relative;display:flex;flex-direction:column;justify-content:flex-end;padding:20px;gap:12px}
 .st-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.95) 6%,rgba(0,0,0,.1) 60%)}
 .st-hero>*{position:relative;z-index:2}
-.st-row h4{font-size:17px;font-weight:700;padding:18px 16px 8px}
+.st-row h4{font-size:calc(17px * var(--tsize));font-weight:700;padding:18px 16px 8px}
 .st-tiles{display:flex;gap:9px;overflow-x:auto;padding:0 16px 6px}
 .st-tiles::-webkit-scrollbar{display:none}
 .st-tile{min-width:112px;height:164px;border-radius:6px;flex:none;position:relative;overflow:hidden;
-  display:flex;align-items:flex-end;padding:8px;font-size:11px;font-weight:700;text-shadow:0 1px 4px #000}
-.st-nav{position:sticky;top:0;z-index:5;display:flex;gap:18px;padding:56px 16px 12px;font-size:14px;
+  display:flex;align-items:flex-end;padding:8px;font-size:calc(11px * var(--tsize));font-weight:700;text-shadow:0 1px 4px #000}
+.st-nav{position:sticky;top:0;z-index:5;display:flex;gap:18px;padding:56px 16px 12px;font-size:calc(14px * var(--tsize));
   background:linear-gradient(to bottom,rgba(0,0,0,.85),transparent)}
 .st-tabbar{position:absolute;bottom:0;left:0;right:0;height:82px;padding-bottom:26px;display:flex;
   background:rgba(0,0,0,.9);align-items:center}
-.st-tabbar button{flex:1;font-size:10px;display:flex;flex-direction:column;gap:4px;align-items:center;color:#8e8e93}
+.st-tabbar button{flex:1;font-size:calc(10px * var(--tsize));display:flex;flex-direction:column;gap:4px;align-items:center;color:#8e8e93}
 .st-tabbar button.on{color:#fff}
 
 /* calculator */
 .calc{position:absolute;inset:0;background:#000;display:flex;flex-direction:column;padding:0 12px 32px}
-.calc .out{flex:1;display:flex;align-items:flex-end;justify-content:flex-end;color:#fff;font-size:80px;font-weight:300;padding:0 14px 12px;overflow:hidden}
+.calc .out{flex:1;display:flex;align-items:flex-end;justify-content:flex-end;color:#fff;font-size:calc(80px * var(--tsize));font-weight:300;padding:0 14px 12px;overflow:hidden}
 .calc .keys{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-.calc button{height:76px;border-radius:50px;background:#333;color:#fff;font-size:33px;font-weight:400}
+.calc button{height:76px;border-radius:50px;background:#333;color:#fff;font-size:calc(33px * var(--tsize));font-weight:400}
 .calc button.op{background:#ff9f0a}
 .calc button.fn{background:#a5a5a5;color:#000}
 .calc button.zero{grid-column:span 2;text-align:left;padding-left:30px}
@@ -604,19 +604,19 @@ ul{list-style:none}
 .ph-cell{aspect-ratio:1;cursor:pointer}
 
 /* notes */
-.note-editor{flex:1;padding:16px;font-size:17px;line-height:1.5;overflow-y:auto;width:100%;resize:none}
+.note-editor{flex:1;padding:16px;font-size:calc(17px * var(--tsize));line-height:1.5;overflow-y:auto;width:100%;resize:none}
 
 /* weather */
 .wx{position:absolute;inset:0;overflow-y:auto;color:#fff;text-align:center;padding:70px 16px 30px}
 .wx-card{background:rgba(255,255,255,.14);backdrop-filter:blur(10px);border-radius:18px;padding:14px;margin-top:14px;text-align:left}
 .wx-hours{display:flex;gap:18px;overflow-x:auto}
 .wx-hours::-webkit-scrollbar{display:none}
-.wx-hours div{text-align:center;font-size:14px;min-width:44px}
+.wx-hours div{text-align:center;font-size:calc(14px * var(--tsize));min-width:44px}
 
 /* ---------- One-time-code entry boxes ---------- */
 .otp-box{
   width:44px;height:54px;border-radius:11px;background:var(--bg3);border:1.5px solid transparent;
-  text-align:center;font-size:24px;font-weight:600;color:var(--txt);caret-color:var(--sysblue);
+  text-align:center;font-size:calc(24px * var(--tsize));font-weight:600;color:var(--txt);caret-color:var(--sysblue);
 }
 .light .otp-box{background:rgba(118,118,128,.1)}
 .otp-box:focus{border-color:var(--sysblue);background:color-mix(in srgb,var(--sysblue) 12%,var(--bg3))}
@@ -662,7 +662,7 @@ ul{list-style:none}
   background:rgba(40,40,44,.86);backdrop-filter:blur(24px) saturate(160%);color:#fff;
   box-shadow:0 10px 30px rgba(0,0,0,.45),inset 0 0 0 .5px rgba(255,255,255,.12)}
 #ringhud.on{opacity:1;transform:translate(-50%,0)}
-#ringhud .rh-lbl{font-size:14px;opacity:.75}
+#ringhud .rh-lbl{font-size:calc(14px * var(--tsize));opacity:.75}
 
 /* ---------- Call UI ---------- */
 #callui{position:absolute;inset:0;z-index:380;display:none;flex-direction:column;color:#fff;
@@ -672,27 +672,27 @@ ul{list-style:none}
 #callui.minimizing{animation:callOut .3s forwards}
 @keyframes callOut{to{opacity:0;transform:translateY(30px)}}
 .call-head{padding:96px 24px 0;text-align:center}
-.call-name{font-size:36px;font-weight:500;letter-spacing:-.5px}
-.call-sub{font-size:17px;opacity:.7;margin-top:6px;min-height:22px}
+.call-name{font-size:calc(36px * var(--tsize));font-weight:500;letter-spacing:-.5px}
+.call-sub{font-size:calc(17px * var(--tsize));opacity:.7;margin-top:6px;min-height:22px}
 .call-av{width:130px;height:130px;border-radius:50%;margin:26px auto 0;display:grid;place-items:center;
-  font-size:48px;font-weight:600;background:linear-gradient(160deg,#5a6472,#2b3440);box-shadow:0 10px 40px rgba(0,0,0,.5)}
+  font-size:calc(48px * var(--tsize));font-weight:600;background:linear-gradient(160deg,#5a6472,#2b3440);box-shadow:0 10px 40px rgba(0,0,0,.5)}
 .call-av.ring{animation:ringpulse 1.6s ease-in-out infinite}
 @keyframes ringpulse{0%,100%{box-shadow:0 0 0 0 rgba(48,209,88,.42),0 10px 40px rgba(0,0,0,.5)}
   50%{box-shadow:0 0 0 22px rgba(48,209,88,0),0 10px 40px rgba(0,0,0,.5)}}
 .call-grid{margin-top:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:26px 12px;padding:0 40px 26px}
-.call-key{display:flex;flex-direction:column;align-items:center;gap:7px;font-size:12px;color:#fff}
-.call-key .kc{width:70px;height:70px;border-radius:50%;background:rgba(255,255,255,.16);display:grid;place-items:center;font-size:25px;
+.call-key{display:flex;flex-direction:column;align-items:center;gap:7px;font-size:calc(12px * var(--tsize));color:#fff}
+.call-key .kc{width:70px;height:70px;border-radius:50%;background:rgba(255,255,255,.16);display:grid;place-items:center;font-size:calc(25px * var(--tsize));
   backdrop-filter:blur(10px);transition:.15s}
 .call-key.on .kc{background:#fff;color:#000}
 .call-key:active .kc{transform:scale(.93)}
 .call-actions{margin-top:auto;display:flex;justify-content:space-around;padding:0 34px 54px}
-.call-btn{width:78px;height:78px;border-radius:50%;display:grid;place-items:center;font-size:32px;color:#fff}
+.call-btn{width:78px;height:78px;border-radius:50%;display:grid;place-items:center;font-size:calc(32px * var(--tsize));color:#fff}
 .call-btn.acc{background:#30d158;animation:jump 1.4s ease-in-out infinite}
 .call-btn.dec{background:#ff453a}
 .call-btn.end{background:#ff453a;margin:0 auto;transform:rotate(135deg)}
 @keyframes jump{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
 .call-min{position:absolute;top:66px;right:20px;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.18);
-  display:grid;place-items:center;font-size:16px;z-index:3}
+  display:grid;place-items:center;font-size:calc(16px * var(--tsize));z-index:3}
 
 /* ---------- Simulator side drawer ---------- */
 #rig{display:flex;align-items:center;gap:58px}
@@ -708,7 +708,7 @@ ul{list-style:none}
 #panel .deck-inner{
   width:270px;
   background:rgba(16,19,26,.92);border:1px solid rgba(255,255,255,.09);border-radius:18px;
-  padding:16px 15px 22px;backdrop-filter:blur(14px);box-shadow:0 24px 60px rgba(0,0,0,.5);font-size:12.5px;
+  padding:16px 15px 22px;backdrop-filter:blur(14px);box-shadow:0 24px 60px rgba(0,0,0,.5);font-size:calc(12.5px * var(--tsize));
 }
 #panel.closed{width:0;opacity:0;margin-right:-58px;pointer-events:none}
 /* pull tab riveted to the side of the phone */
@@ -723,15 +723,15 @@ ul{list-style:none}
 #deckTab:active{transform:translateY(-50%) scale(.94)}
 #deckTab svg{transition:transform .4s cubic-bezier(.25,.9,.3,1)}
 #deckTab.closed svg{transform:rotate(180deg)}
-#deckTab .lbl{position:absolute;left:34px;white-space:nowrap;font-size:11px;color:#7c8798;opacity:0;
+#deckTab .lbl{position:absolute;left:34px;white-space:nowrap;font-size:calc(11px * var(--tsize));color:#7c8798;opacity:0;
   transition:opacity .2s;pointer-events:none}
 #deckTab.closed:hover .lbl{opacity:1}
-#panel h3{color:#fff;font-size:13.5px;margin-bottom:2px;letter-spacing:.2px}
-#panel .pnote{color:#69727f;font-size:11px;line-height:1.45;margin-bottom:14px}
-#panel h4{color:#7d8797;font-size:10px;text-transform:uppercase;letter-spacing:1.1px;margin:15px 0 7px;font-weight:600}
+#panel h3{color:#fff;font-size:calc(13.5px * var(--tsize));margin-bottom:2px;letter-spacing:.2px}
+#panel .pnote{color:#69727f;font-size:calc(11px * var(--tsize));line-height:1.45;margin-bottom:14px}
+#panel h4{color:#7d8797;font-size:calc(10px * var(--tsize));text-transform:uppercase;letter-spacing:1.1px;margin:15px 0 7px;font-weight:600}
 .pbtns{display:flex;flex-wrap:wrap;gap:6px}
 .pbtn{flex:1 1 calc(50% - 6px);background:#1d232e;border:1px solid #2a3240;border-radius:9px;padding:8px 6px;
-  color:#d7dee8;font-size:11.5px;text-align:center;transition:.13s;line-height:1.3;min-height:34px}
+  color:#d7dee8;font-size:calc(11.5px * var(--tsize));text-align:center;transition:.13s;line-height:1.3;min-height:34px}
 .pbtn:hover{background:#273040;border-color:#3a465a;color:#fff}
 .pbtn:active{transform:scale(.97)}
 .pbtn.wide{flex:1 1 100%}
@@ -740,9 +740,9 @@ ul{list-style:none}
 .pbtn.blue{border-color:#1d4a7a;color:#6fb5ff}.pbtn.blue:hover{background:#12293f}
 .pbtn.on{background:#0a84ff;border-color:#0a84ff;color:#fff}
 .pseg{display:flex;background:#161b24;border:1px solid #2a3240;border-radius:9px;overflow:hidden}
-.pseg button{flex:1;padding:7px 2px;font-size:11px;color:#98a2b2}
+.pseg button{flex:1;padding:7px 2px;font-size:calc(11px * var(--tsize));color:#98a2b2}
 .pseg button.on{background:#0a84ff;color:#fff}
-#panel .plog{margin-top:14px;border-top:1px solid #232a36;padding-top:10px;color:#69727f;font-size:11px;line-height:1.5;
+#panel .plog{margin-top:14px;border-top:1px solid #232a36;padding-top:10px;color:#69727f;font-size:calc(11px * var(--tsize));line-height:1.5;
   max-height:96px;overflow-y:auto;scrollbar-width:none}
 #panel .plog::-webkit-scrollbar{display:none}
 #panel .plog b{color:#9fb0c6;font-weight:600}
@@ -762,10 +762,10 @@ ul{list-style:none}
 
 /* hints panel */
 #hint{position:fixed;left:22px;bottom:22px;max-width:290px;background:rgba(20,22,28,.9);border:1px solid rgba(255,255,255,.1);
-  border-radius:14px;padding:14px 16px;font-size:12.5px;line-height:1.55;color:#b9c0cc;backdrop-filter:blur(10px);z-index:50}
-#hint h4{color:#fff;font-size:13px;margin-bottom:6px}
-#hint kbd{background:#2a2e38;border-radius:4px;padding:1px 5px;font-size:11px;color:#e6e9ef}
-#hint .close{position:absolute;top:8px;right:10px;color:#6b7280;font-size:14px}
+  border-radius:14px;padding:14px 16px;font-size:calc(12.5px * var(--tsize));line-height:1.55;color:#b9c0cc;backdrop-filter:blur(10px);z-index:50}
+#hint h4{color:#fff;font-size:calc(13px * var(--tsize));margin-bottom:6px}
+#hint kbd{background:#2a2e38;border-radius:4px;padding:1px 5px;font-size:calc(11px * var(--tsize));color:#e6e9ef}
+#hint .close{position:absolute;top:8px;right:10px;color:#6b7280;font-size:calc(14px * var(--tsize))}
 @media (max-height:900px){ #hint{display:none} }
 </style>
 <link rel="stylesheet" href="styles/extra.css">
@@ -1090,8 +1090,8 @@ function signInSheet(nav,{switching}={}){
     wrap.innerHTML=`
       <div style="width:62px;height:62px;border-radius:16px;margin:0 auto 14px;background:linear-gradient(135deg,#5e5ce6,#0a84ff);
         display:grid;place-items:center;color:#fff">${sf('<circle cx="12" cy="8" r="3.8"/><path d="M4.6 20.4a7.4 7.4 0 0114.8 0"/>',{size:30})}</div>
-      <div style="font-size:21px;font-weight:700">${switching?'Switch Apple Account':'Apple Account Sign In'}</div>
-      <div class="muted" style="font-size:13.5px;line-height:1.45;margin-top:6px">
+      <div style="font-size:calc(21px * var(--tsize));font-weight:700">${switching?'Switch Apple Account':'Apple Account Sign In'}</div>
+      <div class="muted" style="font-size:calc(13.5px * var(--tsize));line-height:1.45;margin-top:6px">
         Use any address you like — this simulator never contacts Apple.</div>`;
     const g=el('div','grp'); g.style.margin='18px 0 8px';
     const mk=(label,ph,type)=>{ const f=el('div','compose-field');
@@ -1135,7 +1135,7 @@ function signInSheet(nav,{switching}={}){
       const gg=el('div','grp');
       ACC().list.forEach(a2=>gg.appendChild(makeRow({
         label:a2.name, sub:a2.email,
-        icon:`<div class="avatar" style="width:32px;height:32px;font-size:13px;background:${a2.color}">${esc(a2.initials)}</div>`,
+        icon:`<div class="avatar" style="width:32px;height:32px;font-size:calc(13px * var(--tsize));background:${a2.color}">${esc(a2.initials)}</div>`,
         iconBg:'transparent',
         onClick:()=>{ ACC().signedIn=a2.id; State.settings.appleID=a2.email; save(); close();
           island('☁️','#0a84ff','Apple Account','Signed in as '+a2.email,2400); nav&&nav.refresh(); }})));
@@ -1143,7 +1143,7 @@ function signInSheet(nav,{switching}={}){
       wrap.appendChild(other);
     }
     const cancel=el('button','','Cancel');
-    cancel.style.cssText='color:var(--txt2);font-size:15px;margin-top:16px;display:block;width:100%';
+    cancel.style.cssText='color:var(--txt2);font-size:calc(15px * var(--tsize));margin-top:16px;display:block;width:100%';
     cancel.onclick=close;
     wrap.appendChild(cancel);
     s.appendChild(wrap);
@@ -1172,7 +1172,7 @@ function runErase(){
       <svg viewBox="0 0 384 512" fill="currentColor"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg></div>
     <div style="width:170px;height:5px;border-radius:3px;background:#2b2b2e;overflow:hidden">
       <i id="eraseBar" style="display:block;height:100%;width:0;background:#e8e8ed;transition:width .3s"></i></div>
-    <div style="font-size:13px;opacity:.6">Erasing iPhone…</div>`;
+    <div style="font-size:calc(13px * var(--tsize));opacity:.6">Erasing iPhone…</div>`;
   $('#screen').appendChild(ov);
   let p=0;
   const t=setInterval(()=>{ p+=8+Math.random()*10;
@@ -1336,7 +1336,7 @@ function island(icon, color, title, sub, ms=2600){
   isl.querySelector('.il-content').innerHTML =
     `<div class="il-badge" style="background:${color}">${icon}</div>
      <div style="flex:1;min-width:0"><div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(title)}</div>
-     <div style="opacity:.65;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(sub||'')}</div></div>`;
+     <div style="opacity:.65;font-size:calc(11px * var(--tsize));white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(sub||'')}</div></div>`;
   isl.classList.add('expanded');
   clearTimeout(islandTimer);
   islandTimer=setTimeout(()=>{ isl.classList.remove('expanded'); islandBusy=false; renderIsland(); }, ms);
@@ -1351,7 +1351,7 @@ function renderIsland(){
     isl.querySelector('.il-content').innerHTML=
       `<div style="width:21px;height:21px;border-radius:50%;background:#30d158;display:grid;place-items:center;flex:none">
          ${sf('<path d="M6.6 3.5l2.6.6 1.2 3.6-2 1.5a11.6 11.6 0 006 6l1.5-2 3.6 1.2.6 2.6a2 2 0 01-2.1 2.4C11 19 5 13 3.9 5.6A2 2 0 016.6 3.5z" fill="currentColor" stroke="none"/>',{fill:true,size:11})}</div>
-       <div style="flex:1;font-variant-numeric:tabular-nums;font-weight:600;font-size:13px;color:#30d158;text-align:center">${callDuration()}</div>
+       <div style="flex:1;font-variant-numeric:tabular-nums;font-weight:600;font-size:calc(13px * var(--tsize));color:#30d158;text-align:center">${callDuration()}</div>
        <div class="il-wave"><i></i><i></i><i></i><i></i><i></i></div>`;
   } else isl.querySelector('.il-content').innerHTML='';
 }
@@ -2007,7 +2007,7 @@ function renderLockNotifs(){
   LOCK_NOTIFS.forEach(n=>{
     const def=Apps[n.app]||{bg:'#3a3a3c',glyph:''};
     const d=el('div','lk-n',
-      `<div class="ic" style="background:${def.bg};display:grid;place-items:center;font-size:15px">${def.glyph||''}</div>
+      `<div class="ic" style="background:${def.bg};display:grid;place-items:center;font-size:calc(15px * var(--tsize))">${def.glyph||''}</div>
        <div style="flex:1;min-width:0"><div class="tt">${esc(n.title)}</div><div class="bb">${esc(n.body)}</div></div>
        <div class="tm">${esc(n.when||'now')}</div>`);
     /* The app opens after the unlock succeeds, not 260ms later regardless —
@@ -2249,13 +2249,13 @@ function renderCallUI(){
       ${incoming
         ? `<div style="text-align:center"><button class="call-btn dec" id="callDecline">
              ${sf('<path d="M6 6l12 12M18 6L6 18"/>',{w:2.4,size:30})}</button>
-             <div style="font-size:13px;opacity:.8;margin-top:9px">Decline</div></div>
+             <div style="font-size:calc(13px * var(--tsize));opacity:.8;margin-top:9px">Decline</div></div>
            <div style="text-align:center"><button class="call-btn acc" id="callAccept">
              ${sf('<path d="M6.6 3.5l2.6.6 1.2 3.6-2 1.5a11.6 11.6 0 006 6l1.5-2 3.6 1.2.6 2.6a2 2 0 01-2.1 2.4C11 19 5 13 3.9 5.6A2 2 0 016.6 3.5z" fill="currentColor" stroke="none"/>',{fill:true,size:30})}</button>
-             <div style="font-size:13px;opacity:.8;margin-top:9px">Accept</div></div>`
+             <div style="font-size:calc(13px * var(--tsize));opacity:.8;margin-top:9px">Accept</div></div>`
         : `<div style="text-align:center;margin:0 auto"><button class="call-btn end" id="callEnd">
              ${sf('<path d="M6.6 3.5l2.6.6 1.2 3.6-2 1.5a11.6 11.6 0 006 6l1.5-2 3.6 1.2.6 2.6a2 2 0 01-2.1 2.4C11 19 5 13 3.9 5.6A2 2 0 016.6 3.5z" fill="currentColor" stroke="none"/>',{fill:true,size:30})}</button>
-             <div style="font-size:13px;opacity:.8;margin-top:9px">End</div></div>`}
+             <div style="font-size:calc(13px * var(--tsize));opacity:.8;margin-top:9px">End</div></div>`}
     </div>`;
   const q=id=>$('#'+id,c);
   q('callAccept')&&(q('callAccept').onclick=answerCall);
@@ -2319,8 +2319,8 @@ function verificationSheet({sender='Sablewave', onDone}={}){
     wrap.innerHTML=`
       <div style="width:56px;height:56px;border-radius:14px;margin:0 auto 14px;background:var(--sysblue);
         display:grid;place-items:center;color:#fff">${SF.lock}</div>
-      <div style="font-size:21px;font-weight:700;letter-spacing:-.3px">Two-Factor Authentication</div>
-      <div class="muted" style="font-size:14px;line-height:1.45;margin-top:6px">
+      <div style="font-size:calc(21px * var(--tsize));font-weight:700;letter-spacing:-.3px">Two-Factor Authentication</div>
+      <div class="muted" style="font-size:calc(14px * var(--tsize));line-height:1.45;margin-top:6px">
         A verification code was sent to your phone by <b>${esc(sender)}</b>. Enter it below to continue.</div>`;
     const boxes=el('div');
     boxes.style.cssText='display:flex;justify-content:center;gap:9px;margin:22px 0 6px';
@@ -2340,18 +2340,18 @@ function verificationSheet({sender='Sablewave', onDone}={}){
       inputs.push(inp); boxes.appendChild(inp);
     }
     wrap.appendChild(boxes);
-    const err=el('div'); err.style.cssText='color:var(--sysred);font-size:13px;height:18px;margin-top:4px';
+    const err=el('div'); err.style.cssText='color:var(--sysred);font-size:calc(13px * var(--tsize));height:18px;margin-top:4px';
     wrap.appendChild(err);
     const verify=el('button','btn-primary','Verify');
     verify.disabled=true; verify.style.cssText+='margin-top:14px;opacity:.4';
     verify.onclick=()=>check();
     wrap.appendChild(verify);
     const resend=el('button','','Didn’t get a code? Resend');
-    resend.style.cssText='color:var(--sysblue);font-size:14px;margin-top:14px;display:block;width:100%';
+    resend.style.cssText='color:var(--sysblue);font-size:calc(14px * var(--tsize));margin-top:14px;display:block;width:100%';
     resend.onclick=()=>{ sendOTP('sablewave'); toast('New code sent'); };
     wrap.appendChild(resend);
     const cancel=el('button','','Cancel');
-    cancel.style.cssText='color:var(--txt2);font-size:15px;margin-top:12px;display:block;width:100%';
+    cancel.style.cssText='color:var(--txt2);font-size:calc(15px * var(--tsize));margin-top:12px;display:block;width:100%';
     cancel.onclick=close;
     wrap.appendChild(cancel);
     s.appendChild(wrap);
@@ -2598,8 +2598,8 @@ function renderCC(){
      <div class="cc-tile span2" style="padding:11px 13px" data-t="music">
        <div style="width:100%;display:flex;align-items:center;gap:11px">
          <div style="width:38px;height:38px;border-radius:8px;background:linear-gradient(135deg,#ff2d55,#ff9500);flex:none"></div>
-         <div style="flex:1;min-width:0;text-align:left"><div style="font-size:13px;font-weight:600">Not Playing</div>
-           <div style="font-size:11px;opacity:.6">Music</div></div>
+         <div style="flex:1;min-width:0;text-align:left"><div style="font-size:calc(13px * var(--tsize));font-weight:600">Not Playing</div>
+           <div style="font-size:calc(11px * var(--tsize));opacity:.6">Music</div></div>
          <div style="display:flex;gap:14px;opacity:.9">
            ${sf('<path d="M18 6v12M16 12L7 5.5v13z" fill="currentColor" stroke="none"/>',{fill:true,size:17})}
            ${sf('<path d="M7 5.5l11 6.5-11 6.5z" fill="currentColor" stroke="none"/>',{fill:true,size:19})}
@@ -2738,7 +2738,7 @@ function settingsIcon(bg,glyph){ return {icon:glyph, iconBg:bg}; }
 
 defineApp({
   id:'settings', name:'Settings', bg:'linear-gradient(180deg,#c8c9cd,#7c7f86)',
-  glyph:'<div style="font-size:40px;line-height:1">⚙️</div>',
+  glyph:'<div style="font-size:calc(40px * var(--tsize));line-height:1">⚙️</div>',
   mount(win,inst){
     const nav=new Nav(win); inst.nav=nav;
     nav.setRoot(settingsRoot());
@@ -2767,14 +2767,14 @@ function settingsRoot(){
     const acct=currentAccount();
     const idRow=el('div','row');
     if(acct){
-      idRow.innerHTML=`<div class="avatar" style="width:60px;height:60px;font-size:24px;background:${acct.color}">${esc(acct.initials)}</div>
-        <div class="lbl"><div style="font-size:22px">${esc(acct.name)}</div><div class="sub">Apple Account, iCloud and more</div></div>
+      idRow.innerHTML=`<div class="avatar" style="width:60px;height:60px;font-size:calc(24px * var(--tsize));background:${acct.color}">${esc(acct.initials)}</div>
+        <div class="lbl"><div style="font-size:calc(22px * var(--tsize))">${esc(acct.name)}</div><div class="sub">Apple Account, iCloud and more</div></div>
         <div class="chev">${SVG.chev}</div>`;
       idRow.onclick=()=>nav.push(appleIDView());
     }else{
       idRow.innerHTML=`<div class="avatar" style="width:60px;height:60px;background:var(--bg3);color:var(--txt2)">
           ${sf('<circle cx="12" cy="8" r="3.8"/><path d="M4.6 20.4a7.4 7.4 0 0114.8 0"/>',{size:28})}</div>
-        <div class="lbl"><div style="font-size:19px">Sign in to your iPhone</div>
+        <div class="lbl"><div style="font-size:calc(19px * var(--tsize))">Sign in to your iPhone</div>
           <div class="sub">Set up iCloud, the App Store and more</div></div>
         <div class="chev">${SVG.chev}</div>`;
       idRow.onclick=()=>signInSheet(nav);
@@ -2881,9 +2881,9 @@ function appsListView(){
     const draw=q=>{
       holder.innerHTML='';
       const inst=State.installed.map(id=>({name:Apps[id].name, id,
-        iconHTML:`<div style="width:29px;height:29px;border-radius:7px;background:${Apps[id].bg};display:grid;place-items:center;font-size:11px;overflow:hidden">${Apps[id].tiny||''}</div>`}));
+        iconHTML:`<div style="width:29px;height:29px;border-radius:7px;background:${Apps[id].bg};display:grid;place-items:center;font-size:calc(11px * var(--tsize));overflow:hidden">${Apps[id].tiny||''}</div>`}));
       const rows=[...inst.map(a=>({name:a.name, icon:a.iconHTML, go:n=>n.push(thirdPartyAppSettings(a.id))})),
-                  ...builtin.map(a=>({name:a.name, icon:`<div style="width:29px;height:29px;border-radius:7px;background:${a.bg};display:grid;place-items:center;font-size:14px">${a.icon}</div>`, go:a.go}))]
+                  ...builtin.map(a=>({name:a.name, icon:`<div style="width:29px;height:29px;border-radius:7px;background:${a.bg};display:grid;place-items:center;font-size:calc(14px * var(--tsize))">${a.icon}</div>`, go:a.go}))]
         .filter(r=>!q||r.name.toLowerCase().includes(q.toLowerCase()))
         .sort((a,b2)=>a.name.localeCompare(b2.name));
       if(!rows.length){ holder.appendChild(h('<div class="empty"><h3>No Apps</h3></div>')); return; }
@@ -2900,8 +2900,8 @@ function appleIntelligenceView(){
     head.innerHTML=`<div style="width:76px;height:76px;border-radius:50%;margin:6px auto 10px;
         background:conic-gradient(from 210deg,#ff375f,#ff9f0a,#ffd60a,#30d158,#40c8e0,#5e5ce6,#bf5af2,#ff375f);
         filter:blur(.3px);box-shadow:0 0 26px rgba(191,90,242,.45)"></div>
-      <div style="font-size:19px;font-weight:600">Apple Intelligence</div>
-      <div class="muted" style="font-size:13px;line-height:1.4;padding:6px 20px 0">Writing Tools, Image Playground, and a more capable Siri — processed on device.</div>`;
+      <div style="font-size:calc(19px * var(--tsize));font-weight:600">Apple Intelligence</div>
+      <div class="muted" style="font-size:calc(13px * var(--tsize));line-height:1.4;padding:6px 20px 0">Writing Tools, Image Playground, and a more capable Siri — processed on device.</div>`;
     b.appendChild(head);
     group(b,{rows:[{label:'Apple Intelligence',toggle:()=>s.appleIntelligence,onToggle:v=>{s.appleIntelligence=v;save();nav.refresh();
       island('✨','#bf5af2','Apple Intelligence',v?'Turning on…':'Off',2200);}}]});
@@ -2991,9 +2991,9 @@ function appleIDView(){
       group(b,{rows:[{label:'Sign In',cls:'blue center',onClick:()=>signInSheet(nav)}]}); return; }
     const head=el('div','pad');
     head.style.textAlign='center';
-    head.innerHTML=`<div class="avatar" style="width:88px;height:88px;font-size:34px;margin:6px auto 10px;background:${acct.color}">${esc(acct.initials)}</div>
-      <div style="font-size:24px;font-weight:600">${esc(acct.name)}</div>
-      <div class="muted" style="font-size:15px">${esc(acct.email)}</div>`;
+    head.innerHTML=`<div class="avatar" style="width:88px;height:88px;font-size:calc(34px * var(--tsize));margin:6px auto 10px;background:${acct.color}">${esc(acct.initials)}</div>
+      <div style="font-size:calc(24px * var(--tsize));font-weight:600">${esc(acct.name)}</div>
+      <div class="muted" style="font-size:calc(15px * var(--tsize))">${esc(acct.email)}</div>`;
     b.appendChild(head);
     group(b,{rows:[
       {label:'Personal Information', icon:'👤', iconBg:'#8e8e93', onClick:()=>nav.push(personalInfoView())},
@@ -3074,7 +3074,7 @@ function paymentView(){
       {label:'Apple Card •••• 4417',sub:'Daily Cash 2%',icon:'💳',iconBg:'#5e5ce6',onClick:()=>toast('Card details are simulated')},
       {label:'Add Payment Method…',cls:'blue',onClick:()=>toast('The simulator can’t take payment details')}]});
     group(b,{header:'Shipping Address',rows:[
-      {labelHTML:'Alex Rivera<br><span class="muted" style="font-size:14px">1200 Lakefront Ave<br>Orlando, FL 32801</span>',chevron:false}]});
+      {labelHTML:'Alex Rivera<br><span class="muted" style="font-size:calc(14px * var(--tsize))">1200 Lakefront Ave<br>Orlando, FL 32801</span>',chevron:false}]});
   }};
 }
 function mediaPurchasesView(){
@@ -3107,7 +3107,7 @@ function familyView(){
   return {title:'Family', build(b,nav){
     group(b,{rows:members.map(([n,role,init,color])=>({
       labelHTML:`${esc(n)}<div class="sub">${esc(role)}</div>`,
-      icon:`<div class="avatar" style="width:34px;height:34px;font-size:14px;background:${color}">${init}</div>`,
+      icon:`<div class="avatar" style="width:34px;height:34px;font-size:calc(14px * var(--tsize));background:${color}">${init}</div>`,
       iconBg:'transparent', onClick:()=>toast('Member management is simulated')}))});
     group(b,{header:'Shared with Your Family',rows:[
       {label:'Subscriptions',value:'iCloud+, TV+',onClick:()=>nav.push(subscriptionsView())},
@@ -3120,9 +3120,9 @@ function familyView(){
 function deviceDetailView(name,model,where,isThis){
   return {title:name, shortTitle:'Device', build(b,nav){
     const head=el('div','pad'); head.style.textAlign='center';
-    head.innerHTML=`<div style="font-size:44px;margin:2px 0 8px">${model.includes('Watch')?'⌚':model.includes('TV')?'📺':model.includes('Mac')?'💻':'📱'}</div>
-      <div style="font-size:19px;font-weight:600">${esc(name)}</div>
-      <div class="muted" style="font-size:13px">${esc(model)} · ${esc(where)}</div>`;
+    head.innerHTML=`<div style="font-size:calc(44px * var(--tsize));margin:2px 0 8px">${model.includes('Watch')?'⌚':model.includes('TV')?'📺':model.includes('Mac')?'💻':'📱'}</div>
+      <div style="font-size:calc(19px * var(--tsize));font-weight:600">${esc(name)}</div>
+      <div class="muted" style="font-size:calc(13px * var(--tsize))">${esc(model)} · ${esc(where)}</div>`;
     b.appendChild(head);
     group(b,{rows:[
       {label:'Model',value:model},
@@ -3157,11 +3157,11 @@ function icloudView(){
     const parts=[['Photos',used*0.62,'#ffd60a'],['Backups',used*0.21,'#0a84ff'],
       ['Mail',used*0.09,'#30d158'],['Docs',used*0.08,'#bf5af2']];
     const bar=el('div','grp'); bar.style.padding='16px';
-    bar.innerHTML=`<div style="display:flex;justify-content:space-between;font-size:13px;color:var(--txt2)">
+    bar.innerHTML=`<div style="display:flex;justify-content:space-between;font-size:calc(13px * var(--tsize));color:var(--txt2)">
         <span>${used.toFixed(1)} GB of ${esc(acct.plan)} Used</span><span>${(capGB-used).toFixed(1)} GB free</span></div>
       <div style="height:11px;border-radius:6px;overflow:hidden;display:flex;background:var(--bg3);margin:10px 0 9px">
         ${parts.map(p=>`<i style="width:${p[1]/capGB*100}%;background:${p[2]}"></i>`).join('')}</div>
-      <div style="display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--txt2)">
+      <div style="display:flex;flex-wrap:wrap;gap:12px;font-size:calc(12px * var(--tsize));color:var(--txt2)">
         ${parts.map(p=>`<span style="display:flex;align-items:center;gap:5px">
           <i style="width:8px;height:8px;border-radius:2px;background:${p[2]};display:inline-block"></i>${p[0]}</span>`).join('')}</div>`;
     b.appendChild(bar);
@@ -3339,7 +3339,7 @@ function wifiView(){
       });
       b.appendChild(el('div','grp-h',conn?'My Networks':'Saved Networks'));
       b.appendChild(g1);
-      if(!conn && !mine.length) g1.appendChild(h('<div class="wf-row" style="cursor:default"><div class="wf-name muted" style="font-size:15px">Not connected</div></div>'));
+      if(!conn && !mine.length) g1.appendChild(h('<div class="wf-row" style="cursor:default"><div class="wf-name muted" style="font-size:calc(15px * var(--tsize))">Not connected</div></div>'));
       if(conn){
         const f=el('div','grp-f');
         f.innerHTML=`Connected to <b>${esc(conn.ssid)}</b> · ${isSecured(conn.sec)?esc(conn.sec)+' security':'Open network'} · IP ${netIP(conn.ssid).ip}`;
@@ -3362,7 +3362,7 @@ function wifiView(){
       g2.appendChild(otherRow);
       const scan=el('div','wf-row');
       scan.style.cursor='default';
-      scan.innerHTML=`<div class="wf-check"></div><div class="wf-name muted" style="font-size:15px">Looking for networks…</div>
+      scan.innerHTML=`<div class="wf-check"></div><div class="wf-name muted" style="font-size:calc(15px * var(--tsize))">Looking for networks…</div>
         <div class="wf-meta"><div class="spinner"></div></div>`;
       g2.appendChild(scan);
       b.appendChild(g2);
@@ -3424,7 +3424,7 @@ function askForPassword(air,nav){
     bar.append(cancel,title,join); s.appendChild(bar);
 
     const head=el('div','pad');
-    head.style.cssText='padding:16px 18px 4px;font-size:14px;color:var(--txt2);line-height:1.4';
+    head.style.cssText='padding:16px 18px 4px;font-size:calc(14px * var(--tsize));color:var(--txt2);line-height:1.4';
     head.innerHTML=`Enter the password for “<b style="color:var(--txt)">${esc(air.ssid)}</b>”`;
     s.appendChild(head);
 
@@ -3538,7 +3538,7 @@ function knownRow(n,nav){
   const inner=el('div','kn-inner');
   inner.innerHTML=`
     <div class="kn-minus">−</div>
-    <div class="wf-name" style="font-size:16px">${esc(n.ssid)}
+    <div class="wf-name" style="font-size:calc(16px * var(--tsize))">${esc(n.ssid)}
       <div class="sub">${connected?'Connected':(here?'In range':'Not in range')} · ${esc(lastSeenText(n.last))}${n.autoJoin?'':' · Auto-Join off'}</div>
     </div>
     <div class="wf-meta">${isSecured(n.sec)?wifiLock:''}${here?wifiSignal(inRange(n.ssid).bars,!connected):''}
@@ -3637,7 +3637,7 @@ function networkDetailView(ssid){
     }
 
     const info=el('div','grp'); info.style.padding='14px';
-    info.innerHTML=`<div style="font-size:13px;color:var(--txt2);line-height:1.65">
+    info.innerHTML=`<div style="font-size:calc(13px * var(--tsize));color:var(--txt2);line-height:1.65">
       <b style="color:var(--txt)">${esc(ssid)}</b><br>
       Security · ${isSecured(k?k.sec:(air&&air.sec))? esc((k?k.sec:air.sec)) : 'None (open network)'}<br>
       Signal · ${air? ['Poor','Fair','Good','Excellent'][air.bars] || 'Good' : 'Not in range'}<br>
@@ -3680,13 +3680,13 @@ function btDeviceView(d){
   return {title:d.n, shortTitle:'Device', build(b,nav){
     const icon={audio:'🎧',watch:'⌚',remote:'📺',car:'🚗'}[d.type]||'📶';
     const head=el('div','pad'); head.style.textAlign='center';
-    head.innerHTML=`<div style="font-size:44px;margin:4px 0 6px">${icon}</div>
-      <div style="font-size:19px;font-weight:600">${esc(d.n)}</div>
-      <div class="muted" style="font-size:13px">${d.conn?'Connected':'Not Connected'}${d.batt!=null?` · ${d.batt}% battery`:''}</div>`;
+    head.innerHTML=`<div style="font-size:calc(44px * var(--tsize));margin:4px 0 6px">${icon}</div>
+      <div style="font-size:calc(19px * var(--tsize));font-weight:600">${esc(d.n)}</div>
+      <div class="muted" style="font-size:calc(13px * var(--tsize))">${d.conn?'Connected':'Not Connected'}${d.batt!=null?` · ${d.batt}% battery`:''}</div>`;
     b.appendChild(head);
     if(d.batt!=null){
       const bar=el('div','grp'); bar.style.padding='14px';
-      bar.innerHTML=`<div style="font-size:12px;color:var(--txt2);margin-bottom:7px">BATTERY</div>
+      bar.innerHTML=`<div style="font-size:calc(12px * var(--tsize));color:var(--txt2);margin-bottom:7px">BATTERY</div>
         <div style="height:8px;border-radius:4px;background:var(--bg3);overflow:hidden">
           <div style="width:${d.batt}%;height:100%;background:${d.batt>20?'var(--sysgreen)':'var(--sysred)'}"></div></div>`;
       b.appendChild(bar);
@@ -3728,18 +3728,18 @@ function cellularView(){
       {label:'Personal Hotspot', value:State.settings.hotspot?'On':'Off', onClick:()=>nav.push(hotspotView())}]});
     group(b,{header:'SIMs',rows:[
       {label:'Primary', sub:'Sablewave Mobile · '+(noService?'No Service':'(407) 555-0142'),
-       rightHTML:noService?'<span class="muted" style="font-size:13px">SOS</span>':'',
+       rightHTML:noService?'<span class="muted" style="font-size:calc(13px * var(--tsize))">SOS</span>':'',
        onClick:()=>nav.push(simDetailView())},
       {label:'Add eSIM', cls:'blue', onClick:()=>alertBox({title:'Set Up Cellular',
         message:'Transfer a number from another iPhone, scan a QR code from your carrier, or use a carrier app.',
         buttons:[{text:'Cancel'},{text:'Use QR Code',style:'bold',onClick:()=>toast('eSIM setup is simulated')}]})}]});
     const total=c.apps.reduce((a2,x)=>a2+x[1],0);
     const usage=el('div','grp'); usage.style.padding='14px';
-    usage.innerHTML=`<div style="display:flex;justify-content:space-between;font-size:13px;color:var(--txt2)">
+    usage.innerHTML=`<div style="display:flex;justify-content:space-between;font-size:calc(13px * var(--tsize));color:var(--txt2)">
         <span>CURRENT PERIOD</span><span>${total.toFixed(1)} GB</span></div>
       <div style="height:9px;border-radius:5px;overflow:hidden;display:flex;background:var(--bg3);margin:9px 0 4px">
         ${c.apps.slice(0,5).map((x,i)=>`<i style="width:${x[1]/total*100}%;background:hsl(${200+i*32} 70% 55%)"></i>`).join('')}</div>
-      <div style="font-size:12px;color:var(--txt2)">Roaming: ${c.roaming} bytes · Resets in 9 days</div>`;
+      <div style="font-size:calc(12px * var(--tsize));color:var(--txt2)">Roaming: ${c.roaming} bytes · Resets in 9 days</div>`;
     b.appendChild(usage);
     group(b,{header:'Cellular Data Usage',rows:c.apps.map(x=>({
       label:x[0], value:x[1]>=1? x[1].toFixed(1)+' GB' : Math.round(x[1]*1000)+' MB',
@@ -3833,13 +3833,13 @@ function vpnView(){
     const s=State.settings;
     s.vpnOn=s.vpnOn??false; s.vpnConfigured=s.vpnConfigured??false;
     if(!s.vpnConfigured){
-      b.appendChild(h(`<div class="empty" style="padding-top:44px"><div style="font-size:40px;margin-bottom:10px">🔒</div>
+      b.appendChild(h(`<div class="empty" style="padding-top:44px"><div style="font-size:calc(40px * var(--tsize));margin-bottom:10px">🔒</div>
         <h3>No VPN Configurations</h3><p style="line-height:1.45">Add a VPN configuration to route this iPhone’s traffic through a private server.</p></div>`));
       group(b,{rows:[{label:'Add VPN Configuration…',cls:'blue',onClick:()=>{
         sheet((sh,close)=>{
           const d={type:'IKEv2',desc:'',server:'',remote:''};
           sh.innerHTML=`<div style="display:flex;justify-content:space-between;padding:14px 16px;border-bottom:.5px solid var(--sep)">
-            <button class="vc" style="color:var(--sysblue)">Cancel</button><b style="font-size:17px">Add Configuration</b>
+            <button class="vc" style="color:var(--sysblue)">Cancel</button><b style="font-size:calc(17px * var(--tsize))">Add Configuration</b>
             <button class="vd" style="color:var(--sysblue);font-weight:600">Done</button></div>`;
           const g=el('div','grp'); g.style.margin='14px 16px';
           [['Type','type','IKEv2'],['Description','desc','My VPN'],['Server','server','vpn.example.com'],['Remote ID','remote','Optional']]
@@ -3898,7 +3898,7 @@ function soundsView(){
     const g=el('div','grp'); g.style.padding='14px';
     const sl=el('input','slider'); sl.type='range'; sl.min=0; sl.max=100; sl.value=s.ringer;
     sl.oninput=e=>{s.ringer=+e.target.value; save();};
-    g.innerHTML='<div style="font-size:13px;color:var(--txt2);margin-bottom:8px">RINGER AND ALERTS</div>';
+    g.innerHTML='<div style="font-size:calc(13px * var(--tsize));color:var(--txt2);margin-bottom:8px">RINGER AND ALERTS</div>';
     g.appendChild(sl); b.appendChild(g);
     group(b,{rows:[sw('Change with Buttons','sounds.changeWithButtons',true)]});
     group(b,{header:'Sounds and Haptic Patterns',rows:[
@@ -3932,12 +3932,12 @@ function screenTimeView(){
   return {title:'Screen Time', build(b,nav){
     const card=el('div','grp'); card.style.padding='16px';
     card.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:baseline">
-      <div><div style="font-size:13px;color:var(--txt2)">DAILY AVERAGE</div>
-      <div style="font-size:30px;font-weight:700">6h 33m</div></div>
-      <div style="color:var(--sysgreen);font-size:13px">↓ 12% from last week</div></div>
+      <div><div style="font-size:calc(13px * var(--tsize));color:var(--txt2)">DAILY AVERAGE</div>
+      <div style="font-size:calc(30px * var(--tsize));font-weight:700">6h 33m</div></div>
+      <div style="color:var(--sysgreen);font-size:calc(13px * var(--tsize))">↓ 12% from last week</div></div>
       <div style="display:flex;align-items:flex-end;gap:8px;height:110px;margin-top:16px">
       ${[4,6,3,7,5,8,6].map(v=>`<div style="flex:1;background:var(--sysblue);border-radius:3px;height:${v*12}%"></div>`).join('')}</div>
-      <div style="display:flex;gap:8px;font-size:11px;color:var(--txt2);margin-top:6px">
+      <div style="display:flex;gap:8px;font-size:calc(11px * var(--tsize));color:var(--txt2);margin-top:6px">
       ${['S','M','T','W','T','F','S'].map(d=>`<div style="flex:1;text-align:center">${d}</div>`).join('')}</div>`;
     b.appendChild(card);
     group(b,{header:'Most Used',rows:data.map(([n,m])=>({
@@ -4021,7 +4021,7 @@ function renameView(){
   return {title:'Name', build(b,nav){
     const g=el('div','grp');
     const row=el('div','row static');
-    const inp=el('input'); inp.value=State.settings.name; inp.style.cssText='flex:1;font-size:17px';
+    const inp=el('input'); inp.value=State.settings.name; inp.style.cssText='flex:1;font-size:calc(17px * var(--tsize))';
     row.appendChild(inp);
     const x=el('div','',"✕"); x.className='muted'; x.style.cursor='pointer'; x.onclick=()=>{inp.value='';inp.focus();};
     row.appendChild(x); g.appendChild(row); b.appendChild(g);
@@ -4053,9 +4053,9 @@ function softwareUpdateView(){
 
     if(!updatePending()){
       const done=el('div','grp'); done.style.cssText='padding:26px 16px;text-align:center';
-      done.innerHTML=`<div style="font-size:34px">✅</div>
-        <div style="font-size:17px;font-weight:600;margin-top:8px">iOS ${esc(osVersion())}</div>
-        <div class="muted" style="font-size:13.5px;margin-top:5px">Your iPhone is up to date.</div>`;
+      done.innerHTML=`<div style="font-size:calc(34px * var(--tsize))">✅</div>
+        <div style="font-size:calc(17px * var(--tsize));font-weight:600;margin-top:8px">iOS ${esc(osVersion())}</div>
+        <div class="muted" style="font-size:calc(13.5px * var(--tsize));margin-top:5px">Your iPhone is up to date.</div>`;
       b.appendChild(done);
       group(b,{header:'Automatic Updates',rows:[
         sw('Download iOS Updates','softwareUpdate.downloadIosUpdates',true),
@@ -4066,18 +4066,18 @@ function softwareUpdateView(){
 
     const card=el('div','grp'); card.style.padding='16px';
     card.innerHTML=`<div style="display:flex;gap:12px;align-items:center">
-      <div style="width:44px;height:44px;border-radius:10px;background:#8e8e93;display:grid;place-items:center;font-size:22px">⚙️</div>
-      <div><div style="font-size:17px;font-weight:600">iOS ${IOS_UPDATE.version}</div>
-      <div class="muted" style="font-size:13px">Apple Inc. · ${IOS_UPDATE.size}</div></div></div>
-      <div style="margin-top:12px;font-size:14px;line-height:1.45">${IOS_UPDATE.notes}</div>`;
+      <div style="width:44px;height:44px;border-radius:10px;background:#8e8e93;display:grid;place-items:center;font-size:calc(22px * var(--tsize))">⚙️</div>
+      <div><div style="font-size:calc(17px * var(--tsize));font-weight:600">iOS ${IOS_UPDATE.version}</div>
+      <div class="muted" style="font-size:calc(13px * var(--tsize))">Apple Inc. · ${IOS_UPDATE.size}</div></div></div>
+      <div style="margin-top:12px;font-size:calc(14px * var(--tsize));line-height:1.45">${IOS_UPDATE.notes}</div>`;
     b.appendChild(card);
 
     if(u.stage==='downloading'||u.stage==='installing'){
       const busy=el('div','grp'); busy.style.padding='16px';
-      busy.innerHTML=`<div style="font-size:14px;font-weight:600">${u.stage==='downloading'?'Downloading':'Preparing Update'}</div>
+      busy.innerHTML=`<div style="font-size:calc(14px * var(--tsize));font-weight:600">${u.stage==='downloading'?'Downloading':'Preparing Update'}</div>
         <div style="height:4px;border-radius:2px;background:var(--bg3);margin:10px 0 6px;overflow:hidden">
           <i id="osu-bar" style="display:block;height:100%;width:${u.progress}%;background:var(--sysblue);transition:width .35s"></i></div>
-        <div class="muted" id="osu-pct" style="font-size:12.5px">${u.progress}%</div>`;
+        <div class="muted" id="osu-pct" style="font-size:calc(12.5px * var(--tsize))">${u.progress}%</div>`;
       b.appendChild(busy);
     }else{
       const label = u.stage==='downloaded' ? 'Install Now' : 'Download and Install';
@@ -4160,11 +4160,11 @@ function storageView(){
   return {title:'iPhone Storage', build(b,nav){
     const used=73.6, cap=256;
     const card=el('div','grp'); card.style.padding='16px';
-    card.innerHTML=`<div style="display:flex;justify-content:space-between;font-size:13px;color:var(--txt2)">
+    card.innerHTML=`<div style="display:flex;justify-content:space-between;font-size:calc(13px * var(--tsize));color:var(--txt2)">
       <span>iPhone</span><span>${used} GB of ${cap} GB Used</span></div>
       <div style="height:14px;border-radius:7px;overflow:hidden;display:flex;background:var(--bg3);margin:10px 0">
       ${base.map(x=>`<i style="width:${parseFloat(x[1])/cap*100}%;background:${x[2]}"></i>`).join('')}</div>
-      <div style="display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--txt2)">
+      <div style="display:flex;flex-wrap:wrap;gap:10px;font-size:calc(12px * var(--tsize));color:var(--txt2)">
       ${base.map(x=>`<span style="display:flex;align-items:center;gap:4px"><i style="width:8px;height:8px;border-radius:2px;background:${x[2]};display:inline-block"></i>${x[0]}</span>`).join('')}</div>`;
     b.appendChild(card);
     group(b,{header:'Recommendations',rows:[
@@ -4172,7 +4172,7 @@ function storageView(){
       {label:'Review Downloaded Videos', sub:'8.9 GB', onClick:()=>toast('Simulated')}]});
     const rows=[...State.installed.map(id=>({
       label:Apps[id].name, sub:'Last used: Today', value:Apps[id].size||'184 MB',
-      icon:`<div style="width:29px;height:29px;border-radius:7px;background:${Apps[id].bg};display:grid;place-items:center;font-size:11px;overflow:hidden">${Apps[id].tiny||''}</div>`,
+      icon:`<div style="width:29px;height:29px;border-radius:7px;background:${Apps[id].bg};display:grid;place-items:center;font-size:calc(11px * var(--tsize));overflow:hidden">${Apps[id].tiny||''}</div>`,
       iconBg:'transparent',
       onClick:()=>nav.push(appStorageView(id))
     })),
@@ -4186,8 +4186,8 @@ function appStorageView(id){
   return {title:def.name, build(b,nav){
     const head=el('div','pad'); head.style.textAlign='center';
     head.innerHTML=`<div style="margin:0 auto 10px;width:74px">${appIconHTML(def,74)}</div>
-      <div style="font-size:20px;font-weight:600">${esc(def.name)}</div>
-      <div class="muted" style="font-size:13px">Version ${def.version||'4.2.1'} · ${def.size||'184 MB'}</div>`;
+      <div style="font-size:calc(20px * var(--tsize));font-weight:600">${esc(def.name)}</div>
+      <div class="muted" style="font-size:calc(13px * var(--tsize))">Version ${def.version||'4.2.1'} · ${def.size||'184 MB'}</div>`;
     b.appendChild(head);
     group(b,{rows:[
       {label:'App Size',value:def.size||'184 MB'},
@@ -4318,8 +4318,8 @@ function displayView(){
       const c=el('div'); c.style.cssText='flex:1;text-align:center;cursor:pointer';
       c.innerHTML=`<div style="height:110px;border-radius:12px;margin-bottom:8px;border:3px solid ${s.dark===dark?'var(--sysblue)':'transparent'};
         background:${dark?'linear-gradient(160deg,#1c1c1e,#000)':'linear-gradient(160deg,#fff,#e5e5ea)'};
-        display:grid;place-items:center;font-size:34px;color:${dark?'#fff':'#000'}">Aa</div>
-        <div style="font-size:14px">${n}</div>`;
+        display:grid;place-items:center;font-size:calc(34px * var(--tsize));color:${dark?'#fff':'#000'}">Aa</div>
+        <div style="font-size:calc(14px * var(--tsize))">${n}</div>`;
       c.onclick=()=>{ s.dark=dark; save(); applyAppearance(); nav.refresh(); };
       seg.appendChild(c);
     });
@@ -4354,7 +4354,7 @@ function textSizeView(){
     sl.oninput=e=>{ s.textSize=+e.target.value/100; applyAppearance(); save();
       $('#tsPrev').style.fontSize=(17*s.textSize)+'px'; };
     g.appendChild(sl);
-    g.appendChild(h(`<div style="display:flex;justify-content:space-between;margin-top:8px;color:var(--txt2)"><span style="font-size:12px">A</span><span style="font-size:22px">A</span></div>`));
+    g.appendChild(h(`<div style="display:flex;justify-content:space-between;margin-top:8px;color:var(--txt2)"><span style="font-size:calc(12px * var(--tsize))">A</span><span style="font-size:calc(22px * var(--tsize))">A</span></div>`));
     b.appendChild(g);
     b.appendChild(el('div','grp-f','Apps that support Dynamic Type will adjust to your preferred reading size.'));
   }};
@@ -4396,7 +4396,7 @@ function wallpaperView(){
       const c=el('div');
       c.style.cssText='cursor:pointer;text-align:center';
       c.innerHTML=`<div style="height:104px;border-radius:12px;background:${w.c};border:3px solid ${State.settings.wallpaper===i?'var(--sysblue)':'transparent'}"></div>
-        <div style="font-size:11px;margin-top:5px;color:var(--txt2)">${w.n}</div>`;
+        <div style="font-size:calc(11px * var(--tsize));margin-top:5px;color:var(--txt2)">${w.n}</div>`;
       c.onclick=()=>{ State.settings.wallpaper=i; save(); applyAppearance(); nav.refresh(); toast('Wallpaper set'); };
       grid.appendChild(c);
     });
@@ -4453,15 +4453,15 @@ function changePasscodeView(){
     const step=steps[at];
     const head=el('div');
     head.style.cssText='text-align:center;padding:34px 30px 20px';
-    head.innerHTML=`<div style="font-size:17px;font-weight:600">${esc(step.title)}</div>
-      <div class="muted" id="cp-err" style="font-size:13px;margin-top:8px;height:18px;color:var(--sysred)"></div>`;
+    head.innerHTML=`<div style="font-size:calc(17px * var(--tsize));font-weight:600">${esc(step.title)}</div>
+      <div class="muted" id="cp-err" style="font-size:calc(13px * var(--tsize));margin-top:8px;height:18px;color:var(--sysred)"></div>`;
     b.appendChild(head);
 
     const g=el('div','grp'); g.style.margin='0 16px';
     const row=el('div','row static');
     const input=el('input');
     input.type='password'; input.inputMode='numeric'; input.placeholder='6 digits';
-    input.style.cssText='flex:1;font-size:19px;letter-spacing:6px;text-align:center';
+    input.style.cssText='flex:1;font-size:calc(19px * var(--tsize));letter-spacing:6px;text-align:center';
     row.appendChild(input); g.appendChild(row); b.appendChild(g);
 
     const advance=()=>{
@@ -4500,8 +4500,8 @@ function batteryView(){
       'Battery health data is simulated.'))}]});
     const card=el('div','grp'); card.style.padding='16px';
     card.innerHTML=`<div class="grp-h" style="margin:0 0 8px;padding:0">Last 24 Hours</div>
-      <div style="font-size:30px;font-weight:700">${Math.round(batteryLevel*100)}%</div>
-      <div class="muted" style="font-size:13px;margin-bottom:14px">Battery Level · ${State.settings.lowpower?'Low Power Mode on':'Normal usage'}</div>
+      <div style="font-size:calc(30px * var(--tsize));font-weight:700">${Math.round(batteryLevel*100)}%</div>
+      <div class="muted" style="font-size:calc(13px * var(--tsize));margin-bottom:14px">Battery Level · ${State.settings.lowpower?'Low Power Mode on':'Normal usage'}</div>
       <div style="display:flex;align-items:flex-end;gap:3px;height:90px">
       ${Array.from({length:24},(_,i)=>`<div style="flex:1;border-radius:2px;background:${i>18?'var(--sysgreen)':'var(--txt2)'};height:${20+Math.abs(Math.sin(i))*70}%"></div>`).join('')}</div>`;
     b.appendChild(card);
@@ -4590,7 +4590,7 @@ function pickerView(title,options,current,onPick){
   return {title, build(b,nav){
     group(b,{rows:options.map(o=>({
       label:o, chevron:false,
-      rightHTML:o===sel?`<div style="color:var(--sysblue);font-size:17px">✓</div>`:'',
+      rightHTML:o===sel?`<div style="color:var(--sysblue);font-size:calc(17px * var(--tsize))">✓</div>`:'',
       onClick:()=>{ sel=o; onPick(o); nav.refresh(); }
     }))});
   }};
@@ -4642,30 +4642,30 @@ const BI = {  /* brand-ish icon art (stylized, drawn with CSS/SVG) */
       <svg viewBox="0 0 40 60" style="height:74%"><defs><linearGradient id="nfg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e50914"/><stop offset="1" stop-color="#8b0000"/></linearGradient></defs>
       <path d="M6 2h9l10 30V2h9v56h-9L15 26v32H6z" fill="url(#nfg)"/></svg></div>`,
   disney:`<div style="width:100%;height:100%;background:linear-gradient(160deg,#0c1b3a,#040a17);display:grid;place-items:center;color:#fff;overflow:hidden">
-      <div style="font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:15px;font-weight:700;letter-spacing:-.3px;white-space:nowrap">Disney<span style="font-style:normal;font-size:11px;vertical-align:top;margin-left:1px">+</span></div></div>`,
+      <div style="font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:calc(15px * var(--tsize));font-weight:700;letter-spacing:-.3px;white-space:nowrap">Disney<span style="font-style:normal;font-size:calc(11px * var(--tsize));vertical-align:top;margin-left:1px">+</span></div></div>`,
   max:`<div style="width:100%;height:100%;background:linear-gradient(150deg,#0d1a4a,#3b1f9e 60%,#0b0f2b);display:grid;place-items:center;color:#fff">
-      <div style="font-size:22px;font-weight:800;letter-spacing:-1.5px">max</div></div>`,
+      <div style="font-size:calc(22px * var(--tsize));font-weight:800;letter-spacing:-1.5px">max</div></div>`,
   paramount:`<div style="width:100%;height:100%;background:linear-gradient(160deg,#0064ff,#001c58);display:grid;place-items:center;color:#fff;position:relative">
       <svg viewBox="0 0 100 100" style="position:absolute;width:100%;height:100%;opacity:.35"><path d="M50 24 L78 76 H22 Z" fill="#fff"/></svg>
-      <div style="position:relative;font-size:13px;font-weight:800;letter-spacing:-.4px">Paramount<span style="font-size:15px">+</span></div></div>`,
+      <div style="position:relative;font-size:calc(13px * var(--tsize));font-weight:800;letter-spacing:-.4px">Paramount<span style="font-size:calc(15px * var(--tsize))">+</span></div></div>`,
   peacock:`<div style="width:100%;height:100%;background:#000;display:grid;place-items:center;position:relative">
       <svg viewBox="0 0 100 100" style="width:66%">${['#ffc900','#ff7c00','#ff3c14','#c724b1','#0089ff','#00b0e4'].map((c,i)=>
         `<circle cx="${50+Math.cos((i-2.5)*0.42-Math.PI/2)*30}" cy="${72+Math.sin((i-2.5)*0.42-Math.PI/2)*30}" r="8.5" fill="${c}"/>`).join('')}
         <circle cx="50" cy="70" r="12" fill="#000"/></svg></div>`,
   hulu:`<div style="width:100%;height:100%;background:#1ce783;display:grid;place-items:center">
-      <div style="color:#000;font-size:19px;font-weight:800;letter-spacing:-1px">hulu</div></div>`,
+      <div style="color:#000;font-size:calc(19px * var(--tsize));font-weight:800;letter-spacing:-1px">hulu</div></div>`,
   prime:`<div style="width:100%;height:100%;background:linear-gradient(160deg,#0f3c5c,#00a8e1);display:grid;place-items:center;color:#fff;text-align:center">
-      <div><div style="font-size:11px;font-weight:600;letter-spacing:.5px">prime</div><div style="font-size:12px;font-weight:800;margin-top:-2px">video</div>
+      <div><div style="font-size:calc(11px * var(--tsize));font-weight:600;letter-spacing:.5px">prime</div><div style="font-size:calc(12px * var(--tsize));font-weight:800;margin-top:-2px">video</div>
       <svg viewBox="0 0 60 14" style="width:36px"><path d="M2 4c14 10 42 10 56 0" stroke="#fff" stroke-width="3.5" fill="none" stroke-linecap="round"/></svg></div></div>`,
   appletv:`<div style="width:100%;height:100%;background:#000;display:grid;place-items:center;color:#fff">
-      <div style="font-size:14px;font-weight:600;letter-spacing:-.5px"> tv<span style="font-size:11px">+</span></div></div>`,
+      <div style="font-size:calc(14px * var(--tsize));font-weight:600;letter-spacing:-.5px"> tv<span style="font-size:calc(11px * var(--tsize))">+</span></div></div>`,
   youtubetv:`<div style="width:100%;height:100%;background:#fff;display:grid;place-items:center">
       <div style="text-align:center"><svg viewBox="0 0 60 42" style="width:38px"><rect width="60" height="42" rx="11" fill="#ff0000"/><path d="M24 12l16 9-16 9z" fill="#fff"/></svg>
-      <div style="font-size:11px;font-weight:700;color:#111;margin-top:1px">TV</div></div></div>`,
+      <div style="font-size:calc(11px * var(--tsize));font-weight:700;color:#111;margin-top:1px">TV</div></div></div>`,
   espn:`<div style="width:100%;height:100%;background:linear-gradient(160deg,#d00,#8a0000);display:grid;place-items:center">
-      <div style="color:#fff;font-size:17px;font-style:italic;font-weight:800;letter-spacing:-1px">ESPN</div></div>`,
+      <div style="color:#fff;font-size:calc(17px * var(--tsize));font-style:italic;font-weight:800;letter-spacing:-1px">ESPN</div></div>`,
   discovery:`<div style="width:100%;height:100%;background:linear-gradient(160deg,#1f3d7a,#0b1733);display:grid;place-items:center;color:#fff;text-align:center">
-      <div style="font-size:11px;font-weight:700;letter-spacing:-.2px">discovery<span style="color:#4aa8ff">+</span></div></div>`
+      <div style="font-size:calc(11px * var(--tsize));font-weight:700;letter-spacing:-.2px">discovery<span style="color:#4aa8ff">+</span></div></div>`
 };
 const STORE=[
   {id:'sablewavetv',name:'Sablewave TV',dev:'Sablewave Communications',sub:'Live TV, On Demand & DVR',cat:'Entertainment',
@@ -4819,8 +4819,8 @@ const installing = new Set();
 function shotArt(app,label,i){
   const [c1,c2]=app.colors;
   return `<div style="position:absolute;inset:0;background:linear-gradient(170deg,${c1},${c2});color:#fff;padding:14px;display:flex;flex-direction:column;gap:8px">
-    <div style="font-size:10px;opacity:.7;letter-spacing:1px;text-transform:uppercase">${esc(app.name)}</div>
-    <div style="font-size:17px;font-weight:800;letter-spacing:-.4px">${esc(label)}</div>
+    <div style="font-size:calc(10px * var(--tsize));opacity:.7;letter-spacing:1px;text-transform:uppercase">${esc(app.name)}</div>
+    <div style="font-size:calc(17px * var(--tsize));font-weight:800;letter-spacing:-.4px">${esc(label)}</div>
     <div style="height:78px;border-radius:8px;background:rgba(255,255,255,.22)"></div>
     <div style="display:flex;gap:6px">${[0,1,2].map(()=>'<div style="flex:1;height:52px;border-radius:6px;background:rgba(255,255,255,.16)"></div>').join('')}</div>
     <div style="display:flex;gap:6px">${[0,1,2].map(()=>'<div style="flex:1;height:52px;border-radius:6px;background:rgba(255,255,255,.13)"></div>').join('')}</div>
@@ -4930,7 +4930,7 @@ defineApp({
 function storeOfflineView(retry){
   return {title:'', build(b){
     const e=el('div','empty');
-    e.innerHTML=`<div style="font-size:44px;margin-bottom:10px">☁️</div>
+    e.innerHTML=`<div style="font-size:calc(44px * var(--tsize));margin-bottom:10px">☁️</div>
       <h3>Cannot Connect to App Store</h3>
       <p style="line-height:1.45;margin-top:6px">${esc(netReason())}</p>`;
     const btn=el('button','btn-primary','Retry'); btn.style.cssText+='max-width:200px;margin:22px auto 0';
@@ -4940,7 +4940,7 @@ function storeOfflineView(retry){
 }
 function storeTodayView(){
   return {title:'', shortTitle:'Today',
-    left:[], right:[{html:`<div class="avatar" style="width:32px;height:32px;font-size:13px;background:linear-gradient(135deg,#5e5ce6,#0a84ff)">AR</div>`,
+    left:[], right:[{html:`<div class="avatar" style="width:32px;height:32px;font-size:calc(13px * var(--tsize));background:linear-gradient(135deg,#5e5ce6,#0a84ff)">AR</div>`,
       onClick:n=>n.push(storeAccountView())}],
     build(b,nav){
       const d=new Date();
@@ -4954,7 +4954,7 @@ function storeTodayView(){
       const story=el('div','as-hero');
       story.innerHTML=`<div class="art" style="background:linear-gradient(160deg,#3b1f9e,#0d1a4a)">
         <div class="kicker">STREAMING GUIDE</div><div class="ttl">Cut the cord without\nlosing the good stuff</div></div>
-        <div style="padding:12px 14px;font-size:14px;color:var(--txt2);line-height:1.4">Six services, one weekend. We tested what actually replaces cable — and what you can skip.</div>`;
+        <div style="padding:12px 14px;font-size:calc(14px * var(--tsize));color:var(--txt2);line-height:1.4">Six services, one weekend. We tested what actually replaces cable — and what you can skip.</div>`;
       story.onclick=()=>nav.push(storeStoryView());
       actionable(story,{label:'Streaming Guide: cut the cord without losing the good stuff'});
       b.appendChild(story);
@@ -4973,7 +4973,7 @@ function storeTodayView(){
         art:'linear-gradient(150deg,#17a2a8,#05222a)',nav}));
 
       const foot=el('div','pad');
-      foot.style.cssText='text-align:center;color:var(--txt2);font-size:12px;padding:30px 30px 10px';
+      foot.style.cssText='text-align:center;color:var(--txt2);font-size:calc(12px * var(--tsize));padding:30px 30px 10px';
       foot.innerHTML='This is a simulated App Store. No real downloads occur.';
       b.appendChild(foot);
     }};
@@ -4983,8 +4983,8 @@ function heroCard({kicker,title,app,art,nav}){
   c.innerHTML=`<div class="art" style="background:${art}">
       <div class="kicker">${esc(kicker)}</div><div class="ttl">${esc(title).replace(/\n/g,'<br>')}</div></div>
     <div class="foot">${storeIconEl(app,'storeicon sm')}
-      <div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:600">${esc(app.name)}</div>
-      <div style="font-size:13px;color:var(--txt2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(app.sub)}</div></div>
+      <div style="flex:1;min-width:0"><div style="font-size:calc(15px * var(--tsize));font-weight:600">${esc(app.name)}</div>
+      <div style="font-size:calc(13px * var(--tsize));color:var(--txt2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(app.sub)}</div></div>
       <span class="slot"></span></div>`;
   c.querySelector('.slot').replaceWith(getButton(app));
   c.querySelector('.art').onclick=()=>nav.push(appDetailView(app));
@@ -5000,10 +5000,10 @@ function sectionHeader(title,onSeeAll){
 }
 function storeRow(app,nav,{rank}={}){
   const r=el('div','as-row');
-  r.innerHTML=`${rank?`<div style="width:16px;text-align:center;color:var(--txt2);font-size:15px">${rank}</div>`:''}
+  r.innerHTML=`${rank?`<div style="width:16px;text-align:center;color:var(--txt2);font-size:calc(15px * var(--tsize))">${rank}</div>`:''}
     ${storeIconEl(app)}
     <div class="meta"><div class="nm">${esc(app.name)}</div><div class="sb">${esc(app.sub)}</div>
-    <div class="sb" style="font-size:11px">${esc(app.cat)}</div></div><span class="slot"></span>`;
+    <div class="sb" style="font-size:calc(11px * var(--tsize))">${esc(app.cat)}</div></div><span class="slot"></span>`;
   r.querySelector('.slot').replaceWith(getButton(app));
   r.onclick=e=>{ if(!e.target.closest('.getbtn')) nav.push(appDetailView(app)); };
   actionable(r,{label:`${app.name}, ${app.sub}, ${app.cat}`});
@@ -5012,7 +5012,7 @@ function storeRow(app,nav,{rank}={}){
 function storeGamesView(){
   const games=()=>STORE.filter(a=>a.game);
   return {title:'Games', largeTitle:true, shortTitle:'Games',
-    right:[{html:`<div class="avatar" style="width:32px;height:32px;font-size:13px;background:linear-gradient(135deg,#5e5ce6,#0a84ff)">AR</div>`,
+    right:[{html:`<div class="avatar" style="width:32px;height:32px;font-size:calc(13px * var(--tsize));background:linear-gradient(135deg,#5e5ce6,#0a84ff)">AR</div>`,
       onClick:n=>n.push(storeAccountView())}],
     build(b,nav){
       const feat=games()[0];
@@ -5026,8 +5026,8 @@ function storeGamesView(){
         const c=el('div','hcard'); c.style.minWidth='210px';
         c.innerHTML=`<div class="shot" style="height:120px">${shotArt(a,a.shots[0],0)}</div>
           <div style="display:flex;gap:10px;align-items:center">${storeIconEl(a,'storeicon sm')}
-          <div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600">${esc(a.name)}</div>
-          <div style="font-size:12px;color:var(--txt2)">${esc(a.editorial)}</div></div><span class="slot"></span></div>`;
+          <div style="flex:1;min-width:0"><div style="font-size:calc(14px * var(--tsize));font-weight:600">${esc(a.name)}</div>
+          <div style="font-size:calc(12px * var(--tsize));color:var(--txt2)">${esc(a.editorial)}</div></div><span class="slot"></span></div>`;
         c.querySelector('.slot').replaceWith(getButton(a));
         c.onclick=e=>{ if(!e.target.closest('.getbtn')) nav.push(appDetailView(a)); };
         hs.appendChild(c);
@@ -5038,7 +5038,7 @@ function storeGamesView(){
 }
 function storeAppsView(){
   return {title:'Apps', largeTitle:true, shortTitle:'Apps',
-    right:[{html:`<div class="avatar" style="width:32px;height:32px;font-size:13px;background:linear-gradient(135deg,#5e5ce6,#0a84ff)">AR</div>`,
+    right:[{html:`<div class="avatar" style="width:32px;height:32px;font-size:calc(13px * var(--tsize));background:linear-gradient(135deg,#5e5ce6,#0a84ff)">AR</div>`,
       onClick:n=>n.push(storeAccountView())}],
     build(b,nav){
       const hs=el('div','hscroll');
@@ -5046,8 +5046,8 @@ function storeAppsView(){
         const c=el('div','hcard');
         c.innerHTML=`<div class="shot">${shotArt(a,a.shots[0],0)}</div>
           <div style="display:flex;gap:10px;align-items:center">${storeIconEl(a,'storeicon sm')}
-          <div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600">${esc(a.name)}</div>
-          <div style="font-size:12px;color:var(--txt2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(a.editorial)}</div></div>
+          <div style="flex:1;min-width:0"><div style="font-size:calc(14px * var(--tsize));font-weight:600">${esc(a.name)}</div>
+          <div style="font-size:calc(12px * var(--tsize));color:var(--txt2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(a.editorial)}</div></div>
           <span class="slot"></span></div>`;
         c.querySelector('.slot').replaceWith(getButton(a));
         c.onclick=e=>{ if(!e.target.closest('.getbtn')) nav.push(appDetailView(a)); };
@@ -5071,8 +5071,8 @@ function storeAppsView(){
         const c=el('div','hcard'); c.style.minWidth='210px';
         c.innerHTML=`<div class="shot" style="height:120px">${shotArt(a,a.shots[1],1)}</div>
           <div style="display:flex;gap:10px;align-items:center">${storeIconEl(a,'storeicon sm')}
-          <div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600">${esc(a.name)}</div>
-          <div style="font-size:12px;color:var(--txt2)">${esc(a.cat)}</div></div><span class="slot"></span></div>`;
+          <div style="flex:1;min-width:0"><div style="font-size:calc(14px * var(--tsize));font-weight:600">${esc(a.name)}</div>
+          <div style="font-size:calc(12px * var(--tsize));color:var(--txt2)">${esc(a.cat)}</div></div><span class="slot"></span></div>`;
         c.querySelector('.slot').replaceWith(getButton(a));
         c.onclick=e=>{ if(!e.target.closest('.getbtn')) nav.push(appDetailView(a)); };
         hs2.appendChild(c);
@@ -5094,11 +5094,11 @@ function storeStoryView(){
   return {title:'', backLabel:'Today', build(b,nav){
     const hero=el('div');
     hero.innerHTML=`<div style="height:230px;background:linear-gradient(160deg,#3b1f9e,#0d1a4a);color:#fff;padding:20px;display:flex;flex-direction:column;justify-content:flex-end">
-      <div class="kicker" style="font-size:12px;font-weight:800;letter-spacing:1px;opacity:.8">STREAMING GUIDE</div>
-      <div style="font-size:28px;font-weight:800;line-height:1.1;margin-top:6px">Cut the cord without losing the good stuff</div></div>`;
+      <div class="kicker" style="font-size:calc(12px * var(--tsize));font-weight:800;letter-spacing:1px;opacity:.8">STREAMING GUIDE</div>
+      <div style="font-size:calc(28px * var(--tsize));font-weight:800;line-height:1.1;margin-top:6px">Cut the cord without losing the good stuff</div></div>`;
     b.appendChild(hero);
     const p=el('div','pad');
-    p.style.cssText='font-size:16px;line-height:1.6;padding:18px 20px;color:var(--txt)';
+    p.style.cssText='font-size:calc(16px * var(--tsize));line-height:1.6;padding:18px 20px;color:var(--txt)';
     p.innerHTML=`Cable used to mean one bill and 300 channels you never watched. Now the lineup is yours to assemble — and the apps below are the ones worth a home-screen slot.<br><br>
       Start with <b>Sablewave TV</b> if you already have service: your channel guide, DVR and On Demand library come along for free.
       Then layer on the originals. <b>Max</b> and <b>Netflix</b> cover prestige drama, <b>Disney+</b> handles the family, and <b>Peacock</b> and <b>Paramount+</b> carry live sports on the weekends.<br><br>
@@ -5152,14 +5152,14 @@ function storeSearchView(){
 }
 function storeUpdatesView(){
   return {title:'Updates', largeTitle:true, shortTitle:'Updates',
-    right:[{html:`<div class="avatar" style="width:32px;height:32px;font-size:13px;background:linear-gradient(135deg,#5e5ce6,#0a84ff)">AR</div>`,
+    right:[{html:`<div class="avatar" style="width:32px;height:32px;font-size:calc(13px * var(--tsize));background:linear-gradient(135deg,#5e5ce6,#0a84ff)">AR</div>`,
       onClick:n=>n.push(storeAccountView())}],
     build(b,nav){
       const pending=(State.updatesAvailable||[]).filter(id=>State.installed.includes(id));
       if(pending.length){
         const head=el('div'); head.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:14px 20px 6px';
-        head.innerHTML=`<div style="font-size:20px;font-weight:700">Available Updates</div>`;
-        const all=el('button','',"Update All"); all.style.cssText='color:var(--sysblue);font-size:15px;font-weight:600';
+        head.innerHTML=`<div style="font-size:calc(20px * var(--tsize));font-weight:700">Available Updates</div>`;
+        const all=el('button','',"Update All"); all.style.cssText='color:var(--sysblue);font-size:calc(15px * var(--tsize));font-weight:600';
         all.onclick=()=>{ State.updatesAvailable=[]; save(); setBadge('appstore',0); nav.refresh(); island('✓','#30d158','App Store','All apps updated',1800); };
         head.appendChild(all); b.appendChild(head);
         pending.map(byId).forEach(a=>{
@@ -5167,7 +5167,7 @@ function storeUpdatesView(){
           r.innerHTML=`${storeIconEl(a)}
             <div class="meta"><div class="nm">${esc(a.name)}</div>
             <div class="sb" style="white-space:normal">Version ${a.version} · ${a.size}</div>
-            <div style="font-size:13px;color:var(--txt2);white-space:pre-wrap;margin-top:4px">${esc(a.whatsnew)}</div></div>`;
+            <div style="font-size:calc(13px * var(--tsize));color:var(--txt2);white-space:pre-wrap;margin-top:4px">${esc(a.whatsnew)}</div></div>`;
           const btn=el('div','getbtn','UPDATE');
           btn.onclick=e=>{ e.stopPropagation();
             btn.textContent='…';
@@ -5200,9 +5200,9 @@ function storeUpdatesView(){
 function storeAccountView(){
   return {title:'Account', backLabel:'Done', build(b,nav){
     const head=el('div','pad'); head.style.textAlign='center';
-    head.innerHTML=`<div class="avatar" style="width:80px;height:80px;font-size:30px;margin:4px auto 10px;background:linear-gradient(135deg,#5e5ce6,#0a84ff)">AR</div>
-      <div style="font-size:20px;font-weight:600">Alex Rivera</div>
-      <div class="muted" style="font-size:14px">${esc(State.settings.appleID)}</div>`;
+    head.innerHTML=`<div class="avatar" style="width:80px;height:80px;font-size:calc(30px * var(--tsize));margin:4px auto 10px;background:linear-gradient(135deg,#5e5ce6,#0a84ff)">AR</div>
+      <div style="font-size:calc(20px * var(--tsize));font-weight:600">Alex Rivera</div>
+      <div class="muted" style="font-size:calc(14px * var(--tsize))">${esc(State.settings.appleID)}</div>`;
     b.appendChild(head);
     group(b,{rows:[
       {label:'Purchased', value:State.installed.length+' apps', onClick:()=>nav.push(storeListView('Purchased',State.installed.map(byId).filter(Boolean)))},
@@ -5217,15 +5217,15 @@ function storeAccountView(){
 }
 function appDetailView(app){
   return {title:app.name, shortTitle:'Back', backLabel:'Back',
-    right:[{html:'􀈂 <span style="font-size:19px">⇪</span>',onClick:()=>toast('Share sheet is simulated')}],
+    right:[{html:'􀈂 <span style="font-size:calc(19px * var(--tsize))">⇪</span>',onClick:()=>toast('Share sheet is simulated')}],
     build(b,nav){
       const head=el('div','appdetail-head');
       head.innerHTML=`${storeIconEl(app,'storeicon lg')}
         <div style="flex:1;min-width:0;padding-bottom:4px">
-          <div style="font-size:22px;font-weight:700;line-height:1.15">${esc(app.name)}</div>
-          <div style="font-size:14px;color:var(--txt2);margin:2px 0 12px">${esc(app.sub)}</div>
+          <div style="font-size:calc(22px * var(--tsize));font-weight:700;line-height:1.15">${esc(app.name)}</div>
+          <div style="font-size:calc(14px * var(--tsize));color:var(--txt2);margin:2px 0 12px">${esc(app.sub)}</div>
           <div style="display:flex;align-items:center;gap:14px"><span class="slot"></span>
-          <span style="font-size:19px;color:var(--txt2)">⇪</span></div>
+          <span style="font-size:calc(19px * var(--tsize));color:var(--txt2)">⇪</span></div>
         </div>`;
       head.querySelector('.slot').replaceWith(getButton(app));
       b.appendChild(head);
@@ -5233,59 +5233,59 @@ function appDetailView(app){
       const stat=el('div','ad-stats');
       stat.innerHTML=`
         <div class="ad-stat"><b>${app.ratings} Ratings</b><s>${app.rating.toFixed(1)}</s><div class="stars">${stars(app.rating)}</div></div>
-        <div class="ad-stat"><b>Age</b><s>${app.age}</s><div style="font-size:11px;color:var(--txt2)">Years Old</div></div>
-        <div class="ad-stat"><b>Chart</b><s>#${app.rank}</s><div style="font-size:11px;color:var(--txt2)">${esc(app.cat)}</div></div>
-        <div class="ad-stat"><b>Developer</b><s>👤</s><div style="font-size:11px;color:var(--txt2)">${esc(app.dev.split(',')[0])}</div></div>
-        <div class="ad-stat"><b>Language</b><s>EN</s><div style="font-size:11px;color:var(--txt2)">+ 5 More</div></div>`;
+        <div class="ad-stat"><b>Age</b><s>${app.age}</s><div style="font-size:calc(11px * var(--tsize));color:var(--txt2)">Years Old</div></div>
+        <div class="ad-stat"><b>Chart</b><s>#${app.rank}</s><div style="font-size:calc(11px * var(--tsize));color:var(--txt2)">${esc(app.cat)}</div></div>
+        <div class="ad-stat"><b>Developer</b><s>👤</s><div style="font-size:calc(11px * var(--tsize));color:var(--txt2)">${esc(app.dev.split(',')[0])}</div></div>
+        <div class="ad-stat"><b>Language</b><s>EN</s><div style="font-size:calc(11px * var(--tsize));color:var(--txt2)">+ 5 More</div></div>`;
       b.appendChild(stat);
 
-      b.appendChild(el('div','as-sec-h','<h3 style="font-size:19px">Preview</h3>'));
+      b.appendChild(el('div','as-sec-h','<h3 style="font-size:calc(19px * var(--tsize))">Preview</h3>'));
       const shots=el('div','shots');
       app.shots.forEach((s,i)=>{ const d=el('div','shot-card'); d.innerHTML=shotArt(app,s,i); shots.appendChild(d); });
       b.appendChild(shots);
 
-      const desc=el('div'); desc.style.cssText='padding:6px 20px 14px;font-size:15px;line-height:1.5;white-space:pre-wrap';
+      const desc=el('div'); desc.style.cssText='padding:6px 20px 14px;font-size:calc(15px * var(--tsize));line-height:1.5;white-space:pre-wrap';
       const full=app.desc, isLong=full.length>200;
       desc.innerHTML = isLong? esc(full.slice(0,190))+'…' : esc(full);
       b.appendChild(desc);
       if(isLong){
-        const more=el('button','','more'); more.style.cssText='color:var(--sysblue);font-size:15px;padding:0 20px 12px;display:block;margin-left:auto';
+        const more=el('button','','more'); more.style.cssText='color:var(--sysblue);font-size:calc(15px * var(--tsize));padding:0 20px 12px;display:block;margin-left:auto';
         more.onclick=()=>{ desc.innerHTML=esc(full); more.remove(); };
         b.appendChild(more);
       }
       const devrow=el('div'); devrow.style.cssText='padding:0 20px 16px;border-bottom:.5px solid var(--sep);margin-bottom:8px';
-      devrow.innerHTML=`<div style="font-size:12px;color:var(--txt2)">Developer</div>
-        <div style="color:var(--sysblue);font-size:15px;margin-top:2px">${esc(app.dev)} ›</div>`;
+      devrow.innerHTML=`<div style="font-size:calc(12px * var(--tsize));color:var(--txt2)">Developer</div>
+        <div style="color:var(--sysblue);font-size:calc(15px * var(--tsize));margin-top:2px">${esc(app.dev)} ›</div>`;
       devrow.onclick=()=>nav.push(storeListView(app.dev,STORE.filter(a=>a.dev===app.dev)));
       b.appendChild(devrow);
 
       const wn=el('div'); wn.style.padding='2px 20px 16px';
       wn.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:baseline">
-        <h3 style="font-size:19px;font-weight:700">What's New</h3><span style="color:var(--sysblue);font-size:15px">Version History</span></div>
-        <div style="display:flex;justify-content:space-between;color:var(--txt2);font-size:13px;margin:6px 0 10px">
+        <h3 style="font-size:calc(19px * var(--tsize));font-weight:700">What's New</h3><span style="color:var(--sysblue);font-size:calc(15px * var(--tsize))">Version History</span></div>
+        <div style="display:flex;justify-content:space-between;color:var(--txt2);font-size:calc(13px * var(--tsize));margin:6px 0 10px">
           <span>Version ${app.version}</span><span>2d ago</span></div>
-        <div style="font-size:15px;line-height:1.5;white-space:pre-wrap">${esc(app.whatsnew)}</div>`;
+        <div style="font-size:calc(15px * var(--tsize));line-height:1.5;white-space:pre-wrap">${esc(app.whatsnew)}</div>`;
       b.appendChild(wn);
 
-      b.appendChild(el('div','as-sec-h',`<h3 style="font-size:19px">Ratings & Reviews</h3><button>See All</button>`));
+      b.appendChild(el('div','as-sec-h',`<h3 style="font-size:calc(19px * var(--tsize))">Ratings & Reviews</h3><button>See All</button>`));
       const rb=el('div','rating-big');
-      rb.innerHTML=`<div><div style="font-size:52px;font-weight:800;line-height:1">${app.rating.toFixed(1)}</div>
-        <div style="font-size:12px;color:var(--txt2)">out of 5</div></div>
+      rb.innerHTML=`<div><div style="font-size:calc(52px * var(--tsize));font-weight:800;line-height:1">${app.rating.toFixed(1)}</div>
+        <div style="font-size:calc(12px * var(--tsize));color:var(--txt2)">out of 5</div></div>
         <div class="bars">${[5,4,3,2,1].map(n=>{
           const w=[62,22,8,4,4][5-n]*(n===Math.round(app.rating)?1.3:1);
           return `<div class="bar"><span>${'★'.repeat(n)}</span><div class="tr"><div class="fl" style="width:${Math.min(w,100)}%"></div></div></div>`;}).join('')}
-        <div style="text-align:right;font-size:12px;color:var(--txt2);margin-top:4px">${app.ratings} Ratings</div></div>`;
+        <div style="text-align:right;font-size:calc(12px * var(--tsize));color:var(--txt2);margin-top:4px">${app.ratings} Ratings</div></div>`;
       b.appendChild(rb);
       REVIEWS(app).forEach(r=>{
         const d=el('div','review');
         d.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:baseline">
-          <div style="font-weight:600;font-size:15px">${esc(r.t)}</div><div style="font-size:12px;color:var(--txt2)">${esc(r.d)}</div></div>
+          <div style="font-weight:600;font-size:calc(15px * var(--tsize))">${esc(r.t)}</div><div style="font-size:calc(12px * var(--tsize));color:var(--txt2)">${esc(r.d)}</div></div>
           <div class="stars" style="margin:3px 0 6px">${stars(r.s)} <span style="color:var(--txt2)">· ${esc(r.u)}</span></div>
-          <div style="font-size:14px;line-height:1.45;color:var(--txt)">${esc(r.b)}</div>`;
+          <div style="font-size:calc(14px * var(--tsize));line-height:1.45;color:var(--txt)">${esc(r.b)}</div>`;
         b.appendChild(d);
       });
       const info=el('div');
-      info.appendChild(el('div','as-sec-h','<h3 style="font-size:19px">Information</h3>'));
+      info.appendChild(el('div','as-sec-h','<h3 style="font-size:calc(19px * var(--tsize))">Information</h3>'));
       group(info,{rows:[
         {label:'Provider',value:app.dev},
         {label:'Size',value:app.size},
@@ -5326,7 +5326,7 @@ const ENGINES={
 };
 const FAVORITES=[
   {n:'Google',u:'https://www.google.com',c:'#fff',t:'<span style="color:#4285f4;font-weight:800">G</span>'},
-  {n:'Sablewave',u:'https://www.sablewave.example',c:'#0a3b43',t:'<span style="color:#fff;font-size:11px;font-weight:700">Sablewave</span>'},
+  {n:'Sablewave',u:'https://www.sablewave.example',c:'#0a3b43',t:'<span style="color:#fff;font-size:calc(11px * var(--tsize));font-weight:700">Sablewave</span>'},
   {n:'YouTube',u:'https://www.youtube.com',c:'#ff0000',t:'<span style="color:#fff">▶</span>'},
   {n:'Netflix',u:'https://www.netflix.com',c:'#000',t:'<span style="color:#e50914;font-weight:800">N</span>'},
   {n:'Wikipedia',u:'https://en.wikipedia.org',c:'#fff',t:'<span style="color:#000;font-family:Georgia,serif">W</span>'},
@@ -5363,9 +5363,9 @@ defineApp({
       <div class="sf-frame" id="sfFrame"></div>
       <div class="sf-bar">
         <div class="sf-url">
-          <span id="sfLockIcon" style="font-size:12px;color:var(--txt2)">🔒</span>
+          <span id="sfLockIcon" style="font-size:calc(12px * var(--tsize));color:var(--txt2)">🔒</span>
           <input id="sfInput" placeholder="Search or enter website name" spellcheck="false" autocapitalize="off">
-          <span id="sfReload" style="color:var(--txt2);font-size:14px">↻</span>
+          <span id="sfReload" style="color:var(--txt2);font-size:calc(14px * var(--tsize))">↻</span>
         </div>
         <div class="sf-tools">
           <button id="sfBack">${sf('<path d="M15 4.5L7.5 12l7.5 7.5"/>',{w:2.1,size:22})}</button>
@@ -5424,7 +5424,7 @@ function safariRender(reload){
   $('#sfLockIcon',inst.el).textContent = t.url? (t.url.startsWith('https')?'🔒':'⚠') : '🔍';
   $('#sfBack',inst.el).classList.toggle('dis', t.idx<0);
   $('#sfFwd',inst.el).classList.toggle('dis', t.idx>=t.history.length-1);
-  $('#sfTabs',inst.el).innerHTML = s.tabs.length>1? `<span style="font-size:13px;border:1.6px solid currentColor;border-radius:5px;padding:0 5px">${s.tabs.length}</span>`:'❐';
+  $('#sfTabs',inst.el).innerHTML = s.tabs.length>1? `<span style="font-size:calc(13px * var(--tsize));border:1.6px solid currentColor;border-radius:5px;padding:0 5px">${s.tabs.length}</span>`:'❐';
 
   if(!reload && frame.dataset.url===t.url) return;
   frame.dataset.url=t.url||'';
@@ -5464,11 +5464,11 @@ function escapeHatch(frame,url){
   $$('.sf-hatch',frame).forEach(x=>x.remove());
   const p=el('div','sf-hatch');
   p.style.cssText=`position:absolute;left:12px;right:12px;bottom:12px;z-index:5;display:flex;align-items:center;gap:10px;
-    background:rgba(28,28,30,.92);backdrop-filter:blur(14px);color:#fff;border-radius:14px;padding:10px 12px;font-size:12px;
+    background:rgba(28,28,30,.92);backdrop-filter:blur(14px);color:#fff;border-radius:14px;padding:10px 12px;font-size:calc(12px * var(--tsize));
     box-shadow:0 6px 20px rgba(0,0,0,.4);transition:opacity .4s`;
   p.innerHTML=`<div style="flex:1;line-height:1.35">Page blank? <b>${esc(prettyHost(url))}</b> may block embedding.</div>`;
   const b=el('button','','Open ↗');
-  b.style.cssText='color:#0a84ff;font-weight:600;font-size:13px;padding:4px 6px';
+  b.style.cssText='color:#0a84ff;font-weight:600;font-size:calc(13px * var(--tsize));padding:4px 6px';
   b.onclick=()=>window.open(url,'_blank','noopener');
   const x=el('button','','✕'); x.style.cssText='color:#8e8e93;padding:4px';
   x.onclick=()=>p.remove();
@@ -5479,9 +5479,9 @@ function showBlocked(frame,url,slow){
   if($('.sf-blocked',frame)) return;
   const host=prettyHost(url);
   const b=el('div','sf-blocked');
-  b.innerHTML=`<div style="font-size:44px">🌐</div>
-    <div style="font-size:19px;font-weight:600">${esc(host)} won't load in a frame</div>
-    <div style="font-size:14px;color:var(--txt2);line-height:1.45">
+  b.innerHTML=`<div style="font-size:calc(44px * var(--tsize))">🌐</div>
+    <div style="font-size:calc(19px * var(--tsize));font-weight:600">${esc(host)} won't load in a frame</div>
+    <div style="font-size:calc(14px * var(--tsize));color:var(--txt2);line-height:1.45">
       ${slow?'The page is taking a long time to respond.':'Most large sites send <b>X-Frame-Options</b> / CSP headers that forbid being embedded, so the simulator can\'t display them inline.'}
       Open it in a real browser tab instead — everything else in Safari (tabs, history, bookmarks, search) keeps working here.</div>`;
   const open=el('button','btn-primary','Open '+host+' in a New Window');
@@ -5489,22 +5489,22 @@ function showBlocked(frame,url,slow){
   open.onclick=()=>window.open(url,'_blank','noopener');
   b.appendChild(open);
   const retry=el('button','','Try Again');
-  retry.style.cssText='color:var(--sysblue);font-size:15px';
+  retry.style.cssText='color:var(--sysblue);font-size:calc(15px * var(--tsize))';
   retry.onclick=()=>safariRender(true);
   b.appendChild(retry);
   frame.appendChild(b);
 }
 function safariError(title,msg,url){
   const b=el('div','sf-blocked');
-  b.innerHTML=`<div style="font-size:40px">📡</div><div style="font-size:19px;font-weight:600">${esc(title)}</div>
-    <div style="font-size:14px;color:var(--txt2);line-height:1.45">${esc(msg)}</div>`;
+  b.innerHTML=`<div style="font-size:calc(40px * var(--tsize))">📡</div><div style="font-size:calc(19px * var(--tsize));font-weight:600">${esc(title)}</div>
+    <div style="font-size:calc(14px * var(--tsize));color:var(--txt2);line-height:1.45">${esc(msg)}</div>`;
   return b;
 }
 function safariStartPage(){
   const p=el('div','sf-start');
   const s=SafariState();
   p.style.background=s.privateMode?'#1c1c1e':'var(--page)';
-  p.innerHTML=`<div style="font-size:15px;font-weight:600;margin-bottom:12px;color:var(--txt)">Favorites</div>`;
+  p.innerHTML=`<div style="font-size:calc(15px * var(--tsize));font-weight:600;margin-bottom:12px;color:var(--txt)">Favorites</div>`;
   const fav=el('div','sf-fav');
   FAVORITES.forEach(f=>{
     const d=el('div','f',`<div class="fi" style="background:${f.c}">${f.t}</div><div>${esc(f.n)}</div>`);
@@ -5514,7 +5514,7 @@ function safariStartPage(){
   });
   p.appendChild(fav);
   if(s.history.length){
-    p.appendChild(h(`<div style="font-size:15px;font-weight:600;margin:6px 0 10px;color:var(--txt)">Recently Visited</div>`));
+    p.appendChild(h(`<div style="font-size:calc(15px * var(--tsize));font-weight:600;margin:6px 0 10px;color:var(--txt)">Recently Visited</div>`));
     const g=el('div');
     group(g,{rows:s.history.slice(0,6).map(x=>({label:x.t,sub:x.u.slice(0,44),onClick:()=>safariGo(x.u)}))});
     g.firstElementChild.style.margin='0 0 20px';
@@ -5523,12 +5523,12 @@ function safariStartPage(){
   const priv=el('div');
   priv.style.cssText='margin-top:10px;padding:14px;border-radius:12px;background:var(--group)';
   priv.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center">
-      <div><div style="font-size:15px;font-weight:600">Privacy Report</div>
-      <div style="font-size:13px;color:var(--txt2)">Safari prevented 24 trackers from profiling you</div></div>
-      <div style="font-size:24px">🛡</div></div>`;
+      <div><div style="font-size:calc(15px * var(--tsize));font-weight:600">Privacy Report</div>
+      <div style="font-size:calc(13px * var(--tsize));color:var(--txt2)">Safari prevented 24 trackers from profiling you</div></div>
+      <div style="font-size:calc(24px * var(--tsize))">🛡</div></div>`;
   p.appendChild(priv);
   const note=el('div');
-  note.style.cssText='margin-top:18px;font-size:12px;color:var(--txt2);line-height:1.5;text-align:center';
+  note.style.cssText='margin-top:18px;font-size:calc(12px * var(--tsize));color:var(--txt2);line-height:1.5;text-align:center';
   note.innerHTML='Type a URL or a search — searches use <b>'+esc(State.settings.searchEngine)+'</b>.<br>Sites that block embedding open in a real window.';
   p.appendChild(note);
   return p;
@@ -5582,7 +5582,7 @@ function safariBookmarks(){
     s.style.height='72%';
     const nav=new Nav(el('div'));
     s.innerHTML=`<div style="padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:.5px solid var(--sep)">
-      <b style="font-size:17px">Bookmarks</b><button id="bmDone" style="color:var(--sysblue)">Done</button></div>`;
+      <b style="font-size:calc(17px * var(--tsize))">Bookmarks</b><button id="bmDone" style="color:var(--sysblue)">Done</button></div>`;
     const seg=segmented(['Bookmarks','History'],'Bookmarks',v=>render(v));
     seg.style.margin='10px 16px'; s.appendChild(seg);
     const body=el('div'); body.style.cssText='flex:1;overflow-y:auto;padding-bottom:20px'; s.appendChild(body);
@@ -5630,12 +5630,12 @@ function safariTabsView(){
   v.appendChild(grid);
   const bar=el('div');
   bar.style.cssText='position:absolute;bottom:0;left:0;right:0;padding:14px 20px 30px;display:flex;justify-content:space-between;align-items:center;background:color-mix(in srgb,var(--page) 90%,transparent);backdrop-filter:var(--blur)';
-  const plus=el('button','','＋'); plus.style.cssText='font-size:26px;color:var(--sysblue)';
+  const plus=el('button','','＋'); plus.style.cssText='font-size:calc(26px * var(--tsize));color:var(--sysblue)';
   plus.onclick=()=>{ const t={id:s.seq++,url:'',title:'Start Page',history:[],idx:-1}; s.tabs.push(t); s.active=t.id; save(); v.remove(); safariRender(true); };
   const priv=el('button','',s.privateMode?'Private':'Private');
-  priv.style.cssText='color:'+(s.privateMode?'var(--sysblue)':'var(--txt2)')+';font-size:15px';
+  priv.style.cssText='color:'+(s.privateMode?'var(--sysblue)':'var(--txt2)')+';font-size:calc(15px * var(--tsize))';
   priv.onclick=()=>{ s.privateMode=!s.privateMode; save(); v.remove(); safariTabsView(); safariRender(true); };
-  const done=el('button','','Done'); done.style.cssText='color:var(--sysblue);font-size:17px;font-weight:600';
+  const done=el('button','','Done'); done.style.cssText='color:var(--sysblue);font-size:calc(17px * var(--tsize));font-weight:600';
   done.onclick=()=>v.remove();
   bar.append(plus,priv,done);
   v.appendChild(bar);
@@ -5790,7 +5790,7 @@ function mailToolbar(nav,{label='Updated Just Now'}={}){
   t.style.justifyContent='space-between'; t.style.padding='0 18px 20px';
   const filter=el('button','',sf('<circle cx="12" cy="12" r="9"/><path d="M7.5 9.5h9M9 12.5h6M10.5 15.5h3"/>',{size:21}));
   filter.onclick=()=>toast('Filtering is simulated');
-  const status=el('div','',`<div style="font-size:12px;color:var(--txt2);text-align:center">${esc(label)}</div>`);
+  const status=el('div','',`<div style="font-size:calc(12px * var(--tsize));color:var(--txt2);text-align:center">${esc(label)}</div>`);
   const compose=el('button','',sf('<path d="M4 20h4.2L20 8.2a2.1 2.1 0 00-3-3L5.2 17z"/><path d="M14.5 6.5l3 3"/>',{size:21}));
   compose.onclick=()=>composeMail({});
   t.append(filter,status,compose);
@@ -5863,7 +5863,7 @@ function mailRow(m,a,nav,box,refresh){
         <span>${m.flagged?'<span class="ml-flag">🚩</span>':''}${esc(fmtDate(m.date))} ${SVG.chev}</span></div>
       <div class="ml-subj">${esc(m.subject||'(No Subject)')}</div>
       <div class="ml-prev">${esc((m.body||'').replace(/\n+/g,' ').slice(0,110))}</div>
-      ${m.attachments.length?`<div style="font-size:12px;color:var(--txt2);margin-top:3px">📎 ${esc(m.attachments[0].n)}</div>`:''}
+      ${m.attachments.length?`<div style="font-size:calc(12px * var(--tsize));color:var(--txt2);margin-top:3px">📎 ${esc(m.attachments[0].n)}</div>`:''}
     </div>
     <div class="ml-actions">
       <button style="background:#8e8e93" data-act="more">${sf('<circle cx="5" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.6" fill="currentColor" stroke="none"/>',{size:20})}More</button>
@@ -5912,22 +5912,22 @@ function mailMoreSheet(m,a,refresh){
 }
 function messageView(m,a,box){
   return {title:'', backLabel:box==='inbox'?'Inbox':(box.charAt(0).toUpperCase()+box.slice(1)),
-    right:[{html:'<span style="font-size:16px">⌃</span>',onClick:()=>toast('Previous message')},
-           {html:'<span style="font-size:16px">⌄</span>',onClick:()=>toast('Next message')}],
+    right:[{html:'<span style="font-size:calc(16px * var(--tsize))">⌃</span>',onClick:()=>toast('Previous message')},
+           {html:'<span style="font-size:calc(16px * var(--tsize))">⌄</span>',onClick:()=>toast('Next message')}],
     build(b,nav,view){
       const head=el('div','msg-head');
       head.innerHTML=`<div class="msg-subject">${esc(m.subject||'(No Subject)')}</div>
         <div style="display:flex;gap:10px;align-items:center">
           <div class="avatar" style="background:${colorFor(m.from.e)}">${esc(initials(m.from.n))}</div>
           <div style="flex:1;min-width:0">
-            <div style="font-size:16px;font-weight:600">${esc(m.from.n)}
+            <div style="font-size:calc(16px * var(--tsize));font-weight:600">${esc(m.from.n)}
               ${ML().vip.includes(m.from.e)?'<span style="color:var(--sysblue)">★</span>':''}</div>
-            <div style="font-size:14px;color:var(--txt2)">To: ${esc(m.to||a.address)} ${SVG.chev}</div>
+            <div style="font-size:calc(14px * var(--tsize));color:var(--txt2)">To: ${esc(m.to||a.address)} ${SVG.chev}</div>
           </div>
-          <div style="text-align:right;font-size:13px;color:var(--txt2)">${new Date(m.date).toLocaleDateString(undefined,{month:'short',day:'numeric'})}<br>
+          <div style="text-align:right;font-size:calc(13px * var(--tsize));color:var(--txt2)">${new Date(m.date).toLocaleDateString(undefined,{month:'short',day:'numeric'})}<br>
             ${new Date(m.date).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'})}</div>
         </div>
-        <div style="font-size:12px;color:var(--txt2);margin-top:8px">From ${esc(m.from.e)} · ${esc(a.desc||a.address)}</div>`;
+        <div style="font-size:calc(12px * var(--tsize));color:var(--txt2);margin-top:8px">From ${esc(m.from.e)} · ${esc(a.desc||a.address)}</div>`;
       b.appendChild(head);
       const body=el('div','msg-body');
       body.innerHTML=esc(m.body).replace(/(https?:\/\/[^\s]+)/g,'<a href="#" data-url="$1">$1</a>');
@@ -5937,8 +5937,8 @@ function messageView(m,a,box){
       if(m.attachments.length){
         const at=el('div'); at.style.padding='0 0 20px';
         m.attachments.forEach(f=>{
-          const d=el('div','attach',`<div style="font-size:22px">📄</div><div><div style="font-weight:600">${esc(f.n)}</div>
-            <div style="font-size:12px;color:var(--txt2)">${esc(f.s)}</div></div>`);
+          const d=el('div','attach',`<div style="font-size:calc(22px * var(--tsize))">📄</div><div><div style="font-weight:600">${esc(f.n)}</div>
+            <div style="font-size:calc(12px * var(--tsize));color:var(--txt2)">${esc(f.s)}</div></div>`);
           d.onclick=()=>toast('Attachment preview is simulated');
           at.appendChild(d);
         });
@@ -6006,7 +6006,7 @@ function composeMail({reply,forward,draft,account,all,subject,body,to,onSent}={}
     mkField('To:','to','');
     mkField('Cc/Bcc:','cc','');
     mkField('Subject:','subject','');
-    const fromRow=el('div','compose-field',`<div class="k">From:</div><div style="flex:1;font-size:16px">${esc(acct.address)}</div>`);
+    const fromRow=el('div','compose-field',`<div class="k">From:</div><div style="flex:1;font-size:calc(16px * var(--tsize))">${esc(acct.address)}</div>`);
     fromRow.onclick=()=>actionSheet('Send From',ML().accounts.map(a=>({text:a.address,onClick:()=>{
       fromRow.querySelector('div:last-child').textContent=a.address; f._from=a.id; }})));
     fields.appendChild(fromRow);
@@ -6015,7 +6015,7 @@ function composeMail({reply,forward,draft,account,all,subject,body,to,onSent}={}
     ta.oninput=()=>f.body=ta.value;
     s.appendChild(ta);
     const tools=el('div');
-    tools.style.cssText='display:flex;gap:18px;padding:12px 16px 26px;border-top:.5px solid var(--sep);font-size:20px;color:var(--sysblue)';
+    tools.style.cssText='display:flex;gap:18px;padding:12px 16px 26px;border-top:.5px solid var(--sep);font-size:calc(20px * var(--tsize));color:var(--sysblue)';
     ['📎','📷','✏️'].forEach(t=>{const bb=el('button','',t);bb.onclick=()=>toast('Attachments are simulated');tools.appendChild(bb);});
     s.appendChild(tools);
     setTimeout(()=>{ (f.to?ta:fields.querySelector('input')).focus(); },380);
@@ -6073,8 +6073,8 @@ function mailAccountsView(){
 function accountDetailView(a,parentNav){
   return {title:a.desc||'Account', build(b,nav){
     const head=el('div','pad'); head.style.textAlign='center';
-    head.innerHTML=`<div class="avatar" style="width:64px;height:64px;font-size:24px;margin:4px auto 8px;background:${a.color}">✉️</div>
-      <div style="font-size:18px;font-weight:600">${esc(a.name)}</div><div class="muted" style="font-size:14px">${esc(a.address)}</div>`;
+    head.innerHTML=`<div class="avatar" style="width:64px;height:64px;font-size:calc(24px * var(--tsize));margin:4px auto 8px;background:${a.color}">✉️</div>
+      <div style="font-size:calc(18px * var(--tsize));font-weight:600">${esc(a.name)}</div><div class="muted" style="font-size:calc(14px * var(--tsize))">${esc(a.address)}</div>`;
     b.appendChild(head);
     group(b,{header:'IMAP Account Information',rows:[
       {label:'Name',value:a.name},
@@ -6151,7 +6151,7 @@ function addAccountView(parentNav){
       onClick:()=>nav.push(brandedSignInView(p))
     }))});
     group(b,{rows:[{labelHTML:'<span style="font-weight:600">Other</span>',
-      icon:`<div style="width:29px;height:29px;border-radius:7px;background:#8e8e93;display:grid;place-items:center;font-size:15px">✉️</div>`,
+      icon:`<div style="width:29px;height:29px;border-radius:7px;background:#8e8e93;display:grid;place-items:center;font-size:calc(15px * var(--tsize))">✉️</div>`,
       iconBg:'transparent', onClick:()=>nav.push(otherAccountView())}]});
     b.appendChild(el('div','grp-f','Pick a provider for a quick sign-in, or choose <b>Other</b> to configure an IMAP or POP mail server by hand.'));
   }};
@@ -6301,9 +6301,9 @@ function imapServerView(d){
 function certDetailsView(d,parentNav){
   return {title:'Certificate', build(b,nav){
     const head=el('div','pad'); head.style.textAlign='center';
-    head.innerHTML=`<div style="font-size:40px">🔓</div>
-      <div style="font-size:17px;font-weight:600;margin-top:6px">${esc(d.in.host)}</div>
-      <div style="color:var(--sysred);font-size:13px;margin-top:4px">Not Trusted</div>`;
+    head.innerHTML=`<div style="font-size:calc(40px * var(--tsize))">🔓</div>
+      <div style="font-size:calc(17px * var(--tsize));font-weight:600;margin-top:6px">${esc(d.in.host)}</div>
+      <div style="color:var(--sysred);font-size:calc(13px * var(--tsize));margin-top:4px">Not Trusted</div>`;
     b.appendChild(head);
     group(b,{header:'Subject Name',rows:[
       {label:'Common Name',value:d.in.host},
@@ -6353,7 +6353,7 @@ function imapMailboxesView(d){
         {label:'Notes',icon:'📝',iconBg:'#ffd60a',toggle:()=>d.notes,onToggle:v=>d.notes=v}
       ],footer:'Choose which services to use with this account.'});
       const sum=el('div','grp'); sum.style.padding='14px';
-      sum.innerHTML=`<div style="font-size:13px;color:var(--txt2);line-height:1.6">
+      sum.innerHTML=`<div style="font-size:calc(13px * var(--tsize));color:var(--txt2);line-height:1.6">
         <b style="color:var(--txt)">${esc(d.email)}</b><br>
         ${esc(d.type)} · ${esc(d.in.host)} : 993 (SSL)<br>
         SMTP · ${esc(d.out.host||'—')} : 587 (TLS)<br>
@@ -6396,8 +6396,8 @@ function brandedSignInView(p){
       const head=el('div','pad'); head.style.textAlign='center';
       head.innerHTML=`<div style="margin:6px auto 8px;width:56px;height:56px;border-radius:14px;background:${p.color};
           display:grid;place-items:center;color:#fff;font-size:${p.mark.length>2?'15':'24'}px;font-weight:700">${esc(p.mark)}</div>
-        <div style="font-size:19px;font-weight:600">Sign in to ${esc(p.name)}</div>
-        <div class="muted" style="font-size:13px;padding:4px 24px 0;line-height:1.4">${esc(p.name)} will be configured automatically using ${esc(p.imap)}.</div>`;
+        <div style="font-size:calc(19px * var(--tsize));font-weight:600">Sign in to ${esc(p.name)}</div>
+        <div class="muted" style="font-size:calc(13px * var(--tsize));padding:4px 24px 0;line-height:1.4">${esc(p.name)} will be configured automatically using ${esc(p.imap)}.</div>`;
       b.appendChild(head);
       formGroup(b,{fields:[
         {label:'Name',placeholder:'John Appleseed',get:()=>d.name,set:v=>d.name=v},
@@ -6552,18 +6552,18 @@ function streamShell(app,win){
     <div class="st-nav">${['Home','Series','Movies','Live','My Stuff'].map((t,i)=>
       `<span style="opacity:${i?'.7':'1'};font-weight:${i?400:700}">${t}</span>`).join('')}</div>
     <div class="st-hero" style="background:linear-gradient(160deg,${app.colors[0]},${app.colors[1]});margin-top:-160px">
-      <div style="font-size:11px;letter-spacing:2px;opacity:.8;text-transform:uppercase">${esc(app.name)} Original</div>
-      <div style="font-size:34px;font-weight:800;line-height:1;letter-spacing:-1px">${esc(tileTitle(app.name,3))}</div>
-      <div style="font-size:13px;opacity:.85">New season · 8 episodes · TV-MA</div>
+      <div style="font-size:calc(11px * var(--tsize));letter-spacing:2px;opacity:.8;text-transform:uppercase">${esc(app.name)} Original</div>
+      <div style="font-size:calc(34px * var(--tsize));font-weight:800;line-height:1;letter-spacing:-1px">${esc(tileTitle(app.name,3))}</div>
+      <div style="font-size:calc(13px * var(--tsize));opacity:.85">New season · 8 episodes · TV-MA</div>
       <div style="display:flex;gap:10px;margin-top:4px">
         <button style="background:#fff;color:#000;font-weight:700;border-radius:6px;padding:10px 26px">▶ Play</button>
         <button style="background:rgba(255,255,255,.25);color:#fff;font-weight:600;border-radius:6px;padding:10px 20px">＋ My List</button>
       </div></div>
     ${rows.map(([r,n])=>`<div class="st-row"><h4>${r}</h4><div class="st-tiles">${tiles(app,r,n)}</div></div>`).join('')}
-    <div style="padding:30px 20px 90px;text-align:center;color:#6b6b70;font-size:12px">
+    <div style="padding:30px 20px 90px;text-align:center;color:#6b6b70;font-size:calc(12px * var(--tsize))">
       Simulated ${esc(app.name)} client · content is placeholder art</div>
     <div class="st-tabbar">${[['⌂','Home'],['🔍','Search'],['⬇','Downloads'],['☰','More']].map((t,i)=>
-      `<button class="${i?'':'on'}"><span style="font-size:17px">${t[0]}</span>${t[1]}</button>`).join('')}</div>`;
+      `<button class="${i?'':'on'}"><span style="font-size:calc(17px * var(--tsize))">${t[0]}</span>${t[1]}</button>`).join('')}</div>`;
   v.querySelectorAll('.st-tile,.st-hero button').forEach(t=>t.onclick=()=>island('▶','#'+(app.colors[0].replace('#','')),app.name,'Playing preview…',2600));
   v.querySelectorAll('.st-tabbar button').forEach(b=>b.onclick=()=>{
     v.querySelectorAll('.st-tabbar button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); });
@@ -6583,26 +6583,26 @@ function sablewaveShell(app,win){
       `<span style="opacity:${i?'.75':'1'};font-weight:${i?400:700}">${t}</span>`).join('')}</div>
     <div style="padding:0 14px 8px;display:flex;gap:8px;overflow-x:auto">
       ${['All Channels','Favorites','Sports','Movies','Kids','News'].map((c,i)=>
-      `<span style="flex:none;background:${i?'rgba(255,255,255,.12)':'#17a2a8'};color:#fff;padding:7px 14px;border-radius:16px;font-size:12px">${c}</span>`).join('')}</div>
-    <div style="display:flex;padding:6px 14px 4px;color:#9fb6cc;font-size:11px">
+      `<span style="flex:none;background:${i?'rgba(255,255,255,.12)':'#17a2a8'};color:#fff;padding:7px 14px;border-radius:16px;font-size:calc(12px * var(--tsize))">${c}</span>`).join('')}</div>
+    <div style="display:flex;padding:6px 14px 4px;color:#9fb6cc;font-size:calc(11px * var(--tsize))">
       <div style="width:70px;flex:none">CHANNEL</div>${hours.map(x=>`<div style="flex:1">${x}</div>`).join('')}</div>
     <div id="guide"></div>
     <div class="st-row"><h4 style="color:#fff">Recommended On Demand</h4><div class="st-tiles">${tiles(app,'ondemand',8)}</div></div>
     <div class="st-row"><h4 style="color:#fff">Your DVR — 3 recordings</h4><div class="st-tiles">${tiles(app,'dvr',5)}</div></div>
-    <div style="padding:24px 20px 90px;text-align:center;color:#6b87a4;font-size:12px">
+    <div style="padding:24px 20px 90px;text-align:center;color:#6b87a4;font-size:calc(12px * var(--tsize))">
       Simulated Sablewave TV client · guide data is placeholder</div>
     <div class="st-tabbar">${[['📺','Guide'],['▶','On Demand'],['📚','Library'],['🔍','Search']].map((t,i)=>
-      `<button class="${i?'':'on'}"><span style="font-size:17px">${t[0]}</span>${t[1]}</button>`).join('')}</div>`;
+      `<button class="${i?'':'on'}"><span style="font-size:calc(17px * var(--tsize))">${t[0]}</span>${t[1]}</button>`).join('')}</div>`;
   const g=$('#guide',v);
   CHANNELS.forEach((c,i)=>{
     const row=el('div');
     row.style.cssText='display:flex;gap:4px;padding:0 14px 4px;align-items:stretch';
-    row.innerHTML=`<div style="width:70px;flex:none;color:#fff;font-size:11px;display:flex;flex-direction:column;justify-content:center">
+    row.innerHTML=`<div style="width:70px;flex:none;color:#fff;font-size:calc(11px * var(--tsize));display:flex;flex-direction:column;justify-content:center">
         <b>${c[0]}</b><span style="opacity:.7">${c[1]}</span></div>
-      <div style="flex:2;background:rgba(255,255,255,.12);border-radius:5px;padding:8px;color:#fff;font-size:12px;
+      <div style="flex:2;background:rgba(255,255,255,.12);border-radius:5px;padding:8px;color:#fff;font-size:calc(12px * var(--tsize));
         ${i===0?'outline:2px solid #0ea5ff':''}">${esc(c[2])}</div>
-      <div style="flex:1;background:rgba(255,255,255,.07);border-radius:5px;padding:8px;color:#cfe2f5;font-size:12px">${esc(tileTitle(c[1],1))}</div>
-      <div style="flex:1;background:rgba(255,255,255,.07);border-radius:5px;padding:8px;color:#cfe2f5;font-size:12px">${esc(tileTitle(c[1],2))}</div>`;
+      <div style="flex:1;background:rgba(255,255,255,.07);border-radius:5px;padding:8px;color:#cfe2f5;font-size:calc(12px * var(--tsize))">${esc(tileTitle(c[1],1))}</div>
+      <div style="flex:1;background:rgba(255,255,255,.07);border-radius:5px;padding:8px;color:#cfe2f5;font-size:calc(12px * var(--tsize))">${esc(tileTitle(c[1],2))}</div>`;
     row.onclick=()=>island('📺','#17a2a8','Sablewave TV','Tuning to '+c[1]+'…',2400);
     g.appendChild(row);
   });
@@ -6613,12 +6613,12 @@ function mySablewaveShell(app,win){
   const v=el('div','st-app'); v.style.background='#f2f4f7'; v.style.color='#111';
   v.innerHTML=`
     <div style="background:linear-gradient(160deg,#0a3b43,#17a2a8);padding:64px 18px 22px;color:#fff">
-      <div style="font-size:13px;opacity:.85">Welcome back,</div>
-      <div style="font-size:24px;font-weight:700">Alex</div>
+      <div style="font-size:calc(13px * var(--tsize));opacity:.85">Welcome back,</div>
+      <div style="font-size:calc(24px * var(--tsize));font-weight:700">Alex</div>
       <div style="margin-top:16px;background:rgba(255,255,255,.14);border-radius:14px;padding:14px">
-        <div style="font-size:12px;opacity:.85">Account ending 4417 · Auto Pay on</div>
-        <div style="font-size:30px;font-weight:800;margin:4px 0">$189.98</div>
-        <div style="font-size:12px;opacity:.85">Due August 12</div>
+        <div style="font-size:calc(12px * var(--tsize));opacity:.85">Account ending 4417 · Auto Pay on</div>
+        <div style="font-size:calc(30px * var(--tsize));font-weight:800;margin:4px 0">$189.98</div>
+        <div style="font-size:calc(12px * var(--tsize));opacity:.85">Due August 12</div>
         <button style="margin-top:12px;background:#fff;color:#0a3b43;font-weight:700;border-radius:22px;padding:11px 0;width:100%">Pay Now</button>
       </div></div>
     <div style="padding:16px">
@@ -6626,20 +6626,20 @@ function mySablewaveShell(app,win){
       <div id="svc"></div>
       <div style="font-weight:700;margin:18px 0 8px">Quick Actions</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px" id="qa"></div>
-      <div style="text-align:center;color:#7d8794;font-size:12px;padding:28px 10px 90px">
+      <div style="text-align:center;color:#7d8794;font-size:calc(12px * var(--tsize));padding:28px 10px 90px">
         Simulated My Sablewave client · account data is fictional</div>
     </div>
     <div class="st-tabbar" style="background:#fff;border-top:1px solid #dfe3e8">
       ${[['🏠','Home'],['💳','Billing'],['📶','Services'],['💬','Support']].map((t,i)=>
-      `<button class="${i?'':'on'}" style="color:${i?'#8b95a1':'#17a2a8'}"><span style="font-size:17px">${t[0]}</span>${t[1]}</button>`).join('')}</div>`;
+      `<button class="${i?'':'on'}" style="color:${i?'#8b95a1':'#17a2a8'}"><span style="font-size:calc(17px * var(--tsize))">${t[0]}</span>${t[1]}</button>`).join('')}</div>`;
   const svc=$('#svc',v);
   [['Internet Ultra','Connected · 512 Mbps','#30d158'],['Sablewave TV Select','215 channels','#17a2a8'],
    ['Mobile — 2 lines','Unlimited data','#5e5ce6'],['Voice','Active','#8e8e93']].forEach(s=>{
     const d=el('div');
     d.style.cssText='background:#fff;border-radius:12px;padding:14px;margin-bottom:8px;display:flex;gap:12px;align-items:center;box-shadow:0 1px 3px rgba(0,0,0,.08)';
     d.innerHTML=`<div style="width:10px;height:10px;border-radius:50%;background:${s[2]}"></div>
-      <div style="flex:1"><div style="font-weight:600;font-size:15px">${s[0]}</div>
-      <div style="font-size:13px;color:#6b7684">${s[1]}</div></div><div style="color:#9aa4b0">›</div>`;
+      <div style="flex:1"><div style="font-weight:600;font-size:calc(15px * var(--tsize))">${s[0]}</div>
+      <div style="font-size:calc(13px * var(--tsize));color:#6b7684">${s[1]}</div></div><div style="color:#9aa4b0">›</div>`;
     d.onclick=()=>island('📶','#17a2a8','My Sablewave',s[0],2000);
     svc.appendChild(d);
   });
@@ -6647,7 +6647,7 @@ function mySablewaveShell(app,win){
   [['🔄','Restart Equipment'],['📶','WiFi Settings'],['📄','View Bill'],['💬','Chat with Support']].forEach(a=>{
     const d=el('div');
     d.style.cssText='background:#fff;border-radius:12px;padding:16px 12px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.08)';
-    d.innerHTML=`<div style="font-size:22px">${a[0]}</div><div style="font-size:13px;margin-top:6px;font-weight:500">${a[1]}</div>`;
+    d.innerHTML=`<div style="font-size:calc(22px * var(--tsize))">${a[0]}</div><div style="font-size:calc(13px * var(--tsize));margin-top:6px;font-weight:500">${a[1]}</div>`;
     d.onclick=()=>{
       if(a[1]==='Restart Equipment') island('🔄','#17a2a8','My Sablewave','Restarting router… ~5 min',3000);
       else if(a[1]==='View Bill'){ goHome(); setTimeout(()=>openApp('mail'),300); }
@@ -6679,10 +6679,10 @@ function gameChrome(app,win,{sub,statLabel='Score'}={}){
   v.style.cssText=`position:absolute;inset:0;display:flex;flex-direction:column;background:${bgDeep};color:#fff`;
   v.innerHTML=`
     <div class="gm-head" style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:62px 18px 8px">
-      <div><div style="font-size:19px;font-weight:800;letter-spacing:-.4px">${esc(app.name)}</div>
-        <div style="font-size:11.5px;opacity:.55">${esc(sub||'')}</div></div>
-      <div style="text-align:right"><div style="font-size:10px;opacity:.55;text-transform:uppercase;letter-spacing:1.1px">${esc(statLabel)}</div>
-        <div class="gm-score" style="font-size:25px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1">0</div></div>
+      <div><div style="font-size:calc(19px * var(--tsize));font-weight:800;letter-spacing:-.4px">${esc(app.name)}</div>
+        <div style="font-size:calc(11.5px * var(--tsize));opacity:.55">${esc(sub||'')}</div></div>
+      <div style="text-align:right"><div style="font-size:calc(10px * var(--tsize));opacity:.55;text-transform:uppercase;letter-spacing:1.1px">${esc(statLabel)}</div>
+        <div class="gm-score" style="font-size:calc(25px * var(--tsize));font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1">0</div></div>
     </div>
     <div class="gm-stage" style="flex:1;position:relative;margin:2px 14px 8px;min-height:0"></div>
     <div class="gm-controls" style="flex:none;padding:0 14px 32px"></div>`;
@@ -6696,10 +6696,10 @@ function gmOverlay(stage,{title,body,btn='Play',onGo}){
   o=el('div','gm-ov');
   o.style.cssText=`position:absolute;inset:0;display:grid;place-items:center;border-radius:18px;z-index:6;
     background:rgba(0,0,0,.6);backdrop-filter:blur(7px);text-align:center;padding:20px`;
-  o.innerHTML=`<div><div style="font-size:19px;font-weight:800;margin-bottom:6px">${esc(title)}</div>
-    <div style="font-size:13px;opacity:.7;line-height:1.4;margin-bottom:16px">${body||''}</div></div>`;
+  o.innerHTML=`<div><div style="font-size:calc(19px * var(--tsize));font-weight:800;margin-bottom:6px">${esc(title)}</div>
+    <div style="font-size:calc(13px * var(--tsize));opacity:.7;line-height:1.4;margin-bottom:16px">${body||''}</div></div>`;
   const b=el('button','',btn);
-  b.style.cssText='background:#fff;color:#000;font-weight:800;border-radius:22px;padding:11px 32px;font-size:15px';
+  b.style.cssText='background:#fff;color:#000;font-weight:800;border-radius:22px;padding:11px 32px;font-size:calc(15px * var(--tsize))';
   b.onclick=()=>{ o.remove(); onGo(); };
   o.firstChild.appendChild(b);
   stage.appendChild(o);
@@ -6882,7 +6882,7 @@ function wordleGame(app,win){
   let answer,rows,cur,done;
   const gridEl=el('div'); gridEl.style.cssText='display:grid;grid-template-rows:repeat(6,1fr);gap:5px;margin-bottom:4px';
   wrap.appendChild(gridEl);
-  const msg=el('div'); msg.style.cssText='font-size:12.5px;height:18px;opacity:.75;margin-top:2px'; wrap.appendChild(msg);
+  const msg=el('div'); msg.style.cssText='font-size:calc(12.5px * var(--tsize));height:18px;opacity:.75;margin-top:2px'; wrap.appendChild(msg);
   const kbState={};
   function drawGrid(){
     gridEl.innerHTML='';
@@ -6893,7 +6893,7 @@ function wordleGame(app,win){
         const ch=(r===cur? (rows[r]||'') : g)[i]||'';
         const st=r<cur? score(g)[i] : null;
         const d=el('div','',esc(ch.toUpperCase()));
-        d.style.cssText=`width:40px;height:44px;border-radius:6px;display:grid;place-items:center;font-size:21px;font-weight:800;
+        d.style.cssText=`width:40px;height:44px;border-radius:6px;display:grid;place-items:center;font-size:calc(21px * var(--tsize));font-weight:800;
           border:2px solid ${st?'transparent':(ch?'rgba(255,255,255,.45)':'rgba(255,255,255,.18)')};
           background:${st==='g'?'#30d158':st==='y'?'#e0b83a':st==='b'?'rgba(255,255,255,.13)':'transparent'};
           color:#fff`;
@@ -7360,7 +7360,7 @@ function recentsView(){
                  ${sf(callArrow[r.type],{w:1.9,size:13})}</span>
                  ${esc(r.type.charAt(0).toUpperCase()+r.type.slice(1))}${r.label?' · '+esc(r.label):''}${r.dur?' · '+r.dur:''}</span>`,
           tint:missed?'var(--sysred)':'', nav,
-          right:`<div class="muted" style="font-size:15px;margin-right:2px">${esc(relTime(r.at))}</div>`});
+          right:`<div class="muted" style="font-size:calc(15px * var(--tsize));margin-right:2px">${esc(relTime(r.at))}</div>`});
         g.appendChild(row);
       });
       b.appendChild(g);
@@ -7416,8 +7416,8 @@ function contactDetailView(name){
       const phones = c? c.phones : (me? [['mobile','(407) 555-0142']] : [['mobile',numberFor(name)||name]]);
       const head=el('div'); head.style.cssText='text-align:center;padding:4px 20px 18px';
       head.innerHTML=`<div style="display:flex;justify-content:center;margin-bottom:10px">${avatarFor(name,96)}</div>
-        <div style="font-size:25px;font-weight:600;letter-spacing:-.4px">${esc(c?contactName(c):name)}</div>
-        ${c&&c.org?`<div class="muted" style="font-size:15px;margin-top:2px">${esc(c.org)}</div>`:''}`;
+        <div style="font-size:calc(25px * var(--tsize));font-weight:600;letter-spacing:-.4px">${esc(c?contactName(c):name)}</div>
+        ${c&&c.org?`<div class="muted" style="font-size:calc(15px * var(--tsize));margin-top:2px">${esc(c.org)}</div>`:''}`;
       b.appendChild(head);
 
       const acts=el('div');
@@ -7433,7 +7433,7 @@ function contactDetailView(name){
           goHome(); setTimeout(()=>{ openApp('mail'); setTimeout(()=>composeMail({to:e}),420); },320); }]
       ].forEach(([lbl,ic,fn])=>{
         const d=el('div');
-        d.style.cssText='display:flex;flex-direction:column;align-items:center;gap:5px;font-size:11px;color:var(--sysblue);cursor:pointer';
+        d.style.cssText='display:flex;flex-direction:column;align-items:center;gap:5px;font-size:calc(11px * var(--tsize));color:var(--sysblue);cursor:pointer';
         d.innerHTML=`<div style="width:56px;height:44px;border-radius:11px;background:var(--group);display:grid;place-items:center">${ic}</div>${lbl}`;
         d.onclick=fn; acts.appendChild(d);
       });
@@ -7472,8 +7472,8 @@ function keypadView(){
     /* number readout — grows from empty like iOS, with Add Number underneath */
     const dispWrap=el('div'); dispWrap.style.cssText='flex:none;height:96px;display:flex;flex-direction:column;justify-content:flex-end';
     const disp=el('div');
-    disp.style.cssText='font-size:34px;font-weight:400;letter-spacing:.6px;padding:0 44px;overflow:hidden;white-space:nowrap;font-variant-numeric:tabular-nums;min-height:44px;display:flex;align-items:center;justify-content:center';
-    const hint=el('div'); hint.style.cssText='font-size:14px;height:24px;color:var(--sysblue)';
+    disp.style.cssText='font-size:calc(34px * var(--tsize));font-weight:400;letter-spacing:.6px;padding:0 44px;overflow:hidden;white-space:nowrap;font-variant-numeric:tabular-nums;min-height:44px;display:flex;align-items:center;justify-content:center';
+    const hint=el('div'); hint.style.cssText='font-size:calc(14px * var(--tsize));height:24px;color:var(--sysblue)';
     dispWrap.append(disp,hint); d.appendChild(dispWrap);
 
     const fmt=v=>{
@@ -7505,7 +7505,7 @@ function keypadView(){
       const big=el('div','', n==='*'?'✻':esc(n));
       big.style.cssText=`font-size:${/[0-9]/.test(n)?'34px':'30px'};font-weight:400;line-height:1;font-variant-numeric:tabular-nums`;
       const small=el('div','',sub);
-      small.style.cssText='font-size:9px;font-weight:600;letter-spacing:1.6px;color:var(--txt2);margin-top:3px;height:11px';
+      small.style.cssText='font-size:calc(9px * var(--tsize));font-weight:600;letter-spacing:1.6px;color:var(--txt2);margin-top:3px;height:11px';
       if(n==='1') small.innerHTML='&nbsp;';
       k.append(big,small);
       k.onpointerdown=()=>k.style.background='color-mix(in srgb,var(--bg3) 55%,#98989d)';
@@ -7575,23 +7575,23 @@ function voicemailView(){
           <div style="display:flex;align-items:center;gap:10px">
             <div style="width:10px;height:10px;border-radius:50%;background:var(--sysblue);visibility:${v.unheard?'visible':'hidden'}"></div>
             <div style="flex:1;min-width:0">
-              <div style="font-size:17px;font-weight:${v.unheard?600:400}">${esc(v.who)}</div>
-              <div class="sub" style="color:var(--txt2);font-size:13px">${esc(numberFor(v.who)||'Unknown')}</div>
+              <div style="font-size:calc(17px * var(--tsize));font-weight:${v.unheard?600:400}">${esc(v.who)}</div>
+              <div class="sub" style="color:var(--txt2);font-size:calc(13px * var(--tsize))">${esc(numberFor(v.who)||'Unknown')}</div>
             </div>
-            <div style="text-align:right"><div class="muted" style="font-size:14px">${esc(relTime(v.at))}</div>
-              <div class="muted" style="font-size:13px">${v.dur}</div></div>
+            <div style="text-align:right"><div class="muted" style="font-size:calc(14px * var(--tsize))">${esc(relTime(v.at))}</div>
+              <div class="muted" style="font-size:calc(13px * var(--tsize))">${v.dur}</div></div>
           </div>
           <div class="vm-body" style="display:none;padding:12px 0 4px">
             <div style="display:flex;align-items:center;gap:12px">
               <button class="vm-play" style="color:var(--sysblue)">${sf('<path d="M8 5.5l11 6.5-11 6.5z" fill="currentColor" stroke="none"/>',{fill:true,size:24})}</button>
               <div style="flex:1;height:4px;border-radius:2px;background:var(--bg3);overflow:hidden">
                 <div class="vm-fill" style="width:0;height:100%;background:var(--sysblue);transition:width .3s linear"></div></div>
-              <div class="muted" style="font-size:12px">${v.dur}</div>
+              <div class="muted" style="font-size:calc(12px * var(--tsize))">${v.dur}</div>
               <button class="vm-spk" style="color:var(--sysblue)">${sf('<path d="M4 9.5h3.5L12 5.5v13L7.5 14.5H4z"/><path d="M15.5 9.2a4 4 0 010 5.6"/>',{size:20})}</button>
             </div>
-            <div style="font-size:14px;line-height:1.45;color:var(--txt);margin-top:10px">
-              <b style="font-size:12px;color:var(--txt2);text-transform:uppercase;letter-spacing:.4px">Transcription</b><br>${esc(v.text)}</div>
-            <div style="display:flex;gap:18px;margin-top:12px;color:var(--sysblue);font-size:15px">
+            <div style="font-size:calc(14px * var(--tsize));line-height:1.45;color:var(--txt);margin-top:10px">
+              <b style="font-size:calc(12px * var(--tsize));color:var(--txt2);text-transform:uppercase;letter-spacing:.4px">Transcription</b><br>${esc(v.text)}</div>
+            <div style="display:flex;gap:18px;margin-top:12px;color:var(--sysblue);font-size:calc(15px * var(--tsize))">
               <button class="vm-call">Call Back</button><button class="vm-del" style="color:var(--sysred)">Delete</button></div>
           </div>`;
         row.onclick=e=>{
@@ -7629,7 +7629,7 @@ function defaultThreads(){ return [
 ];}
 function MSG(){ if(!State.threads){ State.threads=defaultThreads(); save(); } return State.threads; }
 defineApp({id:'messages',name:'Messages',bg:'linear-gradient(180deg,#6ce67d,#17b02f)',
-  glyph:'<div style="font-size:34px">💬</div>',
+  glyph:'<div style="font-size:calc(34px * var(--tsize))">💬</div>',
   mount(win,inst){
     const nav=new Nav(win); inst.nav=nav;
     nav.setRoot({title:'Messages',largeTitle:true,
@@ -7667,12 +7667,12 @@ function threadView(t){
   const shortcode=/^\d{5,6}$/.test(t.n);
   return {title:t.n, build(b,nav,view){
     const wrap=el('div'); wrap.style.padding='14px';
-    if(shortcode) wrap.appendChild(h(`<div style="text-align:center;color:var(--txt2);font-size:12px;padding:4px 20px 12px;line-height:1.4">
+    if(shortcode) wrap.appendChild(h(`<div style="text-align:center;color:var(--txt2);font-size:calc(12px * var(--tsize));padding:4px 20px 12px;line-height:1.4">
       Text Message · ${esc(t.n)}<br>This sender is not in your contacts.</div>`));
     t.msgs.forEach(m=>{
       const line=el('div');
       const bub=el('div','',esc(m[1]));
-      bub.style.cssText=`max-width:78%;padding:9px 14px;border-radius:19px;margin:6px 0;font-size:16px;line-height:1.32;
+      bub.style.cssText=`max-width:78%;padding:9px 14px;border-radius:19px;margin:6px 0;font-size:calc(16px * var(--tsize));line-height:1.32;
         white-space:pre-wrap;${m[0]==='in'?'background:var(--bg3);':'background:#0a84ff;color:#fff;margin-left:auto;'}`;
       line.appendChild(bub);
       // iOS highlights a verification code and offers Copy Code — no prompt, no pressure
@@ -7681,7 +7681,7 @@ function threadView(t){
         bub.innerHTML = esc(m[1]).replace(code,
           `<b style="letter-spacing:1px;text-decoration:underline;text-underline-offset:3px">${code}</b>`);
         const act=el('button','',`${sf('<rect x="8" y="8" width="12" height="12" rx="2.6"/><path d="M16 8V5.6A1.6 1.6 0 0014.4 4H5.6A1.6 1.6 0 004 5.6v8.8A1.6 1.6 0 005.6 16H8"/>',{size:14})}<span>Copy Code</span>`);
-        act.style.cssText='display:flex;align-items:center;gap:6px;color:var(--sysblue);font-size:13px;font-weight:600;margin:2px 0 8px 6px';
+        act.style.cssText='display:flex;align-items:center;gap:6px;color:var(--sysblue);font-size:calc(13px * var(--tsize));font-weight:600;margin:2px 0 8px 6px';
         act.onclick=()=>{
           if(navigator.clipboard) navigator.clipboard.writeText(code).then(()=>toast('Copied '+code),()=>toast('Code: '+code));
           else toast('Code: '+code);
@@ -7750,8 +7750,8 @@ function photosLibraryView(){
         const cell=photoCell(src,i+2,120);
         cell.style.cssText+='height:128px;border-radius:14px;overflow:hidden;aspect-ratio:auto';
         c.appendChild(cell);
-        c.appendChild(h(`<div style="font-size:14px;font-weight:500;margin-top:6px">${name}</div>
-          <div class="muted" style="font-size:12px">${[36,24,18,9][i]} items</div>`));
+        c.appendChild(h(`<div style="font-size:calc(14px * var(--tsize));font-weight:500;margin-top:6px">${name}</div>
+          <div class="muted" style="font-size:calc(12px * var(--tsize))">${[36,24,18,9][i]} items</div>`));
         c.onclick=go;
         rail.appendChild(c);
       });
@@ -7787,7 +7787,7 @@ function photoDetailView(src,i,from){
       stage.style.cssText='height:470px;background:#000;display:grid;place-items:center;overflow:hidden';
       const img=el('img'); img.src=src;
       img.style.cssText='max-width:100%;max-height:100%;object-fit:contain';
-      img.onerror=()=>{ stage.innerHTML='<div class="muted" style="font-size:13px">Photo unavailable offline</div>'; };
+      img.onerror=()=>{ stage.innerHTML='<div class="muted" style="font-size:calc(13px * var(--tsize))">Photo unavailable offline</div>'; };
       stage.appendChild(img); b.appendChild(stage);
       const d=new Date(Date.now()-i*864e5);
       group(b,{rows:[
@@ -7806,16 +7806,16 @@ function photoDetailView(src,i,from){
     }};
 }
 defineApp({id:'camera',name:'Camera',bg:'linear-gradient(160deg,#4a4a4c,#1c1c1e)',
-  glyph:'<div style="font-size:32px">📷</div>', darkStatus:true,
+  glyph:'<div style="font-size:calc(32px * var(--tsize))">📷</div>', darkStatus:true,
   mount(win){
     win.style.background='#000';
     const v=el('div');
     v.style.cssText='position:absolute;inset:0;display:flex;flex-direction:column;color:#fff';
     v.innerHTML=`<div style="flex:1;background:radial-gradient(120% 80% at 50% 30%,#2a2f3a,#0a0a0c);display:grid;place-items:center;margin:60px 0 0">
-        <div style="text-align:center;opacity:.5"><div style="font-size:52px">📷</div>
-        <div style="font-size:13px;margin-top:8px">Camera preview unavailable<br>in the simulator</div></div></div>
+        <div style="text-align:center;opacity:.5"><div style="font-size:calc(52px * var(--tsize))">📷</div>
+        <div style="font-size:calc(13px * var(--tsize));margin-top:8px">Camera preview unavailable<br>in the simulator</div></div></div>
       <div style="padding:16px 0 40px;text-align:center">
-        <div style="display:flex;gap:20px;justify-content:center;font-size:12px;color:#ffd60a;margin-bottom:14px">
+        <div style="display:flex;gap:20px;justify-content:center;font-size:calc(12px * var(--tsize));color:#ffd60a;margin-bottom:14px">
           <span>VIDEO</span><span style="color:#ffd60a;font-weight:700">PHOTO</span><span style="color:#fff;opacity:.7">PORTRAIT</span></div>
         <div style="width:70px;height:70px;border-radius:50%;border:4px solid #fff;margin:0 auto;background:#fff" id="shutter"></div></div>`;
     win.appendChild(v);
@@ -7823,29 +7823,29 @@ defineApp({id:'camera',name:'Camera',bg:'linear-gradient(160deg,#4a4a4c,#1c1c1e)
       win.appendChild(f); setTimeout(()=>f.remove(),120); toast('Photo saved to Library'); };
   }});
 defineApp({id:'weather',name:'Weather',bg:'linear-gradient(180deg,#5ac8fa,#0a63e8)',
-  glyph:'<div style="font-size:32px">🌤</div>', darkStatus:true,
+  glyph:'<div style="font-size:calc(32px * var(--tsize))">🌤</div>', darkStatus:true,
   mount(win){
     win.style.background='linear-gradient(180deg,#3a7bd5,#0d1b3e)';
     const v=el('div','wx');
     const hrs=Array.from({length:9},(_,i)=>{const h=(new Date().getHours()+i)%24;
-      return `<div><div>${i?((h%12||12)+(h<12?'AM':'PM')):'Now'}</div><div style="font-size:20px;margin:6px 0">${['☀','⛅','☁','🌤','⛅','☀','🌙','🌙','🌙'][i]}</div><div><b>${78-i}°</b></div></div>`;}).join('');
-    v.innerHTML=`<div style="font-size:32px;font-weight:500">Orlando</div>
-      <div style="font-size:88px;font-weight:200;line-height:1">78°</div>
-      <div style="font-size:19px;opacity:.9">Partly Cloudy</div>
+      return `<div><div>${i?((h%12||12)+(h<12?'AM':'PM')):'Now'}</div><div style="font-size:calc(20px * var(--tsize));margin:6px 0">${['☀','⛅','☁','🌤','⛅','☀','🌙','🌙','🌙'][i]}</div><div><b>${78-i}°</b></div></div>`;}).join('');
+    v.innerHTML=`<div style="font-size:calc(32px * var(--tsize));font-weight:500">Orlando</div>
+      <div style="font-size:calc(88px * var(--tsize));font-weight:200;line-height:1">78°</div>
+      <div style="font-size:calc(19px * var(--tsize));opacity:.9">Partly Cloudy</div>
       <div style="opacity:.85">H:91° L:74°</div>
-      <div class="wx-card"><div style="font-size:12px;opacity:.75;margin-bottom:10px">HOURLY FORECAST</div>
+      <div class="wx-card"><div style="font-size:calc(12px * var(--tsize));opacity:.75;margin-bottom:10px">HOURLY FORECAST</div>
         <div class="wx-hours">${hrs}</div></div>
-      <div class="wx-card"><div style="font-size:12px;opacity:.75;margin-bottom:10px">10-DAY FORECAST</div>
+      <div class="wx-card"><div style="font-size:calc(12px * var(--tsize));opacity:.75;margin-bottom:10px">10-DAY FORECAST</div>
         ${['Today','Wed','Thu','Fri','Sat','Sun','Mon'].map((d,i)=>
         `<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:${i<6?'.5px solid rgba(255,255,255,.2)':'none'}">
-          <div style="width:50px">${d}</div><div style="font-size:18px">${['⛅','🌧','⛈','☀','☀','🌤','🌧'][i]}</div>
+          <div style="width:50px">${d}</div><div style="font-size:calc(18px * var(--tsize))">${['⛅','🌧','⛈','☀','☀','🌤','🌧'][i]}</div>
           <div style="opacity:.7;width:34px;text-align:right">${72+i}°</div>
           <div style="flex:1;height:4px;border-radius:2px;background:linear-gradient(90deg,#ffd60a,#ff9f0a)"></div>
           <div style="width:34px;text-align:right">${88+i}°</div></div>`).join('')}</div>
-      <div style="display:flex;gap:12px"><div class="wx-card" style="flex:1"><div style="font-size:12px;opacity:.75">UV INDEX</div>
-        <div style="font-size:28px;font-weight:600">7</div><div style="font-size:13px">High</div></div>
-        <div class="wx-card" style="flex:1"><div style="font-size:12px;opacity:.75">HUMIDITY</div>
-        <div style="font-size:28px;font-weight:600">64%</div><div style="font-size:13px">Dew point 68°</div></div></div>
+      <div style="display:flex;gap:12px"><div class="wx-card" style="flex:1"><div style="font-size:calc(12px * var(--tsize));opacity:.75">UV INDEX</div>
+        <div style="font-size:calc(28px * var(--tsize));font-weight:600">7</div><div style="font-size:calc(13px * var(--tsize))">High</div></div>
+        <div class="wx-card" style="flex:1"><div style="font-size:calc(12px * var(--tsize));opacity:.75">HUMIDITY</div>
+        <div style="font-size:calc(28px * var(--tsize));font-weight:600">64%</div><div style="font-size:calc(13px * var(--tsize))">Dew point 68°</div></div></div>
       <div style="height:40px"></div>`;
     win.appendChild(v);
   }});
@@ -7919,10 +7919,10 @@ function worldClockView(){
         const d=cityTime(off), hrs=d.getHours();
         const rel = off===0? 'Today, +0HRS' : `Today, ${off>0?'+':''}${off}HRS`;
         row.innerHTML=`
-          <div style="width:22px;flex:none"><button class="ck-del" style="width:20px;height:20px;border-radius:50%;background:var(--sysred);color:#fff;font-size:15px;line-height:0;display:grid;place-items:center;padding-bottom:2px">−</button></div>
+          <div style="width:22px;flex:none"><button class="ck-del" style="width:20px;height:20px;border-radius:50%;background:var(--sysred);color:#fff;font-size:calc(15px * var(--tsize));line-height:0;display:grid;place-items:center;padding-bottom:2px">−</button></div>
           <div class="wf-name"><div class="sub" style="margin:0">${esc(rel)}</div>
-            <div style="font-size:22px;font-weight:400">${esc(name)}</div></div>
-          <div class="ck-time" style="font-size:44px;font-weight:200;font-variant-numeric:tabular-nums;letter-spacing:-1px;
+            <div style="font-size:calc(22px * var(--tsize));font-weight:400">${esc(name)}</div></div>
+          <div class="ck-time" style="font-size:calc(44px * var(--tsize));font-weight:200;font-variant-numeric:tabular-nums;letter-spacing:-1px;
             color:${hrs>=6&&hrs<18?'var(--txt)':'var(--txt2)'}">${d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'})}</div>`;
         row.querySelector('.ck-del').onclick=e=>{ e.stopPropagation(); ck.cities.splice(i,1); save(); nav.refresh(); };
         row.dataset.off=off;
@@ -7967,8 +7967,8 @@ function alarmsView(){
         const hh=a.h%12||12, ap=a.h<12?'AM':'PM';
         row.innerHTML=`
           <div class="wf-name" style="opacity:${a.on?1:.45}">
-            <div style="font-size:44px;font-weight:200;font-variant-numeric:tabular-nums;letter-spacing:-1px;line-height:1.1">
-              ${hh}:${String(a.m).padStart(2,'0')}<span style="font-size:19px;font-weight:400"> ${ap}</span></div>
+            <div style="font-size:calc(44px * var(--tsize));font-weight:200;font-variant-numeric:tabular-nums;letter-spacing:-1px;line-height:1.1">
+              ${hh}:${String(a.m).padStart(2,'0')}<span style="font-size:calc(19px * var(--tsize));font-weight:400"> ${ap}</span></div>
             <div class="sub" style="margin:0">${esc(a.label)}${a.days?', '+esc(a.days):''}</div>
           </div>`;
         const sw=el('div','sw'+(a.on?' on':''));
@@ -7993,11 +7993,11 @@ function addAlarmSheet(nav,existing){
     bar.append(cancel,title,saveB); s.appendChild(bar);
     /* wheel-ish pickers built from selects for reliability */
     const pick=el('div');
-    pick.style.cssText='display:flex;justify-content:center;gap:8px;padding:22px 0;font-size:22px';
+    pick.style.cssText='display:flex;justify-content:center;gap:8px;padding:22px 0;font-size:calc(22px * var(--tsize))';
     const selH=el('select'); for(let h=1;h<=12;h++){const o=el('option','',String(h));o.value=h;selH.appendChild(o);}
     const selM=el('select'); for(let m=0;m<60;m+=5){const o=el('option','',String(m).padStart(2,'0'));o.value=m;selM.appendChild(o);}
     const selAP=el('select'); ['AM','PM'].forEach(x=>{const o=el('option','',x);selAP.appendChild(o);});
-    [selH,selM,selAP].forEach(x=>x.style.cssText='background:var(--bg3);color:var(--txt);border:none;border-radius:10px;padding:10px 14px;font-size:22px');
+    [selH,selM,selAP].forEach(x=>x.style.cssText='background:var(--bg3);color:var(--txt);border:none;border-radius:10px;padding:10px 14px;font-size:calc(22px * var(--tsize))');
     selH.value=String(a.h%12||12); selM.value=String(a.m-(a.m%5)); selAP.value=a.h<12?'AM':'PM';
     pick.append(selH,selM,selAP); s.appendChild(pick);
     const g=el('div','grp'); g.style.margin='0 16px 14px';
@@ -8026,15 +8026,15 @@ function stopwatchView(){
       const st = view._st = view._st || {run:false,base:0,acc:0,laps:[]};
       b.style.textAlign='center';
       const big=el('div');
-      big.style.cssText='font-size:76px;font-weight:100;font-variant-numeric:tabular-nums;letter-spacing:-1px;padding:34px 0 22px';
+      big.style.cssText='font-size:calc(76px * var(--tsize));font-weight:100;font-variant-numeric:tabular-nums;letter-spacing:-1px;padding:34px 0 22px';
       const fmtSW=ms=>{ const cs=Math.floor(ms/10)%100, ss=Math.floor(ms/1000)%60, mm=Math.floor(ms/60000);
-        return `${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')}<span style="font-size:44px">.${String(cs).padStart(2,'0')}</span>`; };
+        return `${String(mm).padStart(2,'0')}:${String(ss).padStart(2,'0')}<span style="font-size:calc(44px * var(--tsize))">.${String(cs).padStart(2,'0')}</span>`; };
       const now=()=> st.acc + (st.run? Date.now()-st.base : 0);
       big.innerHTML=fmtSW(now()); b.appendChild(big);
       const btns=el('div');
       btns.style.cssText='display:flex;justify-content:space-between;padding:0 34px 10px';
       const mk=(txt,color,bg)=>{ const x=el('button','',txt);
-        x.style.cssText=`width:82px;height:82px;border-radius:50%;font-size:16px;color:${color};background:${bg};
+        x.style.cssText=`width:82px;height:82px;border-radius:50%;font-size:calc(16px * var(--tsize));color:${color};background:${bg};
           border:2px solid color-mix(in srgb,${bg} 60%,#fff3)`; return x; };
       const lap=mk('Lap','var(--txt)','var(--bg3)');
       const go =mk(st.run?'Stop':'Start', st.run?'#ff453a':'#30d158', st.run?'rgba(255,69,58,.18)':'rgba(48,209,88,.18)');
@@ -8071,8 +8071,8 @@ function timerView(){
               stroke-dasharray="${2*Math.PI*115}" stroke-dashoffset="${2*Math.PI*115*(1-frac)}"
               transform="rotate(-90 125 125)"/></svg>
           <div style="position:absolute;inset:0;display:grid;place-items:center">
-            <div><div style="font-size:64px;font-weight:100;font-variant-numeric:tabular-nums">${mm}:${String(ss).padStart(2,'0')}</div>
-            <div class="muted" style="font-size:14px">${t.run?'Remaining':'Timer'}</div></div></div>`;
+            <div><div style="font-size:calc(64px * var(--tsize));font-weight:100;font-variant-numeric:tabular-nums">${mm}:${String(ss).padStart(2,'0')}</div>
+            <div class="muted" style="font-size:calc(14px * var(--tsize))">${t.run?'Remaining':'Timer'}</div></div></div>`;
       };
       paint(); b.appendChild(ring);
       if(!t.run){
@@ -8080,7 +8080,7 @@ function timerView(){
         quick.style.cssText='display:flex;justify-content:center;gap:9px;padding:6px 0 14px;flex-wrap:wrap';
         [[60,'1 min'],[180,'3 min'],[300,'5 min'],[600,'10 min'],[1800,'30 min'],[3600,'1 hr']].forEach(([s2,l])=>{
           const c=el('button','',l);
-          c.style.cssText=`padding:8px 14px;border-radius:16px;font-size:13px;
+          c.style.cssText=`padding:8px 14px;border-radius:16px;font-size:calc(13px * var(--tsize));
             background:${t.total===s2?'var(--sysorange)':'var(--bg3)'};color:${t.total===s2?'#000':'var(--txt)'}`;
           c.onclick=()=>{ t.total=s2; t.left=0; nav.refresh(); };
           quick.appendChild(c);
@@ -8090,7 +8090,7 @@ function timerView(){
       const btns=el('div');
       btns.style.cssText='display:flex;justify-content:space-between;padding:6px 34px 20px';
       const mk=(txt,color,bg)=>{ const x=el('button','',txt);
-        x.style.cssText=`width:82px;height:82px;border-radius:50%;font-size:16px;color:${color};background:${bg}`; return x; };
+        x.style.cssText=`width:82px;height:82px;border-radius:50%;font-size:calc(16px * var(--tsize));color:${color};background:${bg}`; return x; };
       const cancel=mk('Cancel','var(--txt)','var(--bg3)');
       const go=mk(t.run?'Pause':'Start', t.run?'#ff9f0a':'#30d158', t.run?'rgba(255,159,10,.18)':'rgba(48,209,88,.18)');
       btns.append(cancel,go); b.appendChild(btns);
@@ -8104,7 +8104,7 @@ function timerView(){
     }};
 }
 defineApp({id:'notes',name:'Notes',bg:'linear-gradient(180deg,#fff2b8,#ffd60a)',
-  glyph:'<div style="font-size:32px">📝</div>',
+  glyph:'<div style="font-size:calc(32px * var(--tsize))">📝</div>',
   mount(win,inst){
     if(!State.notes) State.notes=[{id:1,t:'Streaming plan',b:'Streaming plan\n\nKeep: Sablewave TV (free with service), Max, Netflix\nRotate: Peacock during football, Paramount+ for CBS\nCancel after the season ends.',d:Date.now()-864e5}];
     const nav=new Nav(win); inst.nav=nav;
@@ -8137,7 +8137,7 @@ function noteEditor(note,parent){
     onPop(){ save(); }};
 }
 defineApp({id:'calculator',name:'Calculator',bg:'linear-gradient(180deg,#3a3a3c,#1c1c1e)',
-  glyph:'<div style="font-size:30px">🧮</div>', darkStatus:true,
+  glyph:'<div style="font-size:calc(30px * var(--tsize))">🧮</div>', darkStatus:true,
   mount(win){
     const c=el('div','calc');
     const out=el('div','out','0'); c.appendChild(out);
@@ -8165,7 +8165,7 @@ defineApp({id:'calculator',name:'Calculator',bg:'linear-gradient(180deg,#3a3a3c,
     win.appendChild(c);
   }});
 defineApp({id:'music',name:'Music',bg:'linear-gradient(180deg,#fa5f6d,#e8305f)',
-  glyph:'<div style="font-size:32px">🎵</div>',
+  glyph:'<div style="font-size:calc(32px * var(--tsize))">🎵</div>',
   mount(win,inst){
     const nav=new Nav(win); inst.nav=nav;
     nav.setRoot({title:'Listen Now',largeTitle:true,build(b){
@@ -8212,9 +8212,9 @@ defineApp({id:'maps',name:'Maps',bg:'linear-gradient(160deg,#8fd88f,#3a8f5f)',
     function show(lat,lon,label){
       host.innerHTML='';
       if(!isOnline()){
-        host.appendChild(h(`<div class="sf-blocked"><div style="font-size:40px">🗺</div>
-          <div style="font-size:19px;font-weight:600">Maps Unavailable</div>
-          <div style="font-size:14px;color:var(--txt2);line-height:1.45">${esc(netReason())}</div></div>`));
+        host.appendChild(h(`<div class="sf-blocked"><div style="font-size:calc(40px * var(--tsize))">🗺</div>
+          <div style="font-size:calc(19px * var(--tsize));font-weight:600">Maps Unavailable</div>
+          <div style="font-size:calc(14px * var(--tsize));color:var(--txt2);line-height:1.45">${esc(netReason())}</div></div>`));
         return;
       }
       const d=zoomSpan;
@@ -8227,7 +8227,7 @@ defineApp({id:'maps',name:'Maps',bg:'linear-gradient(160deg,#8fd88f,#3a8f5f)',
         const tag=el('div');
         tag.style.cssText=`position:absolute;top:64px;left:50%;transform:translateX(-50%);z-index:3;
           background:color-mix(in srgb,var(--page) 90%,transparent);backdrop-filter:var(--blur);color:var(--txt);
-          padding:7px 16px;border-radius:18px;font-size:14px;font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,.3);
+          padding:7px 16px;border-radius:18px;font-size:calc(14px * var(--tsize));font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,.3);
           max-width:80%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap`;
         tag.textContent=label;
         host.appendChild(tag);
@@ -8239,7 +8239,7 @@ defineApp({id:'maps',name:'Maps',bg:'linear-gradient(160deg,#8fd88f,#3a8f5f)',
        ['−',()=>{zoomSpan=Math.min(20,zoomSpan*2);show(lat,lon,label);}]].forEach(([t2,fn],i)=>{
         const bb=el('button','',t2);
         bb.style.cssText=`width:38px;height:38px;background:color-mix(in srgb,var(--page) 92%,transparent);
-          backdrop-filter:var(--blur);color:var(--txt);font-size:21px;${i?'border-top:.5px solid var(--sep)':''}`;
+          backdrop-filter:var(--blur);color:var(--txt);font-size:calc(21px * var(--tsize));${i?'border-top:.5px solid var(--sep)':''}`;
         bb.onclick=fn; z.appendChild(bb);
       });
       host.appendChild(z);
@@ -8264,7 +8264,7 @@ defineApp({id:'maps',name:'Maps',bg:'linear-gradient(160deg,#8fd88f,#3a8f5f)',
     input.onkeydown=e=>{ if(e.key==='Enter') search(input.value); };
     MAP_PLACES.forEach(p=>{
       const c=el('button','',p.n);
-      c.style.cssText='flex:none;background:var(--bg3);color:var(--txt);border-radius:16px;padding:7px 14px;font-size:13px';
+      c.style.cssText='flex:none;background:var(--bg3);color:var(--txt);border-radius:16px;padding:7px 14px;font-size:calc(13px * var(--tsize))';
       c.onclick=()=>{ zoomSpan=0.05; show(p.lat,p.lon,p.n); };
       chips.appendChild(c);
     });
@@ -8274,7 +8274,7 @@ defineApp({id:'maps',name:'Maps',bg:'linear-gradient(160deg,#8fd88f,#3a8f5f)',
   onShow(inst){ if(inst.at && !$('#mapHost iframe') && isOnline()) inst.show(inst.at.lat,inst.at.lon,inst.at.label); }
 });
 defineApp({id:'tv',name:'TV',bg:'#0a0a0c', darkStatus:true,
-  glyph:'<div style="color:#fff;font-size:20px;font-weight:600">tv</div>',
+  glyph:'<div style="color:#fff;font-size:calc(20px * var(--tsize));font-weight:600">tv</div>',
   mount(win){ streamShell({name:'Apple TV',colors:['#1c1c1e','#000']},win); }});
 /* =========================================================================
    WALLET — payment cards, passes, transactions
@@ -8311,37 +8311,37 @@ function walletCardFace(c,{compact}={}){
   let body='';
   if(c.kind==='card'){
     body=`<div style="display:flex;justify-content:space-between;align-items:flex-start">
-        <div style="font-weight:700;font-size:16px">${esc(c.name)}</div>
-        ${c.id==='applecard'?'<div style="font-size:19px"></div>':`<div style="font-size:11px;opacity:.7;letter-spacing:1.5px">${c.id==='visa'?'VISA':''}</div>`}</div>
+        <div style="font-weight:700;font-size:calc(16px * var(--tsize))">${esc(c.name)}</div>
+        ${c.id==='applecard'?'<div style="font-size:calc(19px * var(--tsize))"></div>':`<div style="font-size:calc(11px * var(--tsize));opacity:.7;letter-spacing:1.5px">${c.id==='visa'?'VISA':''}</div>`}</div>
       <div>
-        ${c.balance!=null?`<div style="font-size:11px;opacity:.6">Card Balance</div>
-          <div style="font-size:24px;font-weight:700;font-variant-numeric:tabular-nums">$${c.balance.toFixed(2)}</div>`:''}
-        <div style="font-size:13px;letter-spacing:2px;opacity:.75;margin-top:4px">•••• ${esc(c.last)}</div></div>`;
+        ${c.balance!=null?`<div style="font-size:calc(11px * var(--tsize));opacity:.6">Card Balance</div>
+          <div style="font-size:calc(24px * var(--tsize));font-weight:700;font-variant-numeric:tabular-nums">$${c.balance.toFixed(2)}</div>`:''}
+        <div style="font-size:calc(13px * var(--tsize));letter-spacing:2px;opacity:.75;margin-top:4px">•••• ${esc(c.last)}</div></div>`;
   } else if(c.kind==='transit'){
-    body=`<div style="font-weight:700;font-size:16px">${esc(c.name)}</div>
-      <div><div style="font-size:11px;opacity:.6">Balance</div>
-      <div style="font-size:24px;font-weight:700">$${c.balance.toFixed(2)}</div></div>`;
+    body=`<div style="font-weight:700;font-size:calc(16px * var(--tsize))">${esc(c.name)}</div>
+      <div><div style="font-size:calc(11px * var(--tsize));opacity:.6">Balance</div>
+      <div style="font-size:calc(24px * var(--tsize));font-weight:700">$${c.balance.toFixed(2)}</div></div>`;
   } else if(c.kind==='boarding'){
-    body=`<div style="display:flex;justify-content:space-between;font-size:11px;opacity:.75">
+    body=`<div style="display:flex;justify-content:space-between;font-size:calc(11px * var(--tsize));opacity:.75">
         <span>${esc(c.flight)}</span><span>${esc(c.date)}</span></div>
       <div style="display:flex;align-items:center;gap:12px">
-        <div style="font-size:30px;font-weight:800">${esc(c.from)}</div>
+        <div style="font-size:calc(30px * var(--tsize));font-weight:800">${esc(c.from)}</div>
         <div style="flex:1;border-top:1.5px dashed rgba(255,255,255,.5);position:relative">
           <div style="position:absolute;right:-4px;top:-9px">✈</div></div>
-        <div style="font-size:30px;font-weight:800">${esc(c.to)}</div></div>
-      <div style="display:flex;gap:18px;font-size:11px;opacity:.8">
+        <div style="font-size:calc(30px * var(--tsize));font-weight:800">${esc(c.to)}</div></div>
+      <div style="display:flex;gap:18px;font-size:calc(11px * var(--tsize));opacity:.8">
         <span>GATE ${esc(c.gate)}</span><span>SEAT ${esc(c.seat)}</span><span>BOARDS ${esc(c.boards)}</span></div>`;
   } else if(c.kind==='event'){
-    body=`<div style="font-size:11px;opacity:.7;letter-spacing:1px">EVENT TICKET</div>
-      <div><div style="font-size:19px;font-weight:800">${esc(c.event)}</div>
-      <div style="font-size:12px;opacity:.8">${esc(c.venue)} · ${esc(c.date)}</div></div>
-      <div style="display:flex;gap:16px;font-size:11px;opacity:.85">
+    body=`<div style="font-size:calc(11px * var(--tsize));opacity:.7;letter-spacing:1px">EVENT TICKET</div>
+      <div><div style="font-size:calc(19px * var(--tsize));font-weight:800">${esc(c.event)}</div>
+      <div style="font-size:calc(12px * var(--tsize));opacity:.8">${esc(c.venue)} · ${esc(c.date)}</div></div>
+      <div style="display:flex;gap:16px;font-size:calc(11px * var(--tsize));opacity:.85">
         <span>SEC ${esc(c.section)}</span><span>ROW ${esc(c.row)}</span><span>SEAT ${esc(c.seat)}</span></div>`;
   } else {
-    body=`<div style="font-weight:700;font-size:16px">${esc(c.name)}</div>
-      <div><div style="font-size:11px;opacity:.6">Points</div>
-      <div style="font-size:24px;font-weight:700">${c.points.toLocaleString()}</div>
-      <div style="font-size:11px;opacity:.7;margin-top:2px">${esc(c.member)}</div></div>`;
+    body=`<div style="font-weight:700;font-size:calc(16px * var(--tsize))">${esc(c.name)}</div>
+      <div><div style="font-size:calc(11px * var(--tsize));opacity:.6">Points</div>
+      <div style="font-size:calc(24px * var(--tsize));font-weight:700">${c.points.toLocaleString()}</div>
+      <div style="font-size:calc(11px * var(--tsize));opacity:.7;margin-top:2px">${esc(c.member)}</div></div>`;
   }
   d.innerHTML=body;
   return d;
@@ -8351,7 +8351,7 @@ function barcode(){
     `<i style="display:inline-block;width:${w}px;height:100%;background:#111;margin-right:${Math.random()<.5?2:3}px"></i>`).join('');
   return `<div style="background:#fff;border-radius:10px;padding:14px;text-align:center">
     <div style="height:64px;white-space:nowrap;overflow:hidden">${bars}</div>
-    <div style="font-size:11px;color:#555;margin-top:8px;letter-spacing:2px">SIMULATED PASS</div></div>`;
+    <div style="font-size:calc(11px * var(--tsize));color:#555;margin-top:8px;letter-spacing:2px">SIMULATED PASS</div></div>`;
 }
 defineApp({id:'wallet',name:'Wallet',bg:'linear-gradient(160deg,#3a3a3e,#0d0d0f)', darkStatus:true,
   mount(win,inst){
@@ -8407,9 +8407,9 @@ function cardDetailView(c){
           <circle cx="40" cy="40" r="33" fill="none" stroke="#30d158" stroke-width="9" stroke-linecap="round"
             stroke-dasharray="${2*Math.PI*33}" stroke-dashoffset="${2*Math.PI*33*(1-pct)}" transform="rotate(-90 40 40)"/>
         </svg>
-        <div><div style="font-size:12px;color:var(--txt2)">Card Balance</div>
-          <div style="font-size:26px;font-weight:700">$${c.balance.toFixed(2)}</div>
-          <div style="font-size:12px;color:var(--txt2);margin-top:2px">$${(c.limit-c.balance).toFixed(2)} available of $${c.limit.toLocaleString()}</div></div></div>`;
+        <div><div style="font-size:calc(12px * var(--tsize));color:var(--txt2)">Card Balance</div>
+          <div style="font-size:calc(26px * var(--tsize));font-weight:700">$${c.balance.toFixed(2)}</div>
+          <div style="font-size:calc(12px * var(--tsize));color:var(--txt2);margin-top:2px">$${(c.limit-c.balance).toFixed(2)} available of $${c.limit.toLocaleString()}</div></div></div>`;
       b.appendChild(ring);
       group(b,{rows:[
         {label:'Daily Cash earned this month',value:'$'+c.daily.toFixed(2),chevron:false},
@@ -8546,7 +8546,7 @@ const ART={
     <path d="M40 0l10 64" stroke="#fff" stroke-width="5"/>
     <path d="M32 20a7 7 0 017 7c0 5.4-7 13-7 13s-7-7.6-7-13a7 7 0 017-7z" fill="#ff3b30"/>
     <circle cx="32" cy="27" r="2.6" fill="#fff"/></svg>`},
-  tv:{bg:'#0a0a0c',art:`<div style="color:#fff;font-size:26px;font-weight:600;letter-spacing:-1.6px;font-family:var(--sf)">tv</div>`},
+  tv:{bg:'#0a0a0c',art:`<div style="color:#fff;font-size:calc(26px * var(--tsize));font-weight:600;letter-spacing:-1.6px;font-family:var(--sf)">tv</div>`},
   wallet:{bg:'linear-gradient(180deg,#3a3a3e,#0d0d0f)',art:`<svg viewBox="0 0 64 64" style="width:80%">
     <rect x="10" y="15" width="44" height="11" rx="3.6" fill="#ff6b5e"/>
     <rect x="8" y="23" width="48" height="12" rx="4" fill="#ffb340"/>

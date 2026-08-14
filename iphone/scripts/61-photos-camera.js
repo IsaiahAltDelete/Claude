@@ -151,8 +151,8 @@ function photosLibrary(body, nav) {
   } else if (store.scale === 'Days') {
     groupByDay(items).slice(0, 14).forEach(([day, group]) => {
       body.appendChild(h(`<div style="margin:16px 20px 8px">
-        <div style="font-size:20px;font-weight:700">${esc(relativeDay(new Date(day)))}</div>
-        <div style="font-size:13px;color:var(--txt3)">${esc(new Date(day).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' }))} · ${group.length} items</div></div>`));
+        <div style="font-size:calc(20px * var(--tsize));font-weight:700">${esc(relativeDay(new Date(day)))}</div>
+        <div style="font-size:calc(13px * var(--tsize));color:var(--txt3)">${esc(new Date(day).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' }))} · ${group.length} items</div></div>`));
       const grid = el('div', 'ph-grid');
       group.forEach(item => grid.appendChild(photoTile(item, nav, items)));
       body.appendChild(grid);
@@ -174,8 +174,8 @@ function photosLibrary(body, nav) {
       hero.style.background = `url("${artURI(group[0].seed, { w: 700, h: 420 })}") center/cover`;
       hero.appendChild(h(`<div style="position:absolute;inset:auto 0 0;padding:14px 16px;color:#fff;
         background:linear-gradient(transparent,rgba(0,0,0,.6))">
-        <div style="font-size:22px;font-weight:700">${esc(label)}</div>
-        <div style="font-size:13px;opacity:.85">${group.length} items</div></div>`));
+        <div style="font-size:calc(22px * var(--tsize));font-weight:700">${esc(label)}</div>
+        <div style="font-size:calc(13px * var(--tsize));opacity:.85">${group.length} items</div></div>`));
       hero.onclick = () => nav.push(photoCollectionView(label, group));
       body.appendChild(hero);
     });
@@ -188,13 +188,13 @@ function photosLibrary(body, nav) {
 function photoTile(item, nav, collection) {
   const cell = artCell(item.seed, { w: 240, h: 240 });
   if (item.kind === 'video') {
-    cell.appendChild(h(`<div style="position:absolute;left:5px;bottom:4px;color:#fff;font-size:10px;
+    cell.appendChild(h(`<div style="position:absolute;left:5px;bottom:4px;color:#fff;font-size:calc(10px * var(--tsize));
       text-shadow:0 1px 3px rgba(0,0,0,.6)">▶ ${clockDuration(item.seconds)}</div>`));
     cell.style.position = 'relative';
   }
   if (item.fav) {
     cell.style.position = 'relative';
-    cell.appendChild(h(`<div style="position:absolute;right:5px;bottom:4px;color:#fff;font-size:11px;
+    cell.appendChild(h(`<div style="position:absolute;right:5px;bottom:4px;color:#fff;font-size:calc(11px * var(--tsize));
       text-shadow:0 1px 3px rgba(0,0,0,.6)">♥</div>`));
   }
   cell.onclick = () => nav.push(photoDetail(item, collection, nav));
@@ -279,8 +279,8 @@ function photoDetail(item, collection, parentNav) {
       actions.forEach(([label, glyph, onClick]) => {
         const button = el('button', '', glyph);
         button.title = label;
-        button.style.cssText = 'display:grid;justify-items:center;gap:4px;font-size:11px;color:inherit';
-        button.appendChild(h(`<div style="font-size:11px">${label}</div>`));
+        button.style.cssText = 'display:grid;justify-items:center;gap:4px;font-size:calc(11px * var(--tsize));color:inherit';
+        button.appendChild(h(`<div style="font-size:calc(11px * var(--tsize))">${label}</div>`));
         button.onclick = onClick;
         bar.appendChild(button);
       });
@@ -306,7 +306,7 @@ function photosForYou(body, nav) {
     art.appendChild(h(`<div style="position:absolute;inset:auto 0 0;padding:12px;color:#fff;
       background:linear-gradient(transparent,rgba(0,0,0,.6))">
       <div style="font-weight:700">${esc(label)}</div>
-      <div style="font-size:12px;opacity:.85">${picks.length || items.length} items</div></div>`));
+      <div style="font-size:calc(12px * var(--tsize));opacity:.85">${picks.length || items.length} items</div></div>`));
     cardEl.appendChild(art);
     cardEl.onclick = () => nav.push(photoCollectionView(label, picks.length ? picks : items.slice(0, 12)));
     rail.appendChild(cardEl);
@@ -338,8 +338,8 @@ function photosAlbums(body, nav) {
     const art = el('div');
     art.style.cssText = `height:150px;border-radius:12px;background:url("${artURI(seed, { w: 320, h: 320 })}") center/cover`;
     wrap.appendChild(art);
-    wrap.appendChild(h(`<div style="margin-top:6px;font-size:14px;font-weight:500">${esc(label)}</div>
-      <div style="font-size:12px;color:var(--txt3)">${collection.length}</div>`));
+    wrap.appendChild(h(`<div style="margin-top:6px;font-size:calc(14px * var(--tsize));font-weight:500">${esc(label)}</div>
+      <div style="font-size:calc(12px * var(--tsize));color:var(--txt3)">${collection.length}</div>`));
     wrap.onclick = () => nav.push(photoCollectionView(label, collection));
     grid.appendChild(wrap);
   };
@@ -457,7 +457,7 @@ defineApp({
 
     /* ---- top controls */
     const top = el('div');
-    top.style.cssText = 'padding:56px 20px 8px;display:flex;align-items:center;justify-content:space-between;font-size:13px';
+    top.style.cssText = 'padding:56px 20px 8px;display:flex;align-items:center;justify-content:space-between;font-size:calc(13px * var(--tsize))';
     root.appendChild(top);
 
     /* ---- viewfinder */
@@ -475,7 +475,7 @@ defineApp({
 
       top.innerHTML = '';
       const flashButton = el('button', '', ({ auto: '⚡︎A', on: '⚡︎', off: '⚡︎̸' })[state.flash]);
-      flashButton.style.cssText = 'color:' + (state.flash === 'off' ? '#8e8e93' : '#ffd60a') + ';font-size:15px';
+      flashButton.style.cssText = 'color:' + (state.flash === 'off' ? '#8e8e93' : '#ffd60a') + ';font-size:calc(15px * var(--tsize))';
       flashButton.onclick = () => {
         state.flash = state.flash === 'auto' ? 'on' : state.flash === 'on' ? 'off' : 'auto';
         save();
@@ -490,7 +490,7 @@ defineApp({
        [state.timer ? `${state.timer}s` : 'Timer', state.timer > 0, () => { state.timer = state.timer === 0 ? 3 : state.timer === 3 ? 10 : 0; save(); paint(); }]]
         .forEach(([label, on, onClick]) => {
           const button = el('button', '', esc(label));
-          button.style.cssText = `font-size:12px;color:${on ? '#ffd60a' : '#fff'};opacity:${on ? 1 : 0.75}`;
+          button.style.cssText = `font-size:calc(12px * var(--tsize));color:${on ? '#ffd60a' : '#fff'};opacity:${on ? 1 : 0.75}`;
           button.onclick = onClick;
           live.appendChild(button);
         });
@@ -515,7 +515,7 @@ defineApp({
         finder.appendChild(h(`<div style="position:absolute;inset:0;
           box-shadow:inset 0 0 90px 40px rgba(0,0,0,.45);pointer-events:none"></div>
           <div style="position:absolute;top:12px;left:50%;transform:translateX(-50%);
-          background:rgba(255,214,10,.9);color:#000;font-size:11px;font-weight:600;padding:3px 9px;border-radius:8px">
+          background:rgba(255,214,10,.9);color:#000;font-size:calc(11px * var(--tsize));font-weight:600;padding:3px 9px;border-radius:8px">
           NATURAL LIGHT</div>`));
       }
       if (state.grid) {
@@ -548,7 +548,7 @@ defineApp({
         const pill = el('button', '', level === state.zoom ? `${level}×` : `${level}`);
         pill.style.cssText = `min-width:${level === state.zoom ? 42 : 34}px;height:${level === state.zoom ? 42 : 34}px;
           border-radius:50%;background:rgba(0,0,0,.45);backdrop-filter:blur(8px);
-          color:${level === state.zoom ? '#ffd60a' : '#fff'};font-size:12px;font-weight:600`;
+          color:${level === state.zoom ? '#ffd60a' : '#fff'};font-size:calc(12px * var(--tsize));font-weight:600`;
         pill.onclick = event => { event.stopPropagation(); state.zoom = level; save(); paint(); };
         zooms.appendChild(pill);
       });
@@ -562,7 +562,7 @@ defineApp({
         filters.style.cssText = 'padding:0 16px 10px;gap:8px';
         ['None', 'Vivid', 'Mono', 'Silvertone', 'Noir'].forEach(name => {
           const chip = el('button', '', esc(name));
-          chip.style.cssText = `flex:none;padding:5px 12px;border-radius:999px;font-size:12px;
+          chip.style.cssText = `flex:none;padding:5px 12px;border-radius:999px;font-size:calc(12px * var(--tsize));
             background:${state.filter === name ? '#ffd60a' : 'rgba(255,255,255,.14)'};
             color:${state.filter === name ? '#000' : '#fff'}`;
           chip.onclick = () => { state.filter = name; save(); paint(); };
@@ -572,7 +572,7 @@ defineApp({
       }
 
       const modes = el('div');
-      modes.style.cssText = 'display:flex;gap:18px;justify-content:center;font-size:11px;letter-spacing:.06em;padding:4px 0 12px;overflow-x:auto';
+      modes.style.cssText = 'display:flex;gap:18px;justify-content:center;font-size:calc(11px * var(--tsize));letter-spacing:.06em;padding:4px 0 12px;overflow-x:auto';
       CAMERA_MODES.forEach(mode => {
         const button = el('button', '', mode);
         button.style.cssText = `flex:none;color:${mode === state.mode ? '#ffd60a' : 'rgba(255,255,255,.65)'};
@@ -647,7 +647,7 @@ defineApp({
         let left = state.timer;
         const countdown = el('div');
         countdown.style.cssText = `position:absolute;inset:0;display:grid;place-items:center;z-index:8;
-          font-size:88px;font-weight:200;color:#ffd60a;text-shadow:0 2px 20px rgba(0,0,0,.5)`;
+          font-size:calc(88px * var(--tsize));font-weight:200;color:#ffd60a;text-shadow:0 2px 20px rgba(0,0,0,.5)`;
         countdown.textContent = String(left);
         finder.appendChild(countdown);
         const tick = setInterval(() => {

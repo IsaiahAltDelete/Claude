@@ -190,16 +190,16 @@ defineApp({
       }
       mini.innerHTML = `${musicArt(track.album, 44)}
         <div style="flex:1;min-width:0">
-          <div style="font-size:14px;font-weight:600;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(track.title)}</div>
-          <div style="font-size:12px;color:rgba(255,255,255,.6);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(track.artist)}</div>
+          <div style="font-size:calc(14px * var(--tsize));font-weight:600;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(track.title)}</div>
+          <div style="font-size:calc(12px * var(--tsize));color:rgba(255,255,255,.6);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(track.artist)}</div>
           <div style="height:2px;border-radius:1px;background:rgba(255,255,255,.2);margin-top:4px">
             <div class="mp-bar" style="height:100%;width:${(state.position / track.seconds) * 100}%;background:#fff;border-radius:1px"></div></div>
         </div>`;
       const play = el('button', '', state.playing ? '❚❚' : '▶');
-      play.style.cssText = 'color:#fff;font-size:17px;width:34px;height:34px;flex:none';
+      play.style.cssText = 'color:#fff;font-size:calc(17px * var(--tsize));width:34px;height:34px;flex:none';
       play.onclick = event => { event.stopPropagation(); state.playing = !state.playing; save(); paintMusicChrome(); };
       const next = el('button', '', '⏭');
-      next.style.cssText = 'color:#fff;font-size:16px;width:32px;height:34px;flex:none';
+      next.style.cssText = 'color:#fff;font-size:calc(16px * var(--tsize));width:32px;height:34px;flex:none';
       next.onclick = event => { event.stopPropagation(); musicStep(1); };
       mini.append(play, next);
       mini.onclick = () => nowPlayingSheet();
@@ -230,8 +230,8 @@ function musicListenNowView() {
         card2.innerHTML = `<div style="height:180px;border-radius:14px;overflow:hidden;position:relative;
             background-image:url('${artURI(`pl:${name}`, { w: 400, h: 300, kind: 'album' })}');background-size:cover">
             <div style="position:absolute;inset:auto 0 0;padding:12px;background:linear-gradient(transparent,rgba(0,0,0,.75));color:#fff">
-              <div style="font-size:11px;opacity:.8;letter-spacing:.06em">${esc(subtitle.toUpperCase())}</div>
-              <div style="font-size:19px;font-weight:700">${esc(name)}</div></div></div>`;
+              <div style="font-size:calc(11px * var(--tsize));opacity:.8;letter-spacing:.06em">${esc(subtitle.toUpperCase())}</div>
+              <div style="font-size:calc(19px * var(--tsize));font-weight:700">${esc(name)}</div></div></div>`;
         card2.onclick = () => nav.push(playlistView(name, subtitle, albums));
         hero.appendChild(card2);
       });
@@ -243,8 +243,8 @@ function musicListenNowView() {
         const tile = el('div', 'hcard');
         tile.style.minWidth = '150px';
         tile.innerHTML = `${musicArt(album[0], 150)}
-          <div style="margin-top:8px;font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(album[0])}</div>
-          <div style="font-size:12px;color:var(--txt2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(album[1])}</div>`;
+          <div style="margin-top:8px;font-size:calc(13px * var(--tsize));font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(album[0])}</div>
+          <div style="font-size:calc(12px * var(--tsize));color:var(--txt2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(album[1])}</div>`;
         tile.onclick = () => nav.push(albumView(album[0]));
         recent.appendChild(tile);
       });
@@ -280,8 +280,8 @@ function musicBrowseView() {
         const tile = el('div', 'hcard');
         tile.style.minWidth = '164px';
         tile.innerHTML = `${musicArt(album[0], 164)}
-          <div style="margin-top:8px;font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(album[0])}</div>
-          <div style="font-size:12px;color:var(--txt2)">${esc(album[1])} · ${album[2]}</div>`;
+          <div style="margin-top:8px;font-size:calc(13px * var(--tsize));font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(album[0])}</div>
+          <div style="font-size:calc(12px * var(--tsize));color:var(--txt2)">${esc(album[1])} · ${album[2]}</div>`;
         tile.onclick = () => nav.push(albumView(album[0]));
         strip.appendChild(tile);
       });
@@ -403,8 +403,8 @@ function musicLibraryView() {
         tile.style.cursor = 'pointer';
         tile.innerHTML = `<div style="aspect-ratio:1;border-radius:8px;overflow:hidden;
             background-image:url('${artURI(`album:${album[0]}`, { w: 400, h: 400, kind: 'album' })}');background-size:cover"></div>
-          <div style="margin-top:7px;font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(album[0])}</div>
-          <div style="font-size:12px;color:var(--txt2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(album[1])}</div>`;
+          <div style="margin-top:7px;font-size:calc(13px * var(--tsize));font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(album[0])}</div>
+          <div style="font-size:calc(12px * var(--tsize));color:var(--txt2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(album[1])}</div>`;
         tile.onclick = () => nav.push(albumView(album[0]));
         tile.oncontextmenu = event => {
           event.preventDefault();
@@ -444,7 +444,7 @@ function musicSearchView() {
           grid.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px';
           genres.forEach((genre, index) => {
             const tile = el('button', '', esc(genre));
-            tile.style.cssText = `height:76px;border-radius:12px;color:#fff;font-weight:700;font-size:16px;
+            tile.style.cssText = `height:76px;border-radius:12px;color:#fff;font-weight:700;font-size:calc(16px * var(--tsize));
               text-align:left;padding:12px;background:linear-gradient(${index * 47}deg,
               hsl(${index * 53} 78% 56%),hsl(${index * 53 + 40} 68% 38%))`;
             tile.onclick = () => { query = genre; render(); };
@@ -502,9 +502,9 @@ function albumView(title) {
 
       body.appendChild(h(`<div style="text-align:center;padding:6px 20px 12px">
         <div style="margin:0 auto">${musicArt(title, 200)}</div>
-        <div style="font-size:20px;font-weight:700;margin-top:14px">${esc(title)}</div>
-        <div style="font-size:19px;color:#e8305f">${esc(album[1])}</div>
-        <div style="font-size:12px;color:var(--txt2);margin-top:4px">${esc(album[3])} · ${album[2]}</div></div>`));
+        <div style="font-size:calc(20px * var(--tsize));font-weight:700;margin-top:14px">${esc(title)}</div>
+        <div style="font-size:calc(19px * var(--tsize));color:#e8305f">${esc(album[1])}</div>
+        <div style="font-size:calc(12px * var(--tsize));color:var(--txt2);margin-top:4px">${esc(album[3])} · ${album[2]}</div></div>`));
 
       const buttons = el('div');
       buttons.style.cssText = 'display:flex;gap:10px;padding:0 16px 10px';
@@ -532,13 +532,13 @@ function albumView(title) {
           chevron: false,
           onClick: () => playQueue(tracks.map(t => t.id), index),
         });
-        row.insertBefore(h(`<div style="width:22px;color:var(--txt3);font-size:14px;flex:none">${track.number}</div>`), row.firstChild);
+        row.insertBefore(h(`<div style="width:22px;color:var(--txt3);font-size:calc(14px * var(--tsize));flex:none">${track.number}</div>`), row.firstChild);
         const current = nowPlaying();
         if (current && current.id === track.id) {
           row.style.background = 'color-mix(in srgb,#e8305f 14%,transparent)';
         }
         const love = el('button', '', state.loved.includes(track.id) ? '★' : '☆');
-        love.style.cssText = `color:${state.loved.includes(track.id) ? '#e8305f' : 'var(--txt3)'};font-size:17px;padding:0 6px`;
+        love.style.cssText = `color:${state.loved.includes(track.id) ? '#e8305f' : 'var(--txt3)'};font-size:calc(17px * var(--tsize));padding:0 6px`;
         love.onclick = event => {
           event.stopPropagation();
           state.loved = state.loved.includes(track.id)
@@ -581,8 +581,8 @@ function playlistView(name, subtitle, albums) {
       body.appendChild(h(`<div style="text-align:center;padding:6px 20px 12px">
         <div style="width:200px;height:200px;margin:0 auto;border-radius:10px;box-shadow:0 14px 34px rgba(0,0,0,.4);
           background-image:url('${artURI(`pl:${name}`, { w: 400, h: 400, kind: 'album' })}');background-size:cover"></div>
-        <div style="font-size:20px;font-weight:700;margin-top:14px">${esc(name)}</div>
-        <div style="font-size:13px;color:var(--txt2)">${esc(subtitle)} · ${tracks.length} songs</div></div>`));
+        <div style="font-size:calc(20px * var(--tsize));font-weight:700;margin-top:14px">${esc(name)}</div>
+        <div style="font-size:calc(13px * var(--tsize));color:var(--txt2)">${esc(subtitle)} · ${tracks.length} songs</div></div>`));
       const buttons = el('div');
       buttons.style.cssText = 'display:flex;gap:10px;padding:0 16px 10px';
       const play = el('button', 'btn-primary', '▶  Play');
@@ -649,13 +649,13 @@ function nowPlayingSheet() {
       art.innerHTML = musicArt(current.album, 240);
       meta.innerHTML = `<div style="display:flex;align-items:center;gap:10px">
         <div style="flex:1;min-width:0">
-          <div style="font-size:20px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(current.title)}</div>
-          <div style="font-size:19px;color:#e8305f;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(current.artist)} — ${esc(current.album)}</div>
+          <div style="font-size:calc(20px * var(--tsize));font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(current.title)}</div>
+          <div style="font-size:calc(19px * var(--tsize));color:#e8305f;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(current.artist)} — ${esc(current.album)}</div>
         </div></div>`;
 
       scrub.innerHTML = `<div class="np-track" style="height:6px;border-radius:3px;background:var(--bg3);cursor:pointer">
           <div class="np-bar" style="height:100%;width:${(state.position / current.seconds) * 100}%;background:var(--txt);border-radius:3px"></div></div>
-        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--txt2);margin-top:6px">
+        <div style="display:flex;justify-content:space-between;font-size:calc(11px * var(--tsize));color:var(--txt2);margin-top:6px">
           <span class="np-elapsed">${esc(clockDuration(state.position))}</span>
           <span class="np-left">−${esc(clockDuration(Math.max(0, current.seconds - state.position)))}</span></div>`;
       /* Tap anywhere on the bar to seek, the way the real scrubber behaves. */
@@ -679,7 +679,7 @@ function nowPlayingSheet() {
         button('⏮', 22, () => { if (state.position > 4) { state.position = 0; save(); paintMusicChrome(); } else musicStep(-1); }),
         (() => {
           const play = el('button', '', state.playing ? '❚❚' : '▶');
-          play.style.cssText = 'font-size:30px;width:74px;height:74px;color:var(--txt);display:grid;place-items:center';
+          play.style.cssText = 'font-size:calc(30px * var(--tsize));width:74px;height:74px;color:var(--txt);display:grid;place-items:center';
           play.onclick = () => { state.playing = !state.playing; save(); paintMusicChrome(); };
           return play;
         })(),
@@ -689,7 +689,7 @@ function nowPlayingSheet() {
       extras.innerHTML = '';
       const pill = (label, active, onClick) => {
         const element = el('button', '', label);
-        element.style.cssText = `flex:1;padding:9px 4px;border-radius:10px;font-size:12px;
+        element.style.cssText = `flex:1;padding:9px 4px;border-radius:10px;font-size:calc(12px * var(--tsize));
           background:${active ? 'color-mix(in srgb,#e8305f 26%,transparent)' : 'var(--bg3)'};
           color:${active ? '#e8305f' : 'var(--txt2)'}`;
         element.onclick = onClick;
@@ -735,7 +735,7 @@ function nowPlayingSheet() {
 function queueSheet() {
   sheet(box => {
     const state = MU();
-    box.appendChild(h('<div style="font-size:22px;font-weight:700;margin-bottom:6px">Playing Next</div>'));
+    box.appendChild(h('<div style="font-size:calc(22px * var(--tsize));font-weight:700;margin-bottom:6px">Playing Next</div>'));
     const upcoming = state.queue.slice(state.index).map(trackById).filter(Boolean);
     if (upcoming.length < 2) {
       box.appendChild(emptyState(SF.music, 'Nothing Queued', 'Play an album or a playlist to fill the queue.'));
@@ -753,7 +753,7 @@ function queueSheet() {
       });
       if (offset > 0) {
         const remove = el('button', '', '−');
-        remove.style.cssText = 'color:var(--sysred);font-size:19px;padding:0 8px';
+        remove.style.cssText = 'color:var(--sysred);font-size:calc(19px * var(--tsize));padding:0 8px';
         remove.onclick = event => {
           event.stopPropagation();
           state.queue.splice(state.index + offset, 1);

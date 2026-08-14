@@ -1294,6 +1294,12 @@
       }
     }
 
+    // An open menu owns the arrow keys.
+    if (Mac.session.surface && Mac.session.surface !== 'spotlight' && Mac.Surfaces.keyboard(event)) {
+      event.preventDefault();
+      return;
+    }
+
     // Spotlight navigation.
     if (Mac.session.surface === 'spotlight') {
       if (event.key === 'ArrowDown') { event.preventDefault(); Mac.Spotlight.move(1); return; }
@@ -1358,16 +1364,33 @@
       if (cmd && !event.shiftKey && key === 'e') { event.preventDefault(); Mac.Finder.eject('vol-backup'); return; }
     }
 
-    // Trap focus inside an open dialog.
-    if (Mac.Dialog.current && event.key === 'Tab') {
-      const focusable = Mac.$$('#modal-layer button:not(:disabled), #modal-layer input, #modal-layer select, #modal-layer textarea');
-      if (!focusable.length) return;
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
-      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
-    }
   });
+
+  /**
+   * Keep Tab inside an open dialog.
+   *
+   * This used to live at the end of the handler above, behind an early
+   * return for "the desktop is hidden" — so it did nothing on the login
+   * window, the lock screen or the Setup Assistant, which are exactly where
+   * a modal is most likely to be the only thing on screen. It also only
+   * redirected at the two boundaries, so focus that started outside the
+   * dialog (on the desktop behind it) walked the background freely.
+   *
+   * Registered separately, in the capture phase, so no earlier `return` in
+   * the shortcut table can skip it.
+   */
+  document.addEventListener('keydown', event => {
+    if (event.key !== 'Tab' || !Mac.Dialog.current) return;
+    const focusable = Mac.$$('#modal-layer button:not(:disabled), #modal-layer input:not([type=hidden]), '
+      + '#modal-layer select, #modal-layer textarea, #modal-layer [tabindex="0"]');
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    const inside = Mac.$('#modal-layer').contains(document.activeElement);
+    if (!inside) { event.preventDefault(); (event.shiftKey ? last : first).focus(); return; }
+    if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+    else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+  }, true);
 
   /* --------------------------------------------------------- context menus */
 
