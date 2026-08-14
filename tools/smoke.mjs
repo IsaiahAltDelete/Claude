@@ -252,7 +252,92 @@ async function testIphone(browser, base) {
   if (!folders) note('iphone: the App Library rendered no folders');
   await page.evaluate(() => closeLibrary());
 
+  await testKeyboardAccess(page);
+
   await context.close();
+}
+
+/**
+ * Nothing tappable may be tappable *only*.
+ *
+ * Almost every control on the phone is a div with an onclick, which is fine
+ * for a finger and reaches nobody using a keyboard or a screen reader. A
+ * container whose own click merely forwards to a focusable child (a Settings
+ * row wrapping a switch) is allowed — the child is the control. Anything
+ * else is a dead end, so it fails here.
+ */
+async function testKeyboardAccess(page) {
+  const surfaces = [
+    ['home screen', () => { goHome(); }],
+    ['settings', () => { goHome(); openApp('settings'); }],
+    ['control centre', () => { goHome(); document.querySelector('#cc').classList.add('on'); renderCC(); }],
+    ['lock screen', () => { document.querySelector('#cc').classList.remove('on'); lockPhone(); }],
+  ];
+
+  for (const [label, setup] of surfaces) {
+    await page.evaluate(`(${setup.toString()})()`);
+    await page.waitForTimeout(320);
+    const orphans = await page.evaluate(() => [...document.querySelector('#screen').querySelectorAll('div')]
+      .filter(node => typeof node.onclick === 'function')
+      .filter(node => !node.hasAttribute('role') && node.tabIndex < 0)
+      .filter(node => !node.querySelector('[tabindex="0"],button,input,select,textarea,[role]'))
+      .map(node => `${node.className || '(no class)'}: ${node.textContent.trim().slice(0, 32)}`)
+      .slice(0, 8));
+    orphans.forEach(item => note(`iphone ${label}: click-only, unreachable by keyboard — ${item}`));
+  }
+
+  /* The focus trap, which is what makes a modal usable rather than a place
+     Tab escapes from immediately. */
+  const modal = await page.evaluate(async () => {
+    goHome();
+    await new Promise(resolve => setTimeout(resolve, 300));
+    const tile = document.querySelector('#pages .app[data-app="settings"]');
+    tile.focus();
+    const origin = document.activeElement === tile;
+    alertBox({ title: 'Focus check', message: 'body', buttons: [{ text: 'Cancel' }, { text: 'OK' }] });
+    await new Promise(resolve => setTimeout(resolve, 140));
+    const inside = document.querySelector('#overlay').contains(document.activeElement);
+    closeOverlay();
+    await new Promise(resolve => setTimeout(resolve, 80));
+    return { origin, inside, restored: document.activeElement === tile };
+  });
+  if (!modal.origin) note('iphone: a home-screen icon cannot take focus');
+  if (!modal.inside) note('iphone: opening an alert does not move focus into it');
+  if (!modal.restored) note('iphone: closing an alert does not restore focus to where it came from');
+
+  /* Every text token has to clear WCAG AA against the surface it lands on. */
+  const contrast = await page.evaluate(() => {
+    const linear = value => { const c = value / 255; return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; };
+    const luminance = ([r, g, b]) => 0.2126 * linear(r) + 0.7152 * linear(g) + 0.0722 * linear(b);
+    /* The tokens are authored as both `#fff` and `rgba(...)`, so both forms
+       have to parse — a hex value returns no numbers to a naive match. */
+    const parse = value => {
+      const text = value.trim();
+      const hex = text.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
+      if (hex) {
+        const digits = hex[1].length === 3 ? [...hex[1]].map(d => d + d) : hex[1].match(/../g);
+        return digits.map(pair => parseInt(pair, 16));
+      }
+      return (text.match(/[\d.]+/g) || [0, 0, 0]).map(Number);
+    };
+    const ratio = (token, background) => {
+      const parts = parse(token);
+      const alpha = parts.length > 3 ? parts[3] : 1;
+      const composed = [0, 1, 2].map(i => background[i] + (parts[i] - background[i]) * alpha);
+      const [high, low] = [luminance(composed), luminance(background)].sort((a, b) => b - a);
+      return (high + 0.05) / (low + 0.05);
+    };
+    const style = getComputedStyle(document.documentElement);
+    const surfaces = { black: [0, 0, 0], group: [28, 28, 30], raised: [44, 44, 46] };
+    const out = {};
+    ['--txt', '--txt2', '--txt3'].forEach(name => {
+      out[name] = Math.min(...Object.values(surfaces).map(bg => ratio(style.getPropertyValue(name), bg)));
+    });
+    return out;
+  });
+  Object.entries(contrast).forEach(([token, value]) => {
+    if (value < 4.5) note(`iphone: ${token} measures ${value.toFixed(2)}:1, under the 4.5:1 body text needs`);
+  });
 }
 
 /**

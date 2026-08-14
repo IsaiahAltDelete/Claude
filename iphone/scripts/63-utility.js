@@ -266,8 +266,16 @@ function buildWeatherPage(body, forecast, inst) {
           border-radius:3px;background:linear-gradient(90deg,#5ac8fa,#ffd60a,#ff9f0a)"></div></div>
       <div style="width:34px;text-align:right;font-size:17px">${wxTemp(day.high)}°</div></div>`);
     row.style.cursor = 'pointer';
+    const when = index ? shortDate(day.date) : 'Today';
     row.onclick = () => island(wxGlyph(day.condition.id, 18), '#0a84ff', forecast.name,
-      `${index ? shortDate(day.date) : 'Today'} · ${day.condition.label} · ${wxTemp(day.high)}°/${wxTemp(day.low)}°`);
+      `${when} · ${day.condition.label} · ${wxTemp(day.high)}°/${wxTemp(day.low)}°`);
+    /* Named here rather than left to promoteControls: this app re-renders
+       itself outside the Nav lifecycle, and the raw text of the row reads
+       "Today 84 93" with no units and no conditions. */
+    actionable(row, {
+      label: `${when}, ${day.condition.label}, high ${wxTemp(day.high)} degrees, low ${wxTemp(day.low)} degrees`
+        + `${day.rain > 24 ? `, ${day.rain} percent chance of rain` : ''}`,
+    });
     ten.appendChild(row);
   });
   body.appendChild(ten);

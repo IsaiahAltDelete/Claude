@@ -198,6 +198,12 @@ function photoTile(item, nav, collection) {
       text-shadow:0 1px 3px rgba(0,0,0,.6)">♥</div>`));
   }
   cell.onclick = () => nav.push(photoDetail(item, collection, nav));
+  /* A photo has no text of its own, so the date is the only thing that can
+     distinguish one cell from the next in a grid of forty-eight. */
+  actionable(cell, {
+    label: `${item.kind === 'video' ? 'Video' : 'Photo'}, ${item.album}, ${relativeDay(item.at)}`
+      + `${item.fav ? ', favourite' : ''}`,
+  });
   return cell;
 }
 

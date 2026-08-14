@@ -66,6 +66,7 @@ function libraryFolder(bucket) {
     slot.innerHTML = appIconHTML(Apps[id], 34);
     slot.title = Apps[id].name;
     slot.onclick = event => { event.stopPropagation(); closeLibrary(); openApp(id); };
+    actionable(slot, { label: `Open ${Apps[id].name}` });
     box.appendChild(slot);
   });
   tile.appendChild(box);
@@ -73,6 +74,7 @@ function libraryFolder(bucket) {
   label.textContent = bucket.name;
   tile.appendChild(label);
   tile.onclick = () => openLibraryFolder(bucket);
+  actionable(tile, { label: `${bucket.name} folder, ${bucket.members.length} apps` });
   return tile;
 }
 
@@ -338,6 +340,7 @@ function spotlightRow(row, { compact = false } = {}) {
     </div>
     <div class="sl-chev">${SVG.chev}</div>`;
   item.onclick = () => { closeSpotlight(); row.onClick(); };
+  actionable(item, { label: [row.label, row.sub].filter(Boolean).join(', ') });
   return item;
 }
 
@@ -380,6 +383,7 @@ function openSpotlight() {
     const tile = el('div', 'sl-tile');
     tile.innerHTML = `${appIconHTML(Apps[id], 54)}<div class="sl-tile-name">${esc(Apps[id].name)}</div>`;
     tile.onclick = () => { closeSpotlight(); openApp(id); };
+    actionable(tile, { label: `Open ${Apps[id].name}` });
     return tile;
   };
 
