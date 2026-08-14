@@ -269,49 +269,179 @@
 
 /* ------------------------------------------------------------------ Outlook */
 
-.outlook { display: flex; flex-direction: column; height: 100%; background: var(--content); }
+/*
+ * Outlook for Mac does not look like Apple Mail, and most of the difference is
+ * chrome: a vertical module rail, a tabbed ribbon with labelled groups, and a
+ * status bar along the bottom. Those three are what make a screenshot instantly
+ * recognisable, so they get real structure rather than approximations.
+ *
+ * --ol is Outlook's brand blue (the current Microsoft 365 value), lifted in
+ * dark mode where the darker blue fails against the window background.
+ */
+.outlook {
+  --ol: #0f6cbd;
+  --ol-soft: rgba(15, 108, 189, 0.1);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--content);
+}
+[data-theme="dark"] .outlook { --ol: #6cb8f6; --ol-soft: rgba(108, 184, 246, 0.14); }
+
+.outlook-main { flex: 1; min-height: 0; display: flex; }
+.outlook-workspace { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+/* ---- module rail ---- */
+
+.outlook-rail {
+  flex: none;
+  width: 62px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 4px;
+  border-right: 0.5px solid var(--hair);
+  background: var(--sidebar);
+}
+.ol-rail-btn {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding: 7px 2px;
+  border-radius: 8px;
+  color: var(--text-2);
+  font-size: 9.5px;
+  line-height: 1.2;
+}
+.ol-rail-btn:hover { background: var(--fill); }
+.ol-rail-btn.on { background: var(--ol-soft); color: var(--ol); font-weight: 600; }
+.ol-rail-btn.on svg { color: var(--ol); }
+.ol-rail-badge {
+  position: absolute;
+  top: 3px;
+  right: 8px;
+  min-width: 15px;
+  height: 15px;
+  border-radius: 8px;
+  padding: 0 4px;
+  background: var(--danger);
+  color: #fff;
+  font-size: 9.5px;
+  font-weight: 600;
+  line-height: 15px;
+  text-align: center;
+}
+
+/* ---- ribbon ---- */
+
+.outlook-ribbon-shell { flex: none; border-bottom: 0.5px solid var(--hair); background: var(--ol-soft); }
+.ol-rib-tabs { display: flex; align-items: center; gap: 2px; padding: 4px 8px 0; }
+.ol-rib-tab {
+  padding: 4px 12px;
+  border-radius: 6px 6px 0 0;
+  color: var(--text-2);
+  font-size: 12px;
+}
+.ol-rib-tab:hover { background: var(--fill); }
+.ol-rib-tab.on { background: var(--content); color: var(--ol); font-weight: 600; }
+.ol-rib-tab.ghost { padding: 4px 8px; color: var(--muted); }
+.ol-rib-tab.ghost svg { transform: rotate(90deg); }
+
 .outlook-ribbon {
   display: flex;
-  align-items: center;
-  gap: 4px;
-  flex: none;
-  padding: 6px 10px;
-  border-bottom: 0.5px solid var(--hair);
-  background: rgba(15, 75, 173, 0.06);
+  align-items: stretch;
+  gap: 0;
+  padding: 6px 10px 4px;
+  background: var(--content);
   overflow-x: auto;
+  scrollbar-width: none;
 }
-[data-theme="dark"] .outlook-ribbon { background: rgba(60, 120, 220, 0.1); }
-.ribbon-btn {
+.outlook-ribbon::-webkit-scrollbar { display: none; }
+.ol-rib-group {
+  display: flex;
+  flex-direction: column;
+  flex: none;
+  padding: 0 8px;
+  border-right: 0.5px solid var(--hair);
+}
+.ol-rib-group:last-child { border-right: 0; }
+.ol-rib-row { display: flex; align-items: flex-start; gap: 2px; flex: 1; }
+.ol-rib-label {
+  padding-top: 3px;
+  color: var(--muted);
+  font-size: 9.5px;
+  text-align: center;
+}
+
+.ol-rib-btn {
   display: grid;
   justify-items: center;
   gap: 3px;
-  min-width: 54px;
-  padding: 4px 7px;
+  min-width: 50px;
+  padding: 4px 6px;
   border-radius: 6px;
   color: var(--text-2);
   font-size: 10px;
+  line-height: 1.25;
   white-space: nowrap;
 }
-.ribbon-btn:hover { background: var(--fill); }
-.ribbon-btn svg { width: 17px; height: 17px; color: #0f4bad; }
-[data-theme="dark"] .ribbon-btn svg { color: #6fa8f5; }
-.ribbon-btn.primary { background: #0f4bad; color: #fff; }
-.ribbon-btn.primary svg { color: #fff; }
-.ribbon-sep { width: 0.5px; height: 30px; background: var(--hair); margin: 0 4px; flex: none; }
-.outlook-tabs { display: flex; gap: 2px; flex: none; padding: 0 10px; border-bottom: 0.5px solid var(--hair); }
-.outlook-tab { padding: 6px 11px; border-radius: 6px 6px 0 0; color: var(--muted); font-size: 12px; }
-.outlook-tab.on { color: #0f4bad; font-weight: 600; box-shadow: inset 0 -2px 0 #0f4bad; }
-[data-theme="dark"] .outlook-tab.on { color: #7fb2ef; box-shadow: inset 0 -2px 0 #7fb2ef; }
-.outlook-body { flex: 1; min-height: 0; display: grid; grid-template-columns: 186px 320px minmax(260px, 1fr); }
-.outlook-focused { display: flex; gap: 4px; padding: 6px 9px; border-bottom: 0.5px solid var(--hair); }
-.outlook-focused button { flex: 1; padding: 4px; border-radius: 6px; font-size: 11px; color: var(--muted); }
-.outlook-focused button.on { background: var(--card); color: var(--text); font-weight: 600; box-shadow: 0 0 0 0.5px var(--hair-strong); }
+.ol-rib-btn:hover { background: var(--fill); }
+.ol-rib-btn svg { width: 16px; height: 16px; color: var(--ol); }
+.ol-rib-btn.large { min-width: 62px; padding: 6px 8px; }
+.ol-rib-btn.large svg { width: 20px; height: 20px; }
+.ol-rib-btn.primary { background: var(--ol); color: #fff; }
+.ol-rib-btn.primary svg { color: #fff; }
+.ol-rib-btn.on { background: var(--ol-soft); color: var(--ol); font-weight: 600; }
+/* A button that needs a selected message stays visible but reads as inactive,
+   which is what the real ribbon does — it never hides the control. */
+.ol-rib-btn.dim { opacity: 0.42; }
+.ol-rib-btn.dim:hover { opacity: 0.7; }
+
+/* Simplified ribbon: one compact row, no group labels. */
+.outlook-ribbon.simple { padding: 4px 10px; }
+.outlook-ribbon.simple .ol-rib-label { display: none; }
+.outlook-ribbon.simple .ol-rib-btn { grid-auto-flow: column; align-items: center; gap: 5px; min-width: 0; padding: 4px 8px; }
+.outlook-ribbon.simple .ol-rib-btn.large { min-width: 0; padding: 4px 9px; }
+.outlook-ribbon.simple .ol-rib-btn.large svg { width: 16px; height: 16px; }
+
+.ribbon-sep { width: 0.5px; height: 26px; background: var(--hair); margin: 0 5px; flex: none; align-self: center; }
+
+/* The compose sheet reuses the ribbon shell as a single row. */
+.outlook-ribbon.compose { border-bottom: 0; background: var(--ol-soft); }
+
+/* ---- mail ---- */
+
+.outlook-body { flex: 1; min-height: 0; display: grid; grid-template-columns: 194px 336px minmax(260px, 1fr); }
+.outlook-body.pane-bottom { grid-template-columns: 194px minmax(260px, 1fr); grid-template-rows: 1fr 1fr; }
+.outlook-body.pane-bottom .sidebar { grid-row: 1 / span 2; }
+.outlook-body.pane-off { grid-template-columns: 194px minmax(260px, 1fr); }
+
+.outlook-folders { padding-top: 8px; }
+.ol-side-head {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  padding: 7px 6px 3px;
+  color: var(--muted);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  overflow: hidden;
+}
+.ol-side-head:hover { color: var(--text-2); }
+.ol-twisty { display: grid; place-items: center; transition: transform 0.15s ease; }
+.ol-twisty svg { color: currentColor; }
+.ol-twisty.open { transform: rotate(90deg); }
+
 .outlook-account-chip {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 8px;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   border-radius: 8px;
   background: var(--card);
 }
@@ -319,13 +449,355 @@
 .outlook-account-chip div { min-width: 0; }
 .outlook-account-chip strong { display: block; font-size: 12px; }
 .outlook-account-chip small { display: block; color: var(--muted); font-size: 10px; overflow: hidden; text-overflow: ellipsis; }
+
+.side-count.quiet { background: var(--fill); color: var(--text-2); }
+
+/* Focused / Other pivots plus the filter control. */
+.ol-list-tabs {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 2px 0;
+}
+.ol-pivot {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 2px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.ol-pivot.on { color: var(--text); font-weight: 600; box-shadow: inset 0 -2px 0 var(--ol); }
+.ol-pivot i {
+  min-width: 15px;
+  height: 15px;
+  border-radius: 8px;
+  padding: 0 4px;
+  background: var(--fill);
+  color: var(--text-2);
+  font-size: 9.5px;
+  font-style: normal;
+  line-height: 15px;
+  text-align: center;
+}
+.ol-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  color: var(--text-2);
+  font-size: 11px;
+}
+.ol-filter:hover { background: var(--fill); }
+.ol-scope {
+  flex: none;
+  max-width: 118px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 10.5px;
+}
+
+/* Date group headers in the message list. */
+.ol-date-head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 5px 12px;
+  background: var(--content);
+  color: var(--ol);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* .mail-row is a three-column grid (dot, avatar, copy). Outlook's row replaces
+   the dot with an absolutely positioned accent bar, so it needs its own
+   two-column template — inheriting Mail's put the avatar in the 8px dot column
+   and squeezed the text to nothing. */
+.ol-row { position: relative; grid-template-columns: 30px minmax(0, 1fr); padding-left: 16px; }
+.ol-unread-bar {
+  position: absolute;
+  left: 5px;
+  top: 12px;
+  bottom: 12px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--ol);
+  opacity: 0;
+}
+.ol-row.unread .ol-unread-bar { opacity: 1; }
+.ol-row.unread .mail-subject { font-weight: 700; }
+.mail-row-bottom { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.mail-row-bottom .mail-preview { flex: 1; min-width: 0; }
+.ol-clip { display: grid; place-items: center; color: var(--muted); flex: none; }
+.ol-cat { width: 9px; height: 9px; border-radius: 2px; flex: none; }
+
+/* ---- reading pane ---- */
+
+.ol-reader { display: flex; flex-direction: column; height: 100%; min-height: 0; overflow-y: auto; }
+.ol-reader-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex: none;
+  padding: 14px 16px 8px;
+}
+.ol-reader-head h1 { flex: 1; min-width: 0; margin: 0; font-size: 17px; font-weight: 600; line-height: 1.3; }
+.ol-reader-actions { display: flex; gap: 1px; flex: none; }
+
+.ol-reader-from {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+  padding: 0 16px 12px;
+  border-bottom: 0.5px solid var(--hair);
+}
+.mail-face.big { width: 36px; height: 36px; font-size: 13px; }
+.ol-from-copy { flex: 1; min-width: 0; }
+.ol-from-line { display: flex; align-items: baseline; gap: 6px; font-size: 12.5px; }
+.ol-from-line strong { flex: none; }
+.ol-addr { color: var(--muted); font-size: 11.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ol-from-line time { margin-left: auto; flex: none; color: var(--muted); font-size: 11px; }
+.ol-to-line { margin-top: 2px; color: var(--muted); font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ol-cat-chip {
+  flex: none;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--cat) 18%, transparent);
+  color: var(--cat);
+  font-size: 10.5px;
+  font-weight: 600;
+}
+
+/* The external-sender strip is a real Exchange feature and a real teaching
+   moment, so it looks like a warning rather than a note. */
+.ol-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  flex: none;
+  margin: 10px 16px 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 11.5px;
+  line-height: 1.45;
+}
+.ol-banner svg { flex: none; margin-top: 1px; }
+.ol-banner.caution { background: color-mix(in srgb, var(--warn) 16%, transparent); color: var(--text); }
+.ol-banner.caution svg { color: var(--warn); }
+.ol-banner.offline { background: var(--fill); color: var(--text-2); }
+
+.ol-source {
+  max-height: 46vh;
+  margin: 0;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--text-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.5;
+  overflow: auto;
+  white-space: pre-wrap;
+}
+
+/* ---- status bar ---- */
+
+.ol-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+  padding: 4px 12px;
+  border-top: 0.5px solid var(--hair);
+  background: var(--sidebar);
+  color: var(--text-2);
+  font-size: 10.5px;
+}
+.ol-status-conn { display: inline-flex; align-items: center; gap: 5px; font-weight: 600; }
+.ol-status-conn i { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); }
+.ol-status-conn.bad { color: var(--warn); }
+.ol-status-conn.bad i { background: var(--warn); }
+.ol-status-oof {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 7px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--warn) 20%, transparent);
+  color: var(--text);
+  font-size: 10px;
+}
+.ol-quota { width: 66px; height: 5px; border-radius: 3px; background: var(--fill); overflow: hidden; }
+.ol-quota i { display: block; height: 100%; background: var(--ol); }
+
+/* ---- calendar ---- */
+
+.ol-cal { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.ol-cal-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  padding: 8px 12px;
+  border-bottom: 0.5px solid var(--hair);
+}
+.ol-cal-label { font-size: 13px; }
+.ol-cal-body { flex: 1; min-height: 0; display: grid; grid-template-columns: 194px minmax(260px, 1fr); }
+.ol-cal-side { padding-top: 10px; }
+.ol-grid-wrap { min-width: 0; overflow: auto; }
+
+.ol-mini { margin: 0 4px 10px; }
+.ol-mini-head { padding: 0 2px 6px; font-size: 11.5px; font-weight: 600; }
+.ol-mini-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; }
+.ol-mini-grid b, .ol-mini-grid i {
+  display: grid;
+  place-items: center;
+  height: 19px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 400;
+}
+.ol-mini-grid b { color: var(--muted); font-size: 9px; }
+.ol-mini-grid i.inweek { background: var(--fill); }
+.ol-mini-grid i.today { background: var(--ol); color: #fff; font-weight: 700; }
+
+.ol-cal-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 5px 7px;
+  border-radius: 6px;
+  color: var(--text-2);
+  font-size: 11.5px;
+  text-align: left;
+}
+.ol-cal-check:hover { background: var(--fill); }
+.ol-cal-check .checkbox { border-color: var(--cat); }
+.ol-cal-check .checkbox.on { background: var(--cat); border-color: var(--cat); }
+
+.ol-grid { display: flex; min-width: 100%; }
+.ol-gutter { flex: none; width: 54px; border-right: 0.5px solid var(--hair); }
+.ol-gutter-hour {
+  padding: 1px 6px 0 0;
+  color: var(--muted);
+  font-size: 9.5px;
+  text-align: right;
+  border-top: 0.5px solid var(--hair);
+}
+.ol-col { flex: 1; min-width: 96px; border-right: 0.5px solid var(--hair); }
+.ol-col-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 5px;
+  height: 34px;
+  padding: 7px 0;
+  border-bottom: 0.5px solid var(--hair);
+  color: var(--muted);
+  font-size: 10.5px;
+}
+.ol-col-head strong { color: var(--text); font-size: 14px; font-weight: 500; }
+.ol-col.today .ol-col-head strong {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--ol);
+  color: #fff;
+  font-size: 12px;
+}
+.ol-col-body { position: relative; }
+.ol-hour { border-top: 0.5px solid var(--hair); }
+.ol-col.today .ol-col-body { background: var(--ol-soft); }
+
+.ol-ev {
+  position: absolute;
+  left: 2px;
+  right: 3px;
+  display: block;
+  overflow: hidden;
+  padding: 2px 5px;
+  border-radius: 4px;
+  border-left: 3px solid var(--cat);
+  background: color-mix(in srgb, var(--cat) 20%, var(--window-solid));
+  color: var(--text);
+  font-size: 10px;
+  line-height: 1.3;
+  text-align: left;
+}
+.ol-ev b { display: block; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ol-ev.short { padding: 1px 5px; line-height: 15px; }
+.ol-ev.short em { color: var(--text-2); font-size: 9px; font-style: normal; font-weight: 400; }
+.ol-ev i { display: block; color: var(--text-2); font-size: 9px; font-style: normal; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Tentative is hatched and Free is outline-only, matching how Outlook shows
+   the free/busy state of an event at a glance. */
+.ol-ev.tentative { background: repeating-linear-gradient(45deg, color-mix(in srgb, var(--cat) 20%, var(--window-solid)) 0 4px, var(--window-solid) 4px 8px); }
+.ol-ev.free { background: var(--window-solid); box-shadow: inset 0 0 0 0.5px var(--hair-strong); }
+
 .outlook-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: var(--hair); }
 .outlook-cal-head { padding: 6px; background: var(--window-solid); color: var(--muted); font-size: 10.5px; text-align: center; font-weight: 600; }
 .outlook-cal-cell { min-height: 74px; padding: 5px; background: var(--window-solid); font-size: 11px; }
 .outlook-cal-cell.dim { opacity: 0.4; }
-.outlook-cal-cell.today strong { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: #0f4bad; color: #fff; }
-.outlook-event { margin-top: 3px; padding: 2px 5px; border-radius: 4px; background: rgba(15, 75, 173, 0.14); color: #0f4bad; font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-[data-theme="dark"] .outlook-event { background: rgba(110, 165, 240, 0.2); color: #9cc4f7; }
+.outlook-cal-cell.today strong { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: var(--ol); color: #fff; }
+.outlook-event {
+  margin-top: 3px;
+  padding: 2px 5px;
+  border-radius: 4px;
+  border-left: 2px solid var(--cat, var(--ol));
+  background: color-mix(in srgb, var(--cat, var(--ol)) 16%, transparent);
+  color: var(--text);
+  font-size: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ol-more { margin-top: 2px; color: var(--muted); font-size: 9.5px; }
+
+/* ---- people ---- */
+
+.ol-people { flex: 1; min-height: 0; display: grid; grid-template-columns: 300px minmax(260px, 1fr); }
+.ol-people-list { display: flex; flex-direction: column; min-height: 0; border-right: 0.5px solid var(--hair); }
+.ol-people-card { min-height: 0; overflow-y: auto; padding: 0 4px 16px; }
+.side-item.wide { padding: 7px 10px; gap: 9px; }
+.side-item.wide .side-label { display: block; min-width: 0; }
+.side-item.wide .side-label strong { display: block; font-size: 12px; }
+.side-item.wide .side-label small { display: block; color: var(--muted); font-size: 10.5px; }
+.ol-card-head { padding: 20px 20px 12px; text-align: center; }
+.ol-card-head .avatar { margin: 0 auto 10px; }
+.ol-card-head h1 { margin: 0; font-size: 18px; font-weight: 600; }
+.ol-card-head p { margin: 3px 0 0; color: var(--muted); font-size: 12px; }
+.ol-card-actions { display: flex; justify-content: center; gap: 8px; margin-top: 14px; }
+
+/* ---- to do ---- */
+
+.ol-task { display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 12px; text-align: left; }
+.ol-task + .ol-task { border-top: 0.5px solid var(--hair); }
+.ol-task:hover { background: var(--fill); }
+.ol-task.done .row-text strong { color: var(--muted); text-decoration: line-through; }
+.ol-task .checkbox { flex: none; }
+.ol-task .row-text { flex: 1; min-width: 0; }
+
+/* ---- settings sheet ---- */
+
+.ol-settings { display: grid; grid-template-columns: 148px minmax(0, 1fr); gap: 14px; min-height: 320px; }
+.ol-settings-nav { display: flex; flex-direction: column; gap: 2px; }
+.ol-settings-nav button {
+  padding: 7px 10px;
+  border-radius: 7px;
+  color: var(--text-2);
+  font-size: 12.5px;
+  text-align: left;
+}
+.ol-settings-nav button:hover { background: var(--fill); }
+.ol-settings-nav button.on { background: var(--ol-soft); color: var(--ol); font-weight: 600; }
+.ol-settings-pane { max-height: 52vh; overflow-y: auto; padding-right: 2px; }
+.ol-settings-pane .section-title:first-child { margin-top: 0; }
 
 /* ---------------------------------------------------------------- App Store */
 
