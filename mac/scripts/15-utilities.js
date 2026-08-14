@@ -23,7 +23,7 @@
       const wifi = Mac.state.wifi;
       const out = text => { win.state.output += `${text}\n`; };
 
-      win.state.output += `alex@mac ~ % ${command}\n`;
+      win.state.output += `${Mac.PERSONA.shortName}@mac ~ % ${command}\n`;
       if (command) win.state.history.push(command);
 
       const [name, ...args] = command.split(/\s+/);
@@ -39,7 +39,7 @@
           break;
         case 'clear': win.state.output = ''; break;
         case 'date': out(new Date().toString()); break;
-        case 'whoami': out('alex'); break;
+        case 'whoami': out(Mac.PERSONA.shortName); break;
         case 'hostname': out(Mac.state.settings.computerName.toLowerCase().replace(/[^a-z0-9]+/g, '-')); break;
         case 'uname':
           out(args.includes('-a')
@@ -52,7 +52,7 @@
           out(`BuildVersion:\t\t${Mac.OS.build()}`);
           break;
         case 'uptime': out(`${Mac.formatTime()}  up 3 days, 14:22, 2 users, load averages: 1.42 1.28 1.11`); break;
-        case 'pwd': out('/Users/alex'); break;
+        case 'pwd': out(`/Users/${Mac.PERSONA.shortName}`); break;
         case 'ls':
           out(Mac.FS.children('dir-home').map(node => node.name).join('\t') || '');
           break;
@@ -207,7 +207,7 @@
     }),
     render: win => `<div class="terminal" data-terminal-view>
       <div class="terminal-out">${esc(win.state.output)}</div>
-      <div class="terminal-line"><span class="terminal-prompt">alex@mac ~ %</span>
+      <div class="terminal-line"><span class="terminal-prompt">${Mac.PERSONA.shortName}@mac ~ %</span>
         <input class="terminal-in" data-terminal-input value="${esc(win.state.input)}" autocomplete="off"
           spellcheck="false" aria-label="Terminal command"></div></div>`,
     mount(win) {

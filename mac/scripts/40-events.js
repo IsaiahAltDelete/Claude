@@ -707,7 +707,7 @@
           icon: 'person',
           body: UI.group(
             UI.info('Account type', 'Administrator'),
-            UI.info('Short name', 'alex'),
+            UI.info('Short name', Mac.PERSONA.shortName),
             UI.info('Home folder', '/Users/alex'),
             UI.action('Change Password…', 'change-password', `The lab password is “${Mac.LOGIN_PASSWORD}”.`),
           ),

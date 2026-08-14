@@ -11,6 +11,31 @@ window.Mac = window.Mac || {};
 (function (Mac) {
   'use strict';
 
+  /**
+   * The invented person this simulated Mac belongs to.
+   *
+   * Everything here is fictional and everything is `.example`, which is
+   * reserved by RFC 2606 and can never be registered — no address in this
+   * project can reach a real inbox, and no name belongs to a real person.
+   *
+   * Centralised because it was not: the same name and addresses were typed
+   * out in more than twenty places across both simulators, so changing the
+   * persona meant a find-and-replace across seed data, and the variants had
+   * already started to differ. The seeded mail bodies still spell the name
+   * out — a signature at the foot of a message is prose, and threading a
+   * variable through it would read worse and gain nothing.
+   */
+  Mac.PERSONA = {
+    name: 'Alex Rivera',
+    first: 'Alex',
+    initials: 'AR',
+    shortName: 'alex',          // the Unix account, and the home folder
+    personal: 'alex.rivera@icloud.example',
+    work: 'alex.rivera@support.example',
+    computer: "Alex's MacBook Pro",
+    phone: "Alex's iPhone",
+  };
+
   Mac.VERSION = '7.0';
   Mac.OS_VERSION = '26.6';
   Mac.OS_BUILD = '25G88-SIM';
