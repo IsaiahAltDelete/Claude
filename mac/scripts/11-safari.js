@@ -48,6 +48,9 @@
     closeTab(win, id) {
       const index = win.state.tabs.findIndex(tab => tab.id === id);
       if (index < 0) return;
+      // Closing a tab cancels its fetch; nothing is left to receive it.
+      Mac.Web.cancel(win.state.tabs[index]);
+      clearTimeout(win.state.tabs[index].timer);
       win.state.tabs.splice(index, 1);
       if (!win.state.tabs.length) {
         Mac.wm.close(win.id);
@@ -95,6 +98,9 @@
         else if (reason === 'proxy') url = `proxyfail:${bare}`;
         else url = `offline:${bare}`;
       }
+
+      // A new navigation supersedes whatever this tab was still fetching.
+      Mac.Web.cancel(tab);
 
       if (replace) tab.stack[tab.index] = url;
       else {
@@ -158,6 +164,7 @@
       if (live.reason === 'missing') return 'Page not found';
       if (live.reason === 'no-frame') return 'Refused to connect';
       if (live.reason === 'simulated-offline') return 'You are not connected to the internet';
+      if (live.reason === 'timeout') return 'The server is not responding';
       return 'Cannot open the page';
     },
 
@@ -192,6 +199,9 @@
     stop(win) {
       const tab = this.tab(win);
       clearTimeout(tab.timer);
+      /* Stop used to clear the spinner and leave the request running, so the
+         page it was fetching still appeared a moment later. */
+      Mac.Web.cancel(tab);
       tab.loading = false;
       Mac.wm.render(win);
     },
@@ -365,6 +375,19 @@
       const live = tab.live;
       if (!live) return '<div class="web-page start-page"><h1 style="margin-top:16vh">Loading…</h1></div>';
 
+      /* A payload still in flight carries only its kind — the article and
+         its target arrive together at the end. Pressing Stop clears
+         tab.loading while that placeholder is current, which used to fall
+         straight through to the wiki branch and throw on live.target. */
+      if (live.state === 'loading') {
+        return `<div class="web-page start-page"><h1 style="margin-top:16vh">Stopped</h1>
+          <p class="muted">The page was not finished loading.</p>
+          <div class="error-actions" style="justify-content:center">
+            <button class="btn primary" data-command="browser-retry">Reload</button>
+            <button class="btn" data-command="browse" data-arg="start">Back to Start Page</button>
+          </div></div>`;
+      }
+
       if (live.kind === 'wiki') {
         const project = live.target.project === 'wikipedia' ? 'Wikipedia' : live.target.project;
         return `<article class="wiki-article">
@@ -440,6 +463,23 @@
           <p>Wikipedia has no article with that exact title. Try searching instead.</p>
           <div class="error-actions">
             <button class="btn primary" data-command="wiki-search" data-arg="${esc(live.target?.title || '')}">Search Wikipedia</button>
+            <button class="btn" data-command="browse" data-arg="start">Back to Start Page</button>
+          </div></div></div>`;
+      }
+
+      /* Distinct from a failed request: the connection was made and nothing
+         came back, which is the shape of a slow link or an overloaded
+         server rather than a broken one. */
+      if (live.reason === 'timeout') {
+        return `<div class="error-page"><div>
+          <div class="error-art">${glyph('clock', { size: 54 })}</div>
+          <h1>The server is not responding</h1>
+          <p>Safari gave up waiting after ${Math.round(Mac.Web.TIMEOUT_MS / 1000)} seconds. The connection was
+             made but no reply arrived, which usually means a slow link or a busy server rather than a
+             broken one.</p>
+          <div class="error-actions">
+            <button class="btn primary" data-command="browser-retry">Try Again</button>
+            <button class="btn" data-command="run-diagnostics">Run Diagnostics</button>
             <button class="btn" data-command="browse" data-arg="start">Back to Start Page</button>
           </div></div></div>`;
       }
