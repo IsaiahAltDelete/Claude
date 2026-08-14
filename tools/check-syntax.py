@@ -1,18 +1,17 @@
 #!/usr/bin/env python3
 """Parse-level checks that a per-file syntax check structurally cannot do.
 
-Both simulators are plain scripts with no build step, so nothing sits between a
+The simulators are plain scripts with no build step, so nothing sits between a
 typo and the deployed site. Two failure modes have already bitten this project,
 and neither is visible to `node --check` run file by file:
 
-1.  The iPhone's extension scripts are classic (non-module) scripts. They share
-    ONE global lexical environment with the inline script in index.html, so two
-    top-level `const`/`let`/`class` declarations of the same name are a fatal
+1.  The iPhone's and the Roku's scripts are classic (non-module) scripts. Each
+    simulator's set shares ONE global lexical environment, so two top-level
+    `const`/`let`/`class` declarations of the same name are a fatal
     SyntaxError — but only once the browser has merged them. The offending
     script fails to evaluate in its entirety while everything after it keeps
-    loading, so the home screen still looks right and the apps throw
-    ReferenceErrors when opened. Concatenating the inline body with the
-    extension scripts in load order reproduces it exactly.
+    loading, so the page still looks right and the apps throw ReferenceErrors
+    when opened. Concatenating the files in load order reproduces it exactly.
 
 2.  Duplicate top-level `function` declarations are legal JavaScript: the later
     one silently wins. With hundreds of functions in one flat namespace, giving
@@ -37,6 +36,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 IPHONE = ROOT / "iphone"
 MAC = ROOT / "mac"
+ROKU = ROOT / "roku"
 
 VERBOSE = "--verbose" in sys.argv or "-v" in sys.argv
 failures: list[str] = []
@@ -71,7 +71,8 @@ def script_files(directory: Path) -> list[Path]:
 # ---------------------------------------------------------------- per file ---
 
 def check_each_file() -> None:
-    files = script_files(MAC / "scripts") + script_files(IPHONE / "scripts")
+    files = (script_files(MAC / "scripts") + script_files(IPHONE / "scripts")
+             + script_files(ROKU / "scripts"))
     for path in files:
         error = node_check(path.read_text(encoding="utf-8"), str(path.relative_to(ROOT)))
         if error:
@@ -81,10 +82,10 @@ def check_each_file() -> None:
     print(f"per-file parse: {len(files)} files")
 
 
-# ------------------------------------------------------- iPhone global scope ---
+# -------------------------------------------------------- shared global scope ---
 
 def inline_script_body(html: str) -> str:
-    """The last and largest <script> block in iphone/index.html — the framework.
+    """The largest inline <script> block in a page, or "" if there is none.
 
     Located by scanning rather than by line number: the boundaries move every
     time the file is edited, and a hardcoded offset would rot silently into a
@@ -92,28 +93,40 @@ def inline_script_body(html: str) -> str:
     """
     blocks = re.findall(r"<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>", html, re.S)
     if not blocks:
-        raise SystemExit("check-syntax: found no inline <script> in iphone/index.html")
+        return ""
     return max(blocks, key=len)
 
 
-def loaded_scripts(html: str) -> list[Path]:
-    """The extension scripts, in the exact order the <script src> tags appear."""
-    return [IPHONE / src for src in re.findall(r'<script\s+src="([^"]+)"', html)]
+def loaded_scripts(html: str, base: Path = None) -> list[Path]:
+    """The scripts a page loads, in the exact order the <script src> tags appear."""
+    root = base or IPHONE
+    return [root / src for src in re.findall(r'<script\s+src="([^"]+)"', html)]
 
 
-def check_iphone_global_scope() -> str:
-    html = (IPHONE / "index.html").read_text(encoding="utf-8")
+def check_global_scope(name: str, directory: Path) -> str:
+    """Concatenate a simulator's scripts the way the browser merges them.
+
+    Applies to any simulator whose scripts are plain classic scripts rather
+    than IIFE-wrapped — currently the iPhone and the Roku. Both put every
+    top-level declaration into one shared lexical environment, so two `const`
+    declarations of the same name anywhere across the set are a fatal
+    SyntaxError that only exists once they are merged. The Mac is exempt
+    because each of its files wraps its body in `(function (Mac) { … })`.
+    """
+    html = (directory / "index.html").read_text(encoding="utf-8")
     inline = inline_script_body(html)
-    ordered = loaded_scripts(html)
+    ordered = loaded_scripts(html, directory)
 
     missing = [p for p in ordered if not p.exists()]
     if missing:
         failures.append(
-            "iphone/index.html references scripts that do not exist: "
+            f"{name}/index.html references scripts that do not exist: "
             + ", ".join(str(p.relative_to(ROOT)) for p in missing)
         )
 
-    parts = [f"/* --- inline <script> from iphone/index.html --- */\n{inline}"]
+    parts = []
+    if inline.strip():
+        parts.append(f"/* --- inline <script> from {name}/index.html --- */\n{inline}")
     for path in ordered:
         if path.exists():
             parts.append(
@@ -121,16 +134,16 @@ def check_iphone_global_scope() -> str:
             )
     combined = "\n".join(parts)
 
-    error = node_check(combined, "iphone (inline + extension scripts, concatenated)")
+    error = node_check(combined, f"{name} (inline + scripts, concatenated)")
     if error:
         failures.append(
-            "the iPhone's scripts do not parse when merged into one global scope.\n"
+            f"the {name}'s scripts do not parse when merged into one global scope.\n"
             "This is what the browser actually does, and a collision here kills a whole\n"
-            "script silently — the home screen still renders and the apps throw when opened.\n"
+            "script silently — the page still renders and the app throws when opened.\n"
             + error
         )
     print(
-        f"iPhone global scope: inline + {len(ordered)} scripts = "
+        f"{name} global scope: {'inline + ' if inline.strip() else ''}{len(ordered)} scripts = "
         f"{combined.count(chr(10)) + 1} lines"
     )
     return combined
@@ -141,19 +154,21 @@ def check_iphone_global_scope() -> str:
 DECLARATION = re.compile(r"^(?:async\s+)?function\s+([A-Za-z_$][\w$]*)\s*\(", re.M)
 
 
-def check_duplicate_functions(iphone_source: str) -> None:
+def check_duplicate_functions(label: str, source: str) -> None:
     """`node --check` accepts duplicate function declarations; we should not."""
     seen: dict[str, int] = {}
-    for name in DECLARATION.findall(iphone_source):
+    for name in DECLARATION.findall(source):
         seen[name] = seen.get(name, 0) + 1
     duplicates = sorted(name for name, count in seen.items() if count > 1)
     if duplicates:
         failures.append(
-            "duplicate top-level function names in the iPhone's shared global scope "
+            f"duplicate top-level function names in the {label}'s shared global scope "
             "(the later declaration silently wins): " + ", ".join(duplicates)
         )
-    print(f"iPhone function names: {len(seen)} top-level, {len(duplicates)} duplicated")
+    print(f"{label} function names: {len(seen)} top-level, {len(duplicates)} duplicated")
 
+
+def check_mac_duplicates() -> None:
     # Mac files are IIFE-wrapped, so a collision is file-local — still a bug.
     mac_duplicates: list[str] = []
     for path in script_files(MAC / "scripts"):
@@ -225,10 +240,14 @@ def check_unreferenced(iphone_source: str) -> None:
 def main() -> int:
     print("Checking simulator sources…")
     check_each_file()
-    combined = check_iphone_global_scope()
-    check_duplicate_functions(combined)
+    iphone = check_global_scope("iPhone", IPHONE)
+    check_duplicate_functions("iPhone", iphone)
+    if (ROKU / "index.html").exists():
+        roku = check_global_scope("Roku", ROKU)
+        check_duplicate_functions("Roku", roku)
+    check_mac_duplicates()
     check_shadowed_apps()
-    check_unreferenced(combined)
+    check_unreferenced(iphone)
 
     if failures:
         print(f"\nFAILED — {len(failures)} problem(s):\n", file=sys.stderr)

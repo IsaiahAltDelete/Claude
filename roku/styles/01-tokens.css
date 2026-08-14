@@ -1,0 +1,253 @@
+/* ===========================================================================
+   Tokens, reset and the primitives every screen shares.
+
+   The television draws itself on a fixed 1280x720 canvas — the same HD design
+   grid Roku's own interface is laid out on — and the whole canvas is then
+   scaled with a transform to fit whatever space the browser has. Every size in
+   these stylesheets is therefore a real Roku pixel: a 30px menu row is 30px on
+   a 720p screen, and it stays proportionally correct at any window size.
+   =========================================================================== */
+
+:root {
+  /* ---- brand ---------------------------------------------------------- */
+  --purple:      #662d91;
+  --purple-lit:  #8438bd;
+  --purple-deep: #3c1a58;
+  --purple-glow: rgba(139, 63, 191, 0.55);
+
+  /* ---- surfaces ------------------------------------------------------- */
+  --bg:        #17111f;
+  --bg-deep:   #0c0812;
+  --panel:     #1e1729;
+  --panel-2:   #262035;
+  --hair:      rgba(255, 255, 255, 0.09);
+  --hair-firm: rgba(255, 255, 255, 0.16);
+
+  /* ---- text ----------------------------------------------------------- */
+  --tx:   #ffffff;
+  --tx-2: rgba(255, 255, 255, 0.66);
+  --tx-3: rgba(255, 255, 255, 0.42);
+  --tx-on-light: #17111f;
+
+  /* ---- accents -------------------------------------------------------- */
+  --good:  #46c46a;
+  --warn:  #ffb020;
+  --bad:   #ff4d4d;
+  --info:  #4aa8ff;
+  --gold:  #ffc93c;
+
+  /* ---- focus ---------------------------------------------------------- */
+  --focus-ring: #ffffff;
+  --focus-shadow: 0 0 0 4px var(--focus-ring), 0 12px 34px rgba(0, 0, 0, 0.6);
+
+  /* ---- geometry ------------------------------------------------------- */
+  --safe-x: 48px;          /* title-safe margin, left and right */
+  --safe-y: 27px;          /* title-safe margin, top and bottom */
+  --rail-gap: 22px;
+  --radius: 6px;
+
+  --font: "TV System", "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+
+  /* Set by the theme picker in Settings > Theme. */
+  --wall: radial-gradient(120% 100% at 8% 0%, #2c1c46 0%, #17111f 46%, #0c0812 100%);
+}
+
+/* Themes swap the wallpaper and the tint of the focus fill. Roku's themes only
+   ever change the backdrop and the highlight, never the layout. */
+[data-theme="daydream"] {
+  --wall: radial-gradient(130% 110% at 90% 0%, #1d3f6b 0%, #101c33 48%, #070c16 100%);
+  --purple: #1f6fbf; --purple-lit: #3d95e8; --purple-glow: rgba(61, 149, 232, 0.5);
+}
+[data-theme="graphite"] {
+  --wall: linear-gradient(165deg, #23262b 0%, #14161a 55%, #0a0b0d 100%);
+  --purple: #4a4f57; --purple-lit: #6d747f; --purple-glow: rgba(109, 116, 127, 0.5);
+}
+[data-theme="nebula"] {
+  --wall: radial-gradient(110% 100% at 20% 10%, #4a1050 0%, #1b0a2c 45%, #07040e 100%);
+  --purple: #a01b7a; --purple-lit: #d1379f; --purple-glow: rgba(209, 55, 159, 0.5);
+}
+[data-theme="sunrise"] {
+  --wall: linear-gradient(155deg, #5a2340 0%, #2b1430 45%, #100813 100%);
+  --purple: #c2492f; --purple-lit: #e86a48; --purple-glow: rgba(232, 106, 72, 0.5);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html, body { height: 100%; }
+
+body {
+  background: #08090c;
+  background-image:
+    radial-gradient(1100px 620px at 30% -12%, #191d27 0%, #08090c 62%);
+  color: #e9eaee;
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.45;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button, input { font: inherit; color: inherit; background: none; border: none; outline: none; }
+button { cursor: pointer; }
+ul, ol { list-style: none; }
+img { display: block; max-width: 100%; }
+
+.hidden { display: none !important; }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------- the canvas */
+
+/* Everything inside .tv-canvas is authored at 1280x720 and scaled as a unit. */
+.tv-canvas {
+  position: absolute;
+  top: 0; left: 0;
+  width: 1280px;
+  height: 720px;
+  transform-origin: 0 0;
+  overflow: hidden;
+  background: var(--bg-deep);
+  font-size: 22px;
+  color: var(--tx);
+  contain: strict;
+}
+
+/* Screens stack: content, then overlays (dialogs, the * menu), then anything
+   the system puts over the top of the lot (boot, screensaver, power off). */
+.layer { position: absolute; inset: 0; }
+#layer-screen  { z-index: 1; }
+#layer-overlay { z-index: 40; }
+#layer-system  { z-index: 80; }
+#layer-toast   { z-index: 90; pointer-events: none; }
+
+/* The wallpaper is positioned, so without a negative z-index it would paint
+   over every in-flow element on the screen — headings, settings panes, the
+   search field. It belongs behind all of them. */
+.wall {
+  position: absolute; inset: 0;
+  z-index: -1;
+  background: var(--wall);
+}
+.wall::after {
+  /* A quiet vignette keeps the corners from competing with the artwork. */
+  content: "";
+  position: absolute; inset: 0;
+  background: radial-gradient(120% 120% at 50% 45%, transparent 52%, rgba(0, 0, 0, 0.45) 100%);
+  pointer-events: none;
+}
+
+/* ------------------------------------------------------------------- typography */
+
+.t-hero    { font-size: 46px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; }
+.t-title   { font-size: 34px; font-weight: 600; letter-spacing: -0.015em; }
+.t-section { font-size: 24px; font-weight: 600; letter-spacing: 0.01em; }
+.t-row     { font-size: 24px; font-weight: 400; }
+.t-body    { font-size: 20px; font-weight: 400; color: var(--tx-2); line-height: 1.5; }
+.t-small   { font-size: 17px; font-weight: 400; color: var(--tx-2); }
+.t-micro   { font-size: 15px; font-weight: 500; color: var(--tx-3); letter-spacing: 0.08em; text-transform: uppercase; }
+
+.dim  { color: var(--tx-2); }
+.dim2 { color: var(--tx-3); }
+.num  { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
+
+/* ------------------------------------------------------------------ focusables */
+
+/* .f marks anything the remote can land on. Focus is never the browser's — a
+   television has exactly one highlight and the page keeps it on <body>. */
+.f { position: relative; cursor: pointer; }
+
+.f.on { z-index: 3; }
+
+/* Menu rows: a filled purple bar, the way Roku highlights a list. */
+.row {
+  display: flex; align-items: center; gap: 16px;
+  min-height: 54px; padding: 8px 22px;
+  border-radius: 4px;
+  color: var(--tx-2);
+  font-size: 24px;
+  transition: background 0.12s linear, color 0.12s linear;
+}
+.row .row-val { margin-left: auto; color: var(--tx-3); font-size: 21px; }
+.row .row-chev { margin-left: auto; color: var(--tx-3); font-size: 22px; }
+/* Where the highlight was left when focus moved to another column. */
+.row.here { background: rgba(255, 255, 255, 0.08); color: #fff; }
+.row.on {
+  background: linear-gradient(90deg, var(--purple) 0%, var(--purple-lit) 100%);
+  color: #fff;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.35);
+}
+.row.on .row-val, .row.on .row-chev { color: rgba(255, 255, 255, 0.85); }
+.row.is-set::after {
+  content: "✓"; margin-left: 12px; color: var(--good); font-size: 22px;
+}
+.row.on.is-set::after { color: #fff; }
+
+/* Buttons: pill shaped, filled when focused. */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  min-width: 190px; padding: 13px 30px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff; font-size: 22px; font-weight: 500;
+  transition: transform 0.12s ease, background 0.12s linear;
+}
+.btn.on {
+  background: #fff; color: var(--tx-on-light);
+  transform: scale(1.03);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+.btn.wide { min-width: 260px; }
+
+/* Any row of buttons. Without this they butt up against each other, because
+   .btn is inline-flex and inherits no gap. */
+.btnrow { display: flex; flex-wrap: wrap; gap: 12px; }
+.btn.slim { min-width: 0; padding: 10px 22px; font-size: 20px; }
+
+/* Tiles and posters lift and take a white ring. */
+.lift { transition: transform 0.14s ease, box-shadow 0.14s ease; }
+.lift.on { transform: scale(1.07); box-shadow: var(--focus-shadow); }
+
+/* ------------------------------------------------------------------- scrollers */
+
+.scroll-y { overflow: hidden; }
+/* Horizontal scrollers are flex rows, so they must not force nowrap — that
+   would stop poster titles from wrapping inside the artwork. */
+.scroll-x { overflow: hidden; }
+.slide { transition: transform 0.22s cubic-bezier(0.22, 0.61, 0.36, 1); will-change: transform; }
+
+/* --------------------------------------------------------------------- spinner */
+
+.spin {
+  width: 46px; height: 46px; border-radius: 50%;
+  border: 4px solid rgba(255, 255, 255, 0.16);
+  border-top-color: #fff;
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.dots::after {
+  content: "";
+  animation: dots 1.4s steps(4, end) infinite;
+}
+@keyframes dots { 0% { content: ""; } 25% { content: "."; } 50% { content: ".."; } 75% { content: "..."; } }
+
+/* ---------------------------------------------------------------- transitions */
+
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes rise    { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes from-right { from { transform: translateX(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+.anim-fade { animation: fade-in 0.18s ease both; }
+.anim-rise { animation: rise 0.22s ease both; }
+.anim-right { animation: from-right 0.18s ease both; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

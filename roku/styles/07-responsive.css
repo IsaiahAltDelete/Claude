@@ -1,0 +1,75 @@
+/* ===========================================================================
+   Fitting the pair into whatever window it is given.
+
+   The television is a fixed 1280x720 canvas scaled by a transform, so nothing
+   here reflows the interface itself — these rules only decide how much room
+   the set and the remote each get, and where the remote goes when there isn't
+   room beside the screen.
+   =========================================================================== */
+
+/* Below this the remote moves under the set and the page scrolls. */
+@media (max-width: 980px), (max-height: 520px) {
+  body { overflow: auto; }
+
+  #stage {
+    flex-direction: column;
+    height: auto;
+    min-height: 100%;
+    justify-content: flex-start;
+    gap: 22px;
+    padding: 16px 14px 30px;
+  }
+
+  #stage { align-items: center; }
+  #remote-col { align-self: center; }
+}
+
+/* Narrow phones: trim the frame so the picture keeps as much width as it can. */
+@media (max-width: 560px) {
+  .tv-frame { padding: 7px 7px 26px; border-radius: 11px; }
+  .tv-chin { height: 26px; font-size: 9px; letter-spacing: 0.16em; }
+  .tv-caption { font-size: 11px; flex-wrap: wrap; justify-content: center; text-align: center; }
+  .hints { font-size: 10px; }
+}
+
+/* Pointer-only conveniences. On a touch screen the buttons are the interface,
+   so the hover brightening is dropped rather than left sticky after a tap. */
+@media (hover: none) {
+  .rk:hover, .dpad-ok:hover, .rk-app:hover, .rk-side:hover, .dpad-arm:hover { filter: none; background: revert; }
+}
+
+/* The simulator is a dark object in a dark room; a light preference only
+   changes the page around it, never the picture. */
+@media (prefers-color-scheme: light) {
+  body {
+    background: #e9eaee;
+    background-image: radial-gradient(1100px 620px at 30% -12%, #ffffff 0%, #dfe1e7 62%);
+    color: #2b2d33;
+  }
+  .tv-caption { color: #6b6e78; }
+  .tv-caption b { color: #33363d; }
+  .hints { color: #767a85; }
+  .hints kbd { background: #fff; color: #4a4d55; box-shadow: inset 0 0 0 1px #c9ccd4; }
+  .remote-back { color: #767a85; }
+}
+
+/* Someone who has asked for less transparency gets solid panels instead of the
+   layered scrims the interface normally uses. */
+@media (prefers-reduced-transparency: reduce) {
+  .side::before { background: #06040a; }
+  .optpanel, .playopts { background: #120c1c; }
+  .modal-wrap { background: rgba(4, 3, 8, 0.94); }
+  .toast, .volbar { background: #0c0912; }
+}
+
+/* Printing a simulator is not a thing anyone wants, but leaving it unstyled
+   dumps 700 lines of stray markup onto the page. */
+@media print {
+  body * { visibility: hidden; }
+  body::after {
+    content: "Roku Troubleshooting Simulator — interactive; nothing to print.";
+    visibility: visible;
+    position: absolute; left: 0; top: 40%; width: 100%;
+    text-align: center; font-size: 14px; color: #000;
+  }
+}
