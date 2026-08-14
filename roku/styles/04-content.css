@@ -1,0 +1,454 @@
+/* ===========================================================================
+   Everything that shows content: the rail pages (What to Watch, Sports,
+   Featured Free, the two stores), the live TV guide, search, the streaming
+   store, a channel's own screens and the player.
+   =========================================================================== */
+
+.page { position: absolute; inset: 0; display: flex; flex-direction: column; }
+
+.page-head {
+  flex: none;
+  padding: 26px var(--safe-x) 0 26px;
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
+.page-head h1 { font-size: 36px; font-weight: 600; letter-spacing: -0.015em; }
+.page-head .head-sub { color: var(--tx-3); font-size: 18px; margin-top: 2px; }
+.page-head .head-right { margin-left: auto; text-align: right; }
+
+/* Pages that hang off the left menu keep a slim icon rail so you can always
+   see where you are, exactly as the home screen does. */
+.with-rail { padding-left: 92px; }
+
+/* --------------------------------------------------------------------- hero */
+
+/* A detail band that tracks the highlighted poster. Roku fills the top of its
+   content screens this way, so the synopsis is readable without opening
+   anything. */
+.hero {
+  flex: none;
+  height: 214px;
+  padding: 14px 40px 0 26px;
+  display: flex;
+  gap: 26px;
+  overflow: hidden;
+}
+.hero-art {
+  width: 268px; height: 151px; flex: none;
+  border-radius: 5px; overflow: hidden;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
+}
+.hero-body { min-width: 0; padding-top: 4px; }
+.hero-title { font-size: 38px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; }
+.hero-meta {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 10px;
+  margin-top: 9px; color: var(--tx-2); font-size: 18px;
+}
+.hero-meta .dot { color: var(--tx-3); }
+.hero-desc {
+  margin-top: 11px;
+  max-width: 720px;
+  color: var(--tx-2);
+  font-size: 19px;
+  line-height: 1.45;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 11px; border-radius: 4px;
+  background: rgba(255, 255, 255, 0.14);
+  font-size: 16px; font-weight: 600; letter-spacing: 0.02em;
+}
+.pill.free  { background: rgba(70, 196, 106, 0.22); color: #7fe39a; }
+.pill.sub   { background: rgba(74, 168, 255, 0.2);  color: #8ec9ff; }
+.pill.buy   { background: rgba(255, 201, 60, 0.2);  color: #ffd77a; }
+.pill.live  { background: rgba(255, 77, 77, 0.22);  color: #ff8f8f; }
+.pill.hd    { background: rgba(255, 255, 255, 0.12); color: var(--tx-2); }
+.pill.rating { background: transparent; box-shadow: inset 0 0 0 1.5px var(--tx-3); color: var(--tx-2); }
+
+/* -------------------------------------------------------------------- rails */
+
+.rails { flex: 1; padding-bottom: 24px; }
+.rails-inner { padding-left: 26px; }
+
+.rail { margin-bottom: 26px; }
+.rail-title {
+  font-size: 23px; font-weight: 600;
+  color: var(--tx);
+  margin-bottom: 11px;
+  letter-spacing: 0.005em;
+}
+.rail-title .rt-more { color: var(--tx-3); font-size: 17px; font-weight: 400; margin-left: 12px; }
+/* The padding/negative-margin pair gives the focus ring somewhere to sit
+   without moving the first poster off its margin. */
+.rail-track { display: flex; gap: 16px; padding: 12px; margin: -12px; }
+
+.poster {
+  flex: none;
+  border-radius: 5px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.45);
+}
+.poster.tall  { width: 158px; height: 237px; }
+.poster.wide  { width: 268px; height: 151px; }
+.poster.sq    { width: 168px; height: 168px; }
+.poster.on { box-shadow: var(--focus-shadow); }
+
+.poster .badge {
+  position: absolute; right: 6px; top: 6px;
+  padding: 2px 7px; border-radius: 3px;
+  background: rgba(0, 0, 0, 0.62);
+  font-size: 13px; font-weight: 600;
+  z-index: 3;
+}
+.poster .progressbar {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 5px;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 3;
+}
+.poster .progressbar i { display: block; height: 100%; background: var(--purple-lit); }
+
+/* --------------------------------------------------------- generated key art */
+
+/* Poster art, like the channel logos, is composed rather than fetched: a
+   two-stop gradient, a texture, and the title set over it. */
+.key {
+  position: relative; width: 100%; height: 100%;
+  background: linear-gradient(160deg, var(--c1), var(--c2));
+  display: flex; flex-direction: column; justify-content: flex-end;
+  padding: 12px;
+  overflow: hidden;
+}
+.key .tex { position: absolute; inset: 0; opacity: 0.55; }
+.key .shade {
+  position: absolute; inset: 0;
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.82) 0%, rgba(0, 0, 0, 0.18) 46%, transparent 76%);
+}
+.key .kt {
+  position: relative;
+  font-size: 19px; font-weight: 700; line-height: 1.12;
+  letter-spacing: -0.01em;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.key .ks { position: relative; margin-top: 3px; font-size: 14px; color: rgba(255, 255, 255, 0.72); }
+.poster.wide .key .kt { font-size: 21px; }
+.poster.tall .key .kt { font-size: 18px; }
+
+/* ---------------------------------------------------------------- live guide */
+
+.guide { position: absolute; inset: 0; display: flex; flex-direction: column; padding-left: 92px; }
+
+.guide-hero {
+  flex: none; height: 208px;
+  display: flex; gap: 22px;
+  padding: 22px 40px 16px 26px;
+}
+.guide-hero .gh-screen {
+  width: 300px; height: 169px; flex: none;
+  border-radius: 5px; overflow: hidden;
+  background: #000;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
+  position: relative;
+}
+.guide-hero .gh-body { min-width: 0; }
+
+.guide-times {
+  flex: none;
+  display: flex;
+  padding-left: 246px;
+  border-bottom: 1px solid var(--hair);
+  color: var(--tx-2);
+  font-size: 17px;
+  font-weight: 500;
+}
+.guide-times span { width: 236px; flex: none; padding: 0 0 8px 10px; }
+
+.guide-body { flex: 1; overflow: hidden; }
+.guide-row { display: flex; height: 74px; align-items: stretch; }
+
+.gch {
+  width: 246px; flex: none;
+  display: flex; align-items: center; gap: 12px;
+  padding: 5px 14px 5px 0;
+}
+.gch .gch-art { width: 78px; height: 58px; border-radius: 4px; overflow: hidden; flex: none; }
+.gch .gch-num { display: block; font-size: 15px; color: var(--tx-3); line-height: 1.2; }
+.gch .gch-name {
+  display: block; font-size: 18px; font-weight: 500; line-height: 1.2;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.gprogs { display: flex; gap: 4px; padding: 5px 0; flex: 1; min-width: 0; }
+.gprog {
+  flex: none;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.075);
+  padding: 9px 13px;
+  overflow: hidden;
+  display: flex; flex-direction: column; justify-content: center;
+  transition: background 0.12s linear, box-shadow 0.12s linear;
+}
+.gprog .gp-t { font-size: 18px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gprog .gp-s { font-size: 15px; color: var(--tx-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gprog.on { background: linear-gradient(90deg, var(--purple), var(--purple-lit)); box-shadow: 0 0 0 2px #fff inset; }
+.gprog.on .gp-s { color: rgba(255, 255, 255, 0.85); }
+.gprog.now { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22); }
+.gprog.now.on { box-shadow: 0 0 0 2px #fff inset; }
+
+/* ------------------------------------------------------------------- search */
+
+.search { position: absolute; inset: 0; display: flex; padding-left: 92px; }
+
+.search-left { width: 430px; flex: none; padding: 26px 24px 20px 26px; }
+
+.qfield {
+  height: 56px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.18);
+  display: flex; align-items: center; gap: 12px;
+  padding: 0 16px;
+  font-size: 24px;
+  margin-bottom: 18px;
+}
+.qfield svg { width: 22px; height: 22px; fill: var(--tx-3); flex: none; }
+.qfield .qtext { white-space: nowrap; overflow: hidden; }
+.qfield .qplace { color: var(--tx-3); }
+.qfield .caret {
+  width: 2px; height: 27px; background: #fff;
+  animation: blink 1.05s steps(1, end) infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+.kbd { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+.kkey {
+  height: 50px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.07);
+  display: grid; place-items: center;
+  font-size: 24px; font-weight: 500;
+  color: var(--tx);
+  transition: background 0.1s linear, transform 0.1s ease;
+}
+.kkey.on { background: #fff; color: var(--tx-on-light); transform: scale(1.09); box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5); }
+.kkey.wide { grid-column: span 2; font-size: 18px; letter-spacing: 0.04em; }
+.kkey.act { font-size: 17px; font-weight: 600; letter-spacing: 0.05em; }
+
+.mic-hint {
+  margin-top: 16px;
+  display: flex; align-items: center; gap: 10px;
+  color: var(--tx-3); font-size: 16px;
+}
+.mic-hint svg { width: 18px; height: 18px; fill: currentColor; }
+
+.search-right { flex: 1; min-width: 0; display: flex; }
+
+.res-list { width: 356px; flex: none; padding: 26px 12px 20px 8px; }
+.res-list .res-head { font-size: 18px; color: var(--tx-3); margin: 0 14px 10px; letter-spacing: 0.06em; text-transform: uppercase; }
+.resrow {
+  display: flex; align-items: center; gap: 13px;
+  height: 66px; padding: 0 14px;
+  border-radius: 4px;
+  transition: background 0.11s linear;
+}
+.resrow .rr-art { width: 60px; height: 45px; border-radius: 3px; overflow: hidden; flex: none; }
+.resrow .rr-t { font-size: 21px; line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.resrow .rr-s { font-size: 16px; color: var(--tx-3); }
+.resrow .rr-b { min-width: 0; }
+.resrow.on { background: linear-gradient(90deg, var(--purple), var(--purple-lit)); }
+.resrow.on .rr-s { color: rgba(255, 255, 255, 0.85); }
+
+.res-detail {
+  flex: 1; min-width: 0;
+  padding: 26px 40px 20px 22px;
+  border-left: 1px solid var(--hair);
+}
+.res-detail .rd-art {
+  width: 100%; max-width: 340px; aspect-ratio: 16 / 9;
+  border-radius: 5px; overflow: hidden;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  margin-bottom: 16px;
+}
+.res-detail h3 { font-size: 28px; font-weight: 600; line-height: 1.15; }
+.watch-row {
+  display: flex; align-items: center; gap: 13px;
+  height: 58px; padding: 0 14px; border-radius: 4px;
+  transition: background 0.11s linear;
+}
+.watch-row .wr-art { width: 62px; height: 46px; border-radius: 3px; overflow: hidden; flex: none; }
+.watch-row.on { background: linear-gradient(90deg, var(--purple), var(--purple-lit)); }
+
+.empty-note {
+  padding: 60px 20px; text-align: center;
+  color: var(--tx-3); font-size: 20px;
+}
+
+/* ------------------------------------------------------- the streaming store */
+
+.store { position: absolute; inset: 0; display: flex; padding-left: 92px; }
+.store-cats { width: 304px; flex: none; padding: 26px 12px 20px 20px; }
+.store-main { flex: 1; min-width: 0; padding: 26px 26px 20px 12px; overflow: hidden; }
+.store-grid { display: grid; grid-template-columns: repeat(4, 196px); gap: 20px; align-content: start; }
+.store-tile { width: 196px; height: 147px; border-radius: 6px; overflow: hidden; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.45); }
+.store-tile.on { box-shadow: var(--focus-shadow); }
+.store-tile .owned {
+  position: absolute; right: 0; bottom: 0;
+  padding: 3px 8px 4px; border-radius: 6px 0 0 0;
+  background: rgba(0, 0, 0, 0.72); color: #7fe39a;
+  font-size: 13px; font-weight: 600; z-index: 2;
+}
+
+/* Channel details, shown as a full page the way the store opens one. */
+.chpage { position: absolute; inset: 0; padding: 40px 48px 30px 118px; display: flex; gap: 34px; }
+.chpage .cp-art { width: 292px; height: 219px; border-radius: 8px; overflow: hidden; flex: none; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55); }
+.chpage h1 { font-size: 40px; font-weight: 600; letter-spacing: -0.02em; }
+.chpage .cp-meta { display: flex; align-items: center; gap: 12px; margin-top: 8px; color: var(--tx-2); font-size: 18px; }
+.chpage .cp-desc { margin-top: 14px; max-width: 640px; color: var(--tx-2); font-size: 19px; line-height: 1.5; }
+.chpage .cp-actions { display: flex; gap: 14px; margin-top: 22px; }
+.chpage .cp-facts { margin-top: 24px; display: grid; grid-template-columns: repeat(3, auto); gap: 8px 40px; font-size: 17px; }
+.chpage .cp-facts b { display: block; color: var(--tx-3); font-weight: 500; font-size: 15px; }
+
+.stars { display: inline-flex; gap: 3px; color: var(--gold); font-size: 19px; }
+.stars .off { color: rgba(255, 255, 255, 0.24); }
+
+/* ------------------------------------------------------- inside a channel */
+
+.chapp { position: absolute; inset: 0; display: flex; flex-direction: column; }
+.chapp-bar {
+  flex: none; height: 82px;
+  display: flex; align-items: center; gap: 18px;
+  padding: 0 var(--safe-x) 0 40px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.55), transparent);
+}
+.chapp-bar .cb-logo { width: 128px; height: 44px; border-radius: 4px; overflow: hidden; flex: none; }
+.chapp-bar .cb-nav { display: flex; gap: 8px; margin-left: 12px; }
+.chapp-bar .cb-nav .cbn {
+  padding: 7px 18px; border-radius: 999px;
+  font-size: 19px; color: var(--tx-2);
+  transition: background 0.11s linear, color 0.11s linear;
+}
+.chapp-bar .cb-nav .cbn.on { background: #fff; color: var(--tx-on-light); }
+.chapp-bar .cb-acct { margin-left: auto; color: var(--tx-3); font-size: 16px; }
+
+/* The splash a channel shows while it loads. */
+.chsplash {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  background: linear-gradient(150deg, var(--c1), var(--c2));
+}
+.chsplash .cs-logo { width: 440px; aspect-ratio: 4 / 3; font-size: 60px; }
+.chsplash .cs-bar {
+  position: absolute; left: 50%; bottom: 130px; transform: translateX(-50%);
+  width: 240px; height: 4px; border-radius: 3px;
+  background: rgba(255, 255, 255, 0.24);
+  overflow: hidden;
+}
+.chsplash .cs-bar i {
+  display: block; height: 100%; width: 38%;
+  background: #fff; border-radius: 3px;
+  animation: slidebar 1.1s ease-in-out infinite;
+}
+@keyframes slidebar { 0% { transform: translateX(-105%); } 100% { transform: translateX(268%); } }
+
+/* -------------------------------------------------------------------- player */
+
+.player { position: absolute; inset: 0; background: #000; }
+
+/* A generated "scene" so playback is visibly playing something. */
+.scene { position: absolute; inset: 0; overflow: hidden; }
+.scene .sky { position: absolute; inset: 0; }
+.scene .band { position: absolute; left: -20%; width: 140%; }
+
+.player .buffering {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 5;
+}
+.player .buffering .pct { margin-top: 16px; color: var(--tx-2); font-size: 20px; }
+
+/* Trick play. Roku's bar sits low, shows the title above the scrubber and the
+   elapsed and remaining times at either end. */
+.trick {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  padding: 90px 48px 34px;
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.9) 8%, rgba(0, 0, 0, 0.55) 55%, transparent 100%);
+  transition: opacity 0.24s linear, transform 0.24s ease;
+  z-index: 6;
+}
+.trick.away { opacity: 0; transform: translateY(20px); pointer-events: none; }
+.trick .tk-title { font-size: 28px; font-weight: 600; }
+.trick .tk-sub { color: var(--tx-2); font-size: 18px; margin-top: 3px; }
+.trick .tk-barwrap { display: flex; align-items: center; gap: 16px; margin-top: 16px; }
+.trick .tk-time { font-size: 19px; color: var(--tx-2); width: 74px; flex: none; }
+.trick .tk-time.right { text-align: right; }
+.trick .tk-bar {
+  position: relative; flex: 1; height: 6px; border-radius: 4px;
+  background: rgba(255, 255, 255, 0.24);
+}
+.trick .tk-bar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; background: #fff; }
+.trick .tk-bar .thumb {
+  position: absolute; top: 50%; width: 18px; height: 18px; border-radius: 50%;
+  background: #fff; transform: translate(-50%, -50%);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+}
+.trick .tk-state {
+  display: flex; align-items: center; gap: 10px;
+  margin-top: 12px; color: var(--tx-2); font-size: 19px;
+}
+.trick .tk-state svg { width: 20px; height: 20px; fill: currentColor; }
+.trick .tk-speed { color: var(--gold); font-weight: 600; }
+
+/* The panel * opens during playback. */
+.playopts {
+  position: absolute; right: 0; top: 0; bottom: 0; width: 440px;
+  padding: 42px 30px;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.35), rgba(12, 8, 18, 0.97) 12%);
+  z-index: 8;
+  animation: from-right 0.18s ease both;
+}
+.playopts h3 { font-size: 26px; font-weight: 600; margin-bottom: 18px; }
+
+/* Playback settings carry long values ("English (Dolby Digital Plus 5.1)"),
+   so the value goes under the label rather than fighting it for the row. */
+.playopts .row {
+  flex-direction: column; align-items: flex-start; gap: 1px;
+  min-height: 0; padding: 11px 22px;
+}
+.playopts .row .row-val { margin-left: 0; font-size: 18px; }
+
+/* -------------------------------------------------- advanced video statistics */
+
+/* The overlay a support agent asks for when a stream looks soft or stutters.
+   Deliberately plain and monospaced, the way diagnostic overlays always are. */
+.vstats {
+  position: absolute; left: 40px; top: 40px;
+  min-width: 330px;
+  padding: 16px 20px;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.78);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+  font-size: 17px;
+  line-height: 1.6;
+  font-variant-numeric: tabular-nums;
+  z-index: 7;
+}
+.vstats h4 { font-size: 15px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--tx-3); margin-bottom: 8px; }
+.vstats .vs-row { display: flex; gap: 18px; }
+.vstats .vs-row span:first-child { width: 168px; color: var(--tx-2); }
+
+/* An error a channel draws inside itself, rather than a system dialog. */
+.cherr {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  padding: 60px; text-align: center;
+  background: linear-gradient(150deg, var(--c1), var(--c2));
+}
+.cherr .ce-inner { max-width: 640px; }
+.cherr h2 { font-size: 32px; font-weight: 600; margin-bottom: 12px; }
+.cherr p { font-size: 20px; line-height: 1.5; color: rgba(255, 255, 255, 0.86); }
+.cherr .ce-actions { display: flex; gap: 12px; justify-content: center; margin-top: 26px; }

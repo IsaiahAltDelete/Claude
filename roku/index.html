@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark light">
+<meta name="description" content="An offline, browser-based Roku troubleshooting simulator — home screen, channels, search, the full settings tree, restarts and factory reset, driven by an on-screen remote.">
+<title>Roku — Troubleshooting Simulator</title>
+
+<link rel="icon" href="assets/icon.svg">
+<link rel="stylesheet" href="assets/fonts/fonts.css">
+<link rel="stylesheet" href="styles/01-tokens.css">
+<link rel="stylesheet" href="styles/02-stage.css">
+<link rel="stylesheet" href="styles/03-home.css">
+<link rel="stylesheet" href="styles/04-content.css">
+<link rel="stylesheet" href="styles/05-settings.css">
+<link rel="stylesheet" href="styles/06-system.css">
+<link rel="stylesheet" href="styles/07-responsive.css">
+</head>
+<body>
+
+<main id="stage">
+
+  <!-- ------------------------------------------------------------ the set -->
+  <div id="tv-col">
+    <div class="tv-frame">
+      <div class="tv-well" id="tv-well">
+        <!-- Everything the television shows is drawn on this fixed 1280x720
+             canvas and scaled to fit. Three layers, lowest first: the current
+             screen, panels over it, and anything the system puts over the lot. -->
+        <div class="tv-canvas" id="canvas" data-theme="roku" role="application"
+             aria-label="Television screen">
+          <div class="layer" id="layer-screen"></div>
+          <div class="layer" id="layer-overlay"></div>
+          <div class="layer" id="layer-system"></div>
+          <div class="layer" id="layer-toast"><div class="toasts"></div></div>
+        </div>
+      </div>
+      <div class="tv-chin">
+        <span class="tv-led" id="tv-led" data-state="on"></span>
+        <span>HDMI 1</span>
+      </div>
+    </div>
+    <div class="tv-stand" id="tv-stand"></div>
+    <div class="tv-caption" id="tv-caption">
+      <span><b id="cap-model">Roku Ultra</b> · HDMI 1</span>
+      <span class="sep">|</span>
+      <span id="cap-state">Simulated device — nothing here touches a real Roku, network or account</span>
+    </div>
+  </div>
+
+  <!-- --------------------------------------------------------- the remote -->
+  <div id="remote-col">
+    <div id="remote-scaler"><div id="remote-mount"></div></div>
+  </div>
+
+</main>
+
+<noscript style="position:fixed;inset:0;display:grid;place-items:center;background:#111;color:#fff;padding:24px;text-align:center;font-family:system-ui,sans-serif">
+  This troubleshooting simulator needs JavaScript enabled.
+</noscript>
+
+<!-- Load order matters: primitives, then data, then the navigation engine and
+     the shell, then the screens, then the remote, then boot. -->
+<script src="scripts/01-core.js"></script>
+<script src="scripts/02-icons.js"></script>
+<script src="scripts/03-art.js"></script>
+<script src="scripts/04-data.js"></script>
+<script src="scripts/05-focus.js"></script>
+<script src="scripts/06-shell.js"></script>
+<script src="scripts/09-menu.js"></script>
+<script src="scripts/10-home.js"></script>
+<script src="scripts/11-rails.js"></script>
+<script src="scripts/12-live.js"></script>
+<script src="scripts/13-search.js"></script>
+<script src="scripts/14-store.js"></script>
+<script src="scripts/15-app.js"></script>
+<script src="scripts/20-settings.js"></script>
+<script src="scripts/21-network.js"></script>
+<script src="scripts/22-devices.js"></script>
+<script src="scripts/30-system.js"></script>
+<script src="scripts/40-remote.js"></script>
+<script src="scripts/99-boot.js"></script>
+</body>
+</html>
