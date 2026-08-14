@@ -1,0 +1,356 @@
+/* ===========================================================================
+   The stage: a television on the left, a remote on the right.
+
+   Both are drawn at a natural size and then scaled by JS (fitStage) so the
+   pair always fills the window without either one being clipped. Below about
+   980px the remote drops underneath the set and the page is allowed to scroll.
+   =========================================================================== */
+
+/* Stretch, not centre: the columns need full height before they can be
+   measured, and each one centres its own contents. */
+#stage {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 30px;
+  height: 100%;
+  padding: 20px 22px;
+}
+
+/* ------------------------------------------------------------------ the set */
+
+#tv-col {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.tv-frame {
+  position: relative;
+  padding: 12px 12px 34px;
+  border-radius: 16px;
+  background: linear-gradient(168deg, #33353b 0%, #17181c 34%, #202226 72%, #101114 100%);
+  box-shadow:
+    0 34px 70px rgba(0, 0, 0, 0.68),
+    0 0 0 1px rgba(255, 255, 255, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.11);
+}
+
+/* The screen well. Its size is written by JS to match the scaled canvas. */
+.tv-well {
+  position: relative;
+  overflow: hidden;
+  border-radius: 5px;
+  background: #000;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.9), inset 0 0 60px rgba(0, 0, 0, 0.55);
+}
+
+/* A whisper of glass over the picture. Purely cosmetic, never interactive. */
+.tv-well::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(122deg, rgba(255, 255, 255, 0.055) 0%, transparent 34%, transparent 66%, rgba(255, 255, 255, 0.028) 100%);
+  pointer-events: none;
+  z-index: 200;
+}
+[data-glare="off"] .tv-well::after { display: none; }
+
+.tv-chin {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: rgba(255, 255, 255, 0.28);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.tv-led {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #2a5c33;
+  box-shadow: 0 0 7px rgba(70, 196, 106, 0.5);
+  transition: background 0.3s, box-shadow 0.3s;
+}
+.tv-led[data-state="on"]      { background: #46c46a; box-shadow: 0 0 10px rgba(70, 196, 106, 0.85); }
+.tv-led[data-state="standby"] { background: #b8332f; box-shadow: 0 0 8px rgba(184, 51, 47, 0.7); }
+.tv-led[data-state="busy"]    { background: #ffb020; box-shadow: 0 0 10px rgba(255, 176, 32, 0.8); animation: led-pulse 1.1s ease-in-out infinite; }
+@keyframes led-pulse { 50% { opacity: 0.35; } }
+
+.tv-stand {
+  width: 34%;
+  max-width: 260px;
+  height: 12px;
+  border-radius: 0 0 9px 9px;
+  background: linear-gradient(180deg, #26282d, #131418);
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.55);
+}
+
+/* Caption under the set: what the box is and what it is doing. */
+.tv-caption {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: #6f727c;
+  font-size: 12px;
+  letter-spacing: 0.03em;
+}
+.tv-caption b { color: #a9adb8; font-weight: 600; }
+.tv-caption .sep { color: #3a3d45; }
+
+/* ---------------------------------------------------------------- the remote */
+
+#remote-col {
+  flex: 0 0 auto;
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* Scaled from the top-left so the column's measured width and the drawn
+   width stay the same number. */
+#remote-scaler { transform-origin: top left; }
+
+.remote {
+  position: relative;
+  width: 226px;
+  padding: 20px 20px 22px;
+  border-radius: 34px;
+  background: linear-gradient(160deg, #45474e 0%, #2a2c32 16%, #232529 52%, #2c2e34 84%, #1a1b1f 100%);
+  box-shadow:
+    0 26px 54px rgba(0, 0, 0, 0.62),
+    0 0 0 1px rgba(255, 255, 255, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.5);
+  user-select: none;
+}
+
+.remote-brand {
+  text-align: center;
+  margin-bottom: 14px;
+  color: rgba(255, 255, 255, 0.34);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+/* Every pressable thing on the remote. */
+.rk {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #e6e7ea;
+  background: linear-gradient(180deg, #4a4d55 0%, #383b42 52%, #2b2e34 100%);
+  border-radius: 999px;
+  box-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transition: transform 0.07s ease, filter 0.07s ease, box-shadow 0.07s ease;
+}
+.rk:hover { filter: brightness(1.22); }
+.rk:active, .rk.press {
+  transform: translateY(2px);
+  filter: brightness(1.5);
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0.4), inset 0 2px 5px rgba(0, 0, 0, 0.45);
+}
+.rk svg { width: 20px; height: 20px; fill: currentColor; pointer-events: none; }
+.rk .lbl { font-size: 10px; font-weight: 600; letter-spacing: 0.05em; pointer-events: none; }
+
+.rk-round { width: 42px; height: 42px; }
+.rk-pill  { height: 34px; padding: 0 12px; border-radius: 999px; }
+
+.rk-power { background: linear-gradient(180deg, #55585f, #3a3d43); }
+.rk-power svg { width: 17px; height: 17px; }
+.rk-power.press, .rk-power:active { color: #ff8a80; }
+
+.rk-mic svg { width: 17px; height: 17px; }
+.rk-mic.live { color: #fff; background: linear-gradient(180deg, #8438bd, #5a2382); box-shadow: 0 0 16px var(--purple-glow); }
+
+.remote-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.remote-row.center { justify-content: center; gap: 18px; }
+
+/* --- the D-pad ------------------------------------------------------------ */
+
+.dpad {
+  position: relative;
+  width: 168px; height: 168px;
+  margin: 2px auto 18px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 34%, #8438bd 0%, #662d91 46%, #4b1f6c 78%, #351650 100%);
+  box-shadow:
+    0 4px 0 rgba(0, 0, 0, 0.4),
+    0 10px 26px rgba(102, 45, 145, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24),
+    inset 0 -8px 18px rgba(0, 0, 0, 0.3);
+}
+
+.dpad-arm {
+  position: absolute;
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(255, 255, 255, 0.92);
+  border-radius: 12px;
+  transition: background 0.08s linear, transform 0.07s ease;
+}
+.dpad-arm svg { width: 19px; height: 19px; fill: currentColor; pointer-events: none; }
+.dpad-arm:hover { background: rgba(255, 255, 255, 0.14); }
+.dpad-arm:active, .dpad-arm.press { background: rgba(255, 255, 255, 0.3); transform: scale(0.94); }
+
+.dpad-up    { top: 6px;  left: 50%; transform: translateX(-50%); width: 60px; height: 44px; }
+.dpad-down  { bottom: 6px; left: 50%; transform: translateX(-50%); width: 60px; height: 44px; }
+.dpad-left  { left: 6px;  top: 50%; transform: translateY(-50%); width: 44px; height: 60px; }
+.dpad-right { right: 6px; top: 50%; transform: translateY(-50%); width: 44px; height: 60px; }
+.dpad-up:active, .dpad-up.press       { transform: translateX(-50%) scale(0.94); }
+.dpad-down:active, .dpad-down.press   { transform: translateX(-50%) scale(0.94); }
+.dpad-left:active, .dpad-left.press   { transform: translateY(-50%) scale(0.94); }
+.dpad-right:active, .dpad-right.press { transform: translateY(-50%) scale(0.94); }
+
+.dpad-ok {
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  width: 74px; height: 74px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+  font-size: 15px; font-weight: 700; letter-spacing: 0.1em;
+  background: linear-gradient(180deg, #4b4e56 0%, #34373d 55%, #26282d 100%);
+  box-shadow:
+    0 3px 0 rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: transform 0.07s ease, filter 0.07s ease;
+}
+.dpad-ok:hover { filter: brightness(1.2); }
+.dpad-ok:active, .dpad-ok.press { transform: translate(-50%, -50%) translateY(2px) scale(0.97); filter: brightness(1.45); }
+
+/* --- transport and shortcuts --------------------------------------------- */
+
+.remote-transport { display: flex; justify-content: space-between; margin-bottom: 18px; }
+.remote-transport .rk { width: 52px; height: 34px; border-radius: 10px; }
+
+.remote-apps {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+.rk-app {
+  height: 34px;
+  border-radius: 5px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em;
+  color: #fff;
+  text-transform: uppercase;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: transform 0.07s ease, filter 0.07s ease;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.rk-app:hover { filter: brightness(1.15); }
+.rk-app:active, .rk-app.press { transform: translateY(2px); filter: brightness(1.35); }
+
+/* --- volume rocker on the right edge -------------------------------------- */
+
+.remote-side {
+  position: absolute;
+  right: -9px;
+  top: 214px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.rk-side {
+  width: 11px; height: 46px;
+  border-radius: 0 6px 6px 0;
+  background: linear-gradient(90deg, #26282d, #4a4d55);
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+  transition: filter 0.07s ease, transform 0.07s ease;
+  position: relative;
+}
+.rk-side::after {
+  content: attr(data-mark);
+  position: absolute; left: 1px; top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 9px; font-weight: 700;
+}
+.rk-side:hover { filter: brightness(1.35); }
+.rk-side:active, .rk-side.press { filter: brightness(1.7); transform: translateX(-1px); }
+.rk-side.mute { height: 30px; }
+
+/* --- the bit on the back --------------------------------------------------- */
+
+.remote-back {
+  width: 226px;
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #6f727c;
+  font-size: 11px;
+}
+.remote-back button {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #1b1d22;
+  color: #9aa0ac;
+  font-size: 11px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+.remote-back button:hover { color: #fff; background: #24262c; }
+.remote-back .batt {
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.remote-back .batt i {
+  width: 18px; height: 9px; border-radius: 2px;
+  box-shadow: inset 0 0 0 1px #4a4d55;
+  position: relative;
+  display: inline-block;
+}
+.remote-back .batt i::before {
+  content: ""; position: absolute; left: 1.5px; top: 1.5px; bottom: 1.5px;
+  width: calc(var(--pct, 82) * 0.15px);
+  background: #46c46a; border-radius: 1px;
+}
+.remote-back .batt.low i::before { background: #ffb020; }
+
+/* --- key hints ------------------------------------------------------------- */
+
+.hints {
+  width: 226px;
+  margin-top: 10px;
+  color: #5f636d;
+  font-size: 10px;
+  line-height: 1.7;
+  text-align: center;
+}
+.hints kbd {
+  display: inline-block;
+  min-width: 16px;
+  padding: 0 4px;
+  border-radius: 3px;
+  background: #1b1d22;
+  box-shadow: inset 0 0 0 1px #2e3138;
+  color: #9aa0ac;
+  font-family: inherit;
+  font-size: 10px;
+}
+.hints .sep { color: #33363d; margin: 0 3px; }
