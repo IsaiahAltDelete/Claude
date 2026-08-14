@@ -63,10 +63,8 @@
   const Outlook = Mac.Outlook = {
     data() { return Mac.state.outlook; },
 
-    online() {
-      const wifi = Mac.state.wifi;
-      return wifi.enabled && Boolean(wifi.current) && !wifi.captive;
-    },
+    /* Delegated for the same reason as Mail's — see Mac.Network.offlineReason. */
+    online() { return Mac.Network.online(); },
 
     /* --------------------------------------------------------------- model */
 

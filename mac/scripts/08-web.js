@@ -57,10 +57,13 @@
     enabled() { return Mac.state.browser.liveWeb !== false; },
 
     /** The simulated Wi-Fi still gates real requests, so scenarios stay honest. */
-    simulatedOnline() {
-      const wifi = Mac.state.wifi;
-      return wifi.enabled && Boolean(wifi.current) && !wifi.captive && wifi.dns.length > 0;
-    },
+    /* The simulated network gates the real one: a live fetch must not
+       succeed on a Mac the simulator is describing as unreachable, or the
+       whole exercise stops being reproducible. Delegated to Mac.Network so
+       there is one definition — this copy used to check DNS but not the
+       proxy, so a live page loaded through a proxy that Safari said was
+       refusing connections. */
+    simulatedOnline() { return Mac.Network.online(); },
 
     /**
      * Classify typed input.

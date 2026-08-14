@@ -33,10 +33,11 @@
 
     activeAccount() { return this.account(this.data().activeAccountId) || this.accounts()[0]; },
 
-    online() {
-      const wifi = Mac.state.wifi;
-      return wifi.enabled && Boolean(wifi.current) && !wifi.captive;
-    },
+    /* One definition of reachability for the whole simulator — see
+       Mac.Network.offlineReason. Mail used to keep its own, which ignored DNS
+       and proxy faults, so it happily fetched mail on a Mac that could not
+       resolve a hostname. */
+    online() { return Mac.Network.online(); },
 
     /** Messages for the current mailbox, account scope, category and search. */
     visible() {

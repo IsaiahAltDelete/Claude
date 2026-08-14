@@ -108,6 +108,7 @@
       case 'wifi-forget': Mac.Network.forget(arg); break;
       case 'renew-dhcp': Mac.Network.renewLease(); break;
       case 'edit-dns': Mac.Network.editDNS(); break;
+      case 'clear-proxy': Mac.Network.clearProxy(); break;
       case 'run-diagnostics': Mac.Dialog.close(); Mac.Surfaces.close(); Mac.Network.diagnostics(); break;
       case 'reset-network': Mac.Network.resetNetwork(); break;
       case 'portal-agree': Mac.Network.portalAgree(); break;
