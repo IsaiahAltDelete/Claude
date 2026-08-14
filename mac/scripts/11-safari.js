@@ -161,11 +161,22 @@
       return 'Cannot open the page';
     },
 
+    /**
+     * Scroll a loaded article to one of its sections.
+     *
+     * Accepts either a raw URL fragment or an id the sanitiser already
+     * namespaced, so a click on an in-page link and a load of a URL that
+     * carries a fragment both land in the same place.
+     */
     scrollToAnchor(win, anchor) {
       const view = win.el.querySelector('.browser-view');
-      if (!view) return;
-      const target = view.querySelector(`#${CSS.escape(anchor)}, [id="${anchor}"]`);
-      if (target) view.scrollTop = target.offsetTop - 12;
+      if (!view || !anchor) return;
+      const id = anchor.startsWith('wiki-anchor-') ? anchor : Mac.Web.anchorId(decodeURIComponent(anchor));
+      const target = view.querySelector(`[id="${CSS.escape(id)}"]`);
+      if (!target) return;
+      /* offsetTop is relative to the nearest positioned ancestor, which is
+         not always the scroller — measure against the scroller instead. */
+      view.scrollTop += target.getBoundingClientRect().top - view.getBoundingClientRect().top - 12;
     },
 
     go(win, delta) {
