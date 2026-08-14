@@ -19,7 +19,15 @@
   --sysblue:#0a84ff; --sysgreen:#30d158; --sysred:#ff453a; --sysorange:#ff9f0a;
   --syspurple:#bf5af2; --sysyellow:#ffd60a; --syspink:#ff375f; --systeal:#40c8e0;
   --bg:#000; --bg2:#1c1c1e; --bg3:#2c2c2e; --sep:rgba(84,84,88,.6);
-  --txt:#fff; --txt2:rgba(235,235,245,.6); --txt3:rgba(235,235,245,.3);
+  /* iOS's own secondaryLabel and tertiaryLabel are .6 and .3, and those are
+     what these were. Tertiary at .3 measures 2.4:1 against every background
+     it is used on here — well under the 4.5:1 that body text needs — and it
+     is not decoration in this build: 43 places use it for dates, counts,
+     section headings and organisation names. Raised until each level clears
+     4.5:1 on the darkest surface it lands on (#2c2c2e), keeping three
+     distinguishable levels. Faithfulness loses to legibility on a tool whose
+     entire purpose is reading what the screen says. */
+  --txt:#fff; --txt2:rgba(235,235,245,.68); --txt3:rgba(235,235,245,.55);
   --group:#1c1c1e; --page:#000; --blur:saturate(180%) blur(20px);
   --tsize:1;
   /* "Phone System" is the bundled pack in assets/fonts: real SF Pro through
@@ -29,12 +37,28 @@
 }
 .light{
   --bg:#fff; --bg2:#fff; --bg3:#f2f2f7; --sep:rgba(60,60,67,.29);
-  --txt:#000; --txt2:rgba(60,60,67,.6); --txt3:rgba(60,60,67,.3);
+  /* Light mode was worse: secondary measured 3.3:1 and tertiary 1.7:1. */
+  --txt:#000; --txt2:rgba(60,60,67,.84); --txt3:rgba(60,60,67,.74);
   --group:#fff; --page:#f2f2f7;
   --sysblue:#007aff; --sysgreen:#34c759; --sysred:#ff3b30; --sysorange:#ff9500;
   --syspurple:#af52de; --sysyellow:#ffcc00; --syspink:#ff2d55;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+
+/* ---------- Focus ----------
+   Only :focus-visible, so a tap never draws a ring, and a single rule rather
+   than per-component styling — anything reachable by Tab shows where it is,
+   including the divs that actionable() promotes to controls. The ring is
+   drawn with outline (which never affects layout) and given an offset so it
+   is visible against a filled row as well as an icon. */
+:focus{outline:none}
+:focus-visible{outline:2.5px solid var(--sysblue);outline-offset:2px;border-radius:6px}
+.app:focus-visible,.cc-tile:focus-visible,.sl-tile:focus-visible{outline-offset:4px}
+.row:focus-visible{outline-offset:-2.5px;border-radius:0}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;scroll-behavior:auto !important}
+}
 html,body{height:100%}
 body{
   background:#0b0d12;
@@ -835,6 +859,100 @@ const $ = (s,r=document)=>r.querySelector(s);
 const $$ = (s,r=document)=>[...r.querySelectorAll(s)];
 function el(tag,cls,html){const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e;}
 function h(html){const t=document.createElement('template');t.innerHTML=html.trim();return t.content.firstElementChild;}
+
+/**
+ * Make a plain <div> behave like a control.
+ *
+ * Almost everything you can tap on this phone is a div with an onclick —
+ * rows, app icons, Control Centre tiles, Spotlight results. That is fine for
+ * a finger and useless for anything else: nothing was reachable by Tab,
+ * nothing announced what it was, and nothing said whether a switch was on.
+ * Rather than rewrite every construction site as a <button> (which would
+ * fight the layout in a dozen places), the constructors mark their output
+ * here and one delegated key handler does the rest.
+ *
+ * @param {HTMLElement} node
+ * @param {object} [options]
+ * @param {string} [options.role]    ARIA role; 'button' unless stated
+ * @param {string} [options.label]   accessible name, when the text is not enough
+ * @param {boolean} [options.checked] for role="switch"
+ */
+function actionable(node, {role='button', label=null, checked=null, describedBy=null}={}){
+  node.setAttribute('role', role);
+  if(!node.hasAttribute('tabindex')) node.tabIndex=0;
+  if(label!=null) node.setAttribute('aria-label', label);
+  if(checked!=null) node.setAttribute('aria-checked', String(checked));
+  if(describedBy!=null) node.setAttribute('aria-describedby', describedBy);
+  return node;
+}
+
+/* Enter and Space activate a marked element, the way they do on a real
+   button. Delegated once rather than bound per element, so every current and
+   future construction site gets it by marking its output. */
+document.addEventListener('keydown', event => {
+  if(event.key!=='Enter' && event.key!==' ' && event.key!=='Spacebar') return;
+  const node=event.target;
+  if(!(node instanceof HTMLElement)) return;
+  // Real controls already do this themselves.
+  if(node.matches('input,textarea,select,button,a[href]')) return;
+  if(!node.matches('[role="button"],[role="switch"],[role="link"],[role="tab"],[role="menuitem"]')) return;
+  event.preventDefault();
+  node.click();
+});
+
+/**
+ * Promote anything still click-only into a keyboard-operable control.
+ *
+ * The constructors that build the same shape many times — rows, app icons,
+ * Control Centre tiles, Spotlight results — call actionable() directly,
+ * because they can produce a far better name than the raw text ("Unread.
+ * Nina Okafor. Call me when you get a chance." rather than the run-together
+ * contents of the node). But a simulator this size also has dozens of
+ * one-off tappable cards, and chasing each by hand guarantees the next one
+ * added is missed again.
+ *
+ * So after every render, whatever is left gets promoted here using its own
+ * text as its name. It is a fallback, not the plan: an element that already
+ * carries a role, is already focusable, or merely wraps a real control is
+ * left alone.
+ *
+ * @param {HTMLElement} root
+ */
+function promoteControls(root){
+  if(!root) return;
+  root.querySelectorAll('div').forEach(node=>{
+    if(typeof node.onclick!=='function') return;
+    if(node.hasAttribute('role') || node.tabIndex>=0) return;
+    // A container whose click only forwards to a real control is not a control.
+    if(node.querySelector('[tabindex="0"],button,input,select,textarea,[role]')) return;
+    const text=node.textContent.replace(/\s+/g,' ').trim().slice(0,120);
+    actionable(node,{label:text||undefined});
+  });
+}
+
+/**
+ * Announce something to a screen reader without showing it.
+ *
+ * The phone communicates almost entirely through motion — a toast slides up,
+ * an icon animates, a switch slides across. None of that reaches anyone who
+ * is not looking at it, so the same events are mirrored here.
+ */
+function announce(message){
+  let live=document.getElementById('sr-live');
+  if(!live){
+    live=el('div');
+    live.id='sr-live';
+    live.setAttribute('role','status');
+    live.setAttribute('aria-live','polite');
+    live.setAttribute('aria-atomic','true');
+    live.style.cssText='position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0';
+    document.body.appendChild(live);
+  }
+  /* Cleared first: repeating the same string into a live region is otherwise
+     silent, and "Wi-Fi off" twice in a row is a real sequence here. */
+  live.textContent='';
+  setTimeout(()=>{ live.textContent=String(message); },30);
+}
 const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 /* ---------- persistent state ---------- */
@@ -1243,14 +1361,56 @@ $('#island').addEventListener('click',()=>{ if(Call.state==='active') showCallUI
 function toast(msg, ms=1700){
   $$('.toast').forEach(t=>t.remove());
   const t=el('div','toast',esc(msg)); $('#screen').appendChild(t);
+  /* A toast is the phone's main way of confirming that something happened,
+     and it is purely visual — it slides in and out with no other trace. */
+  announce(msg);
   setTimeout(()=>{t.style.transition='opacity .3s';t.style.opacity='0';setTimeout(()=>t.remove(),300);},ms);
 }
+
+/* ---------- Modal focus ----------
+   Alerts, action sheets and sheets all render into #overlay, so one trap
+   covers all three. Without it, Tab walks straight out of a modal and into
+   the home screen behind it, and dismissing the modal leaves focus on an
+   element that has since been removed — which sends it back to <body> and
+   loses the reader's place entirely. */
+let overlayReturnFocus=null;
+
+function trapOverlayFocus(){
+  const ov=$('#overlay');
+  overlayReturnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  ov.setAttribute('role','dialog');
+  ov.setAttribute('aria-modal','true');
+  requestAnimationFrame(()=>{
+    const first=overlayFocusable()[0];
+    if(first) first.focus();
+  });
+}
+
+function overlayFocusable(){
+  return $$('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"]),[role="button"],[role="switch"]',$('#overlay'))
+    .filter(node=>!node.disabled && node.offsetParent!==null);
+}
+
+document.addEventListener('keydown',event=>{
+  const ov=$('#overlay');
+  if(!ov || !ov.classList.contains('on')) return;
+  if(event.key==='Escape'){ event.preventDefault(); closeOverlay(); return; }
+  if(event.key!=='Tab') return;
+  const items=overlayFocusable();
+  if(!items.length) return;
+  const first=items[0], last=items[items.length-1];
+  if(event.shiftKey && document.activeElement===first){ event.preventDefault(); last.focus(); }
+  else if(!event.shiftKey && document.activeElement===last){ event.preventDefault(); first.focus(); }
+});
 function alertBox({title,message,buttons}){
   const ov=$('#overlay'); ov.innerHTML='';
   const a=el('div','alert',
     `<div class="at">${esc(title)}</div>${message?`<div class="am">${esc(message)}</div>`:''}
      <div class="ab">${buttons.map((b,i)=>`<button data-i="${i}" class="${b.style||''}">${esc(b.text)}</button>`).join('')}</div>`);
   ov.appendChild(a); ov.classList.add('on'); requestAnimationFrame(()=>a.classList.add('on'));
+  a.setAttribute('aria-label',[title,message].filter(Boolean).join('. '));
+  trapOverlayFocus();
+  announce([title,message].filter(Boolean).join('. '));
   a.onclick=e=>{ const b=e.target.closest('button'); if(!b)return;
     const btn=buttons[+b.dataset.i]; closeOverlay(); btn.onClick&&btn.onClick(); };
 }
@@ -1261,6 +1421,8 @@ function actionSheet(title, items, cancelText='Cancel'){
       ${items.map((it,i)=>`<button data-i="${i}" class="${it.style||''}">${esc(it.text)}</button>`).join('')}</div>
      <div class="as-grp as-cancel"><button data-cancel="1">${esc(cancelText)}</button></div>`);
   ov.appendChild(a); ov.classList.add('on'); requestAnimationFrame(()=>a.classList.add('on'));
+  if(title) a.setAttribute('aria-label',title);
+  trapOverlayFocus();
   ov.onclick=e=>{ if(e.target===ov) closeOverlay(); };
   a.onclick=e=>{ const b=e.target.closest('button'); if(!b)return;
     if(b.dataset.cancel){closeOverlay();return;}
@@ -1272,12 +1434,19 @@ function sheet(buildFn,{full=false}={}){
   ov.appendChild(s); ov.classList.add('on');
   buildFn(s, closeOverlay);
   requestAnimationFrame(()=>s.classList.add('on'));
+  trapOverlayFocus();
   ov.onclick=e=>{ if(e.target===ov) closeOverlay(); };
   return s;
 }
 function closeOverlay(){
   const ov=$('#overlay'); ov.classList.remove('on');
+  ov.removeAttribute('role'); ov.removeAttribute('aria-modal');
   $$('.sheet,.alert,.actionsheet',ov).forEach(x=>x.classList.remove('on'));
+  /* Put focus back where it came from. Skipped when the element has since
+     been removed from the document — a re-render during the modal — because
+     focusing a detached node silently drops focus to <body>. */
+  if(overlayReturnFocus && overlayReturnFocus.isConnected) overlayReturnFocus.focus();
+  overlayReturnFocus=null;
   setTimeout(()=>{ if(!ov.classList.contains('on')) ov.innerHTML=''; },320);
 }
 
@@ -1314,6 +1483,7 @@ class Nav{
     view._page=page; view._body=body; view._bar=bar; view._nav=this;
     view.build && view.build(body,this,view);
     if(view.tabbar) page.appendChild(view.tabbar);
+    promoteControls(page);
     return page;
   }
   push(view,animate=true){
@@ -1368,7 +1538,7 @@ class Nav{
   /** rebuild current page contents in place */
   refresh(){ const v=this.top; if(!v)return; const sc=v._body.scrollTop;
     v._body.innerHTML=''; if(v.largeTitle) v._body.appendChild(el('div','lg-title',esc(v.title||'')));
-    v.build&&v.build(v._body,this,v); v._body.scrollTop=sc; }
+    v.build&&v.build(v._body,this,v); v._body.scrollTop=sc; promoteControls(v._body); }
 }
 
 /* list building helpers */
@@ -1408,16 +1578,34 @@ function makeRow(r){
   if(r.rightHTML) row.appendChild(h(`<div>${r.rightHTML}</div>`));
   if(r.toggle){
     const sw=el('div','sw'+(r.toggle()?' on':''));
-    sw.onclick=e=>{e.stopPropagation(); const v=!r.toggle(); r.onToggle(v); sw.classList.toggle('on',v);};
+    /* The switch itself carries the role, not the row: a screen reader
+       should hear "Auto-Correction, switch, on" once, not a button
+       containing a switch. The row still forwards clicks so the whole
+       row stays tappable. */
+    actionable(sw,{role:'switch',label:r.label||'',checked:r.toggle()});
+    sw.onclick=e=>{
+      e.stopPropagation();
+      const v=!r.toggle();
+      r.onToggle(v);
+      sw.classList.toggle('on',v);
+      sw.setAttribute('aria-checked',String(v));
+      announce(`${r.label||''} ${v?'on':'off'}`);
+    };
     row.appendChild(sw); row.classList.add('static');
     row.onclick=()=>sw.click();
     row.classList.remove('static');
+    return row;
   }
   // centred action rows ("Forget All Networks", "Sign Out", …) never take a chevron
   if(r.chevron!==false && r.onClick && !/\bcenter\b/.test(r.cls||''))
     row.appendChild(h(`<div class="chev">${SVG.chev}</div>`));
-  if(r.onClick) row.onclick=()=>r.onClick(row);
-  else if(!r.toggle) row.classList.add('static');
+  if(r.onClick){
+    row.onclick=()=>r.onClick(row);
+    /* The value is part of the name — "Wi-Fi, SABLEWAVE-5G" is the whole
+       point of the row, and reading it as "Wi-Fi" alone loses the answer. */
+    actionable(row,{label:[r.label,r.sub,r.value].filter(Boolean).join(', ')||undefined});
+  }
+  else row.classList.add('static');
   return row;
 }
 /**
@@ -1479,6 +1667,9 @@ function openApp(id, origin){
     $('#applayer').appendChild(win);
     inst={win,def}; openApps.set(id,inst);
     def.mount(win, inst);
+    /* Apps that do not use Nav (Camera, Weather, the games) build their own
+       DOM, so they get the sweep here rather than through Nav._build. */
+    promoteControls(win);
     setTimeout(()=>win.classList.remove('opening'),400);
   }
   $('#applayer').appendChild(inst.win);   // bring to front
@@ -1555,8 +1746,15 @@ function appTile(id){
   const t=el('div','app'+(State.installed.includes(id)?' removable':''));
   t.dataset.app=id;
   t.innerHTML = `<div class="delx">✕</div><div class="iconwrap">${appIconHTML(def)}</div><div class="applabel">${esc(def.name)}</div>`;
-  t.querySelector('.delx').onclick=e=>{ e.stopPropagation(); confirmDelete(id); };
+  const remove=t.querySelector('.delx');
+  remove.onclick=e=>{ e.stopPropagation(); confirmDelete(id); };
+  actionable(remove,{label:`Delete ${def.name}`});
   t.onclick=()=>{ if($('#home').classList.contains('jiggle'))return; openApp(id,t.querySelector('.appicon')); };
+  const badge=State.badges[id]|0;
+  actionable(t,{label:def.name + (badge? `, ${badge} notification${badge===1?'':'s'}`:'')});
+  /* Long press on a keyboard is the context-menu key or Shift-F10; without
+     it there is no way to reach the delete affordance except by touch. */
+  t.addEventListener('contextmenu',e=>{ e.preventDefault(); $('#home').classList.add('jiggle'); });
   let lp;
   t.addEventListener('pointerdown',()=>{ lp=setTimeout(()=>{ $('#home').classList.add('jiggle'); navigator.vibrate&&navigator.vibrate(8); },550); });
   ['pointerup','pointerleave','pointermove'].forEach(ev=>t.addEventListener(ev,()=>clearTimeout(lp)));
@@ -1585,6 +1783,10 @@ function updateBadges(){
     const host=t.querySelector('.iconwrap')||t;
     if(n>0){ if(!b){b=el('div','badge');host.appendChild(b);} b.textContent=n>99?'99+':n; }
     else if(b) b.remove();
+    /* The badge is the whole reason someone opens an app, so it belongs in
+       the name rather than in a decoration nobody hears. */
+    if(t.hasAttribute('aria-label') && Apps[id])
+      t.setAttribute('aria-label', Apps[id].name + (n>0? `, ${n} notification${n===1?'':'s'}`:''));
   });
 }
 function setBadge(id,n){ State.badges[id]=n; save(); updateBadges(); }
@@ -1811,6 +2013,7 @@ function renderLockNotifs(){
     /* The app opens after the unlock succeeds, not 260ms later regardless —
        tapping a notification on a phone you cannot get into must not open
        the app behind the passcode screen. */
+    actionable(d,{label:`${n.title}. ${n.body}. ${n.when||'now'}`});
     d.onclick=()=>unlock(()=>{
       openApp(n.app);
       if(n.thread){ const inst=openApps.get('messages'), t=MSG().find(x=>x.n===n.thread);
@@ -1824,6 +2027,8 @@ function renderLockNotifs(){
 if($('#lkTorch')){
   $('#lkTorch').innerHTML=SF.torch;
   $('#lkCam').innerHTML=SF.camera;
+  actionable($('#lkTorch'),{label:'Torch'});
+  actionable($('#lkCam'),{label:'Camera'});
   $('#lkTorch').onclick=()=>toast('Flashlight is simulated');
   /* A real iPhone opens Camera from the lock screen without unlocking, but
      it opens it into a sandbox that shows only the shots taken in that
@@ -2418,8 +2623,28 @@ function renderCC(){
        <div class="cc-ic">${sf('<rect x="2.5" y="6.5" width="19" height="13" rx="3.4"/><path d="M8.5 6.5l1.4-2.4h4.2l1.4 2.4"/><circle cx="12" cy="13" r="3.7"/>',{size:22,w:1.7})}</div>
        <div class="cc-label">Camera</div></div>
    </div>`;
+  /* Control Centre tiles are toggles that announce their own state. The
+     names come from the tile's own text where it has any, and from this
+     table where the tile is a bare icon. */
+  const CC_NAMES={airplane:'Airplane Mode',cellular:'Cellular Data',wifi:'Wi-Fi',bluetooth:'Bluetooth',
+    lock:'Rotation Lock',dnd:'Focus',low:'Low Power Mode',flash:'Torch',
+    music:'Now Playing',calc:'Calculator',camera:'Camera'};
+  const CC_TOGGLES=new Set(['airplane','cellular','wifi','bluetooth','lock','dnd','low','flash']);
+  const ccState={airplane:()=>s.airplane,cellular:()=>s.cellular&&!s.airplane,wifi:()=>s.wifi&&!s.airplane,
+    bluetooth:()=>s.bluetooth,lock:()=>s.rotationLock,dnd:()=>s.dnd,low:()=>s.lowpower,flash:()=>s.torch};
+  cc.querySelectorAll('[data-t]').forEach(n=>{
+    const key=n.dataset.t;
+    actionable(n,{
+      role:CC_TOGGLES.has(key)?'switch':'button',
+      label:CC_NAMES[key]||key,
+      checked:CC_TOGGLES.has(key)?ccState[key]():null,
+    });
+  });
+  $('#ccBright').setAttribute('aria-label','Brightness');
+  $('#ccVol').setAttribute('aria-label','Volume');
   cc.querySelectorAll('[data-t]').forEach(n=>n.onclick=e=>{
     e.stopPropagation(); const t=n.dataset.t;
+    if(CC_TOGGLES.has(t)) setTimeout(()=>announce(`${CC_NAMES[t]} ${ccState[t]()?'on':'off'}`),0);
     if(t==='airplane'){ s.airplane=!s.airplane; if(s.airplane){s.wifi=false;} toast(s.airplane?'Airplane Mode On':'Airplane Mode Off'); }
     else if(t==='wifi'){ s.wifi=!s.wifi; if(s.wifi)s.airplane=false; }
     else if(t==='cellular'){ s.cellular=!s.cellular; }
@@ -2434,15 +2659,33 @@ function renderCC(){
     save(); applyAppearance(); renderCC();
   });
   const drag=(node,get,set)=>{
+    const apply=v=>{ set(v); node.querySelector('.cc-fill').style.height=(v*100)+'%';
+      node.setAttribute('aria-valuenow',Math.round(v*100)); };
     const move=e=>{ const r=node.getBoundingClientRect();
-      const v=Math.min(1,Math.max(0,1-(e.clientY-r.top)/r.height)); set(v);
-      node.querySelector('.cc-fill').style.height=(v*100)+'%'; };
+      apply(Math.min(1,Math.max(0,1-(e.clientY-r.top)/r.height))); };
     node.addEventListener('pointerdown',e=>{ node.setPointerCapture(e.pointerId); move(e);
       node.onpointermove=ev=>{ if(ev.buttons) move(ev); };
       node.onpointerup=()=>{ node.onpointermove=null; save(); applyAppearance(); }; });
+    /* A vertical drag is unreachable without a pointer, so the arrow keys
+       drive the same setter. role="slider" rather than the actionable()
+       helper, because Enter and Space do nothing to a slider. */
+    node.setAttribute('role','slider');
+    node.setAttribute('aria-valuemin','0');
+    node.setAttribute('aria-valuemax','100');
+    node.setAttribute('aria-valuenow',String(Math.round(get()*100)));
+    node.tabIndex=0;
+    node.addEventListener('keydown',e=>{
+      const step={ArrowUp:.05,ArrowRight:.05,ArrowDown:-.05,ArrowLeft:-.05,PageUp:.2,PageDown:-.2}[e.key];
+      const jump={Home:0,End:1}[e.key];
+      if(step===undefined && jump===undefined) return;
+      e.preventDefault();
+      apply(jump!==undefined? jump : Math.min(1,Math.max(0,get()+step)));
+      save(); applyAppearance();
+      announce(`${node.getAttribute('aria-label')} ${node.getAttribute('aria-valuenow')} percent`);
+    });
   };
-  drag($('#ccBright'),null,v=>{ s.brightness=Math.max(.15,v); applyAppearance(); });
-  drag($('#ccVol'),null,v=>{ s.ringer=Math.round(v*100); });
+  drag($('#ccBright'),()=>s.brightness,v=>{ s.brightness=Math.max(.15,v); applyAppearance(); });
+  drag($('#ccVol'),()=>s.ringer/100,v=>{ s.ringer=Math.round(v*100); });
 }
 
 /* ---------- App switcher ---------- */
@@ -2537,6 +2780,7 @@ function settingsRoot(){
       idRow.onclick=()=>signInSheet(nav);
     }
     idRow.style.padding='14px';
+    actionable(idRow,{label:idRow.textContent.replace(/\s+/g,' ').trim()});
     const g0=el('div','grp'); g0.appendChild(idRow); content.appendChild(g0);
 
     /* Only while there is genuinely an update left to install — the banner
@@ -4596,16 +4840,23 @@ function getButton(app,{onOpen}={}){
     else if(State.installed.includes(app.id)){ b.className='getbtn'; b.textContent='OPEN'; }
     else { b.className='getbtn'; b.textContent='GET'; }
   };
-  paint();
+  /* The label is redrawn on every state change (GET → spinner → OPEN), so
+     the accessible name has to be redrawn with it rather than set once —
+     otherwise it announces "GET" forever, including after the install. */
+  const repaint=()=>{
+    paint();
+    actionable(b,{label:`${b.textContent||`Downloading ${app.name}`}${b.textContent?` ${app.name}`:''}`});
+  };
+  repaint();
   b.onclick=e=>{
     e.stopPropagation();
     if(installing.has(app.id)) return;
     if(State.installed.includes(app.id)){ onOpen? onOpen() : openApp(app.id); return; }
     if(!isOnline()){ alertBox({title:'Unable to Download App',
       message:`“${app.name}” could not be downloaded at this time. ${netReason()}`,buttons:[{text:'OK'}]}); return; }
-    startInstall(app,b,paint);
+    startInstall(app,b,repaint);
   };
-  b._paint=paint;
+  b._paint=repaint;
   return b;
 }
 function startInstall(app,btn,paint){
@@ -4705,6 +4956,7 @@ function storeTodayView(){
         <div class="kicker">STREAMING GUIDE</div><div class="ttl">Cut the cord without\nlosing the good stuff</div></div>
         <div style="padding:12px 14px;font-size:14px;color:var(--txt2);line-height:1.4">Six services, one weekend. We tested what actually replaces cable — and what you can skip.</div>`;
       story.onclick=()=>nav.push(storeStoryView());
+      actionable(story,{label:'Streaming Guide: cut the cord without losing the good stuff'});
       b.appendChild(story);
 
       b.appendChild(heroCard({kicker:'NOW TRENDING',title:'Everything on Peacock\nthis month',app:byId('peacock'),
@@ -4737,6 +4989,8 @@ function heroCard({kicker,title,app,art,nav}){
   c.querySelector('.slot').replaceWith(getButton(app));
   c.querySelector('.art').onclick=()=>nav.push(appDetailView(app));
   c.querySelector('.foot').onclick=e=>{ if(!e.target.closest('.getbtn')) nav.push(appDetailView(app)); };
+  actionable(c.querySelector('.art'),{label:`${kicker}: ${title.replace(/\n/g,' ')}`});
+  actionable(c.querySelector('.foot'),{label:`${app.name}, ${app.sub}`});
   return c;
 }
 function sectionHeader(title,onSeeAll){
@@ -4752,6 +5006,7 @@ function storeRow(app,nav,{rank}={}){
     <div class="sb" style="font-size:11px">${esc(app.cat)}</div></div><span class="slot"></span>`;
   r.querySelector('.slot').replaceWith(getButton(app));
   r.onclick=e=>{ if(!e.target.closest('.getbtn')) nav.push(appDetailView(app)); };
+  actionable(r,{label:`${app.name}, ${app.sub}, ${app.cat}`});
   return r;
 }
 function storeGamesView(){
@@ -5254,6 +5509,7 @@ function safariStartPage(){
   FAVORITES.forEach(f=>{
     const d=el('div','f',`<div class="fi" style="background:${f.c}">${f.t}</div><div>${esc(f.n)}</div>`);
     d.onclick=()=>safariGo(f.u);
+    actionable(d,{role:'link',label:`${f.n}, ${f.u}`});
     fav.appendChild(d);
   });
   p.appendChild(fav);
@@ -5614,6 +5870,7 @@ function mailRow(m,a,nav,box,refresh){
       <button style="background:#ff9f0a" data-act="flag">${sf('<path d="M5.5 21V4.5M5.5 5.5h11l-1.6 3.4 1.6 3.4h-11z" fill="currentColor"/>',{size:19})}${m.flagged?'Unflag':'Flag'}</button>
       <button style="background:#ff3b30" data-act="trash">${sf('<path d="M4.5 6.5h15M9.5 6.5V4.8h5v1.7M6.5 6.5l.9 12.4a2 2 0 002 1.8h5.2a2 2 0 002-1.8l.9-12.4"/>',{size:19})}${box==='trash'?'Delete':'Trash'}</button>
     </div>`;
+  actionable(row,{label:`${m.read?'':'Unread. '}${who}. ${m.subject||'No subject'}. ${fmtDate(m.date)}`});
   let sx=0,moved=false;
   row.addEventListener('pointerdown',e=>{ sx=e.clientX; moved=false; });
   row.addEventListener('pointerup',e=>{
@@ -7390,6 +7647,7 @@ defineApp({id:'messages',name:'Messages',bg:'linear-gradient(180deg,#6ce67d,#17b
           <div class="avatar" style="background:${colorFor(t.n)}">${esc(initials(t.n))}</div>
           <div class="ml-main"><div class="ml-from">${esc(t.n)}<span>${fmtDate(t.at||Date.now()-3600e3)} ${SVG.chev}</span></div>
           <div class="ml-prev">${esc(last[1])}</div></div></div>`;
+        actionable(r,{label:`${unread?'Unread. ':''}${t.n}. ${last[1]}. ${fmtDate(t.at||Date.now()-3600e3)}`});
         r.onclick=()=>{
           t.msgs.forEach(m=>m[2]=0); save();
           r.classList.remove('unread');          // clear it straight away
