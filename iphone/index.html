@@ -1651,17 +1651,42 @@ if($('#lkTorch')){
 /* =========================================================================
    NETWORK STATE
    ========================================================================= */
+/** The Wi-Fi network this iPhone is actually associated with, or null. */
+function joinedNetwork(){
+  const s=State.settings;
+  if(s.airplane || !s.wifi) return null;
+  return WF().connected || null;
+}
 function isOnline(){
   const s=State.settings;
   if(s.airplane) return false;
-  if(s.network==='offline'||s.network==='noservice') return s.network==='offline'? false : !!s.wifi;
-  return !!(s.wifi||s.cellular);
+  if(s.network==='offline') return false;
+  if(s.network==='noservice') return !!joinedNetwork();
+  return !!(joinedNetwork() || s.cellular);
 }
+/**
+ * Why there is no internet, in the words Safari puts on the error page.
+ *
+ * The offline branch used to say the Wi-Fi network was "connected but has no
+ * internet connection" whether or not anything was connected — so with Wi-Fi
+ * switched off, or after forgetting every network, Safari asserted a
+ * connection to a network the phone had just left, and named it. Anyone
+ * following that message would go looking for a router problem instead of
+ * turning Wi-Fi back on.
+ */
 function netReason(){
   const s=State.settings;
+  const joined=joinedNetwork();
   if(s.airplane) return 'Airplane Mode is on. Turn it off in Control Center or Settings.';
-  if(s.network==='noservice') return 'There is no cellular service and Wi‑Fi is unavailable.';
-  if(s.network==='offline') return 'The Wi‑Fi network “'+s.wifiName+'” is connected but has no internet connection.';
+  if(s.network==='noservice')
+    return joined? 'There is no cellular service. Wi‑Fi is connected but has no internet connection.'
+                 : 'There is no cellular service and this iPhone is not connected to Wi‑Fi.';
+  if(s.network==='offline')
+    return joined? 'The Wi‑Fi network “'+joined+'” is connected but has no internet connection.'
+                 : 'This iPhone is not connected to a Wi‑Fi network.';
+  if(!joined && !s.cellular)
+    return s.wifi? 'Wi‑Fi is on but this iPhone has not joined a network. Choose one in Settings › Wi‑Fi.'
+                 : 'Turn on Wi‑Fi or Cellular Data in Settings.';
   return 'Turn on Wi-Fi or Cellular Data in Settings.';
 }
 function setNetwork(mode){
@@ -1705,9 +1730,63 @@ function ringTone(on){
     beep(); ringTimer=setInterval(beep,2600);
   }catch(e){}
 }
-function incomingCall(name='Nina Okafor',number='mobile'){
+/**
+ * Resolve whoever is calling against Contacts.
+ *
+ * A call has to arrive carrying a number, because whether that number matches
+ * a contact is the entire question: a known caller shows a name, an unknown
+ * one shows the digits, Silence Unknown Callers can only act on the
+ * difference, and afterwards Recents has to show the same thing. Calls used
+ * to be created with a display name and the literal string "mobile" in the
+ * number field, so there was nothing to match against, nothing to add to
+ * Contacts, and nothing to silence.
+ *
+ * Accepts either a number or a name so the older demo triggers still work.
+ *
+ * @returns {{name:string, number:string, label:string, known:boolean}}
+ */
+function callerFor(who,label='mobile'){
+  const people = (typeof CON==='function' ? CON().people : State.contacts?.people) || [];
+  const digits = String(who||'').replace(/\D/g,'');
+  const byNumber = digits.length>=7
+    ? people.find(p=>p.phone.replace(/\D/g,'').endsWith(digits.slice(-7))) : null;
+  const byName = people.find(p=>personName(p).toLowerCase()===String(who||'').toLowerCase());
+  const person = byNumber || byName;
+  if(person) return {name:personName(person), number:person.phone, label, known:true};
+  // Not in Contacts: show the number, exactly as the phone would.
+  const number = digits.length>=7 ? String(who) : UNKNOWN_CALLER;
+  return {name:number, number, label, known:false};
+}
+const UNKNOWN_CALLER='+1 (407) 555-0182';
+
+function incomingCall(who='Nina Okafor',label='mobile'){
   if(Call.state!=='idle') return toast('A call is already in progress');
-  Object.assign(Call,{state:'incoming',name,number,started:0,mute:false,speaker:false,hold:false});
+  /* Airplane Mode and a dead cell radio stop a call reaching the phone at
+     all. Letting one ring through was the clearest way to teach that
+     Airplane Mode does not really do anything, which is the opposite of
+     what this simulator is for. */
+  const blocked = State.settings.airplane ? 'Airplane Mode'
+    : State.settings.network==='noservice' ? 'No Service'
+    : !State.settings.cellular ? 'Cellular Data off' : null;
+  if(blocked==='Airplane Mode' || blocked==='No Service'){
+    const caller=callerFor(who,label);
+    pushNotification('phone','Missed Call',`${caller.name} called while ${blocked} was on`);
+    setBadge('phone',(State.badges.phone||0)+1);
+    PH().recents.unshift({who:caller.name,type:'missed',label:caller.label,at:Date.now(),dur:''});
+    PH().recents=PH().recents.slice(0,40); save();
+    return;
+  }
+  const caller=callerFor(who,label);
+  /* Silence Unknown Callers sends anyone not in Contacts straight to
+     voicemail — the switch in Settings › Phone now decides something. */
+  if(!caller.known && State.switches['phone.silenceUnknownCallers']){
+    pushNotification('phone','Missed Call',`${caller.name} was silenced and sent to voicemail`);
+    PH().recents.unshift({who:caller.name,type:'missed',label:caller.label,at:Date.now(),dur:''});
+    PH().recents=PH().recents.slice(0,40); save();
+    return;
+  }
+  Object.assign(Call,{state:'incoming',name:caller.name,number:caller.number,
+    label:caller.label,known:caller.known,started:0,mute:false,speaker:false,hold:false});
   showCallUI(); ringTone(true);
   navigator.vibrate&&navigator.vibrate([400,200,400]);
 }
@@ -1719,7 +1798,14 @@ function answerCall(){
 /* dialling out from Favourites / Recents / Contacts / Keypad / Voicemail */
 function startOutgoingCall(name,number){
   if(Call.state!=='idle') return toast('A call is already in progress');
-  if(!isOnline() && State.settings.network==='noservice')
+  /* Same gate as an incoming call, and for the same reason: dialling out in
+     Airplane Mode used to connect, which taught the wrong thing about the
+     first switch anyone flips on a connectivity call. */
+  if(State.settings.airplane)
+    return alertBox({title:'Turn Off Airplane Mode',
+      message:'To make a call, turn off Airplane Mode in Control Centre or Settings.',
+      buttons:[{text:'OK'},{text:'Settings',style:'bold',onClick:()=>{goHome();setTimeout(()=>openApp('settings'),320);}}]});
+  if(State.settings.network==='noservice')
     return alertBox({title:'Call Failed',message:'There is no cellular service. Try again when you have signal.',buttons:[{text:'OK'}]});
   Object.assign(Call,{state:'dialing',name:name||number,number:number||'',started:0,mute:false,speaker:false});
   showCallUI();
@@ -1748,7 +1834,10 @@ function minimizeCall(){ hideCallUI(); renderStatus(); }
 function renderCallUI(){
   const c=$('#callui'); if(!c.classList.contains('on')) return;
   const incoming=Call.state==='incoming', dialing=Call.state==='dialing';
-  const sub = incoming? 'iPhone · '+esc(Call.number)
+  /* Incoming shows the number under the name — for a caller who is not in
+     Contacts the name IS the number, so it shows the label instead, which
+     is what iOS does and what makes an unknown caller obvious at a glance. */
+  const sub = incoming? (Call.known===false ? 'iPhone' : `${esc(Call.label||'mobile')} · ${esc(Call.number||'')}`)
             : dialing? 'calling '+esc(Call.number||'')+'…'
             : callDuration();
   c.innerHTML=`
@@ -2697,16 +2786,23 @@ function backupView(){
    WI-FI — networks in range, known ("previous") networks, join + forget
    ========================================================================= */
 /* what the radio can see right now */
+/* Networks in range. The secured ones carry a real password, because a
+   length check alone cannot teach the most common Wi-Fi call there is: the
+   customer is certain the password is right and it is not. `pw` is what the
+   network actually accepts; anything else is rejected with the same wording
+   iOS uses. Networks joined through "Other Network" have no known password,
+   so those fall back to the length rule. The home network's password is
+   written down in Notes, the way it would be on a sticker on the router. */
 const AIRWAVES=[
-  {ssid:'SABLEWAVE-5G',              sec:'WPA3', bars:3},
-  {ssid:'SABLEWAVE-2.4G',            sec:'WPA2', bars:3},
+  {ssid:'SABLEWAVE-5G',              sec:'WPA3', bars:3, pw:'wavecrest2019'},
+  {ssid:'SABLEWAVE-2.4G',            sec:'WPA2', bars:3, pw:'wavecrest2019'},
   {ssid:'Sablewave WiFi',            sec:'open', bars:2},
-  {ssid:'SablewaveSetup-A4',         sec:'WPA2', bars:2},
-  {ssid:'ATT-WIFI-8821',            sec:'WPA2', bars:2},
-  {ssid:'Apt 4B Guest',             sec:'WPA2', bars:2},
-  {ssid:'NETGEAR74',                sec:'WPA2', bars:1},
+  {ssid:'SablewaveSetup-A4',         sec:'WPA2', bars:2, pw:'setup1234'},
+  {ssid:'ATT-WIFI-8821',            sec:'WPA2', bars:2, pw:'8821attwifi'},
+  {ssid:'Apt 4B Guest',             sec:'WPA2', bars:2, pw:'guestpass'},
+  {ssid:'NETGEAR74',                sec:'WPA2', bars:1, pw:'basicwater238'},
   {ssid:'xfinitywifi',              sec:'open', bars:1},
-  {ssid:'DIRECT-3F-HP OfficeJet',   sec:'WPA2', bars:1}
+  {ssid:'DIRECT-3F-HP OfficeJet',   sec:'WPA2', bars:1, pw:'12345678'}
 ];
 const SECURITIES=['None','WEP','WPA','WPA2','WPA3','WPA2/WPA3','WPA2 Enterprise','WPA3 Enterprise'];
 const DAY=864e5;
@@ -2912,10 +3008,15 @@ function askForPassword(air,nav){
 
     cancel.onclick=close;
     join.onclick=()=>{
-      if(isSecured(air.sec) && pw.length<8){
+      /* A network in range has a real password; one typed in by hand through
+         "Other Network" does not, so that case keeps the length rule. */
+      const wrong = isSecured(air.sec) && (air.pw ? pw!==air.pw : pw.length<8);
+      if(wrong){
         close();
         setTimeout(()=>alertBox({title:'Unable to Join the Network “'+air.ssid+'”',
-          message:'The password you entered is incorrect. WPA2/WPA3 passwords are at least 8 characters.',
+          message:air.pw
+            ? 'The password you entered is incorrect. Check the label on the router, or ask whoever set up the network.'
+            : 'The password you entered is incorrect. WPA2/WPA3 passwords are at least 8 characters.',
           buttons:[{text:'Cancel'},{text:'Try Again',style:'bold',onClick:()=>askForPassword(air,nav)}]}),320);
         return;
       }
@@ -3445,16 +3546,37 @@ function generalView(){
     }}]});
   }};
 }
+/* The identifiers a support call actually asks for. IMEI above all — it is
+   the first thing a carrier wants and it was not on this screen at all, so
+   the most common reason anyone opens About could not be practised here. */
+const DEVICE_IDS=[
+  ['Serial Number','F2LX9K3QW1PZ'],
+  ['IMEI','35 674209 118432 7'],
+  ['IMEI2','35 674209 118433 5'],
+  ['MEID','35674209118432'],
+  ['ICCID','8901 4103 2718 4409 552'],
+  ['EID','89049032004008882600'],
+  ['Wi-Fi Address','8A:2C:19:F0:41:DE'],
+  ['Bluetooth','8A:2C:19:F0:41:DF'],
+];
 function aboutView(){
-  const rows=[['Name',State.settings.name],['Software Version','iOS 26.1'],['Model Name','iPhone 15 Pro'],
-    ['Model Number','MTQ83LL/A'],['Serial Number','F2LX9K3QW1PZ'],['Wi-Fi Address','8A:2C:19:F0:41:DE'],
-    ['Bluetooth','8A:2C:19:F0:41:DF'],['Carrier','Sablewave Mobile 54.1'],['EID','89049032004008882600'],
-    ['Songs','1,204'],['Videos','88'],['Photos','7,431'],['Applications',String(homeApps().length+DOCK.length)],
-    ['Capacity','256 GB'],['Available','182.4 GB']];
   return {title:'About', build(b,nav){
     group(b,{rows:[{label:'Name',value:State.settings.name,onClick:()=>nav.push(renameView())}]});
-    group(b,{rows:rows.slice(1,9).map(([k,v])=>({label:k,value:v}))});
-    group(b,{rows:rows.slice(9).map(([k,v])=>({label:k,value:v}))});
+    group(b,{rows:[
+      {label:'Software Version',value:'iOS 26.1'},
+      {label:'Model Name',value:'iPhone 15 Pro'},
+      {label:'Model Number',value:'MTQ83LL/A'},
+      {label:'Carrier',value:'Sablewave Mobile 54.1'}]});
+    /* Tapping an identifier copies it, the way pressing and holding does on
+       a real iPhone — reading an IMEI back over the phone is the task. */
+    group(b,{rows:DEVICE_IDS.map(([label,value])=>({label,value,chevron:false,onClick:()=>{
+      if(navigator.clipboard) navigator.clipboard.writeText(value).then(()=>toast(label+' copied'),()=>toast(value));
+      else toast(value);
+    }})),footer:'Tap an identifier to copy it.'});
+    group(b,{rows:[
+      {label:'Songs',value:'1,204'},{label:'Videos',value:'88'},{label:'Photos',value:'7,431'},
+      {label:'Applications',value:String(homeApps().length+DOCK.length)},
+      {label:'Capacity',value:'256 GB'},{label:'Available',value:'182.4 GB'}]});
     group(b,{rows:[
       {label:'Certificate Trust Settings',onClick:()=>toast('Simulated')},
       {label:'Legal Notices',onClick:()=>toast('Simulated')}]});
@@ -3587,12 +3709,62 @@ function resetOptionsView(){
     group(b,{rows:[
       {label:'Reset All Settings',cls:'blue',onClick:()=>alertBox({title:'Reset All Settings',message:'All settings including Wi-Fi, wallpaper and appearance will be restored to defaults. Your apps and mail stay.',
         buttons:[{text:'Cancel'},{text:'Reset',style:'red bold',onClick:()=>{State.settings=structuredClone(DEFAULTS.settings);save();applyAppearance();nav.popToRoot();toast('All settings reset');}}]})},
-      {label:'Reset Network Settings',cls:'blue',onClick:()=>{State.settings.wifiName='SABLEWAVE-5G';State.settings.wifi=true;save();toast('Network settings reset');}},
-      {label:'Reset Keyboard Dictionary',cls:'blue',onClick:()=>toast('Keyboard dictionary reset')},
-      {label:'Reset Home Screen Layout',cls:'blue',onClick:()=>{renderHome();toast('Home Screen layout reset');}},
-      {label:'Reset Location & Privacy',cls:'blue',onClick:()=>toast('Location & Privacy reset')}]});
+      {label:'Reset Network Settings',cls:'blue',onClick:()=>alertBox({
+        title:'Reset Network Settings',
+        message:'All network settings will be reset, including saved Wi-Fi networks and passwords, cellular settings and VPN configurations.',
+        buttons:[{text:'Cancel'},{text:'Reset',style:'red bold',onClick:resetNetworkSettings}]})},
+      {label:'Reset Keyboard Dictionary',cls:'blue',onClick:()=>alertBox({title:'Reset Keyboard Dictionary',
+        message:'All custom words you have taught the keyboard will be deleted.',
+        buttons:[{text:'Cancel'},{text:'Reset',style:'red bold',onClick:()=>toast('Keyboard dictionary reset')}]})},
+      {label:'Reset Home Screen Layout',cls:'blue',onClick:()=>alertBox({title:'Reset Home Screen Layout',
+        message:'Your Home Screen will be returned to its original layout.',
+        buttons:[{text:'Cancel'},{text:'Reset',style:'red bold',onClick:()=>{resetHomeLayout();toast('Home Screen layout reset');}}]})},
+      {label:'Reset Location & Privacy',cls:'blue',onClick:()=>alertBox({title:'Reset Location & Privacy',
+        message:'Location and privacy settings will return to factory defaults. Apps will ask for permission again.',
+        buttons:[{text:'Cancel'},{text:'Reset',style:'red bold',onClick:()=>toast('Location & Privacy reset')}]})}]});
   }};
 }
+/**
+ * Reset Network Settings, doing what the name says.
+ *
+ * It used to set `wifiName` and turn Wi-Fi on, which is not a reset of
+ * anything: the phone stayed joined to the same network, kept every saved
+ * network and password, and kept the VPN and hotspot configuration. That
+ * makes the single most-used step on a connectivity call a no-op, and worse,
+ * one that appears to succeed.
+ *
+ * A real reset forgets every network, so the phone comes back disconnected
+ * and has to be rejoined with the password — which is the point of the step,
+ * and the reason it fixes some problems and strands people who do not know
+ * their password.
+ */
+function resetNetworkSettings(){
+  const s=State.settings;
+  const w=WF();
+  w.known=[];
+  w.connected=null;
+  w.askToJoin='Notify';
+  w.autoJoinHotspot='Ask to Join';
+  s.wifi=true; s.wifiName=''; s.airplane=false; s.cellular=true;
+  s.hotspot=false; s.hotspotPw='bluesky2249';
+  s.vpnOn=false; s.vpnConfigured=false;
+  /* Cellular still works after a network reset — it is only Wi-Fi that has
+     to be rejoined, which is exactly what makes the step worth teaching. */
+  s.network='online';
+  save();
+  applyAppearance(); renderCC(); renderStatus();
+  const inst=openApps.get('settings');
+  if(inst){ inst.nav.popToRoot(); inst.nav.refresh(); }
+  island(SVG.wifi,'#ff9f0a','Wi-Fi','Not Connected',2400);
+  toast('Network settings reset — rejoin a Wi-Fi network');
+}
+
+/* Icons cannot be rearranged here, so there is no custom layout to discard —
+   apps sit in their registered order with anything installed appended. The
+   reset repaints and reports honestly rather than claiming to undo something
+   that was never possible. */
+function resetHomeLayout(){ renderHome(); }
+
 function eraseConfirm(){ eraseFlow(); }
 
 function displayView(){
@@ -6725,7 +6897,23 @@ function keypadView(){
       k.append(big,small);
       k.onpointerdown=()=>k.style.background='color-mix(in srgb,var(--bg3) 55%,#98989d)';
       k.onpointerup=k.onpointerleave=()=>k.style.background='var(--bg3)';
-      k.onclick=()=>{ digits+=n; paint(); if(State.settings.hapticFeedback&&navigator.vibrate)navigator.vibrate(3); };
+      k.onclick=()=>{
+        digits+=n; paint();
+        if(State.settings.hapticFeedback&&navigator.vibrate)navigator.vibrate(3);
+        /* *#06# shows the IMEI on any phone, and it is the fastest way to
+           read one back to a carrier — so it works here too. */
+        if(digits.endsWith('*#06#')){
+          digits=''; paint();
+          const [,imei]=DEVICE_IDS.find(([label])=>label==='IMEI');
+          const [,imei2]=DEVICE_IDS.find(([label])=>label==='IMEI2');
+          alertBox({title:'Device Identifiers',
+            message:`IMEI\n${imei}\n\nIMEI2 (eSIM)\n${imei2}`,
+            buttons:[{text:'Done'},{text:'Copy IMEI',style:'bold',onClick:()=>{
+              if(navigator.clipboard) navigator.clipboard.writeText(imei).then(()=>toast('IMEI copied'),()=>toast(imei));
+              else toast(imei);
+            }}]});
+        }
+      };
       let lp;
       if(n==='0'){ k.addEventListener('pointerdown',()=>{lp=setTimeout(()=>{digits=digits.slice(0,-1)+'+';paint();},550);});
         ['pointerup','pointerleave'].forEach(ev=>k.addEventListener(ev,()=>clearTimeout(lp))); }

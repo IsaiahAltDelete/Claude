@@ -621,9 +621,18 @@ function NT() {
         id: 3, folder: 'ideas', at: Date.now() - 5 * 864e5,
         body: 'Weekend\n\nFarmers market before 9, then the coast road. Bring the film camera.',
       },
+      /* The home Wi-Fi password lives here because it has to live somewhere.
+         "Forget the network and rejoin" is a dead end otherwise — the phone
+         asks for a password nobody can produce, which is a real support call
+         but a useless exercise. On a real one it is read off the router; here
+         it is where someone would have typed it after doing exactly that. */
+      {
+        id: 4, folder: 'notes', at: Date.now() - 19 * 864e5,
+        body: 'Router info\n\nSablewave gateway, hall closet\nNetwork: SABLEWAVE-5G (also SABLEWAVE-2.4G)\nPassword: wavecrest2019\n\nAdmin page: 192.168.1.1\nAccount PIN is the last 4 of the phone number.',
+      },
     ],
     trash: [],
-  }));
+  }), 2);
 }
 
 const noteTitle = note => (note.body.split('\n')[0] || '').trim() || 'New Note';
