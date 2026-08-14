@@ -56,6 +56,15 @@ being replaced; render targets are rebuilt only on a size change; the frame loop
 allocates nothing; and quality tiers cap total pixels so a 4K artboard cannot
 melt a phone. Context loss is caught and the whole pipeline rebuilds itself.
 
+## Presets and canvas
+
+Two things get reached for constantly and belong to no panel, so they have
+their own buttons in the bar. **Presets** (`P`) opens seventeen finished looks
+— tunnels, tickers, galaxies, corridors, emoji swarms, chrome rings, knockout
+monoliths — each a complete parameter set, each undoable. **Canvas** (`C`) sets
+the artboard: eight ratios, six named pixel sizes from HD to 4K, a turn that
+swaps width and height, and a clear.
+
 ## Controls
 
 Five panels — Type, Space, Motion, Look, Out — generated from a single schema in

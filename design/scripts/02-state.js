@@ -333,9 +333,10 @@ const PRESETS = [
     fog: 0.85, vignette: 0.3, grain: 0.05, bloom: 0.1 } },
   { id: "ticker", name: "Ticker", patch: {
     text: "DESIGN\nSTUDIO\nISAIART", font: "grotesk", weight: 700, split: "lines", case: "upper",
-    effect: "fill", formation: "line", count: 60, depth: 9, size: 0.5, tracking: 0.12,
-    speed: 0.8, spin: 0, facing: "billboard", colorMode: "solid", tintA: "#f2f2f3",
-    bgType: "solid", bgA: "#0b0b0d", fog: 0.35, scan: 0.18, grain: 0.06, vignette: 0.2 } },
+    effect: "fill", formation: "line", count: 26, depth: 5.5, size: 0.28, tracking: 0.12,
+    speed: 0.35, dist: 3.6, facing: "billboard", colorMode: "depth", tintA: "#f2f2f3",
+    tintB: "#5c5c64", bgType: "solid", bgA: "#0b0b0d", fog: 0.8, scan: 0.18, grain: 0.06,
+    vignette: 0.24 } },
   { id: "swarm", name: "Emoji swarm", patch: {
     text: "🛰 👾 🪐 ✦", split: "words", font: "system", effect: "fill", formation: "cloud",
     count: 900, radius: 2.2, depth: 6, size: 0.34, sizeVar: 0.6, scatter: 0.9, speed: 0.2,
@@ -359,15 +360,70 @@ const PRESETS = [
     fog: 0.6, chroma: 0.18, bloom: 0.2 } },
   { id: "monolith", name: "Monolith", patch: {
     text: "ISAIART", font: "playfair", weight: 900, split: "phrase", case: "upper", effect: "knockout",
-    formation: "column", count: 220, radius: 0.6, depth: 6, size: 0.8, speed: 0.18, spin: 0.22,
-    facing: "radial", colorMode: "solid", tintA: "#efefef", bgType: "solid", bgA: "#101012",
-    fog: 0.62, vignette: 0.42, grain: 0.09, contrast: 0.12 } },
+    formation: "column", count: 90, radius: 1.6, depth: 6, turns: 4, size: 0.36, speed: 0.2,
+    spin: 0.18, dist: 4.4, facing: "radial", colorMode: "depth", tintA: "#efefef", tintB: "#6a6a72",
+    bgType: "solid", bgA: "#101012", fog: 0.72, vignette: 0.42, grain: 0.09, contrast: 0.12 } },
   { id: "static", name: "Static", patch: {
-    text: "ISAIART", font: "vt323", split: "chars", effect: "scan", formation: "wall", count: 800,
-    radius: 2.2, depth: 2.6, size: 0.26, sizeVar: 0.3, wobble: 0.25, wobbleFreq: 2.6, turb: 0.35,
-    speed: 0.1, facing: "flat", colorMode: "random", tintA: "#ffffff", tintB: "#8a8a90",
-    bgType: "noise", bgA: "#0a0a0b", bgB: "#1a1a1e", bgScale: 2, scan: 0.4, grain: 0.22,
-    chroma: 0.3, fog: 0.4 } },
+    text: "ISAIART", font: "vt323", split: "chars", effect: "scan", effectAmt: 0.5,
+    formation: "wall", count: 220, radius: 2.2, depth: 2.6, size: 0.5, sizeVar: 0.3,
+    wobble: 0.2, wobbleFreq: 2.6, turb: 0.25, speed: 0.1, facing: "flat", colorMode: "random",
+    tintA: "#ffffff", tintB: "#c9c9d0", bgType: "noise", bgA: "#0a0a0b", bgB: "#1a1a1e",
+    bgScale: 2, scan: 0.26, grain: 0.16, chroma: 0.24, fog: 0.3, contrast: 0.24 } },
+
+  { id: "corridor", name: "Corridor", patch: {
+    text: "ISAIART DESIGN", split: "words", font: "jetbrains", weight: 600, case: "upper",
+    effect: "fill", formation: "corridor", count: 460, radius: 1.5, depth: 8, size: 0.24,
+    speed: 0.55, facing: "radial", colorMode: "depth", tintA: "#ffffff", tintB: "#4e4e55",
+    bgType: "solid", bgA: "#0a0a0c", fog: 0.9, vignette: 0.36, grain: 0.06, scan: 0.12 } },
+
+  { id: "vortex", name: "Vortex", patch: {
+    text: "ISAIART", split: "chars", font: "bebas", effect: "fill", formation: "vortex",
+    count: 900, radius: 2.4, depth: 6, turns: 6, size: 0.28, speed: 0.5, swirl: 0.4,
+    colorMode: "depth", tintA: "#ffffff", tintB: "#5a5a62", bgType: "radial", bgA: "#09090b",
+    bgB: "#1b1b20", fog: 0.85, bloom: 0.15, vignette: 0.36 } },
+
+  { id: "orbit", name: "Orbit", patch: {
+    text: "ISAIART", font: "instrument", case: "asis", effect: "fill", formation: "rings",
+    count: 300, radius: 2, depth: 4, turns: 5, size: 0.32, spin: 0.12, pitch: -24, dist: 4.2,
+    facing: "radial", colorMode: "index", tintA: "#f4f4f5", tintB: "#6b6b73",
+    bgType: "radial", bgA: "#0b0b0d", bgB: "#1d1d22", fog: 0.6, vignette: 0.4, grain: 0.04 } },
+
+  { id: "confetti", name: "Confetti", patch: {
+    text: "🖤 ✦ ⚡ 🧊 ✨", split: "words", font: "system", formation: "cloud", count: 420,
+    radius: 1.9, depth: 5, size: 0.38, sizeVar: 0.5, scatter: 0.8, speed: 0.35, tumble: 1.1,
+    pulse: 0.2, pulseRate: 2, tintA: "#ffffff", bgType: "solid", bgA: "#101013",
+    fog: 0.55, vignette: 0.3, bloom: 0.15 } },
+
+  { id: "chrome", name: "Chrome", patch: {
+    text: "ISAIART", font: "archivo", effect: "chrome", effectAmt: 0.5, stroke: 0.02,
+    fillA: "#f2f2f3", fillB: "#3a3a40", formation: "torus", count: 44, radius: 1.7, turns: 1,
+    size: 0.3, spin: 0.1, pitch: 44, dist: 5, bgType: "linear", bgA: "#0b0b0d", bgB: "#26262c",
+    bgAngle: 110, fog: 0.55, vignette: 0.35, contrast: 0.1 } },
+
+  { id: "plan", name: "Plan", patch: {
+    text: "ISAIART DESIGN", split: "words", font: "oswald", effect: "outline", stroke: 0.03,
+    formation: "grid", count: 340, radius: 2.6, depth: 4, turns: 2, size: 0.28, speed: 0.1,
+    facing: "flat", colorMode: "depth", tintA: "#ffffff", tintB: "#55555c", bgType: "grid",
+    bgA: "#0b0b0d", bgB: "#212127", bgScale: 2.2, fog: 0.75, vignette: 0.28, grain: 0.05 } },
+
+  { id: "ribbon", name: "Ribbon", patch: {
+    text: "ISAIART", split: "chars", font: "syne", weight: 800, effect: "gradient",
+    fillA: "#ffffff", fillB: "#6e6e77", formation: "ribbon", count: 220, radius: 1.5, depth: 5,
+    turns: 4, size: 0.22, speed: 0.45, dist: 3.8, tintA: "#ffffff", bgType: "linear",
+    bgA: "#0a0a0c", bgB: "#1e1e24", bgAngle: 200, fog: 0.8, vignette: 0.3, bloom: 0.1 } },
+
+  { id: "nebula", name: "Nebula", patch: {
+    text: "✦ ● ✳", split: "words", font: "system", effect: "glow", effectAmt: 0.7,
+    fillA: "#ffffff", fillB: "#8a8a92", formation: "shell", count: 1100, radius: 2.4,
+    size: 0.12, sizeVar: 0.7, spin: 0.06, tumble: 0.2, blend: "add", colorMode: "random",
+    tintA: "#ffffff", tintB: "#7a7a84", bgType: "radial", bgA: "#08080a", bgB: "#141418",
+    fog: 0.35, bloom: 0.7, vignette: 0.45, grain: 0.05 } },
+
+  { id: "stamp", name: "Stamp", patch: {
+    text: "ISAIART", font: "bungee", effect: "plate", fillA: "#0a0a0b", fillB: "#f2f2f3",
+    formation: "arc", count: 44, radius: 2.2, turns: 4, depth: 5, size: 0.26, speed: 0,
+    spin: 0.04, scatter: 0.25, colorMode: "solid", tintA: "#ffffff", bgType: "stripes", bgA: "#0d0d10",
+    bgB: "#17171c", bgScale: 1.6, bgAngle: 45, fog: 0.5, vignette: 0.35, grain: 0.07 } },
 ];
 
 /* --------------------------------------------------------------- runtime */
