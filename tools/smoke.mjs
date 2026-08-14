@@ -93,6 +93,72 @@ async function blockOutbound(context) {
   });
 }
 
+/* A fixture shaped like the markup the Wikipedia parse API returns, plus the
+   things a hostile or merely awkward page would include. Kept here rather
+   than fetched so the assertions below are deterministic and run offline. */
+const WIKI_FIXTURE = `
+  <div class="mw-parser-output">
+    <p>Intro with an <a href="/wiki/Internal_Link">internal link</a>
+       and a <a href="/wiki/Other#Section_Two">deep link</a>.</p>
+    <div class="mw-heading mw-heading2"><h2 id="History">History</h2></div>
+    <p>History text.</p>
+    <div class="mw-heading mw-heading2"><h2 id="See also">See also</h2></div>
+    <ul><li><a href="#History">Back to History</a></li>
+        <li><a href="#See also">See also</a></li></ul>
+    <script>window.__sanitizerEscaped = 'script';</script>
+    <iframe src="https://evil.example"></iframe>
+    <object data="https://evil.example"></object>
+    <a href="javascript:void(window.__sanitizerEscaped='href')">click</a>
+    <p onclick="window.__sanitizerEscaped='handler'">handler</p>
+    <img src="//upload.wikimedia.org/x.png" width="900" height="700">
+    <img src="http://insecure.example/x.png">
+    <div id="settings">an id that would collide with the simulator</div>
+  </div>`;
+
+/**
+ * Assertions for Mac.Web.sanitize.
+ *
+ * Worth pinning down precisely: it is the only place in either simulator
+ * that renders markup fetched from the open internet into the same document
+ * as the app itself. Both halves matter — nothing executable may survive,
+ * and enough must survive that articles are still navigable.
+ */
+async function testSanitizer(page) {
+  const result = await page.evaluate(fixture => {
+    const html = Mac.Web.sanitize(fixture, { lang: 'en', project: 'wikipedia', title: 'Test' });
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const anchors = [...doc.querySelectorAll('[data-web-anchor]')];
+    return {
+      escaped: window.__sanitizerEscaped || null,
+      scripts: doc.querySelectorAll('script, iframe, object, embed, style, link').length,
+      handlers: [...doc.querySelectorAll('*')].filter(node =>
+        [...node.attributes].some(attribute => attribute.name.toLowerCase().startsWith('on'))).length,
+      jsHrefs: [...doc.querySelectorAll('[href]')].filter(node =>
+        /^\s*javascript:/i.test(node.getAttribute('href'))).length,
+      rawIds: [...doc.querySelectorAll('[id]')].map(node => node.id).filter(id => !id.startsWith('wiki-anchor-')),
+      unresolvedAnchors: anchors.filter(link =>
+        !doc.querySelector(`[id="${CSS.escape(link.dataset.webAnchor)}"]`)).map(link => link.dataset.webAnchor),
+      anchorCount: anchors.length,
+      insecureImages: [...doc.querySelectorAll('img')].filter(node =>
+        !/^https:\/\//i.test(node.getAttribute('src') || '')).length,
+      keptFragment: [...doc.querySelectorAll('a[data-command="browse"]')]
+        .some(node => node.dataset.arg.includes('#Section_Two')),
+      headings: doc.querySelectorAll('h2').length,
+    };
+  }, WIKI_FIXTURE);
+
+  if (result.escaped) note(`mac sanitize: executable content survived (${result.escaped})`);
+  if (result.scripts) note(`mac sanitize: ${result.scripts} script/iframe/style element(s) survived`);
+  if (result.handlers) note(`mac sanitize: ${result.handlers} inline event handler(s) survived`);
+  if (result.jsHrefs) note(`mac sanitize: ${result.jsHrefs} javascript: href(s) survived`);
+  if (result.rawIds.length) note(`mac sanitize: un-namespaced id(s) leaked into the app document: ${result.rawIds.join(', ')}`);
+  if (result.anchorCount < 2) note('mac sanitize: in-page section links were dropped');
+  if (result.unresolvedAnchors.length) note(`mac sanitize: section link(s) point at nothing: ${result.unresolvedAnchors.join(', ')}`);
+  if (result.insecureImages) note(`mac sanitize: ${result.insecureImages} non-https image(s) survived`);
+  if (!result.keptFragment) note('mac sanitize: a link to another article lost its #section fragment');
+  if (!result.headings) note('mac sanitize: headings were stripped, so articles have no structure');
+}
+
 async function testMac(browser, base) {
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   await blockOutbound(context);
@@ -131,6 +197,8 @@ async function testMac(browser, base) {
   await page.evaluate(() => { Mac.set('settings.appearance', 'light'); Mac.wm.refreshAll(); });
   await page.waitForTimeout(600);
 
+  await testSanitizer(page);
+
   await context.close();
 }
 
@@ -146,7 +214,9 @@ async function testIphone(browser, base) {
   await page.waitForFunction(
     () => typeof Apps !== 'undefined' && typeof openApp === 'function', null, { timeout: 15000 });
   await page.waitForTimeout(2600);          // boot animation
-  await page.evaluate(() => unlock());
+  /* finishUnlock rather than unlock: unlock runs Face ID on a timer, and this
+     suite is not testing the lock screen — testLockScreen is. */
+  await page.evaluate(() => finishUnlock());
   await page.waitForTimeout(400);
 
   const ids = await page.evaluate(() => Object.keys(Apps));
@@ -182,17 +252,74 @@ async function testIphone(browser, base) {
   if (!folders) note('iphone: the App Library rendered no folders');
   await page.evaluate(() => closeLibrary());
 
-  /* A save written by an older build must not brick the boot. */
-  await page.evaluate(() => {
-    localStorage.setItem(SAVE_KEY, JSON.stringify({ settings: { dark: 'yes' }, notes: 'not an array', badges: null }));
-  });
-  await page.reload({ waitUntil: 'load' });
-  await page.waitForTimeout(3000);
-  const recovered = await page.evaluate(
-    () => typeof Apps !== 'undefined' && Object.keys(Apps).length > 0 && Boolean(document.querySelector('#pages .app')));
-  if (!recovered) note('iphone: a malformed save prevents the simulator from booting');
-
   await context.close();
+}
+
+/**
+ * Boot each simulator against a save it did not write.
+ *
+ * Both of these ship as a single HTML page in a browser, so the state on
+ * disk outlives every deploy: whatever is in localStorage when a new build
+ * lands is what the new build has to open. A save from two versions ago, or
+ * one that has been hand-edited, must degrade to defaults rather than throw
+ * during boot — and a boot-time throw is the worst case here, because both
+ * overlays are visible at parse time and a dead splash screen has no way out
+ * that does not involve devtools.
+ */
+async function testStaleSaves(browser, base) {
+  const cases = [
+    {
+      label: 'iphone: malformed types',
+      path: 'iphone', key: 'iphone-sim-v4',
+      save: { settings: { dark: 'yes', ringer: 'loud' }, notes: 'not an array', badges: null, wf: null },
+    },
+    {
+      label: 'iphone: an older build with none of the newer keys',
+      path: 'iphone', key: 'iphone-sim-v4',
+      save: { settings: { dark: true, wifi: true, wifiName: 'SABLEWAVE-5G' }, installed: [], badges: {} },
+    },
+    {
+      label: 'iphone: unknown keys from a future build',
+      path: 'iphone', key: 'iphone-sim-v4',
+      save: { settings: { dark: true, somethingNew: { nested: true } }, unknownSlice: [1, 2, 3] },
+    },
+    {
+      label: 'mac: a previous schema',
+      path: 'mac', key: 'macos-tahoe-simulator-v9',
+      save: { schema: 3, settings: { appearance: 'dark' }, fs: [], volumes: [] },
+    },
+    {
+      label: 'mac: current schema, corrupted contents',
+      path: 'mac', key: 'macos-tahoe-simulator-v9',
+      save: { schema: 10, settings: null, fs: 'not an array', wifi: { enabled: 'yes' }, volumes: null },
+    },
+    {
+      label: 'mac: not JSON at all',
+      path: 'mac', key: 'macos-tahoe-simulator-v9', raw: 'this is not json {{{',
+    },
+  ];
+
+  for (const testCase of cases) {
+    const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+    await blockOutbound(context);
+    const page = await context.newPage();
+    watch(page, testCase.label);
+    /* Seeded before any script runs, so load() genuinely reads it. */
+    await context.addInitScript(([key, value]) => {
+      try { localStorage.setItem(key, value); } catch { /* blocked */ }
+    }, [testCase.key, testCase.raw ?? JSON.stringify(testCase.save)]);
+
+    await page.goto(`${base}/${testCase.path}/`, { waitUntil: 'load' });
+    await page.waitForTimeout(testCase.path === 'mac' ? 2600 : 3400);
+
+    const alive = testCase.path === 'mac'
+      ? await page.evaluate(() => Boolean(window.Mac?.state?.settings) && Mac.appList().length > 0)
+      : await page.evaluate(() => typeof Apps !== 'undefined' && Object.keys(Apps).length > 0
+          && Boolean(document.querySelector('#pages .app')));
+    if (!alive) note(`${testCase.label}: the simulator did not come up`);
+
+    await context.close();
+  }
 }
 
 /* Resolved through CJS so NODE_PATH and a globally installed playwright both
@@ -222,6 +349,7 @@ const browser = await chromium.launch(launch);
 try {
   await testMac(browser, hosted.base);
   await testIphone(browser, hosted.base);
+  await testStaleSaves(browser, hosted.base);
 } finally {
   await browser.close();
   hosted.server?.close();

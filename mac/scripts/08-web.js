@@ -46,6 +46,20 @@
   const ALLOWED_ATTRS = new Set(['alt', 'class', 'colspan', 'datetime', 'dir', 'height',
     'lang', 'rowspan', 'title', 'width']);
 
+  /**
+   * Prefix for ids carried over from a fetched page.
+   *
+   * `id` is deliberately not in ALLOWED_ATTRS, because the article is
+   * rendered into the same document as the entire simulator — an article
+   * containing id="settings" or id="desktop" would quietly break Mac.$()
+   * everywhere. But dropping ids outright meant every section link on a
+   * Wikipedia article was dead: the anchor handler and scrollToAnchor were
+   * both wired up and had nothing to find. Ids are kept, namespaced, and the
+   * anchors are rewritten to match.
+   */
+  const ANCHOR_PREFIX = 'wiki-anchor-';
+  const anchorId = value => ANCHOR_PREFIX + String(value).replace(/\s+/g, '_');
+
   /* Wikipedia furniture that only makes sense with their own stylesheet. */
   const DROP_SELECTORS = ['.mw-editsection', '.mw-jump-link', '.mw-empty-elt', '.navbox',
     '.vertical-navbox', '.sistersitebox', '.metadata.plainlinks', '.ambox', '.mbox-small',
@@ -173,6 +187,10 @@
       return data.query?.random?.[0]?.title || 'Macintosh';
     },
 
+    /* Exposed so Safari can turn a URL fragment into the id the sanitiser
+       actually wrote, without either side hard-coding the prefix. */
+    anchorId(value) { return anchorId(value); },
+
     stripTags(html) {
       const parsed = new DOMParser().parseFromString(String(html || ''), 'text/html');
       return (parsed.body.textContent || '').trim();
@@ -219,6 +237,9 @@
           if (name.startsWith('on')) continue;
           if (ALLOWED_ATTRS.has(name)) clone.setAttribute(name, attribute.value);
         }
+        // Namespaced, so section links resolve without colliding with the app.
+        const id = node.getAttribute('id');
+        if (id) clone.id = anchorId(id);
 
         if (node.tagName === 'A') this.rewriteLink(node, clone, target);
         if (node.tagName === 'IMG' && !this.rewriteImage(node, clone)) return;
@@ -234,16 +255,19 @@
       const project = target.project === 'wikipedia' ? 'wikipedia' : target.project;
 
       if (href.startsWith('#')) {
-        clone.setAttribute('data-web-anchor', href.slice(1));
+        clone.setAttribute('data-web-anchor', anchorId(decodeURIComponent(href.slice(1))));
         clone.setAttribute('role', 'link');
         return;
       }
       const wiki = href.match(/^(?:https?:)?(?:\/\/[^/]+)?\/wiki\/([^#?]+)(#.*)?$/);
       if (wiki) {
         const title = decodeURIComponent(wiki[1]);
+        const fragment = wiki[2] || '';
+        /* A link to another article's section keeps its fragment, so the
+           load lands on the section rather than the top of the page. */
         clone.setAttribute('data-command', 'browse');
-        clone.setAttribute('data-arg', `${target.lang}.${project}.org/wiki/${encodeURIComponent(title)}`);
-        clone.setAttribute('title', title.replace(/_/g, ' '));
+        clone.setAttribute('data-arg', `${target.lang}.${project}.org/wiki/${encodeURIComponent(title)}${fragment}`);
+        clone.setAttribute('title', title.replace(/_/g, ' ') + (fragment ? ` ${fragment}` : ''));
         return;
       }
       if (/^https?:\/\//i.test(href)) {
