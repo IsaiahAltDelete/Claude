@@ -50,6 +50,7 @@ function powerOn() {
   State.power = 'on';
   save();
   setLed('busy');
+  cecPullToRoku('Woken by the Roku remote');
   /* Fast TV start skips the long boot, which is the whole point of it. */
   if (State.system.fastStart) {
     clearSystem();
@@ -550,6 +551,8 @@ function noteActivity() {
 function startScreensaver(preview = false) {
   if (State.power === 'standby') return;
   if (UI.system) return;
+  /* Nothing the box draws is visible when the set is on another input. */
+  if (!onRoku()) return;
   const top = UI.stack[UI.stack.length - 1];
   /* Nothing covers a running player, which is how it behaves on the box. */
   if (!preview && top && top.id === 'player') return;
@@ -585,4 +588,94 @@ function stopScreensaver() {
   saverDrift = null;
   clearSystem();
   noteActivity();
+}
+
+/* ------------------------------------------------------- the secret screens */
+
+/* Roku's own button chords, kept because they are real and because they are
+   the fastest way out of a wedged box on a support call. Every press goes
+   through here; only the tail of the buffer is ever examined. */
+const CHORD_BUFFER = [];
+
+const CHORDS = [
+  {
+    keys: ['home', 'home', 'home', 'home', 'home', 'up', 'rew', 'rew', 'fwd', 'fwd'],
+    run() { toast('Reboot shortcut'); runRestart('Restarting'); },
+  },
+  {
+    keys: ['home', 'home', 'home', 'home', 'home', 'fwd', 'fwd', 'fwd', 'rew', 'rew'],
+    run() { openSecretScreen(); },
+  },
+  {
+    keys: ['home', 'home', 'home', 'home', 'home', 'right', 'left', 'right', 'left', 'right'],
+    run() { toast('Network shortcut'); go('settings', { path: ['network'] }); },
+  },
+];
+
+function noteChord(key) {
+  CHORD_BUFFER.push(key);
+  if (CHORD_BUFFER.length > 14) CHORD_BUFFER.shift();
+  const found = CHORDS.find(chord => {
+    const tail = CHORD_BUFFER.slice(-chord.keys.length);
+    return tail.length === chord.keys.length && tail.every((k, i) => k === chord.keys[i]);
+  });
+  if (!found) return;
+  CHORD_BUFFER.length = 0;
+  /* Let the press that completed the chord finish first. */
+  setTimeout(() => found.run(), 0);
+}
+
+/**
+ * The platform secret screen: plain, monospaced and deliberately ugly, the way
+ * a diagnostic screen always is. Everything on it is read from the simulated
+ * device rather than invented on the spot.
+ */
+function openSecretScreen() {
+  const n = State.network;
+  const up = Date.now() - State.bootedAt;
+  /* Stable per boot, so the numbers do not dance while somebody reads them. */
+  const random = rng(`secret:${State.bootedAt}`);
+  const temp = (52 + random() * 9).toFixed(1);
+  const freeMem = Math.round(180 + random() * 70);
+
+  const node = el('div', 'secret');
+  node.innerHTML = `
+    <div class="sec-inner">
+      <div class="sec-title">Platform Secret Screen</div>
+      <div class="sec-rows">
+        ${[
+          ['Model', `${State.model} (${State.modelNumber})`],
+          ['Serial', State.serial],
+          ['Device ID', State.deviceId],
+          ['Software', `${State.software.version} build ${State.software.build}`],
+          ['Uptime', fmtUptime(up)],
+          ['CPU temperature', `${temp} C`],
+          ['Free memory', `${freeMem} MB`],
+          ['Display', `${State.display.resolved} · HDMI ${State.display.hdmiMode}`],
+          ['TV input', currentInput().name],
+          ['Network', n.mode === 'wired' ? 'wired' : `${n.ssid} (${n.band}, ch ${n.channelNo})`],
+          ['Signal', `${n.signal}/4 bars`],
+          ['IP', n.ip],
+          ['MAC', n.mode === 'wired' ? n.macWired : n.macWireless],
+          ['Remote', State.remote.paired ? `${State.remote.kind} · ${State.remote.battery}% · fw ${State.remote.firmware}` : 'none paired'],
+          ['Channels installed', String(State.installed.length)],
+        ].map(([k, v]) => `<div class="sec-row"><span>${esc(k)}</span><span>${esc(v)}</span></div>`).join('')}
+      </div>
+      <div class="sec-actions">
+        <button class="btn slim f" data-fid="sec-store" data-sec="store" data-first>Cycle channel store server</button>
+        <button class="btn slim f" data-fid="sec-log" data-sec="log">Disable debug logging</button>
+        <button class="btn slim f" data-fid="sec-close" data-sec="close">Close</button>
+      </div>
+      <div class="sec-foot">Reached with Home x5, then fast forward x3, rewind x2.</div>
+    </div>`;
+
+  setSystem(node, {
+    select(target) {
+      const which = target.dataset.sec;
+      if (which === 'store') { toast('Channel store server cycled'); return; }
+      if (which === 'log') { toast('Debug logging disabled'); return; }
+      clearSystem();
+    },
+    back() { clearSystem(); return true; },
+  });
 }

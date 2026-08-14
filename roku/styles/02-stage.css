@@ -173,6 +173,8 @@
 .rk-power svg { width: 17px; height: 17px; }
 .rk-power.press, .rk-power:active { color: #ff8a80; }
 
+.rk-input svg { width: 19px; height: 19px; }
+
 .rk-mic svg { width: 17px; height: 17px; }
 .rk-mic.live { color: #fff; background: linear-gradient(180deg, #8438bd, #5a2382); box-shadow: 0 0 16px var(--purple-glow); }
 
@@ -354,3 +356,25 @@
   font-size: 10px;
 }
 .hints .sep { color: #33363d; margin: 0 3px; }
+
+/* The two buttons on the set itself. They are the way out when the remote is
+   flat, unpaired, or pointed at the wrong thing. */
+.tv-keys {
+  position: absolute;
+  right: 14px;
+  display: flex;
+  gap: 6px;
+}
+.tv-keys button {
+  padding: 2px 8px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.34);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  transition: background 0.12s linear, color 0.12s linear;
+}
+.tv-keys button:hover { background: rgba(255, 255, 255, 0.16); color: #fff; }
+.tv-keys button:active { background: rgba(255, 255, 255, 0.28); }

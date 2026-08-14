@@ -19,11 +19,15 @@ const UI = {
   stack: [],
   overlays: [],
   system: null,        /* { node, api } */
+  tv: null,            /* set while the television, not the box, owns the remote */
   canvas: null,
   layers: {},
 
   /** Whoever owns the remote right now. */
   current() {
+    /* The television outranks everything: if the set is on another input, the
+       box may as well not be there. */
+    if (UI.tv) return UI.tv.api;
     if (UI.system) return UI.system.api;
     if (UI.overlays.length) return UI.overlays[UI.overlays.length - 1].api;
     const top = UI.stack[UI.stack.length - 1];
@@ -32,7 +36,8 @@ const UI = {
 
   /** The element navigation is confined to. */
   refreshScope() {
-    if (UI.system) Focus.scope = UI.layers.system;
+    if (UI.tv) Focus.scope = UI.layers.tv;
+    else if (UI.system) Focus.scope = UI.layers.system;
     else if (UI.overlays.length) Focus.scope = UI.overlays[UI.overlays.length - 1].node;
     else Focus.scope = UI.layers.screen;
   },
@@ -282,6 +287,7 @@ function tickClock() {
 function press(key) {
   flashRemote(key);
   noteActivity(key);
+  noteChord(key);
 
   /* Power and volume work from anywhere, exactly as they do on the real
      remote — even over a dialog or the screensaver. */
@@ -292,10 +298,13 @@ function press(key) {
   if (key === 'vol-') { setVolume(-2); return; }
   if (key === 'mute') { toggleMute(); return; }
 
+  /* Input is the television's button, so it works whatever the box is doing. */
+  if (key === 'input') { toggleInputPicker(); return; }
+
   const owner = UI.current();
 
   /* The screensaver eats the first press of anything else. */
-  if (UI.system && UI.system.api.swallow) {
+  if (!UI.tv && UI.system && UI.system.api.swallow) {
     UI.system.api.swallow(key);
     return;
   }

@@ -40,6 +40,7 @@ has a key:
 | Rewind / fast forward | <kbd>,</kbd> and <kbd>.</kbd> |
 | Volume, mute | <kbd>+</kbd>, <kbd>-</kbd>, <kbd>M</kbd> |
 | Voice search | <kbd>V</kbd>, or the microphone |
+| TV input | <kbd>I</kbd>, or the input button |
 | Power / standby | the power button |
 
 Clicking on the screen also works — it moves the highlight there and presses
@@ -49,6 +50,34 @@ The four shortcut buttons at the bottom of the remote launch their channel from
 anywhere, and the small **Pair** control underneath it is the pairing button
 inside the battery compartment. It only does anything while the box is actually
 listening for a remote.
+
+## The television
+
+The Roku is a box plugged into **HDMI 1**. The set it is plugged into is
+simulated too, and that is deliberate: "check which input the TV is on" is the
+first question on a huge share of real calls, and it is impossible to practise
+if the television is only a picture frame.
+
+Press **Input** on the remote (or <kbd>I</kbd>) and the set draws its own input
+list — square corners, flat grey, nothing like the Roku interface, because
+telling the two apart is the entire skill. HDMI 2 has a disc player on it,
+HDMI 3 and AV have nothing, and the antenna input has never been tuned.
+
+Switch away from HDMI 1 and the box keeps running behind the set, which is
+exactly the fault: everything works, and the customer sees *No Signal*. The
+Roku remote goes deaf, because nothing it sends can be seen. Three ways back:
+
+- **Input** on the remote, and choose HDMI 1
+- **Home**, if HDMI-CEC one-touch play is on under
+  *Settings › System › Control other devices (CEC)* — turn it off and Home
+  stops working, which is worth showing someone once
+- the **Input** button on the set itself, which always works, even when the
+  remote has never learned the television's codes
+
+That last one matters: the remote only drives the set once it has been through
+*Settings › Remotes & devices › Set up remote for TV control*. Take that away
+(`roku.noTvControl()`) and the remote's Input button says so instead of doing
+nothing, which is the honest failure.
 
 ## What it covers
 
@@ -105,6 +134,19 @@ when a picture looks soft or keeps stopping. Part-watched titles come back in
   **Factory reset**
 - **Help** — six short answers to the faults that come up most
 
+**Secret screens** — Roku's own button chords are here because they are real,
+and because they are the fastest way out of a wedged box:
+
+| Chord | What it does |
+|---|---|
+| Home ×5, Up, Rewind ×2, Fast forward ×2 | reboots the device |
+| Home ×5, Fast forward ×3, Rewind ×2 | the platform secret screen |
+| Home ×5, Right, Left, Right, Left, Right | jumps straight to the network menu |
+
+The secret screen is plain, monospaced and deliberately ugly, and everything on
+it — serial, uptime, CPU temperature, free memory, signal, remote battery — is
+read off the simulated device rather than invented on the spot.
+
 **System flows** — a restart really tears the interface down, shows the purple
 splash and builds it again. A software update downloads, installs and restarts.
 A factory reset makes you type the code shown on screen, erases the store and
@@ -126,10 +168,15 @@ roku.setNetwork('offline')     // not joined to anything
 roku.setNetwork('wired')       // Ethernet
 roku.setNetwork('ok')          // back to normal
 
+roku.setInput('hdmi2')         // the set is on the wrong input
+roku.noTvControl()             // the remote never learned the TV's codes
+roku.noCec()                   // one-touch play off, so Home cannot pull it back
+
 roku.setBattery(9)             // the usual "the remote stopped working"
 roku.unpair()                  // no paired remote at all
 roku.oldSoftware()             // put the update back on the shelf
 roku.restart()                 // straight to the splash
+roku.secret()                  // the platform secret screen
 roku.saver()                   // screensaver now
 roku.setup()                   // run guided setup again
 roku.reset()                   // wipe localStorage and reload
@@ -176,6 +223,7 @@ roku/scripts/20-settings.js    the settings tree and the screen that walks it
 roku/scripts/21-network.js     check connection, set up connection, network reset
 roku/scripts/22-devices.js     pairing, TV control, the PIN, Guest Mode
 roku/scripts/30-system.js      power, boot, restart, updates, factory reset, setup
+roku/scripts/35-tv.js          the television's own inputs, and its on-screen display
 roku/scripts/40-remote.js      the remote, the keyboard map, fitting the stage
 roku/scripts/99-boot.js        wiring, first boot, and the console helpers
 ```
@@ -206,11 +254,31 @@ between renders.
 Responsive from a 360px phone to a large desktop — below about 980px the remote
 drops underneath the set — and it honours reduce-motion and reduce-transparency.
 
+## The jokes
+
+The support flows are all straight. The content around them is not.
+
+Every title in the catalogue is a **show within a show** — the sort of thing
+that only ever exists inside somebody else's sitcom, playing on a television in
+the background of a scene. The developer names on the channel pages are the
+fictional companies that made them, the neighbours' Wi-Fi networks are the
+names people really do give their routers, and there are a few more buried in
+the search suggestions, the live guide and the voice results.
+
+None of it changes how anything behaves — a channel page still shows a real
+version number and a real size next to a developer who does not exist. Places
+worth looking: any channel page (the **Developer** line), *Settings › Network ›
+Set up connection* (the network list), the **Live TV** guide, the microphone,
+and one channel whose developer explains a name that started as an accident.
+
 ## Notes
 
 This is an independent educational simulation and is not a Roku product. It is
 not affiliated with, endorsed by or connected to Roku, Inc.
 
-Every streaming service, programme, live channel, person, network name and
-serial number in it is invented. The bundled font is Inter, under the SIL Open
-Font License 1.1; the licence sits alongside it in `assets/fonts/`.
+Every streaming service, live channel, person, network name and serial number in
+it is invented. The programme titles and company names are affectionate nods to
+fictional works and fictional companies from other people's comedy — they are
+jokes, not products, and nothing here is offered as, or connected to, anything
+real. The bundled font is Inter, under the SIL Open Font License 1.1; the
+licence sits alongside it in `assets/fonts/`.

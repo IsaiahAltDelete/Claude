@@ -40,7 +40,13 @@
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
 }
 .hero-body { min-width: 0; padding-top: 4px; }
-.hero-title { font-size: 38px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; }
+/* One title in the catalogue is absurdly long on purpose, so every place a
+   title is set has to survive it. */
+.hero-title {
+  font-size: 38px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.1;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 .hero-meta {
   display: flex; align-items: center; flex-wrap: wrap; gap: 10px;
   margin-top: 9px; color: var(--tx-2); font-size: 18px;
@@ -273,7 +279,11 @@
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
   margin-bottom: 16px;
 }
-.res-detail h3 { font-size: 28px; font-weight: 600; line-height: 1.15; }
+.res-detail h3 {
+  font-size: 28px; font-weight: 600; line-height: 1.15;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 .watch-row {
   display: flex; align-items: center; gap: 13px;
   height: 58px; padding: 0 14px; border-radius: 4px;
@@ -305,7 +315,11 @@
 /* Channel details, shown as a full page the way the store opens one. */
 .chpage { position: absolute; inset: 0; padding: 40px 48px 30px 118px; display: flex; gap: 34px; }
 .chpage .cp-art { width: 292px; height: 219px; border-radius: 8px; overflow: hidden; flex: none; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55); }
-.chpage h1 { font-size: 40px; font-weight: 600; letter-spacing: -0.02em; }
+.chpage h1 {
+  font-size: 40px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.1;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 .chpage .cp-meta { display: flex; align-items: center; gap: 12px; margin-top: 8px; color: var(--tx-2); font-size: 18px; }
 .chpage .cp-desc { margin-top: 14px; max-width: 640px; color: var(--tx-2); font-size: 19px; line-height: 1.5; }
 .chpage .cp-actions { display: flex; gap: 14px; margin-top: 22px; }
@@ -381,7 +395,11 @@
   z-index: 6;
 }
 .trick.away { opacity: 0; transform: translateY(20px); pointer-events: none; }
-.trick .tk-title { font-size: 28px; font-weight: 600; }
+.trick .tk-title {
+  font-size: 28px; font-weight: 600; line-height: 1.15;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 .trick .tk-sub { color: var(--tx-2); font-size: 18px; margin-top: 3px; }
 .trick .tk-barwrap { display: flex; align-items: center; gap: 16px; margin-top: 16px; }
 .trick .tk-time { font-size: 19px; color: var(--tx-2); width: 74px; flex: none; }

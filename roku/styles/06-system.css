@@ -214,3 +214,126 @@
 .errscreen p { font-size: 21px; line-height: 1.5; color: rgba(255, 255, 255, 0.82); }
 .errscreen .es-code { margin-top: 20px; font-size: 17px; color: rgba(255, 255, 255, 0.5); letter-spacing: 0.06em; }
 .errscreen .es-actions { display: flex; gap: 12px; justify-content: center; margin-top: 28px; }
+
+/* =============================================================== the set ===
+   Everything below is drawn by the television, not by the Roku, so none of it
+   uses the Roku palette. That difference is the point: on a support call the
+   whole difficulty is telling the box's screens from the set's.
+   ========================================================================== */
+
+#layer-tv { z-index: 100; pointer-events: none; }
+#layer-tv > * { pointer-events: auto; }
+#tv-source:empty, #tv-osd:empty { pointer-events: none; }
+
+.tv-src {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  font-family: "TV System", system-ui, sans-serif;
+}
+.tv-src .src-inner { text-align: center; }
+.tv-src .src-hint {
+  position: absolute; left: 0; right: 0; bottom: 34px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 17px;
+}
+
+/* A disc player on HDMI 2 — flat, blue and nothing like the Roku. */
+.src-disc { background: linear-gradient(180deg, #0b2440 0%, #061626 60%, #03080f 100%); }
+.src-disc .src-logo {
+  font-size: 56px; font-weight: 300; letter-spacing: 0.24em;
+  color: #cfe4ff;
+}
+.src-disc .src-logo span {
+  font-weight: 700; letter-spacing: 0.08em; margin-left: 8px;
+  color: #4aa8ff;
+}
+.src-disc .src-menu { display: flex; gap: 34px; justify-content: center; margin-top: 40px; }
+.src-disc .src-item {
+  font-size: 24px; color: rgba(207, 228, 255, 0.55);
+  padding-bottom: 8px;
+}
+.src-disc .src-item.on { color: #fff; box-shadow: inset 0 -3px 0 #4aa8ff; }
+.src-disc .src-note { margin-top: 34px; color: rgba(207, 228, 255, 0.4); font-size: 19px; }
+
+.src-tuner { background: #0a0a0c; }
+.src-tuner h2 { font-size: 34px; font-weight: 600; }
+.src-tuner p { margin: 12px auto 0; max-width: 560px; color: rgba(255, 255, 255, 0.6); font-size: 20px; line-height: 1.5; }
+
+/* The set's input list. Square corners, flat grey, no purple anywhere. */
+.input-picker {
+  position: absolute;
+  right: 54px; top: 54px;
+  width: 372px;
+  background: rgba(16, 18, 22, 0.96);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.22), 0 24px 60px rgba(0, 0, 0, 0.7);
+  animation: from-right 0.16s ease both;
+}
+.input-picker .ip-head {
+  padding: 13px 18px;
+  background: rgba(255, 255, 255, 0.1);
+  font-size: 15px; font-weight: 600;
+  letter-spacing: 0.28em; text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.75);
+}
+.input-picker .ip-row {
+  display: flex; align-items: baseline; gap: 12px;
+  padding: 13px 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.72);
+}
+.input-picker .ip-name { font-size: 23px; }
+.input-picker .ip-dev { margin-left: auto; font-size: 16px; color: rgba(255, 255, 255, 0.4); }
+.input-picker .ip-row.here { color: #fff; }
+.input-picker .ip-row.here .ip-name::after {
+  content: "•"; margin-left: 10px; color: #46c46a;
+}
+.input-picker .ip-row.on {
+  background: #dfe3ea; color: #14161a;
+}
+.input-picker .ip-row.on .ip-dev { color: rgba(20, 22, 26, 0.6); }
+.input-picker .ip-foot {
+  padding: 11px 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  font-size: 15px; color: rgba(255, 255, 255, 0.38);
+}
+
+/* The corner label a set flashes when the source changes. */
+.tv-banner {
+  position: absolute; left: 54px; top: 54px;
+  padding: 12px 20px;
+  background: rgba(16, 18, 22, 0.94);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2);
+  animation: rise 0.18s ease both;
+}
+.tv-banner b { display: block; font-size: 24px; font-weight: 600; }
+.tv-banner span { display: block; margin-top: 2px; font-size: 16px; color: rgba(255, 255, 255, 0.5); }
+
+/* ------------------------------------------------------- the secret screen */
+
+/* Monospaced and flat, the way a diagnostic screen always is. */
+.secret {
+  position: absolute; inset: 0;
+  background: #0f1013;
+  padding: 34px 48px;
+  font-family: ui-monospace, "JetBrains Mono", "SF Mono", Menlo, monospace;
+  overflow: hidden;
+}
+.secret .sec-title {
+  font-size: 22px; font-weight: 600;
+  color: #46c46a;
+  margin-bottom: 16px;
+  letter-spacing: 0.04em;
+}
+.secret .sec-rows { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 40px; }
+.secret .sec-row {
+  display: flex; gap: 14px;
+  padding: 5px 0;
+  font-size: 17px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.secret .sec-row span:first-child { width: 200px; flex: none; color: rgba(255, 255, 255, 0.42); }
+.secret .sec-row span:last-child { color: #e9eaee; word-break: break-all; }
+.secret .sec-actions { display: flex; gap: 12px; margin-top: 22px; }
+.secret .sec-actions .btn { font-family: inherit; font-size: 17px; border-radius: 2px; }
+.secret .sec-foot { margin-top: 18px; font-size: 15px; color: rgba(255, 255, 255, 0.3); }
