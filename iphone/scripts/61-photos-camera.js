@@ -28,6 +28,17 @@ function PHOTOLIB() {
   });
 }
 
+/* The camera's own state, shared with Settings › Camera. Both reach it
+   through here so the viewfinder's Grid button and the Grid switch in
+   Settings can never end up describing two different settings — which is the
+   sort of inconsistency this simulator exists to teach people to spot. */
+function CAM() {
+  return slice('camera', () => ({
+    mode: 'PHOTO', flash: 'auto', zoom: 1, timer: 0, front: false, filter: 'None',
+    grid: false, level: true, mirrorFront: true,
+  }), 2);
+}
+
 const livePhotos = () => PHOTOLIB().items.filter(item => !item.deleted);
 const deletedPhotos = () => PHOTOLIB().items.filter(item => item.deleted);
 
@@ -430,7 +441,7 @@ defineApp({
     <rect x="38" y="19" width="24" height="9" rx="4" fill="#aeaeb2"/>
     <circle cx="78" cy="37" r="3.4" fill="#ffd60a"/></svg>`,
   mount(win, inst) {
-    const state = slice('camera', () => ({ mode: 'PHOTO', flash: 'auto', zoom: 1, grid: false, timer: 0, front: false, filter: 'None' }));
+    const state = CAM();
     inst.cam = { recording: false, seconds: 0, ticker: null };
     win.style.background = '#000';
 
@@ -488,8 +499,9 @@ defineApp({
       finder.innerHTML = '';
       const scene = el('div');
       const zoomScale = 1 + (state.zoom - 1) * 0.35;
+      const mirrored = state.front && state.mirrorFront !== false;
       scene.style.cssText = `position:absolute;inset:0;background:url("${artURI(state.front ? 'selfie-scene' : 'camera-scene', { w: 700, h: 900 })}") center/cover;
-        transform:scale(${zoomScale});transition:transform .25s ease;
+        transform:scale(${zoomScale})${mirrored ? ' scaleX(-1)' : ''};transition:transform .25s ease;
         filter:${({ None: 'none', Vivid: 'saturate(1.5) contrast(1.1)', Mono: 'grayscale(1)', Silvertone: 'grayscale(1) contrast(1.2) brightness(1.05)', Noir: 'grayscale(1) contrast(1.5) brightness(.85)' })[state.filter]}`;
       finder.appendChild(scene);
 
@@ -504,6 +516,13 @@ defineApp({
         finder.appendChild(h(`<div style="position:absolute;inset:0;pointer-events:none;
           background:linear-gradient(to right,transparent 33.2%,rgba(255,255,255,.3) 33.3%,rgba(255,255,255,.3) 33.5%,transparent 33.6%,transparent 66.2%,rgba(255,255,255,.3) 66.3%,rgba(255,255,255,.3) 66.5%,transparent 66.6%),
           linear-gradient(to bottom,transparent 33.2%,rgba(255,255,255,.3) 33.3%,rgba(255,255,255,.3) 33.5%,transparent 33.6%,transparent 66.2%,rgba(255,255,255,.3) 66.3%,rgba(255,255,255,.3) 66.5%,transparent 66.6%)"></div>`));
+      }
+      /* Level: on a real phone this only appears once the device is close to
+         flat, and turns yellow when it is level. There is no accelerometer
+         here, so it settles a moment after the app opens. */
+      if (state.level !== false) {
+        finder.appendChild(h(`<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+          width:110px;height:1.5px;background:#ffd60a;opacity:.85;pointer-events:none;border-radius:1px"></div>`));
       }
       // Tap to focus.
       finder.onclick = event => {
