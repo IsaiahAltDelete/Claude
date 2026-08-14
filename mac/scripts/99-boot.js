@@ -62,6 +62,7 @@
   }
 
   function init() {
+    Mac.OS.recover();
     Mac.sync();
     Mac.Shell.renderMenuBar();
     Mac.Shell.renderDock();

@@ -14,7 +14,7 @@
   const Terminal = Mac.Terminal = {
     banner() {
       return `Last login: ${new Date().toLocaleString()} on ttys000\n` +
-        `macOS ${Mac.OS_VERSION} (${Mac.OS_BUILD}) — training shell\n` +
+        `macOS ${Mac.OS.version()} (${Mac.OS.build()}) — training shell\n` +
         'Type "help" for the list of simulated commands.\n\n';
     },
 
@@ -48,8 +48,8 @@
           break;
         case 'sw_vers':
           out('ProductName:\t\tmacOS');
-          out(`ProductVersion:\t\t${Mac.OS_VERSION}`);
-          out(`BuildVersion:\t\t${Mac.OS_BUILD}`);
+          out(`ProductVersion:\t\t${Mac.OS.version()}`);
+          out(`BuildVersion:\t\t${Mac.OS.build()}`);
           break;
         case 'uptime': out(`${Mac.formatTime()}  up 3 days, 14:22, 2 users, load averages: 1.42 1.28 1.11`); break;
         case 'pwd': out('/Users/alex'); break;
@@ -128,7 +128,7 @@
         case 'system_profiler':
           out('Hardware:\n    Model Name: MacBook Pro');
           out('    Chip: Apple M4 Pro\n    Total Number of Cores: 12\n    Memory: 24 GB');
-          out(`    Serial Number: SIMULATED\n    macOS: ${Mac.OS_VERSION}`);
+          out(`    Serial Number: SIMULATED\n    macOS: ${Mac.OS.version()}`);
           break;
         case 'softwareupdate':
           out('Software Update Tool');
@@ -872,7 +872,7 @@
           ['Status', Mac.state.wifi.current ? 'Connected' : 'Not connected'],
           ['Network', Mac.state.wifi.current || '--'], ['IPv4 Address', Mac.state.wifi.current ? Mac.state.wifi.ip : '--'],
           ['Router', Mac.state.wifi.current ? Mac.state.wifi.router : '--'], ['DNS', Mac.state.wifi.dns.join(', ') || 'None']],
-        Software: [['System Version', `macOS ${Mac.OS_VERSION}`], ['Kernel Version', 'Darwin 26.6.0'],
+        Software: [['System Version', `macOS ${Mac.OS.version()}`], ['Kernel Version', 'Darwin 26.6.0'],
           ['Boot Volume', 'Macintosh HD'], ['Boot Mode', Mac.session.safeMode ? 'Safe' : 'Normal'],
           ['Computer Name', Mac.state.settings.computerName], ['User Name', `${Mac.state.account.name} (alex)`],
           ['Secure Virtual Memory', 'Enabled'], ['FileVault', Mac.state.settings.fileVault ? 'Enabled' : 'Disabled']],
@@ -893,7 +893,7 @@
             <span class="side-glyph">${glyph('info', { size: 15 })}</span>
             <span class="side-label">${section}</span></button>`).join('')}</aside>
         <section class="main-pane"><div class="pane-scroll"><div class="pane-pad">
-          ${UI.header(win.state.section, `${Mac.state.settings.computerName} — macOS ${Mac.OS_VERSION}`)}
+          ${UI.header(win.state.section, `${Mac.state.settings.computerName} — macOS ${Mac.OS.version()}`)}
           ${UI.group(...content.map(([label, value]) => UI.info(label, value)))}
           <button class="btn" data-command="export-report">Save Report to Desktop</button>
         </div></div></section></div>`;

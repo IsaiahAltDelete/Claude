@@ -364,11 +364,21 @@
         Mac.wm.render(target);
         break;
       }
-      case 'check-updates':
-        Mac.Notify.show('Software Update', Mac.Network.online()
-          ? `Checked for updates — ${Mac.state.appUpdates.length || 'no'} app updates available.`
-          : 'Unable to check for updates. Connect to the internet and try again.', { app: 'appstore' });
+      case 'check-updates': {
+        if (!Mac.Network.online()) {
+          Mac.Notify.show('Software Update',
+            `Unable to check for updates. ${Mac.Network.summary()}.`, { app: 'appstore' });
+          break;
+        }
+        const parts = [];
+        if (Mac.OS.pending()) parts.push(`macOS Tahoe ${Mac.OS.update().version}`);
+        if (Mac.state.appUpdates.length) parts.push(Mac.plural(Mac.state.appUpdates.length, 'app update'));
+        Mac.Notify.show('Software Update',
+          parts.length ? `Checked for updates — ${parts.join(' and ')} available.`
+            : 'Checked for updates — this Mac is up to date.', { app: 'appstore' });
         break;
+      }
+      case 'os-update': Mac.OS.run(arg); break;
 
       /* -------------------------------------------------------------- Notes */
       case 'new-note': Mac.Notes.create(); break;
@@ -589,7 +599,7 @@
           icon: { app: 'system-info' },
           body: `<div style="text-align:center;margin-bottom:14px">
               <strong style="font-size:19px">macOS Tahoe</strong>
-              <p class="muted" style="margin:3px 0 0;font-size:12px">Version ${Mac.OS_VERSION} — Simulator ${Mac.VERSION}</p></div>
+              <p class="muted" style="margin:3px 0 0;font-size:12px">Version ${Mac.OS.version()} — Simulator ${Mac.VERSION}</p></div>
             ${UI.group(
               UI.info('MacBook Pro', '14-inch, M4 Pro'),
               UI.info('Chip', 'Apple M4 Pro'),

@@ -50,7 +50,7 @@
   ];
 
   Mac.DefaultState = {
-    schema: 9,
+    schema: 10,
 
     /* ------------------------------------------------------------ settings */
     settings: {
@@ -263,6 +263,11 @@
       { id: 'outlook', version: '16.92', size: 604897280, notes: 'Adds Focused Inbox controls and resolves a sync stall on shared mailboxes.' },
     ],
     storeInstalls: [],
+    /* The pending macOS update. `stage` walks available → downloading →
+       downloaded → installing, and installing ends in a restart. */
+    osUpdate: { stage: 'available', progress: 0 },
+    osVersion: null,   // null means still on Mac.OS_VERSION
+    osBuild: null,
 
     /* --------------------------------------------------------------- notes */
     notes: [
