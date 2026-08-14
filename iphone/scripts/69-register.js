@@ -29,17 +29,16 @@ if (!State.badgesSeeded) {
 }
 
 /* A couple of lock-screen notifications from the new apps, so the phone looks
-   lived-in on first boot rather than empty. */
-if (!State.notifsSeeded) {
-  State.notifsSeeded = true;
-  save();
-  LOCK_NOTIFS.push(
-    { app: 'reminders', title: 'Reminders', body: 'Call back ticket 4821 — due in an hour', when: '35m ago' },
-    { app: 'health', title: 'Health', body: 'Your weekly summary is ready', when: '2h ago' },
-  );
-}
+   lived-in rather than empty.
 
-/* Rebuild the home screen so the new pages, dots and Search pill appear. */
-renderHome();
-updateBadges();
-renderLockNotifs();
+   Unconditionally, and deliberately: LOCK_NOTIFS is rebuilt from scratch on
+   every load, exactly like the three the inline script seeds. Gating this on a
+   persisted flag — which is what the badge block above correctly does, because
+   State.badges IS persisted — meant these two appeared once and never again. */
+LOCK_NOTIFS.push(
+  { app: 'reminders', title: 'Reminders', body: 'Call back ticket 4821 — due in an hour', when: '35m ago' },
+  { app: 'health', title: 'Health', body: 'Your weekly summary is ready', when: '2h ago' },
+);
+
+/* Boot (scripts/70-boot.js) runs after this file and paints everything, so
+   nothing needs replaying here. */

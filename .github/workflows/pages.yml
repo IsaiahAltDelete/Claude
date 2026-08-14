@@ -1,11 +1,19 @@
 name: Deploy to GitHub Pages
 
-# The simulator is a static site with no build step, so the repository is
+# The simulators are static sites with no build step, so the repository is
 # published as-is. `configure-pages` turns Pages on the first time this runs.
+#
+# Nothing deploys until `checks` and `smoke` are both green. That ordering
+# matters more here than it looks: the simulators load a dozen classic (non
+# module) scripts into one shared global scope, so a single duplicated
+# top-level `const` is a SyntaxError that silently kills an entire file — and
+# the page still renders, just missing half its apps. Only the gates below
+# catch that, so they block the deploy rather than warn beside it.
 
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -14,11 +22,68 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: pages-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
+  # Static gates: parse every script, resolve every icon/command reference, and
+  # confirm the committed artwork still matches its generator. Cheap enough to
+  # run on every push and every pull request.
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Parse every script
+        run: python3 tools/check-syntax.py
+
+      - name: Resolve every icon, pane and command reference
+        run: python3 tools/check-refs.py
+
+      - name: Regenerate icons and wallpapers
+        run: python3 tools/build-assets.py
+
+      - name: Fail on asset drift
+        run: |
+          if git diff --quiet -- mac/assets iphone/assets; then
+            echo "Committed assets match tools/build-assets.py."
+          else
+            echo "::error::assets differ from the generator output — run tools/build-assets.py and commit the result."
+            git --no-pager diff --stat -- mac/assets iphone/assets
+            exit 1
+          fi
+
+  # Boots both simulators in a real browser and opens every single app, failing
+  # on any console error, page error, failed request or empty window body.
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Playwright and Chromium
+        run: |
+          npm install --no-save playwright@1.49.1
+          npx playwright install --with-deps chromium
+
+      - name: Open every app in both simulators
+        run: node tools/smoke.mjs
+
   deploy:
+    # Pull requests exercise the gates but must never publish.
+    if: github.event_name != 'pull_request'
+    needs: [checks, smoke]
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -39,23 +104,3 @@ jobs:
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
-
-  # Non-blocking: confirms the committed artwork still matches the generator.
-  # Runs alongside the deploy so a cosmetic drift never takes the site down.
-  assets:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - name: Regenerate icons and wallpapers
-        run: python3 tools/build-assets.py
-      - name: Report any drift
-        run: |
-          if git diff --quiet -- assets; then
-            echo "Committed assets match tools/build-assets.py."
-          else
-            echo "::warning::assets/ differs from the generator output — run tools/build-assets.py and commit."
-            git --no-pager diff --stat -- assets
-          fi

@@ -836,15 +836,45 @@ const DEFAULTS = {
   otp:null,       // live one-time passcode
   badges:{}
 };
+/**
+ * Merge a saved profile over the defaults, recursively and by type.
+ *
+ * A one-level Object.assign was not enough: a saved `null` or a value of the
+ * wrong type would replace a default object wholesale, and the first thing to
+ * touch it threw during boot — which, with both overlays still up, left a dead
+ * splash screen on every subsequent reload. Arrays are user data and are taken
+ * as they are; objects merge key by key; a primitive of the wrong shape loses
+ * to the default.
+ */
+function mergeDefaults(defaults, saved){
+  if(Array.isArray(defaults)) return Array.isArray(saved)? saved : structuredClone(defaults);
+  if(defaults && typeof defaults==='object'){
+    if(!saved || typeof saved!=='object' || Array.isArray(saved)) return structuredClone(defaults);
+    const out={};
+    for(const key of new Set([...Object.keys(defaults),...Object.keys(saved)])){
+      out[key] = key in defaults ? mergeDefaults(defaults[key], saved[key]) : saved[key];
+    }
+    return out;
+  }
+  if(saved===undefined || saved===null) return defaults;
+  // A default of a known primitive type will not accept another type.
+  if(defaults!==null && typeof defaults!==typeof saved) return defaults;
+  return saved;
+}
+
 let State = load();
 function load(){
   try{
     RETIRED_KEYS.forEach(k=>localStorage.removeItem(k));
+    /* ?reset (or #reset) in the URL wipes the save before it is read — the
+       only recovery a trainee handed a link can perform without devtools. */
+    if(/(^|[?&#])reset\b/.test(location.search+location.hash)){
+      localStorage.removeItem(SAVE_KEY);
+      return structuredClone(DEFAULTS);
+    }
     const raw = localStorage.getItem(SAVE_KEY);
     if(!raw) return structuredClone(DEFAULTS);
-    const s = JSON.parse(raw);
-    s.settings = Object.assign(structuredClone(DEFAULTS.settings), s.settings||{});
-    return Object.assign(structuredClone(DEFAULTS), s);
+    return mergeDefaults(structuredClone(DEFAULTS), JSON.parse(raw));
   }catch(e){ return structuredClone(DEFAULTS); }
 }
 let saveTimer;
@@ -1234,21 +1264,36 @@ class Nav{
     prev._page.classList.add('back-in');
     view._page.classList.add('back-out');
     setTimeout(()=>{ view._page.remove(); prev._page.classList.remove('back-in'); },340);
-    view.onPop && view.onPop();
+    this._release(view);
     prev.onReturn && prev.onReturn(prev._body, this, prev);
   }
-  popToRoot(){ while(this.stack.length>1){ const v=this.stack.pop(); v._page.remove(); }
+  popToRoot(){ while(this.stack.length>1){ const v=this.stack.pop(); this._release(v); v._page.remove(); }
     const r=this.top; r._page.classList.remove('out'); r.onReturn&&r.onReturn(r._body,this,r); }
   /** unwind to the nearest view with this title, animating only the final step */
   popTo(title){
     while(this.stack.length>1 && this.top.title!==title){
       const under=this.stack[this.stack.length-2];
       if(under && under.title===title){ this.pop(); return; }
-      const v=this.stack.pop(); v._page.remove();
+      const v=this.stack.pop(); this._release(v); v._page.remove();
     }
     const r=this.top; r._page.classList.remove('out'); r.onReturn&&r.onReturn(r._body,this,r);
   }
-  setRoot(view){ this.host.innerHTML=''; this.stack=[]; this.push(view,false); }
+  setRoot(view){ this.stack.forEach(v=>this._release(v)); this.host.innerHTML=''; this.stack=[]; this.push(view,false); }
+  /* Discard every view, e.g. when the app that owns this stack is quit. */
+  teardown(){ this.stack.forEach(v=>this._release(v)); this.stack=[]; this.host.innerHTML=''; }
+  /* A view's onPop is its only chance to clear an interval or drop a listener.
+     pop() has always run it; setRoot, popToRoot and popTo used to throw the
+     view away without asking, so anything they discarded kept ticking. */
+  _release(view){
+    if(!view || view._released) return;
+    view._released=true;
+    /* `view._tick` is the established convention for a view-scoped interval
+       (Clock, Podcasts, the stopwatch and the timer all use it), so it is
+       cleared centrally — an app should not have to remember. */
+    if(view._tick){ clearInterval(view._tick); view._tick=null; }
+    try{ view.onPop && view.onPop(); }
+    catch(e){ console.error('onPop failed for view "'+(view.title||'')+'"', e); }
+  }
   /** rebuild current page contents in place */
   refresh(){ const v=this.top; if(!v)return; const sc=v._body.scrollTop;
     v._body.innerHTML=''; if(v.largeTitle) v._body.appendChild(el('div','lg-title',esc(v.title||'')));
@@ -1340,6 +1385,7 @@ function openApp(id, origin){
   }
   $('#applayer').appendChild(inst.win);   // bring to front
   currentApp=def;
+  inst.hidden=false;
   $('#home').classList.add('blurred');
   renderStatus();
   def.onShow && def.onShow(inst);
@@ -1353,14 +1399,36 @@ function goHome(){
   if(currentApp){
     const inst=openApps.get(currentApp.id);
     if(inst){ inst.win.classList.add('closing'); const w=inst.win;
-      setTimeout(()=>{ w.classList.remove('closing'); w.style.display='none'; },320); }
+      setTimeout(()=>{ w.classList.remove('closing'); w.style.display='none'; },320);
+      /* Backgrounding is a lifecycle event: an app with a running timer needs
+         to be told, or it keeps ticking against a hidden window for the rest of
+         the page's life. */
+      hideApp(inst); }
     currentApp=null;
   }
   $('#home').classList.remove('blurred','jiggle');
   renderHome();
   renderStatus();
 }
-function quitApp(id){ const inst=openApps.get(id); if(!inst)return; inst.win.remove(); openApps.delete(id); if(currentApp&&currentApp.id===id) currentApp=null; }
+/** Tell an app it is no longer on screen. Safe to call more than once. */
+function hideApp(inst){
+  if(!inst || inst.hidden) return;
+  inst.hidden=true;
+  try{ inst.def.onHide && inst.def.onHide(inst); }
+  catch(e){ console.error('onHide failed for '+inst.def.id, e); }
+}
+function quitApp(id){
+  const inst=openApps.get(id); if(!inst) return;
+  hideApp(inst);
+  /* Every view in every nav stack gets its onPop, so view-scoped timers and
+     listeners are released rather than outliving the window that owned them. */
+  try{ inst.def.onQuit && inst.def.onQuit(inst); }
+  catch(e){ console.error('onQuit failed for '+id, e); }
+  [inst.nav, ...Object.values(inst.navs||{}).map(n=>n.nav)].forEach(nav=>nav && nav.teardown && nav.teardown());
+  inst.win.remove();
+  openApps.delete(id);
+  if(currentApp&&currentApp.id===id) currentApp=null;
+}
 
 /* =========================================================================
    Home screen
@@ -6995,7 +7063,7 @@ function worldClockView(){
         const off=ck.cities[i]?ck.cities[i][1]:0;
         t.textContent=cityTime(off).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'}); });},2000);
     },
-    onPop(){ }};
+    /* the ticker is released centrally by Nav._release */ };
 }
 function addCityView(){
   return {title:'Choose a City', build(b,nav){
@@ -7847,52 +7915,6 @@ document.addEventListener('keydown',e=>{
 /* keep the panel's live bits fresh */
 setInterval(()=>{ const b=$('#panel [data-a="end"]'); if(b && Call.state==='active') b.textContent='End call · '+callDuration(); },1000);
 
-/* =========================================================================
-   BOOT
-   ========================================================================= */
-function fitStage(){
-  const s=$('#stage');
-  const p=$('#panel');
-  // measure the drawer live so the phone scales smoothly while it slides
-  const panelW = p? p.getBoundingClientRect().width + (deckOpen?58:0) : 0;
-  const scale=Math.min(1,(window.innerHeight-30)/852,(window.innerWidth-panelW-76)/393);
-  s.style.transform='scale('+scale+')';
-  s.style.height=(852*scale)+'px';
-  s.style.width=(393*scale)+'px';
-  s.firstElementChild.style.transformOrigin='top left';
-  s.style.transform='none';
-  s.firstElementChild.style.transform='scale('+scale+')';
-}
-window.addEventListener('resize',fitStage);
-
-(function boot(){
-  registerStoreApps();
-  applyAppArt();
-  ML(); SafariState(); WF(); PH(); MSG(); ACC(); WAL(); CK();
-  if(State.settings.wifi && WF().connected) State.settings.wifiName=WF().connected;
-  // a couple of pending updates for apps the user has installed
-  State.updatesAvailable=(State.updatesAvailable||[]).filter(id=>State.installed.includes(id));
-  State.installed.slice(0,2).forEach(id=>{ if(!State.updatesAvailable.includes(id)) State.updatesAvailable.push(id); });
-  save();
-
-  applyAppearance();
-  renderHome();
-  renderCC();
-  renderLockNotifs();
-  renderPanel();
-  renderStatus();
-  setBadge('appstore', State.updatesAvailable.length);
-  syncMailBadge();
-  setDeck(deckOpen && window.innerWidth>820, {animate:false});
-  fitStage();
-
-  locked=true;
-  $('#screen').classList.add('locked');
-  $('#lock').classList.remove('hidden');
-  $('#lk-lockicon').innerHTML=SF.lock;
-  setTimeout(()=>$('#boot').classList.add('gone'), 2300);
-  setTimeout(()=>island('🔒','#1c1c1e','iPhone','Swipe up to unlock',2600), 2900);
-})();
 
 </script>
 
@@ -7911,5 +7933,6 @@ window.addEventListener('resize',fitStage);
 <script src="scripts/66-setup-network.js"></script>
 <script src="scripts/68-system.js"></script>
 <script src="scripts/69-register.js"></script>
+<script src="scripts/70-boot.js"></script>
 </body>
 </html>

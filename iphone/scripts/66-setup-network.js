@@ -581,12 +581,9 @@ function runSetupAssistant() {
   render();
 }
 
-/* Run the assistant if an erase left the marker, and give the console a way to
-   replay it on demand. */
-if (setupPending()) {
-  /* After the boot animation, so the Apple logo still plays first. */
-  setTimeout(runSetupAssistant, 2400);
-}
+/* setupPending() is checked by scripts/70-boot.js once the splash has played,
+   so the whole startup order stays readable in one place. runSetupAssistant is
+   also callable from the console to replay the flow on demand. */
 
 /* ============================================== wiring into the Sim panel === */
 
@@ -646,4 +643,3 @@ renderPanel = function renderPanelWithScenarios() {
   }
 };
 
-renderPanel();
