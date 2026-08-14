@@ -171,6 +171,34 @@ ul{list-style:none}
 .lk-btn:active{background:rgba(255,255,255,.35)}
 #lk-hint{position:absolute;bottom:16px;left:0;right:0;text-align:center;color:rgba(255,255,255,.72);font-size:11.5px;letter-spacing:.3px}
 
+/* ---------- Passcode ----------
+   Sits above #lock (350) and below the call UI (380), because a call has to
+   be answerable from a locked phone. */
+#pass{position:absolute;inset:0;z-index:360;display:none;flex-direction:column;align-items:center;
+  color:#fff;background:rgba(0,0,0,.62);backdrop-filter:blur(28px) saturate(140%);
+  -webkit-backdrop-filter:blur(28px) saturate(140%)}
+#pass.on{display:flex}
+#pass .pc-face{margin-top:96px;height:44px;display:grid;place-items:center;opacity:.9}
+#pass .pc-title{margin-top:12px;font-size:17px;font-weight:600;letter-spacing:-.2px}
+#pass .pc-sub{margin-top:6px;font-size:13px;color:rgba(255,255,255,.62);height:17px;text-align:center;padding:0 30px}
+#pass .pc-dots{display:flex;gap:19px;margin-top:26px}
+#pass .pc-dot{width:13px;height:13px;border-radius:50%;border:1.4px solid #fff;transition:background .12s}
+#pass .pc-dot.on{background:#fff}
+#pass .pc-dots.wrong{animation:pcshake .42s}
+@keyframes pcshake{0%,100%{transform:translateX(0)}18%{transform:translateX(-11px)}
+  38%{transform:translateX(9px)}58%{transform:translateX(-6px)}78%{transform:translateX(4px)}}
+#pass .pc-pad{margin-top:auto;display:grid;grid-template-columns:repeat(3,76px);gap:15px 26px;justify-content:center}
+#pass .pc-key{width:76px;height:76px;border-radius:50%;background:rgba(255,255,255,.19);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;
+  border:.5px solid rgba(255,255,255,.08);transition:background .1s}
+#pass .pc-key:active{background:rgba(255,255,255,.42)}
+#pass .pc-key b{font-size:34px;font-weight:400;line-height:1;font-variant-numeric:tabular-nums}
+#pass .pc-key span{font-size:9px;font-weight:600;letter-spacing:1.6px;margin-top:3px;height:11px;opacity:.85}
+#pass .pc-foot{display:flex;justify-content:space-between;align-items:center;width:274px;
+  margin:22px 0 40px;font-size:16px;color:#fff}
+#pass .pc-foot button{color:#fff;font-size:16px}
+#pass .pc-foot button:disabled{opacity:.35}
+
 /* ---------- Home screen ---------- */
 #home{position:absolute;inset:0;z-index:100;display:flex;flex-direction:column;padding-top:64px;transition:transform .35s,opacity .3s,filter .3s}
 #home.blurred{filter:blur(18px) brightness(.7);transform:scale(1.06);opacity:0;pointer-events:none}
@@ -764,6 +792,9 @@ ul{list-style:none}
         <div id="lk-hint">Swipe up to open · tap the bar below</div>
       </div>
 
+      <!-- Passcode, built by passcodeScreen() -->
+      <div id="pass"></div>
+
       <!-- Control Center -->
       <div id="cc"></div>
 
@@ -817,7 +848,12 @@ const DEFAULTS = {
     dark:true, brightness:0.9, wallpaper:0, textSize:1, bold:false,
     airplane:false, wifi:true, wifiName:'SABLEWAVE-5G', bluetooth:true, cellular:true, network:'online',
     dnd:false, lowpower:false, rotationLock:false, autoLock:'2 Minutes', touchCursor:true,
-    searchEngine:'Google', blockPopups:true, preventTracking:true, faceid:true,
+    searchEngine:'Google', blockPopups:true, preventTracking:true,
+    /* faceIDFails is driven from the simulator drawer: a Face ID that stops
+       recognising someone is a real call, and the only way to practise the
+       fallback is to be able to cause it. */
+    faceid:true, faceIDFails:false,
+    passcodeOn:true, passcode:'482913', wrongPasscodes:0, lockedOutUntil:0,
     name:"Alex's iPhone", appleID:'alex.rivera@icloud.example',
     autoUpdates:true, cellDownloads:false, offloadUnused:false, hapticFeedback:true, appleIntelligence:true,
     ringer:75, mailPreview:2, mailSignature:'Sent from my iPhone', mailThread:true
@@ -1563,15 +1599,155 @@ function lockPhone(){
   $('#lk-lockicon').innerHTML=SF.lock;
   renderLockNotifs(); renderPanel&&renderPanel();
 }
-function unlock(){
-  if(!locked) return;
+/**
+ * Ask the phone to unlock.
+ *
+ * The lock screen used to be scenery: a swipe up always worked, so a locked
+ * iPhone was a locked iPhone in appearance only. That removes an entire
+ * class of call — the customer who cannot get in, the phone that says
+ * "iPhone Unavailable", the Face ID that stopped recognising someone after
+ * a screen repair — and it quietly teaches that the passcode does not
+ * matter.
+ *
+ * Everything that used to call unlock() and then act — a notification, the
+ * camera button, the home bar — now passes what it wanted to do as `then`,
+ * so the action waits for the unlock instead of racing it.
+ *
+ * @param {function} [then] run only once the phone is genuinely unlocked
+ */
+function unlock(then){
+  if(!locked){ then&&then(); return; }
+  unlockThen = then || null;
+  const s=State.settings;
+  if(!s.passcodeOn) return finishUnlock();
+  if(lockoutRemaining()>0) return passcodeScreen();
+  if(s.faceid) return faceIDAttempt();
+  passcodeScreen();
+}
+let unlockThen=null;
+
+function finishUnlock(){
   locked=false;
+  State.settings.wrongPasscodes=0; save();
+  closePasscode();
   $('#lock').classList.add('hidden');
   $('#lk-lockicon').innerHTML=SF.unlock;
   setTimeout(()=>{ if(!locked) $('#screen').classList.remove('locked'); },260);
-  if(State.settings.faceid) island(SF.faceid,'#1c1c1e','Face ID','iPhone unlocked',1400);
   renderPanel&&renderPanel();
+  const then=unlockThen; unlockThen=null;
+  if(then) setTimeout(then,260);
 }
+
+/** Run Face ID, which succeeds unless the drawer has been told to fail it. */
+function faceIDAttempt(){
+  const s=State.settings;
+  island(SF.faceid,'#1c1c1e','Face ID','Scanning…',900);
+  setTimeout(()=>{
+    if(!locked) return;
+    if(s.faceIDFails){
+      island(SF.faceid,'#ff453a','Face ID','Face Not Recognised',1500);
+      passcodeScreen('Face ID Not Recognised');
+    }else{
+      island(SF.faceid,'#1c1c1e','Face ID','iPhone unlocked',1400);
+      finishUnlock();
+    }
+  },800);
+}
+
+/* iOS backs off after repeated wrong entries, and the message it shows —
+   "iPhone Unavailable, try again in N minutes" — is one people ring up
+   about, so it is worth being able to reach. Kept short here. */
+const LOCKOUT_STEPS={5:60e3, 6:5*60e3, 7:15*60e3, 8:60*60e3};
+function lockoutRemaining(){
+  const until=State.settings.lockedOutUntil||0;
+  return Math.max(0, until-Date.now());
+}
+
+function closePasscode(){
+  const p=$('#pass');
+  if(p){ p.classList.remove('on'); p.innerHTML=''; clearInterval(p._tick); p._tick=null; }
+}
+
+/**
+ * The passcode keypad.
+ * @param {string} [reason] sub-heading, e.g. after a failed Face ID
+ */
+function passcodeScreen(reason=''){
+  const p=$('#pass');
+  const s=State.settings;
+  let entered='';
+  clearInterval(p._tick);
+
+  p.innerHTML=`
+    <div class="pc-face">${s.faceid?SF.faceid:''}</div>
+    <div class="pc-title">Enter Passcode</div>
+    <div class="pc-sub" id="pc-sub">${esc(reason)}</div>
+    <div class="pc-dots" id="pc-dots">${'<div class="pc-dot"></div>'.repeat(s.passcode.length)}</div>
+    <div class="pc-pad" id="pc-pad"></div>
+    <div class="pc-foot">
+      <button id="pc-sos">Emergency</button>
+      <button id="pc-cancel">Cancel</button>
+    </div>`;
+  p.classList.add('on');
+
+  const dots=$('#pc-dots',p), sub=$('#pc-sub',p), pad=$('#pc-pad',p);
+  const letters={2:'A B C',3:'D E F',4:'G H I',5:'J K L',6:'M N O',7:'P Q R S',8:'T U V',9:'W X Y Z'};
+
+  const paintDots=()=>$$('.pc-dot',dots).forEach((d,i)=>d.classList.toggle('on',i<entered.length));
+
+  const paintLockout = () => {
+    const left=lockoutRemaining();
+    if(left<=0){
+      clearInterval(p._tick); p._tick=null;
+      sub.textContent=''; pad.style.opacity='1'; pad.style.pointerEvents='auto';
+      return;
+    }
+    const minutes=Math.ceil(left/60e3);
+    $('.pc-title',p).textContent='iPhone Unavailable';
+    sub.textContent=`Try again in ${minutes} minute${minutes===1?'':'s'}`;
+    pad.style.opacity='.4'; pad.style.pointerEvents='none';
+  };
+
+  const submit=()=>{
+    if(entered===s.passcode) return finishUnlock();
+    s.wrongPasscodes=(s.wrongPasscodes||0)+1;
+    const wait=LOCKOUT_STEPS[Math.min(s.wrongPasscodes,8)];
+    if(wait) s.lockedOutUntil=Date.now()+wait;
+    save();
+    dots.classList.add('wrong');
+    if(State.settings.hapticFeedback&&navigator.vibrate) navigator.vibrate([60,60,60]);
+    setTimeout(()=>{
+      dots.classList.remove('wrong');
+      entered=''; paintDots();
+      if(lockoutRemaining()>0){ paintLockout(); p._tick=setInterval(paintLockout,1000); }
+      else sub.textContent=`Wrong Passcode — ${s.wrongPasscodes} Failed Passcode Attempt${s.wrongPasscodes===1?'':'s'}`;
+    },440);
+  };
+
+  for(let n=1;n<=9;n++) pad.appendChild(passKey(String(n),letters[n]||''));
+  pad.appendChild(el('div'));
+  pad.appendChild(passKey('0',''));
+  const back=el('button','pc-key'); back.innerHTML='<b>⌫</b>';
+  back.onclick=()=>{ entered=entered.slice(0,-1); paintDots(); };
+  pad.appendChild(back);
+
+  function passKey(digit,sub2){
+    const k=el('button','pc-key');
+    k.innerHTML=`<b>${digit}</b><span>${sub2}</span>`;
+    k.onclick=()=>{
+      if(entered.length>=s.passcode.length) return;
+      entered+=digit; paintDots();
+      if(State.settings.hapticFeedback&&navigator.vibrate) navigator.vibrate(3);
+      if(entered.length===s.passcode.length) setTimeout(submit,180);
+    };
+    return k;
+  }
+
+  $('#pc-cancel',p).onclick=()=>{ unlockThen=null; closePasscode(); };
+  $('#pc-sos',p).onclick=()=>toast('Emergency calls are simulated');
+  if(lockoutRemaining()>0){ paintLockout(); p._tick=setInterval(paintLockout,1000); }
+}
+
 $('#bPower').onclick=()=>{ locked?unlock():lockPhone(); };
 /* iOS shows volume as a tall capsule hugging the left edge, level with the
    physical buttons — not as a banner. */
@@ -1631,13 +1807,16 @@ function renderLockNotifs(){
       `<div class="ic" style="background:${def.bg};display:grid;place-items:center;font-size:15px">${def.glyph||''}</div>
        <div style="flex:1;min-width:0"><div class="tt">${esc(n.title)}</div><div class="bb">${esc(n.body)}</div></div>
        <div class="tm">${esc(n.when||'now')}</div>`);
-    d.onclick=()=>{ unlock(); setTimeout(()=>{
+    /* The app opens after the unlock succeeds, not 260ms later regardless —
+       tapping a notification on a phone you cannot get into must not open
+       the app behind the passcode screen. */
+    d.onclick=()=>unlock(()=>{
       openApp(n.app);
       if(n.thread){ const inst=openApps.get('messages'), t=MSG().find(x=>x.n===n.thread);
         if(inst&&t){ t.msgs.forEach(m=>m[2]=0); save();
           setBadge('messages',MSG().reduce((a,x)=>a+x.msgs.filter(m=>m[2]).length,0));
           inst.nav.popToRoot(); inst.nav.push(threadView(t)); } }
-    },260); };
+    });
     c.appendChild(d);
   });
 }
@@ -1645,7 +1824,12 @@ if($('#lkTorch')){
   $('#lkTorch').innerHTML=SF.torch;
   $('#lkCam').innerHTML=SF.camera;
   $('#lkTorch').onclick=()=>toast('Flashlight is simulated');
-  $('#lkCam').onclick=()=>{ unlock(); setTimeout(()=>openApp('camera'),260); };
+  /* A real iPhone opens Camera from the lock screen without unlocking, but
+     it opens it into a sandbox that shows only the shots taken in that
+     session. There is no such sandbox here, so this goes through the
+     passcode — an ungated shortcut into a fully unlocked phone would be a
+     hole straight through the thing this screen is meant to demonstrate. */
+  $('#lkCam').onclick=()=>unlock(()=>openApp('camera'));
 }
 
 /* =========================================================================
@@ -3878,8 +4062,16 @@ function faceIDView(){
       {label:'Set Up an Alternate Appearance',cls:'blue',onClick:()=>{island('😀','#30d158','Face ID','Move your head in a circle',2600);toast('Simulated scan');}},
       {label:'Reset Face ID',cls:'blue',onClick:()=>toast('Face ID reset')}]});
     group(b,{rows:[
-      {label:'Turn Passcode Off',cls:'blue',onClick:()=>toast('Simulated')},
-      {label:'Change Passcode',cls:'blue',onClick:()=>toast('Simulated')}]});
+      {label:s.passcodeOn?'Turn Passcode Off':'Turn Passcode On',cls:'blue',onClick:()=>{
+        if(!s.passcodeOn){ s.passcodeOn=true; save(); nav.refresh(); return toast('Passcode turned on'); }
+        alertBox({title:'Turn Off Passcode?',
+          message:'Anyone with this iPhone will be able to unlock it and see everything on it.',
+          buttons:[{text:'Cancel'},{text:'Turn Off',style:'red bold',onClick:()=>{
+            s.passcodeOn=false; s.wrongPasscodes=0; s.lockedOutUntil=0; save();
+            nav.refresh(); renderPanel&&renderPanel(); toast('Passcode turned off');
+          }}]});
+      }},
+      {label:'Change Passcode',cls:'blue',onClick:()=>nav.push(changePasscodeView())}]});
     group(b,{header:'Allow Access When Locked',rows:[
       sw('Today View and Search','faceID.todayViewAndSearch',true),
       sw('Notification Center','faceID.notificationCenter',true),
@@ -3890,6 +4082,58 @@ function faceIDView(){
       footer:'Erase all data on this iPhone after 10 failed passcode attempts.'});
   }};
 }
+/* Old passcode, new passcode, confirm — the same three steps as the real
+   flow, because "I changed my passcode and now I'm locked out" is a call. */
+function changePasscodeView(){
+  const steps=[
+    {title:'Enter Your Passcode', key:'old'},
+    {title:'Enter Your New Passcode', key:'new'},
+    {title:'Re-enter Your New Passcode', key:'confirm'},
+  ];
+  let at=0;
+  const entry={};
+  return {title:'Change Passcode', shortTitle:'Passcode', build(b,nav,view){
+    const s=State.settings;
+    const step=steps[at];
+    const head=el('div');
+    head.style.cssText='text-align:center;padding:34px 30px 20px';
+    head.innerHTML=`<div style="font-size:17px;font-weight:600">${esc(step.title)}</div>
+      <div class="muted" id="cp-err" style="font-size:13px;margin-top:8px;height:18px;color:var(--sysred)"></div>`;
+    b.appendChild(head);
+
+    const g=el('div','grp'); g.style.margin='0 16px';
+    const row=el('div','row static');
+    const input=el('input');
+    input.type='password'; input.inputMode='numeric'; input.placeholder='6 digits';
+    input.style.cssText='flex:1;font-size:19px;letter-spacing:6px;text-align:center';
+    row.appendChild(input); g.appendChild(row); b.appendChild(g);
+
+    const advance=()=>{
+      const value=input.value.trim();
+      const err=$('#cp-err',b);
+      if(step.key==='old' && value!==s.passcode) return (err.textContent='That is not your current passcode.', input.value='');
+      if(step.key==='new' && !/^\d{4,6}$/.test(value)) return (err.textContent='Use 4 to 6 digits.', input.value='');
+      if(step.key==='confirm' && value!==entry.new) return (err.textContent='The passcodes did not match.', input.value='');
+      entry[step.key]=value;
+      if(at===steps.length-1){
+        s.passcode=entry.new; s.wrongPasscodes=0; s.lockedOutUntil=0; save();
+        renderPanel&&renderPanel();
+        nav.pop(); nav.refresh();
+        return toast('Passcode changed');
+      }
+      at+=1;
+      nav.refresh();
+    };
+    input.onkeydown=e=>{ if(e.key==='Enter') advance(); };
+    const wrap=el('div','pad');
+    const next=el('button','btn-primary','Next');
+    next.onclick=advance;
+    wrap.appendChild(next); b.appendChild(wrap);
+    b.appendChild(el('div','grp-f','The simulator shows the current passcode in the control drawer if you lose it.'));
+    setTimeout(()=>input.focus(),340);
+  }};
+}
+
 function batteryView(){
   return {title:'Battery', build(b,nav){
     const s=State.settings;
@@ -7990,7 +8234,30 @@ const Sim={
   answer(){ answerCall(); this.log('Call answered'); },
   end(){ if(Call.state==='idle') return this.log('No active call'); endCall(); this.log('Call ended'); },
   reboot(){ this.log('Rebooting…'); reboot(); },
-  lock(){ locked?unlock():lockPhone(); this.log(locked?'Locked':'Unlocked'); },
+  /* The drawer sits outside the phone, so its Unlock skips the passcode —
+     it is the way back in when the point of the exercise was to get locked
+     out. Everything inside the phone goes through unlock(). */
+  lock(){ if(locked) finishUnlock(); else lockPhone(); this.log(locked?'Locked':'Unlocked'); },
+  passcodeOff(){
+    const s=State.settings;
+    s.passcodeOn=!s.passcodeOn; save();
+    this.log('Passcode '+(s.passcodeOn?'on':'off'));
+    renderPanel();
+  },
+  faceIDFail(){
+    const s=State.settings;
+    s.faceIDFails=!s.faceIDFails; save();
+    this.log('Face ID '+(s.faceIDFails?'set to fail':'working'));
+    renderPanel();
+  },
+  clearLockout(){
+    State.settings.wrongPasscodes=0;
+    State.settings.lockedOutUntil=0;
+    save();
+    this.log('Failed passcode attempts cleared');
+    if($('#pass').classList.contains('on')) passcodeScreen();
+    renderPanel();
+  },
   network(mode){ setNetwork(mode); this.log('Network → '+mode); renderPanel(); },
   cantConnect(){
     setNetwork('offline');
@@ -8074,6 +8341,15 @@ function renderPanel(){
       <button class="pbtn wide" data-a="reboot">⟳ Reboot iPhone</button>
     </div>
 
+    <h4>Lock</h4>
+    <div class="pbtns">
+      <button class="pbtn ${s.passcodeOn?'':'on'}" data-a="passcodeoff">${s.passcodeOn?'Turn passcode off':'Passcode is off'}</button>
+      <button class="pbtn ${s.faceIDFails?'red':''}" data-a="faceidfail">Face ID: ${s.faceIDFails?'failing':'working'}</button>
+      <button class="pbtn wide" data-a="clearlockout">Clear failed attempts${s.wrongPasscodes?` (${s.wrongPasscodes})`:''}</button>
+    </div>
+    <div class="pnote" style="margin:6px 0 0">Passcode is <b>${esc(s.passcode)}</b>${
+      lockoutRemaining()>0? ` · locked out for ${Math.ceil(lockoutRemaining()/60e3)} min`:''}</div>
+
     <h4>Calls</h4>
     <div class="pbtns">
       <button class="pbtn green wide" data-a="ring">📞 Incoming call — Nina</button>
@@ -8139,7 +8415,8 @@ function renderPanel(){
       verify:()=>Sim.verify(), openmsgs:()=>Sim.openMessages(),
       low:()=>Sim.battery(.15), full:()=>Sim.battery(1), charge:()=>Sim.charge(), silent:()=>Sim.silent(),
       theme:()=>Sim.theme(), wallpaper:()=>Sim.wallpaper(), erase:()=>Sim.erase(),
-      touch:()=>Sim.touch()})[a]();
+      touch:()=>Sim.touch(),
+      passcodeoff:()=>Sim.passcodeOff(), faceidfail:()=>Sim.faceIDFail(), clearlockout:()=>Sim.clearLockout()})[a]();
     if(['lock','ring','answer','end','charge','touch'].includes(a)) setTimeout(renderPanel,60);
   });
   p.querySelectorAll('[data-net]').forEach(b=>b.onclick=()=>Sim.network(b.dataset.net));
