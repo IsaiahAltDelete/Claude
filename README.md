@@ -15,6 +15,11 @@ or rehearse one, without touching a real machine.
 Each folder has its own README with credentials, a feature list, its layout and
 the console commands for staging scenarios.
 
+> This repository hosts more than the simulators. The other project is **ISAIART
+> DESIGN**, a type-in-space generator at [`/design`](design/) —
+> <https://isaiahaltdelete.github.io/Claude/design/>. The rest of this file is
+> about the simulators.
+
 ## What they have in common
 
 Vanilla HTML, CSS and JavaScript. No dependencies, no build step, no server —
@@ -47,6 +52,7 @@ index.html                   the index page at the site root
 mac/                         the macOS simulator, served at /mac
 iphone/                      the iPhone simulator, served at /iphone
 roku/                        the Roku simulator, served at /roku
+design/                      ISAIART DESIGN, served at /design
 tools/build-assets.py        regenerates the Mac's icons and wallpapers
 ```
 
