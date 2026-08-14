@@ -121,14 +121,14 @@ function closeLibrary() {
 
 function openLibraryFolder(bucket) {
   sheet(box => {
-    box.appendChild(h(`<div style="font-size:22px;font-weight:700;margin-bottom:14px">${esc(bucket.name)}</div>`));
+    box.appendChild(h(`<div style="font-size:calc(22px * var(--tsize));font-weight:700;margin-bottom:14px">${esc(bucket.name)}</div>`));
     const grid = el('div');
     grid.style.cssText = 'display:grid;grid-template-columns:repeat(4,1fr);gap:18px 10px;max-height:52vh;overflow-y:auto';
     bucket.members.forEach(id => {
       const tile = el('div');
       tile.style.cssText = 'text-align:center;cursor:pointer';
       tile.innerHTML = `${appIconHTML(Apps[id], 54)}
-        <div style="font-size:11px;color:var(--txt);margin-top:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(Apps[id].name)}</div>`;
+        <div style="font-size:calc(11px * var(--tsize));color:var(--txt);margin-top:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(Apps[id].name)}</div>`;
       tile.onclick = () => { closeOverlay(); closeLibrary(); openApp(id); };
       grid.appendChild(tile);
     });
@@ -546,7 +546,7 @@ renderHome = function renderHomeWithLibrary() {
   libraryBuckets().slice(0, 6).forEach(bucket => grid.appendChild(libraryFolder(bucket)));
   page.appendChild(grid);
   const all = el('button', '', 'Show all app categories');
-  all.style.cssText = 'color:#fff;opacity:.8;font-size:13px;padding:14px 0 0;margin:0 auto';
+  all.style.cssText = 'color:#fff;opacity:.8;font-size:calc(13px * var(--tsize));padding:14px 0 0;margin:0 auto';
   all.onclick = openLibrary;
   page.appendChild(all);
   pagesEl.appendChild(page);

@@ -79,7 +79,13 @@
     <div class="desktop-widgets" id="desktop-widgets"></div>
     <div class="desktop-items" id="desktop-items"></div>
 
-    <div id="window-layer" aria-live="polite"></div>
+    <!-- Deliberately not a live region. It was aria-live="polite", which
+         made a screen reader read the entire contents of every window that
+         opened, re-rendered or refreshed — and windows here re-render on
+         almost any state change, so it narrated whole app bodies
+         continuously. The toast stack below is the live region; that is
+         what announcements are for. -->
+    <div id="window-layer"></div>
     <div id="snap-preview" class="hidden" aria-hidden="true"></div>
     <div id="overlay-layer"></div>
     <div id="surface-layer"></div>

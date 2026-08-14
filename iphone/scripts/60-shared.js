@@ -104,7 +104,7 @@ function barsSVG(values, { labels = [], colour = 'var(--sysblue)', height = 110 
     bar.style.cssText = `width:100%;border-radius:4px 4px 2px 2px;background:${colour};height:${Math.max(2, (value / peak) * (height - 26))}px`;
     column.appendChild(bar);
     if (labels[index]) {
-      column.appendChild(h(`<div style="font-size:10px;color:var(--txt3)">${esc(labels[index])}</div>`));
+      column.appendChild(h(`<div style="font-size:calc(10px * var(--tsize));color:var(--txt3)">${esc(labels[index])}</div>`));
     }
     wrap.appendChild(column);
   });
@@ -141,7 +141,7 @@ function card(parent, build, { pad = '14px 16px', bg = 'var(--group)' } = {}) {
 /** Small caps section label used above cards. */
 function cardHeader(text, trailing = '') {
   return h(`<div style="display:flex;align-items:center;justify-content:space-between;
-    margin:18px 20px 4px;font-size:13px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.04em">
+    margin:18px 20px 4px;font-size:calc(13px * var(--tsize));font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.04em">
     <span>${esc(text)}</span><span style="text-transform:none;letter-spacing:0;color:var(--sysblue);font-weight:400">${trailing}</span></div>`);
 }
 
@@ -149,8 +149,8 @@ function cardHeader(text, trailing = '') {
 function emptyState(glyph, title, sub) {
   return h(`<div style="text-align:center;padding:64px 32px;color:var(--txt3)">
     <div style="opacity:.4;display:grid;place-items:center;margin-bottom:12px">${glyph}</div>
-    <div style="font-size:17px;font-weight:600;color:var(--txt2)">${esc(title)}</div>
-    ${sub ? `<div style="font-size:13px;margin-top:5px;line-height:1.4">${esc(sub)}</div>` : ''}</div>`);
+    <div style="font-size:calc(17px * var(--tsize));font-weight:600;color:var(--txt2)">${esc(title)}</div>
+    ${sub ? `<div style="font-size:calc(13px * var(--tsize));margin-top:5px;line-height:1.4">${esc(sub)}</div>` : ''}</div>`);
 }
 
 /** iOS-style search field that filters as you type. */
@@ -163,7 +163,7 @@ function searchField(placeholder, onInput) {
   box.innerHTML = `<span style="display:grid;place-items:center;opacity:.7">${SF.magnifier}</span>`;
   const input = el('input');
   input.placeholder = placeholder;
-  input.style.cssText = 'flex:1;min-width:0;border:0;outline:0;background:transparent;color:var(--txt);font-size:16px';
+  input.style.cssText = 'flex:1;min-width:0;border:0;outline:0;background:transparent;color:var(--txt);font-size:calc(16px * var(--tsize))';
   input.oninput = () => onInput(input.value);
   box.appendChild(input);
   wrap.appendChild(box);

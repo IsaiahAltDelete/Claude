@@ -40,7 +40,7 @@
 
   .titlebar-tools .search { width: 108px; }
   .desktop-items { top: 30px; right: 8px; }
-  .desktop-item { width: 68px; font-size: 10.5px; }
+  .desktop-item { width: 68px; font-size: calc(10.5px * var(--text-scale)); }
   .desktop-item .app-icon { width: 44px; height: 44px; }
 
   .mail-app, .outlook-body { grid-template-columns: 1fr; }
@@ -50,7 +50,7 @@
   .store-shell > .sidebar { display: none; }
   .finder-preview { display: none; }
   .spotlight { top: 8%; width: calc(100vw - 16px); }
-  .spotlight-head input { font-size: 17px; }
+  .spotlight-head input { font-size: calc(17px * var(--text-scale)); }
   .launchpad-page { grid-template-columns: repeat(4, 96px); gap: 16px 4px; }
   .launchpad-app .app-icon { width: 56px; height: 56px; }
   .exposé-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
@@ -68,28 +68,28 @@
   .settings-shell > .sidebar { width: 178px; }
   .notes-list { width: 140px; }
   .pane-pad { padding: 16px 14px 28px; }
-  .pane-header h1 { font-size: 19px; }
+  .pane-header h1 { font-size: calc(19px * var(--text-scale)); }
   .mail-content { padding: 16px 16px 30px; }
   .web-page { padding: 22px 16px 36px; }
-  .web-page h1 { font-size: 25px; }
+  .web-page h1 { font-size: calc(25px * var(--text-scale)); }
   .control-center { width: calc(100vw - 14px); }
   .notification-center { width: calc(100vw - 14px); }
   .toast-stack { width: calc(100vw - 16px); right: 8px; }
   .dock { gap: 3px; padding: 5px; border-radius: 16px; }
   .dock-item:nth-last-child(n+11):not(.always-dock) { display: none; }
-  .lock-time { font-size: 62px; }
+  .lock-time { font-size: calc(62px * var(--text-scale)); }
   .tile-grid { grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); }
   .store-cards { grid-template-columns: 1fr 1fr; }
   .store-detail-head { flex-direction: column; }
-  .calc-key { min-height: 34px; font-size: 15px; }
+  .calc-key { min-height: 34px; font-size: calc(15px * var(--text-scale)); }
   .launchpad-page { grid-template-columns: repeat(3, 92px); }
   /* Narrow: the ribbon drops its group labels and the reading pane collapses
      to a two-column layout, the way the real window reflows. */
   .outlook-ribbon { padding: 5px 6px; }
-  .ol-rib-btn { min-width: 44px; font-size: 9px; }
+  .ol-rib-btn { min-width: 44px; font-size: calc(9px * var(--text-scale)); }
   .ol-rib-group { padding: 0 5px; }
   .outlook-rail { width: 54px; }
-  .ol-rail-btn { font-size: 9px; }
+  .ol-rail-btn { font-size: calc(9px * var(--text-scale)); }
   .outlook-body { grid-template-columns: 168px 280px minmax(220px, 1fr); }
   .ol-cal-body { grid-template-columns: 168px minmax(220px, 1fr); }
   .ol-people { grid-template-columns: 260px minmax(220px, 1fr); }
@@ -118,7 +118,7 @@
   .cc-grid { grid-template-columns: 1fr 1fr; }
   .sidebar { width: 132px; }
   .settings-shell > .sidebar { width: 152px; }
-  .settings-list .side-item .side-label { font-size: 11px; }
+  .settings-list .side-item .side-label { font-size: calc(11px * var(--text-scale)); }
   .desktop-items { display: none; }
   .spaces-bar { display: none; }
 }
@@ -138,7 +138,7 @@
 /* Short viewports: reduce vertical chrome so content still fits. */
 @media (max-height: 560px) {
   .lock-hero { top: 3%; }
-  .lock-time { font-size: 54px; }
+  .lock-time { font-size: calc(54px * var(--text-scale)); }
   .auth-card { bottom: 6%; }
   .start-page h1 { margin-top: 4vh; }
   .launchpad-search { margin-top: calc(var(--menu-h) + 10px); }
