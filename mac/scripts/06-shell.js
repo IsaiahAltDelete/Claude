@@ -54,6 +54,12 @@
     Mac.Shell.renderMenuBar();
     Mac.Shell.renderDock();
     Mac.Shell.renderDesktop();
+
+    /* Scenario goals are re-checked here because sync already runs after
+       every state change — so progress keeps itself up to date without each
+       scenario having to know which settings the trainee is going to touch. */
+    Mac.Scenarios?.evaluate();
+    Mac.Scenarios?.renderProgress();
   };
 
   /* ------------------------------------------------------------------ menus */
@@ -156,6 +162,8 @@
         'sep',
         { label: 'Recent Items', command: 'recent-items' },
         'sep',
+        { label: 'Training Scenarios…', command: 'scenarios' },
+        'sep',
         { label: 'Force Quit…', command: 'force-quit-dialog', shortcut: '⌥⌘⎋' },
         'sep',
         { label: 'Sleep', command: 'power', arg: 'sleep' },
@@ -191,10 +199,15 @@
       const menus = Menus.build(appId);
       const names = Object.keys(menus);
 
+      /* aria-haspopup and aria-expanded, so the button announces that it
+         opens a menu and whether that menu is open — the role="menubar" on
+         the container is only half the contract. */
       Mac.$('#menu-left').innerHTML =
-        `<button class="menu-item apple-menu" data-surface="apple" aria-label="Apple menu">${Mac.appleMark()}</button>` +
+        `<button class="menu-item apple-menu" data-surface="apple" aria-label="Apple menu"
+          aria-haspopup="menu" aria-expanded="false">${Mac.appleMark()}</button>` +
         names.map((name, index) => `<button class="menu-item ${index === 0 ? 'app-name' : 'menu-hideable'}"
-          data-surface="menu" data-menu-name="${esc(name)}">${esc(name)}</button>`).join('');
+          data-surface="menu" data-menu-name="${esc(name)}"
+          aria-haspopup="menu" aria-expanded="false">${esc(name)}</button>`).join('');
 
       const s = Mac.state.settings;
       const wifi = Mac.state.wifi;
@@ -397,9 +410,17 @@
 
     close() {
       Mac.$('#surface-layer').innerHTML = '';
-      Mac.$$('[data-surface].open').forEach(node => node.classList.remove('open'));
+      Mac.$$('[data-surface].open').forEach(node => {
+        node.classList.remove('open');
+        node.setAttribute('aria-expanded', 'false');
+      });
       this.current = null;
       Mac.session.surface = null;
+      /* Focus goes back to the button that opened the menu. Without this it
+         is left on a node that has just been removed, which drops it to
+         <body> and loses the keyboard user's place in the menu bar. */
+      if (this.anchor && this.anchor.isConnected) this.anchor.focus();
+      this.anchor = null;
     },
 
     /** Toggle a named popover, anchored to the element that triggered it. */
@@ -409,7 +430,9 @@
       this.close();
       this.current = key;
       Mac.session.surface = name;
+      this.anchor = anchor || null;
       anchor?.classList.add('open');
+      anchor?.setAttribute('aria-expanded', 'true');
 
       const layer = Mac.$('#surface-layer');
       const element = document.createElement('div');
@@ -464,6 +487,54 @@
       }
 
       layer.appendChild(element);
+      /* Opening a menu moves focus into it. The menubar/menu roles promise a
+         screen-reader user that the arrow keys work; keyboard() below makes
+         that true, and this is what gives it something to start from. */
+      element.querySelector('button:not(:disabled), [tabindex="0"]')?.focus();
+    },
+
+    /**
+     * Arrow-key navigation inside an open menu.
+     *
+     * The menu bar declares role="menubar" and role="menuitem", which tells
+     * assistive technology to use the arrow keys — and nothing implemented
+     * them, so the promise was false and the menus were reachable only by
+     * Tab, one item at a time, through every menu on screen. Declaring the
+     * roles without this is worse than not declaring them at all.
+     *
+     * @returns {boolean} true when the key was consumed
+     */
+    keyboard(event) {
+      const layer = Mac.$('#surface-layer');
+      const popover = layer.querySelector('.popover');
+      if (!popover) return false;
+
+      const items = [...popover.querySelectorAll('button:not(:disabled)')];
+      if (!items.length) return false;
+      const index = items.indexOf(document.activeElement);
+
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        const step = event.key === 'ArrowDown' ? 1 : -1;
+        const next = index < 0 ? (step > 0 ? 0 : items.length - 1)
+          : (index + step + items.length) % items.length;
+        items[next].focus();
+        return true;
+      }
+      if (event.key === 'Home') { items[0].focus(); return true; }
+      if (event.key === 'End') { items[items.length - 1].focus(); return true; }
+
+      /* Left and right walk the menu bar itself, the way a real menu does —
+         open a menu, then slide along the row without closing anything. */
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        const bar = [...Mac.$$('#menu-left .menu-item')];
+        const at = bar.indexOf(this.anchor);
+        if (at < 0) return false;
+        const target = bar[(at + (event.key === 'ArrowRight' ? 1 : -1) + bar.length) % bar.length];
+        target.click();
+        target.focus();
+        return true;
+      }
+      return false;
     },
 
     /** Rebuild the visible popover in place (after a toggle inside it). */

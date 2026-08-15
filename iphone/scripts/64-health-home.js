@@ -54,7 +54,7 @@ function healthFormat(id, value) {
 function HL() {
   return slice('health', () => ({
     favourites: ['steps', 'heart', 'sleep', 'energy', 'exercise'],
-    profile: { name: 'Alex Rivera', dob: '1996-04-14', sex: 'Male', height: `5'11"`, blood: 'O+' },
+    profile: { name: PERSONA.name, dob: '1996-04-14', sex: 'Male', height: `5'11"`, blood: 'O+' },
     medications: [
       { id: 1, name: 'Vitamin D3', dose: '2000 IU', when: 'Morning', taken: true },
       { id: 2, name: 'Cetirizine', dose: '10 mg', when: 'Evening', taken: false },
@@ -102,7 +102,7 @@ function healthSummaryView() {
   return {
     title: 'Summary',
     largeTitle: true,
-    right: [{ html: `<div class="avatar" style="background:#ff2d55;width:30px;height:30px;font-size:13px">A</div>`,
+    right: [{ html: `<div class="avatar" style="background:#ff2d55;width:30px;height:30px;font-size:calc(13px * var(--tsize))">A</div>`,
       onClick: nav => nav.push(healthProfileView()) }],
     build(body, nav) {
       const state = HL();
@@ -114,20 +114,20 @@ function healthSummaryView() {
       const stand = healthValue('stand');
       card(body, box => {
         box.style.padding = '16px';
-        box.appendChild(h(`<div style="font-size:13px;color:var(--txt3);font-weight:600">TODAY’S ACTIVITY</div>`));
+        box.appendChild(h(`<div style="font-size:calc(13px * var(--tsize));color:var(--txt3);font-weight:600">TODAY’S ACTIVITY</div>`));
         const row = el('div');
         row.style.cssText = 'display:flex;align-items:center;gap:18px;margin-top:12px';
         row.innerHTML = `<div style="position:relative;width:112px;height:112px;flex:none">
           <div style="position:absolute;inset:0">${ringSVG(move / goals.move, '#ff375f', { size: 112, width: 12 })}</div>
           <div style="position:absolute;inset:16px">${ringSVG(exercise / goals.exercise, '#a3e635', { size: 80, width: 12 })}</div>
           <div style="position:absolute;inset:32px">${ringSVG(stand / goals.stand, '#40c8e0', { size: 48, width: 12 })}</div></div>
-          <div style="flex:1;min-width:0;font-size:14px;line-height:1.7">
+          <div style="flex:1;min-width:0;font-size:calc(14px * var(--tsize));line-height:1.7">
             <div style="color:#ff375f">Move <b>${Math.round(move)}</b>/${goals.move} cal</div>
             <div style="color:#7bc62d">Exercise <b>${Math.round(exercise)}</b>/${goals.exercise} min</div>
             <div style="color:#40c8e0">Stand <b>${Math.round(stand)}</b>/${goals.stand} hrs</div></div>`;
         box.appendChild(row);
         const open = el('button', '', 'Open Fitness →');
-        open.style.cssText = 'color:var(--sysblue);font-size:14px;margin-top:12px';
+        open.style.cssText = 'color:var(--sysblue);font-size:calc(14px * var(--tsize));margin-top:12px';
         open.onclick = () => openApp('fitness');
         box.appendChild(open);
       });
@@ -140,9 +140,9 @@ function healthSummaryView() {
         const item = el('div');
         item.style.cssText = 'background:var(--group);border-radius:14px;padding:14px 16px;margin:10px 16px;cursor:pointer';
         item.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:baseline">
-            <div style="color:${metric.colour};font-weight:600;font-size:15px">${esc(metric.name)}</div>
-            <div style="color:var(--txt3);font-size:12px">${esc(relativeDay(Date.now()))}</div></div>
-          <div style="font-size:26px;font-weight:600;margin-top:4px">${esc(healthFormat(id, healthValue(id)))}</div>`;
+            <div style="color:${metric.colour};font-weight:600;font-size:calc(15px * var(--tsize))">${esc(metric.name)}</div>
+            <div style="color:var(--txt3);font-size:calc(12px * var(--tsize))">${esc(relativeDay(Date.now()))}</div></div>
+          <div style="font-size:calc(26px * var(--tsize));font-weight:600;margin-top:4px">${esc(healthFormat(id, healthValue(id)))}</div>`;
         item.appendChild(barsSVG(week, {
           labels: Array.from({ length: 7 }, (_, index) => shortDay(new Date(Date.now() - (6 - index) * 864e5))[0]),
           colour: metric.colour,
@@ -173,8 +173,8 @@ function healthSummaryView() {
           label: medication.name,
           sub: `${medication.dose} · ${medication.when}`,
           rightHTML: medication.taken
-            ? '<span style="color:var(--sysgreen);font-size:13px">Taken</span>'
-            : '<span style="color:var(--sysblue);font-size:13px">Log</span>',
+            ? '<span style="color:var(--sysgreen);font-size:calc(13px * var(--tsize))">Taken</span>'
+            : '<span style="color:var(--sysblue);font-size:calc(13px * var(--tsize))">Log</span>',
           chevron: false,
           onClick: () => {
             medication.taken = !medication.taken;
@@ -288,10 +288,10 @@ function healthMetricView(id) {
       card(body, box => {
         const total = values.reduce((a, b) => a + b, 0);
         const average = total / values.length;
-        box.appendChild(h(`<div style="color:var(--txt2);font-size:13px">
+        box.appendChild(h(`<div style="color:var(--txt2);font-size:calc(13px * var(--tsize))">
           ${['steps', 'distance', 'flights', 'energy', 'exercise', 'water'].includes(id) && view.range !== 'D' ? 'DAILY AVERAGE' : 'AVERAGE'}</div>
-          <div style="font-size:30px;font-weight:600;color:${metric.colour};margin:2px 0 6px">${esc(healthFormat(id, average))}</div>
-          <div style="color:var(--txt3);font-size:12px">${esc(view.range === 'D' ? 'Today' : `Last ${days} ${stride > 1 ? (stride === 7 ? 'weeks' : 'months') : 'days'}`)}</div>`));
+          <div style="font-size:calc(30px * var(--tsize));font-weight:600;color:${metric.colour};margin:2px 0 6px">${esc(healthFormat(id, average))}</div>
+          <div style="color:var(--txt3);font-size:calc(12px * var(--tsize))">${esc(view.range === 'D' ? 'Today' : `Last ${days} ${stride > 1 ? (stride === 7 ? 'weeks' : 'months') : 'days'}`)}</div>`));
         box.appendChild(barsSVG(values, { labels, colour: metric.colour, height: 150 }));
       });
 
@@ -337,9 +337,9 @@ function healthProfileView() {
       const state = HL();
       const profile = state.profile;
       body.appendChild(h(`<div style="text-align:center;padding:10px 0 6px">
-        <div class="avatar" style="background:#ff2d55;width:74px;height:74px;font-size:30px;margin:0 auto 8px">A</div>
-        <div style="font-size:21px;font-weight:600">${esc(profile.name)}</div>
-        <div style="color:var(--txt2);font-size:14px">Health data from this iPhone</div></div>`));
+        <div class="avatar" style="background:#ff2d55;width:74px;height:74px;font-size:calc(30px * var(--tsize));margin:0 auto 8px">A</div>
+        <div style="font-size:calc(21px * var(--tsize));font-weight:600">${esc(profile.name)}</div>
+        <div style="color:var(--txt2);font-size:calc(14px * var(--tsize))">Health data from this iPhone</div></div>`));
       const editable = [['name', 'Name'], ['dob', 'Date of Birth'], ['sex', 'Sex'], ['height', 'Height'], ['blood', 'Blood Type']];
       group(body, {
         header: 'Details',
@@ -347,7 +347,7 @@ function healthProfileView() {
           label,
           value: profile[key],
           onClick: () => sheet(box => {
-            box.appendChild(h(`<div style="font-size:20px;font-weight:700;margin-bottom:10px">${esc(label)}</div>`));
+            box.appendChild(h(`<div style="font-size:calc(20px * var(--tsize));font-weight:700;margin-bottom:10px">${esc(label)}</div>`));
             const field = el('div', 'compose-field');
             const input = el('input');
             input.value = profile[key];
@@ -391,14 +391,14 @@ function medicalIDView() {
       const state = HL();
       const id = state.medicalID;
       body.appendChild(h(`<div style="margin:12px 16px;padding:14px;border-radius:14px;background:rgba(255,69,58,.14);
-        border:.5px solid rgba(255,69,58,.4);font-size:13px;line-height:1.5;color:var(--txt2)">
+        border:.5px solid rgba(255,69,58,.4);font-size:calc(13px * var(--tsize));line-height:1.5;color:var(--txt2)">
         Medical ID can be shown from the lock screen during an emergency call, even while the phone is locked.</div>`));
       const fields = [['conditions', 'Medical Conditions'], ['allergies', 'Allergies & Reactions'], ['contact', 'Emergency Contact']];
       group(body, {
         rows: fields.map(([key, label]) => ({
           labelHTML: `<div>${esc(label)}</div><div class="sub">${esc(id[key] || 'None')}</div>`,
           onClick: () => sheet(box => {
-            box.appendChild(h(`<div style="font-size:20px;font-weight:700;margin-bottom:10px">${esc(label)}</div>`));
+            box.appendChild(h(`<div style="font-size:calc(20px * var(--tsize));font-weight:700;margin-bottom:10px">${esc(label)}</div>`));
             const field = el('div', 'compose-field');
             const input = el('input');
             input.value = id[key] || '';
@@ -494,8 +494,8 @@ function fitnessSummaryView() {
       card(body, box => {
         box.style.padding = '18px 16px';
         box.appendChild(h(`<div style="display:flex;justify-content:space-between;align-items:baseline">
-          <div style="font-size:19px;font-weight:600">Activity</div>
-          <div style="color:var(--txt3);font-size:13px">${esc(new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' }))}</div></div>`));
+          <div style="font-size:calc(19px * var(--tsize));font-weight:600">Activity</div>
+          <div style="color:var(--txt3);font-size:calc(13px * var(--tsize))">${esc(new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' }))}</div></div>`));
         const rings = el('div');
         rings.style.cssText = 'display:flex;align-items:center;gap:20px;margin-top:16px';
         rings.innerHTML = `<div style="position:relative;width:128px;height:128px;flex:none">
@@ -505,25 +505,25 @@ function fitnessSummaryView() {
           <div style="flex:1;min-width:0">
             ${[['Move', move, goals.move, 'CAL', '#ff375f'], ['Exercise', exercise, goals.exercise, 'MIN', '#a3e635'], ['Stand', stand, goals.stand, 'HRS', '#40c8e0']]
     .map(([label, value, goal, unit, colour]) => `<div style="margin-bottom:12px">
-              <div style="font-size:11px;letter-spacing:.5px;color:${colour};font-weight:700">${label.toUpperCase()}</div>
-              <div style="font-size:19px;font-weight:600">${Math.round(value)}<span style="color:var(--txt3);font-size:14px">/${goal}${unit}</span></div></div>`).join('')}
+              <div style="font-size:calc(11px * var(--tsize));letter-spacing:.5px;color:${colour};font-weight:700">${label.toUpperCase()}</div>
+              <div style="font-size:calc(19px * var(--tsize));font-weight:600">${Math.round(value)}<span style="color:var(--txt3);font-size:calc(14px * var(--tsize))">/${goal}${unit}</span></div></div>`).join('')}
           </div>`;
         box.appendChild(rings);
         const complete = move >= goals.move && exercise >= goals.exercise && stand >= goals.stand;
-        box.appendChild(h(`<div style="margin-top:4px;font-size:13px;color:${complete ? 'var(--sysgreen)' : 'var(--txt2)'}">
+        box.appendChild(h(`<div style="margin-top:4px;font-size:calc(13px * var(--tsize));color:${complete ? 'var(--sysgreen)' : 'var(--txt2)'}">
           ${complete ? 'All three rings closed. Nice work.' : `Move ${Math.max(0, Math.round(goals.move - move))} more calories to close your Move ring.`}
           · ${goals.streak}-day streak</div>`));
       });
 
       /* Weekly steps and distance */
       card(body, box => {
-        box.appendChild(h('<div style="font-size:15px;font-weight:600">Steps</div>'));
+        box.appendChild(h('<div style="font-size:calc(15px * var(--tsize));font-weight:600">Steps</div>'));
         box.appendChild(barsSVG(healthWeek('steps'), {
           labels: Array.from({ length: 7 }, (_, index) => shortDay(new Date(Date.now() - (6 - index) * 864e5))[0]),
           colour: '#ff9f0a',
           height: 110,
         }));
-        box.appendChild(h(`<div style="color:var(--txt2);font-size:13px">Average
+        box.appendChild(h(`<div style="color:var(--txt2);font-size:calc(13px * var(--tsize))">Average
           <b style="color:var(--txt)">${Math.round(healthWeek('steps').reduce((a, b) => a + b, 0) / 7).toLocaleString()}</b> steps a day</div>`));
       });
 
@@ -533,7 +533,7 @@ function fitnessSummaryView() {
       WORKOUT_TYPES.forEach(([name, colour]) => {
         const chip = el('button', '', esc(name));
         chip.style.cssText = `flex:none;background:${colour};color:#0a0a0c;font-weight:600;border-radius:16px;
-          padding:9px 14px;font-size:13px`;
+          padding:9px 14px;font-size:calc(13px * var(--tsize))`;
         chip.onclick = () => startWorkoutSheet(name, colour, nav);
         start.appendChild(chip);
       });
@@ -564,15 +564,15 @@ function fitnessSummaryView() {
 
 function startWorkoutSheet(name, colour, nav) {
   sheet(box => {
-    box.appendChild(h(`<div style="font-size:22px;font-weight:700">${esc(name)}</div>
-      <div style="color:var(--txt2);font-size:14px;margin-bottom:12px">Open Goal</div>`));
+    box.appendChild(h(`<div style="font-size:calc(22px * var(--tsize));font-weight:700">${esc(name)}</div>
+      <div style="color:var(--txt2);font-size:calc(14px * var(--tsize));margin-bottom:12px">Open Goal</div>`));
     let seconds = 0;
     let running = true;
     const readout = el('div');
-    readout.style.cssText = `font-size:52px;font-weight:200;font-variant-numeric:tabular-nums;text-align:center;
+    readout.style.cssText = `font-size:calc(52px * var(--tsize));font-weight:200;font-variant-numeric:tabular-nums;text-align:center;
       color:${colour};padding:10px 0`;
     const stats = el('div');
-    stats.style.cssText = 'display:flex;justify-content:space-around;color:var(--txt2);font-size:14px;padding-bottom:14px';
+    stats.style.cssText = 'display:flex;justify-content:space-around;color:var(--txt2);font-size:calc(14px * var(--tsize));padding-bottom:14px';
     box.append(readout, stats);
 
     const rate = (WORKOUT_TYPES.find(w => w[0] === name) || [, , 6])[2];
@@ -626,9 +626,9 @@ function workoutDetailView(workout) {
     shortTitle: 'Summary',
     build(body, nav) {
       body.appendChild(h(`<div style="padding:6px 20px 12px">
-        <div style="font-size:13px;color:var(--txt3)">${esc(new Date(workout.at).toLocaleString())}</div>
-        <div style="font-size:44px;font-weight:200;color:${workout.colour};margin-top:6px">${esc(clockDuration(workout.minutes * 60))}</div>
-        <div style="color:var(--txt2);font-size:14px">Total time</div></div>`));
+        <div style="font-size:calc(13px * var(--tsize));color:var(--txt3)">${esc(new Date(workout.at).toLocaleString())}</div>
+        <div style="font-size:calc(44px * var(--tsize));font-weight:200;color:${workout.colour};margin-top:6px">${esc(clockDuration(workout.minutes * 60))}</div>
+        <div style="color:var(--txt2);font-size:calc(14px * var(--tsize))">Total time</div></div>`));
       const tiles = [
         ['Active Calories', `${workout.calories} cal`],
         ['Avg. Heart Rate', `${workout.heart} BPM`],
@@ -641,13 +641,13 @@ function workoutDetailView(workout) {
       grid.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px';
       tiles.forEach(([label, value]) => {
         grid.appendChild(h(`<div style="background:var(--group);border-radius:14px;padding:14px">
-          <div style="color:var(--txt2);font-size:12px">${esc(label)}</div>
-          <div style="font-size:20px;font-weight:600;margin-top:3px">${esc(value)}</div></div>`));
+          <div style="color:var(--txt2);font-size:calc(12px * var(--tsize))">${esc(label)}</div>
+          <div style="font-size:calc(20px * var(--tsize));font-weight:600;margin-top:3px">${esc(value)}</div></div>`));
       });
       body.appendChild(grid);
 
       card(body, box => {
-        box.appendChild(h('<div style="font-size:14px;font-weight:600;margin-bottom:4px">Heart Rate</div>'));
+        box.appendChild(h('<div style="font-size:calc(14px * var(--tsize));font-weight:600;margin-bottom:4px">Heart Rate</div>'));
         const random = rng(`${workout.id}:hr`);
         box.appendChild(h(lineSVG(Array.from({ length: 28 }, () => workout.heart + (random() - 0.5) * 34),
           { colour: '#ff375f', w: 300, h: 90 })));
@@ -673,15 +673,15 @@ function fitnessGoalsView() {
       const goals = fitnessGoals();
       [['move', 'Move', 'calories', 40], ['exercise', 'Exercise', 'minutes', 5], ['stand', 'Stand', 'hours', 1]].forEach(([key, label, unit, step]) => {
         card(body, box => {
-          box.appendChild(h(`<div style="font-size:16px;font-weight:600">${esc(label)} Goal</div>
-            <div style="color:var(--txt2);font-size:13px">Daily ${esc(unit)}</div>`));
+          box.appendChild(h(`<div style="font-size:calc(16px * var(--tsize));font-weight:600">${esc(label)} Goal</div>
+            <div style="color:var(--txt2);font-size:calc(13px * var(--tsize))">Daily ${esc(unit)}</div>`));
           const row = el('div');
           row.style.cssText = 'display:flex;align-items:center;gap:16px;margin-top:10px';
           const value = el('div', '', String(goals[key]));
-          value.style.cssText = 'flex:1;text-align:center;font-size:34px;font-weight:300';
+          value.style.cssText = 'flex:1;text-align:center;font-size:calc(34px * var(--tsize));font-weight:300';
           const bump = (delta, text) => {
             const button = el('button', '', text);
-            button.style.cssText = `width:46px;height:46px;border-radius:50%;background:var(--bg3);color:var(--sysblue);font-size:24px`;
+            button.style.cssText = `width:46px;height:46px;border-radius:50%;background:var(--bg3);color:var(--sysblue);font-size:calc(24px * var(--tsize))`;
             button.onclick = () => {
               goals[key] = Math.max(step, goals[key] + delta);
               value.textContent = String(goals[key]);
@@ -724,8 +724,8 @@ function fitnessAwardsView() {
           <div style="width:64px;height:64px;margin:0 auto 10px;border-radius:50%;
             background:${earned ? `conic-gradient(from ${index * 60}deg,#ff375f,#ff9f0a,#a3e635,#40c8e0,#ff375f)` : 'var(--bg3)'};
             display:grid;place-items:center;color:#fff">${SF.star}</div>
-          <div style="font-size:14px;font-weight:600;line-height:1.25">${esc(name)}</div>
-          <div style="font-size:12px;color:var(--txt2);margin-top:4px;line-height:1.35">${esc(detail)}</div></div>`);
+          <div style="font-size:calc(14px * var(--tsize));font-weight:600;line-height:1.25">${esc(name)}</div>
+          <div style="font-size:calc(12px * var(--tsize));color:var(--txt2);margin-top:4px;line-height:1.35">${esc(detail)}</div></div>`);
         tile.onclick = () => toast(earned ? `Earned: ${name}` : `Not earned yet: ${name}`);
         grid.appendChild(tile);
       });
@@ -812,7 +812,7 @@ function homeRootView() {
       { text: 'Add Accessory', onClick: () => addDeviceSheet(nav) },
       { text: 'Add Scene', onClick: () => addSceneSheet(nav) },
       { text: 'Add Room', onClick: () => sheet(box => {
-        box.appendChild(h('<div style="font-size:20px;font-weight:700;margin-bottom:10px">New Room</div>'));
+        box.appendChild(h('<div style="font-size:calc(20px * var(--tsize));font-weight:700;margin-bottom:10px">New Room</div>'));
         const field = el('div', 'compose-field');
         const input = el('input');
         input.placeholder = 'Room name';
@@ -830,7 +830,7 @@ function homeRootView() {
     ]) }],
     build(body, nav) {
       const state = HM();
-      body.appendChild(h(`<div style="padding:0 20px 12px;color:var(--txt2);font-size:14px;line-height:1.5">
+      body.appendChild(h(`<div style="padding:0 20px 12px;color:var(--txt2);font-size:calc(14px * var(--tsize));line-height:1.5">
         ${esc(state.name)}<br>${esc(homeSummary().join(' · '))}</div>`));
 
       /* Cameras strip */
@@ -844,7 +844,7 @@ function homeRootView() {
           tile.innerHTML = `<div style="height:132px;border-radius:14px;overflow:hidden;position:relative;
               background-image:url('${artURI(`cam:${camera.id}`, { w: 320, h: 180, kind: 'photo' })}');background-size:cover">
               <div style="position:absolute;inset:auto 0 0;padding:8px 10px;background:linear-gradient(transparent,rgba(0,0,0,.7));
-                color:#fff;font-size:13px;font-weight:600">${esc(camera.name)}
+                color:#fff;font-size:calc(13px * var(--tsize));font-weight:600">${esc(camera.name)}
                 <span style="opacity:.7;font-weight:400"> · ${esc(camera.on ? 'Live' : 'Off')}</span></div>
               ${camera.on ? '<div style="position:absolute;top:8px;left:10px;width:8px;height:8px;border-radius:50%;background:#ff453a"></div>' : ''}</div>`;
           tile.onclick = () => nav.push(homeDeviceView(camera));
@@ -864,8 +864,8 @@ function homeRootView() {
           ${scene.on ? 'color:#fff' : ''}`;
         tile.innerHTML = `<div style="display:grid;place-items:center;width:34px;height:34px;border-radius:50%;
             background:${scene.on ? 'rgba(255,255,255,.28)' : 'var(--bg3)'};margin-bottom:8px">${SF.sparkles}</div>
-          <div style="font-size:15px;font-weight:600">${esc(scene.name)}</div>
-          <div style="font-size:12px;opacity:.75">${scene.devices.length} accessor${scene.devices.length === 1 ? 'y' : 'ies'}</div>`;
+          <div style="font-size:calc(15px * var(--tsize));font-weight:600">${esc(scene.name)}</div>
+          <div style="font-size:calc(12px * var(--tsize));opacity:.75">${scene.devices.length} accessor${scene.devices.length === 1 ? 'y' : 'ies'}</div>`;
         tile.onclick = () => {
           scene.on = !scene.on;
           scene.devices.forEach(id => {
@@ -921,8 +921,8 @@ function homeTile(device, nav) {
   tile.innerHTML = `<div style="display:flex;align-items:flex-start;gap:8px">
       <div style="display:grid;place-items:center;width:32px;height:32px;border-radius:50%;flex:none;
         background:${active ? 'rgba(0,0,0,.08)' : 'var(--bg3)'};color:${active ? kind.colour : 'var(--txt2)'}">${kind.glyph}</div></div>
-    <div style="font-size:14px;font-weight:600;margin-top:8px;line-height:1.2">${esc(device.name)}</div>
-    <div style="font-size:12px;opacity:.7">${esc(detail)}</div>`;
+    <div style="font-size:calc(14px * var(--tsize));font-weight:600;margin-top:8px;line-height:1.2">${esc(device.name)}</div>
+    <div style="font-size:calc(12px * var(--tsize));opacity:.7">${esc(detail)}</div>`;
   tile.onclick = () => {
     if (kind.readonly) { nav.push(homeDeviceView(device)); return; }
     device.on = !device.on;
@@ -932,7 +932,7 @@ function homeTile(device, nav) {
   tile.oncontextmenu = event => { event.preventDefault(); nav.push(homeDeviceView(device)); };
   const more = el('button', '', '⋯');
   more.style.cssText = `position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;
-    background:${active ? 'rgba(0,0,0,.08)' : 'var(--bg3)'};color:${active ? '#000' : 'var(--txt2)'};font-size:15px;line-height:1`;
+    background:${active ? 'rgba(0,0,0,.08)' : 'var(--bg3)'};color:${active ? '#000' : 'var(--txt2)'};font-size:calc(15px * var(--tsize));line-height:1`;
   more.onclick = event => { event.stopPropagation(); nav.push(homeDeviceView(device)); };
   tile.appendChild(more);
   return tile;
@@ -952,14 +952,14 @@ function homeDeviceView(device) {
       if (kind.temp) {
         card(body, box => {
           box.appendChild(h(`<div style="text-align:center">
-            <div style="font-size:13px;color:var(--txt2)">CURRENTLY</div>
-            <div style="font-size:56px;font-weight:200;color:#ff9f0a">${device.current}°</div>
-            <div style="color:var(--txt2);font-size:14px">Target ${device.target}° · Heating</div></div>`));
+            <div style="font-size:calc(13px * var(--tsize));color:var(--txt2)">CURRENTLY</div>
+            <div style="font-size:calc(56px * var(--tsize));font-weight:200;color:#ff9f0a">${device.current}°</div>
+            <div style="color:var(--txt2);font-size:calc(14px * var(--tsize))">Target ${device.target}° · Heating</div></div>`));
           const row = el('div');
           row.style.cssText = 'display:flex;align-items:center;gap:14px;margin-top:12px';
           const bump = (delta, text) => {
             const button = el('button', '', text);
-            button.style.cssText = 'flex:1;height:46px;border-radius:14px;background:var(--bg3);color:var(--txt);font-size:22px';
+            button.style.cssText = 'flex:1;height:46px;border-radius:14px;background:var(--bg3);color:var(--txt);font-size:calc(22px * var(--tsize))';
             button.onclick = () => { device.target = Math.max(50, Math.min(90, device.target + delta)); save(); nav.refresh(); };
             return button;
           };
@@ -980,7 +980,7 @@ function homeDeviceView(device) {
             const row = el('div', 'row');
             row.style.flexDirection = 'column';
             row.style.alignItems = 'stretch';
-            row.innerHTML = `<div style="display:flex;justify-content:space-between;font-size:15px">
+            row.innerHTML = `<div style="display:flex;justify-content:space-between;font-size:calc(15px * var(--tsize))">
               <span>${device.kind === 'speaker' ? 'Volume' : device.kind === 'fan' ? 'Speed' : 'Brightness'}</span>
               <span style="color:var(--txt2)">${device.level || 50}%</span></div>`;
             const slider = el('input');
@@ -1037,7 +1037,7 @@ function homeDeviceView(device) {
 
 function addDeviceSheet(nav) {
   sheet(box => {
-    box.appendChild(h('<div style="font-size:22px;font-weight:700;margin-bottom:8px">Add Accessory</div>'));
+    box.appendChild(h('<div style="font-size:calc(22px * var(--tsize));font-weight:700;margin-bottom:8px">Add Accessory</div>'));
     const field = el('div', 'compose-field');
     const input = el('input');
     input.placeholder = 'Accessory name';
@@ -1066,7 +1066,7 @@ function addDeviceSheet(nav) {
 
 function addSceneSheet(nav) {
   sheet(box => {
-    box.appendChild(h('<div style="font-size:22px;font-weight:700;margin-bottom:8px">New Scene</div>'));
+    box.appendChild(h('<div style="font-size:calc(22px * var(--tsize));font-weight:700;margin-bottom:8px">New Scene</div>'));
     const field = el('div', 'compose-field');
     const input = el('input');
     input.placeholder = 'Scene name';
@@ -1166,7 +1166,7 @@ function findMyListView(tab) {
           <div style="position:absolute;left:46%;top:44%;width:16px;height:16px;border-radius:50%;background:#0a84ff;
             border:2.5px solid #fff;box-shadow:0 0 0 8px rgba(10,132,255,.25)"></div>
           <button id="fmOpen" style="position:absolute;right:10px;bottom:10px;background:rgba(0,0,0,.6);color:#fff;
-            border-radius:14px;padding:7px 12px;font-size:12px">Open in Maps</button></div>`));
+            border-radius:14px;padding:7px 12px;font-size:calc(12px * var(--tsize))">Open in Maps</button></div>`));
       const open = $('#fmOpen', body);
       if (open) open.onclick = () => openApp('maps');
 
@@ -1202,7 +1202,7 @@ function findMyListView(tab) {
           labelHTML: `<div>${esc(entry.name)}</div>
             <div class="sub">${esc(entry.where)}${entry.distance ? ` · ${esc(entry.distance)}` : ''} · ${esc(relativeDay(entry.at))} ${esc(timeStr(new Date(entry.at)))}</div>`,
           rightHTML: entry.battery != null
-            ? `<span style="font-size:12px;color:${entry.battery < 0.2 ? 'var(--sysred)' : 'var(--txt2)'}">${Math.round(entry.battery * 100)}%</span>`
+            ? `<span style="font-size:calc(12px * var(--tsize));color:${entry.battery < 0.2 ? 'var(--sysred)' : 'var(--txt2)'}">${Math.round(entry.battery * 100)}%</span>`
             : '',
           onClick: () => nav.push(findMyDetailView(entry, tab)),
         })),
@@ -1337,7 +1337,7 @@ function faceTimeView() {
 
 function faceTimeCompose(nav) {
   sheet(box => {
-    box.appendChild(h('<div style="font-size:22px;font-weight:700;margin-bottom:8px">New FaceTime</div>'));
+    box.appendChild(h('<div style="font-size:calc(22px * var(--tsize));font-weight:700;margin-bottom:8px">New FaceTime</div>'));
     const field = el('div', 'compose-field');
     field.appendChild(h('<div class="k">To:</div>'));
     const input = el('input');
@@ -1380,8 +1380,8 @@ function faceTimeCall(name, kind, nav) {
     <div style="position:absolute;inset:0;background-image:url('${artURI(seed, { w: 400, h: 800, kind: 'album' })}');
       background-size:cover;opacity:${kind === 'video' ? 0.95 : 0.35}"></div>
     <div style="position:relative;padding:64px 22px 0;text-align:center">
-      <div style="font-size:26px;font-weight:600">${esc(name)}</div>
-      <div id="ftStatus" style="opacity:.75;font-size:15px;margin-top:4px">Connecting…</div></div>
+      <div style="font-size:calc(26px * var(--tsize));font-weight:600">${esc(name)}</div>
+      <div id="ftStatus" style="opacity:.75;font-size:calc(15px * var(--tsize));margin-top:4px">Connecting…</div></div>
     ${kind === 'video' ? `<div style="position:absolute;right:14px;top:120px;width:96px;height:132px;border-radius:14px;
       overflow:hidden;border:1px solid rgba(255,255,255,.3);
       background-image:url('${artURI('ft:self', { w: 200, h: 280, kind: 'album' })}');background-size:cover"></div>` : ''}
@@ -1400,7 +1400,7 @@ function faceTimeCall(name, kind, nav) {
     const grid = el('div');
     grid.style.cssText = 'display:grid;grid-template-columns:repeat(3,1fr);gap:16px;justify-items:center';
     const pill = (label, glyph, active, onClick) => {
-      const button = el('button', '', `${glyph}<div style="font-size:11px;margin-top:5px">${esc(label)}</div>`);
+      const button = el('button', '', `${glyph}<div style="font-size:calc(11px * var(--tsize));margin-top:5px">${esc(label)}</div>`);
       button.style.cssText = `display:grid;place-items:center;width:66px;height:66px;border-radius:50%;
         background:${active ? '#fff' : 'rgba(255,255,255,.22)'};color:${active ? '#000' : '#fff'};backdrop-filter:blur(10px)`;
       button.onclick = onClick;
@@ -1492,11 +1492,11 @@ function booksHomeView() {
 
       card(body, box => {
         box.appendChild(h(`<div style="display:flex;justify-content:space-between;align-items:center">
-          <div><div style="font-size:16px;font-weight:600">Reading Goal</div>
-          <div style="color:var(--txt2);font-size:13px">${state.readToday} of ${state.goal} minutes today</div></div>
+          <div><div style="font-size:calc(16px * var(--tsize));font-weight:600">Reading Goal</div>
+          <div style="color:var(--txt2);font-size:calc(13px * var(--tsize))">${state.readToday} of ${state.goal} minutes today</div></div>
           <div style="width:60px;height:60px">${ringSVG(state.readToday / state.goal, '#ff9f0a', { size: 60, width: 8 })}</div></div>`));
         const add = el('button', '', 'Log 5 minutes');
-        add.style.cssText = 'color:var(--sysblue);font-size:14px;margin-top:8px';
+        add.style.cssText = 'color:var(--sysblue);font-size:calc(14px * var(--tsize));margin-top:8px';
         add.onclick = () => {
           state.readToday += 5;
           save();
@@ -1515,10 +1515,10 @@ function booksHomeView() {
           tile.innerHTML = `
             <div style="height:210px;border-radius:8px;overflow:hidden;box-shadow:0 8px 20px rgba(0,0,0,.4);
               background-image:url('${artURI(`book:${book.id}`, { w: 200, h: 300, kind: 'book' })}');background-size:cover;
-              display:flex;align-items:flex-end;padding:10px;color:#fff;font-weight:700;font-size:14px;line-height:1.2">
+              display:flex;align-items:flex-end;padding:10px;color:#fff;font-weight:700;font-size:calc(14px * var(--tsize));line-height:1.2">
               ${esc(book.title)}</div>
-            <div style="margin-top:8px;font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(book.title)}</div>
-            <div style="font-size:12px;color:var(--txt2)">${Math.round((book.page / book.pages) * 100)}% · ${book.pages - book.page} pages left</div>`;
+            <div style="margin-top:8px;font-size:calc(13px * var(--tsize));font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(book.title)}</div>
+            <div style="font-size:calc(12px * var(--tsize));color:var(--txt2)">${Math.round((book.page / book.pages) * 100)}% · ${book.pages - book.page} pages left</div>`;
           tile.onclick = () => nav.push(bookReaderView(book));
           strip.appendChild(tile);
         });
@@ -1530,8 +1530,8 @@ function booksHomeView() {
         rows: state.library.map(book => ({
           labelHTML: `<div>${esc(book.title)}</div><div class="sub">${esc(book.author)} · ${esc(book.genre)}</div>`,
           rightHTML: book.finished
-            ? '<span style="color:var(--sysgreen);font-size:12px">Finished</span>'
-            : book.page ? `<span style="color:var(--txt2);font-size:12px">${Math.round((book.page / book.pages) * 100)}%</span>` : '',
+            ? '<span style="color:var(--sysgreen);font-size:calc(12px * var(--tsize))">Finished</span>'
+            : book.page ? `<span style="color:var(--txt2);font-size:calc(12px * var(--tsize))">${Math.round((book.page / book.pages) * 100)}%</span>` : '',
           onClick: () => nav.push(bookReaderView(book)),
         })),
       });
@@ -1561,8 +1561,8 @@ function booksStoreView() {
             const owned = state.library.some(book => book.title === title);
             return {
               labelHTML: `<div>${esc(title)}</div><div class="sub">${esc(author)} · ${esc(genre)} · ${pages} pages</div>`,
-              rightHTML: owned ? '<span style="color:var(--txt2);font-size:12px">In Library</span>'
-                : '<span style="color:var(--sysblue);font-size:13px">Get</span>',
+              rightHTML: owned ? '<span style="color:var(--txt2);font-size:calc(12px * var(--tsize))">In Library</span>'
+                : '<span style="color:var(--sysblue);font-size:calc(13px * var(--tsize))">Get</span>',
               chevron: false,
               onClick: () => {
                 if (owned) { toast('Already in your library'); return; }
@@ -1603,9 +1603,9 @@ function bookReaderView(book) {
       const random = rng(`${book.id}:${page}`);
       body.style.background = '#f7f1e3';
       const sheetEl = el('div');
-      sheetEl.style.cssText = `padding:18px 22px 10px;color:#2c2418;font-size:17px;line-height:1.62;
+      sheetEl.style.cssText = `padding:18px 22px 10px;color:#2c2418;font-size:calc(17px * var(--tsize));line-height:1.62;
         font-family:Georgia,"Times New Roman",serif;min-height:52vh`;
-      sheetEl.innerHTML = `<div style="text-align:center;font-size:12px;letter-spacing:.08em;text-transform:uppercase;
+      sheetEl.innerHTML = `<div style="text-align:center;font-size:calc(12px * var(--tsize));letter-spacing:.08em;text-transform:uppercase;
           opacity:.5;margin-bottom:16px">${esc(book.title)}</div>
         ${Array.from({ length: 4 }, () => `<p style="margin-bottom:14px">${esc(PARAGRAPHS[Math.floor(random() * PARAGRAPHS.length)])}
           ${esc(PARAGRAPHS[Math.floor(random() * PARAGRAPHS.length)])}</p>`).join('')}`;
@@ -1614,7 +1614,7 @@ function bookReaderView(book) {
       const bar = el('div');
       bar.style.cssText = `position:sticky;bottom:0;background:#f7f1e3;border-top:1px solid rgba(0,0,0,.08);
         padding:10px 16px 16px;color:#5a5140`;
-      bar.innerHTML = `<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px">
+      bar.innerHTML = `<div style="display:flex;justify-content:space-between;font-size:calc(12px * var(--tsize));margin-bottom:8px">
         <span>Page ${page} of ${book.pages}</span><span>${Math.round((page / book.pages) * 100)}%</span></div>
         <div style="height:3px;border-radius:2px;background:rgba(0,0,0,.1)">
           <div style="height:100%;width:${(page / book.pages) * 100}%;background:#ff9f0a;border-radius:2px"></div></div>`;
@@ -1622,7 +1622,7 @@ function bookReaderView(book) {
       buttons.style.cssText = 'display:flex;gap:10px;margin-top:12px';
       const turn = (label, delta) => {
         const button = el('button', '', label);
-        button.style.cssText = 'flex:1;padding:11px;border-radius:12px;background:rgba(0,0,0,.06);color:#2c2418;font-size:15px';
+        button.style.cssText = 'flex:1;padding:11px;border-radius:12px;background:rgba(0,0,0,.06);color:#2c2418;font-size:calc(15px * var(--tsize))';
         button.onclick = () => {
           book.page = Math.max(1, Math.min(book.pages, page + delta));
           book.finished = book.page >= book.pages;
@@ -1711,9 +1711,9 @@ function podcastsHomeView() {
         tile.innerHTML = `
           <div style="height:150px;border-radius:14px;overflow:hidden;
             background-image:url('${artURI(`pod:${episode.show}`, { w: 300, h: 300, kind: 'album' })}');background-size:cover"></div>
-          <div style="margin-top:9px;font-size:12px;color:var(--txt2)">${esc(relativeDay(episode.at))} · ${esc(episode.show)}</div>
-          <div style="font-size:14px;font-weight:600;line-height:1.25;margin-top:2px">${esc(episode.title)}</div>
-          <div style="font-size:12px;color:var(--txt2);margin-top:3px">
+          <div style="margin-top:9px;font-size:calc(12px * var(--tsize));color:var(--txt2)">${esc(relativeDay(episode.at))} · ${esc(episode.show)}</div>
+          <div style="font-size:calc(14px * var(--tsize));font-weight:600;line-height:1.25;margin-top:2px">${esc(episode.title)}</div>
+          <div style="font-size:calc(12px * var(--tsize));color:var(--txt2);margin-top:3px">
             ${played ? `${clockDuration(episode.seconds - played)} left` : clockDuration(episode.seconds)}</div>`;
         tile.onclick = () => nav.push(episodeView(episode));
         strip.appendChild(tile);
@@ -1735,7 +1735,7 @@ function podcastsHomeView() {
         rows: SHOWS.filter(([name]) => !state.following.includes(name)).map(([name, publisher, category]) => ({
           label: name,
           sub: `${publisher} · ${category}`,
-          rightHTML: '<span style="color:var(--sysblue);font-size:13px">Follow</span>',
+          rightHTML: '<span style="color:var(--sysblue);font-size:calc(13px * var(--tsize))">Follow</span>',
           chevron: false,
           onClick: () => { state.following.push(name); save(); nav.refresh(); island(SF.music, '#bf5af2', 'Podcasts', `Following ${name}`); },
         })),
@@ -1755,9 +1755,9 @@ function showView(name) {
         <div style="width:104px;height:104px;border-radius:14px;flex:none;
           background-image:url('${artURI(`pod:${name}`, { w: 300, h: 300, kind: 'album' })}');background-size:cover"></div>
         <div style="flex:1;min-width:0">
-          <div style="font-size:19px;font-weight:700;line-height:1.2">${esc(name)}</div>
-          <div style="color:var(--txt2);font-size:13px;margin-top:3px">${esc(show[1])}</div>
-          <div style="color:var(--txt3);font-size:12px;margin-top:3px">${esc(show[2])} · Updated weekly</div></div></div>`));
+          <div style="font-size:calc(19px * var(--tsize));font-weight:700;line-height:1.2">${esc(name)}</div>
+          <div style="color:var(--txt2);font-size:calc(13px * var(--tsize));margin-top:3px">${esc(show[1])}</div>
+          <div style="color:var(--txt3);font-size:calc(12px * var(--tsize));margin-top:3px">${esc(show[2])} · Updated weekly</div></div></div>`));
       const follow = primaryButton(state.following.includes(name) ? 'Following' : 'Follow', () => {
         state.following = state.following.includes(name)
           ? state.following.filter(s => s !== name)
@@ -1798,8 +1798,8 @@ function episodeView(episode) {
       body.appendChild(h(`<div style="text-align:center;padding:8px 24px 4px">
         <div style="width:190px;height:190px;margin:0 auto 14px;border-radius:16px;box-shadow:0 12px 30px rgba(0,0,0,.4);
           background-image:url('${artURI(`pod:${episode.show}`, { w: 400, h: 400, kind: 'album' })}');background-size:cover"></div>
-        <div style="font-size:18px;font-weight:700;line-height:1.25">${esc(episode.title)}</div>
-        <div style="color:var(--txt2);font-size:13px;margin-top:4px">${esc(episode.show)} · ${esc(relativeDay(episode.at))}</div></div>`));
+        <div style="font-size:calc(18px * var(--tsize));font-weight:700;line-height:1.25">${esc(episode.title)}</div>
+        <div style="color:var(--txt2);font-size:calc(13px * var(--tsize));margin-top:4px">${esc(episode.show)} · ${esc(relativeDay(episode.at))}</div></div>`));
 
       const progress = el('div');
       progress.style.cssText = 'padding:14px 24px 0';
@@ -1810,7 +1810,7 @@ function episodeView(episode) {
       const paint = () => {
         progress.innerHTML = `<div style="height:4px;border-radius:2px;background:var(--bg3)">
             <div style="height:100%;width:${((position / episode.seconds) * 100).toFixed(1)}%;background:#bf5af2;border-radius:2px"></div></div>
-          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--txt2);margin-top:6px">
+          <div style="display:flex;justify-content:space-between;font-size:calc(11px * var(--tsize));color:var(--txt2);margin-top:6px">
             <span>${esc(clockDuration(position))}</span><span>−${esc(clockDuration(Math.max(0, episode.seconds - position)))}</span></div>`;
         controls.innerHTML = '';
         const button = (label, size, onClick) => {
@@ -1823,7 +1823,7 @@ function episodeView(episode) {
           button('−15', 44, () => { position = Math.max(0, position - 15); commit(); }),
           (() => {
             const play = el('button', '', playing ? '❚❚' : '▶');
-            play.style.cssText = `width:66px;height:66px;border-radius:50%;background:#bf5af2;color:#fff;font-size:22px`;
+            play.style.cssText = `width:66px;height:66px;border-radius:50%;background:#bf5af2;color:#fff;font-size:calc(22px * var(--tsize))`;
             play.onclick = () => { playing = !playing; paint(); };
             return play;
           })(),
@@ -1853,7 +1853,7 @@ function episodeView(episode) {
           { label: 'Share Episode', icon: SF.share, iconBg: '#0a84ff', onClick: () => toast('Sharing is simulated') },
         ],
       });
-      body.appendChild(h(`<div style="padding:6px 20px 30px;color:var(--txt2);font-size:14px;line-height:1.55">
+      body.appendChild(h(`<div style="padding:6px 20px 30px;color:var(--txt2);font-size:calc(14px * var(--tsize));line-height:1.55">
         ${esc(episode.notes)}</div>`));
     },
   };
@@ -1909,15 +1909,15 @@ function freeformListView() {
             position:relative;overflow:hidden">
             ${board.items.slice(0, 6).map(item => `<div style="position:absolute;left:${item.x * 0.9}%;top:${item.y * 0.9}%;
               width:28%;height:20%;border-radius:3px;background:${item.colour};opacity:.9"></div>`).join('')}
-            ${board.items.length ? '' : '<div style="position:absolute;inset:0;display:grid;place-items:center;color:var(--txt3);font-size:12px">Empty</div>'}</div>
-          <div style="margin-top:7px;font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(board.name)}</div>
-          <div style="font-size:12px;color:var(--txt2)">${esc(relativeDay(board.at))} · ${board.items.length} item${board.items.length === 1 ? '' : 's'}</div>`;
+            ${board.items.length ? '' : '<div style="position:absolute;inset:0;display:grid;place-items:center;color:var(--txt3);font-size:calc(12px * var(--tsize))">Empty</div>'}</div>
+          <div style="margin-top:7px;font-size:calc(14px * var(--tsize));font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(board.name)}</div>
+          <div style="font-size:calc(12px * var(--tsize));color:var(--txt2)">${esc(relativeDay(board.at))} · ${board.items.length} item${board.items.length === 1 ? '' : 's'}</div>`;
         tile.onclick = () => nav.push(freeformBoardView(board));
         tile.oncontextmenu = event => {
           event.preventDefault();
           actionSheet(board.name, [
             { text: 'Rename', onClick: () => sheet(box => {
-              box.appendChild(h('<div style="font-size:20px;font-weight:700;margin-bottom:10px">Rename Board</div>'));
+              box.appendChild(h('<div style="font-size:calc(20px * var(--tsize));font-weight:700;margin-bottom:10px">Rename Board</div>'));
               const field = el('div', 'compose-field');
               const input = el('input');
               input.value = board.name;
@@ -1954,7 +1954,7 @@ function freeformBoardView(board) {
       { text: 'Clear Board', style: 'red', onClick: () => { board.items = []; save(); nav.refresh(); } },
     ]) }],
     build(body, nav) {
-      body.appendChild(h(`<div style="padding:4px 20px 8px;color:var(--txt2);font-size:13px">
+      body.appendChild(h(`<div style="padding:4px 20px 8px;color:var(--txt2);font-size:calc(13px * var(--tsize))">
         Tap anywhere on the canvas to add a note. Drag to rearrange.</div>`));
       const canvas = el('div');
       canvas.style.cssText = `position:relative;margin:0 12px 16px;height:60vh;border-radius:14px;
@@ -1967,7 +1967,7 @@ function freeformBoardView(board) {
         board.items.forEach(item => {
           const note = el('div', 'ff-note');
           note.style.cssText = `position:absolute;left:${item.x}%;top:${item.y}%;width:110px;min-height:76px;
-            background:${item.colour};border-radius:4px;padding:9px 10px;font-size:13px;line-height:1.35;color:#2c2418;
+            background:${item.colour};border-radius:4px;padding:9px 10px;font-size:calc(13px * var(--tsize));line-height:1.35;color:#2c2418;
             box-shadow:0 4px 10px rgba(0,0,0,.18);cursor:grab;word-break:break-word`;
           note.textContent = item.text;
           canvas.appendChild(note);
@@ -1998,10 +1998,10 @@ function freeformBoardView(board) {
       };
 
       const editNote = item => sheet(box => {
-        box.appendChild(h('<div style="font-size:20px;font-weight:700;margin-bottom:10px">Note</div>'));
+        box.appendChild(h('<div style="font-size:calc(20px * var(--tsize));font-weight:700;margin-bottom:10px">Note</div>'));
         const area = el('textarea');
         area.value = item.text;
-        area.style.cssText = 'width:100%;min-height:96px;background:var(--bg3);border-radius:12px;padding:12px;color:var(--txt);font-size:16px;resize:none';
+        area.style.cssText = 'width:100%;min-height:96px;background:var(--bg3);border-radius:12px;padding:12px;color:var(--txt);font-size:calc(16px * var(--tsize));resize:none';
         box.appendChild(area);
         const swatches = el('div');
         swatches.style.cssText = 'display:flex;gap:10px;margin:12px 0';

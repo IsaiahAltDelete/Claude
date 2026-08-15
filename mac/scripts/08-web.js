@@ -46,6 +46,20 @@
   const ALLOWED_ATTRS = new Set(['alt', 'class', 'colspan', 'datetime', 'dir', 'height',
     'lang', 'rowspan', 'title', 'width']);
 
+  /**
+   * Prefix for ids carried over from a fetched page.
+   *
+   * `id` is deliberately not in ALLOWED_ATTRS, because the article is
+   * rendered into the same document as the entire simulator — an article
+   * containing id="settings" or id="desktop" would quietly break Mac.$()
+   * everywhere. But dropping ids outright meant every section link on a
+   * Wikipedia article was dead: the anchor handler and scrollToAnchor were
+   * both wired up and had nothing to find. Ids are kept, namespaced, and the
+   * anchors are rewritten to match.
+   */
+  const ANCHOR_PREFIX = 'wiki-anchor-';
+  const anchorId = value => ANCHOR_PREFIX + String(value).replace(/\s+/g, '_');
+
   /* Wikipedia furniture that only makes sense with their own stylesheet. */
   const DROP_SELECTORS = ['.mw-editsection', '.mw-jump-link', '.mw-empty-elt', '.navbox',
     '.vertical-navbox', '.sistersitebox', '.metadata.plainlinks', '.ambox', '.mbox-small',
@@ -57,10 +71,13 @@
     enabled() { return Mac.state.browser.liveWeb !== false; },
 
     /** The simulated Wi-Fi still gates real requests, so scenarios stay honest. */
-    simulatedOnline() {
-      const wifi = Mac.state.wifi;
-      return wifi.enabled && Boolean(wifi.current) && !wifi.captive && wifi.dns.length > 0;
-    },
+    /* The simulated network gates the real one: a live fetch must not
+       succeed on a Mac the simulator is describing as unreachable, or the
+       whole exercise stops being reproducible. Delegated to Mac.Network so
+       there is one definition — this copy used to check DNS but not the
+       proxy, so a live page loaded through a proxy that Safari said was
+       refusing connections. */
+    simulatedOnline() { return Mac.Network.online(); },
 
     /**
      * Classify typed input.
@@ -109,14 +126,39 @@
       return `https://${target.lang}.${project}.org/w/api.php`;
     },
 
-    async request(url) {
-      const response = await fetch(url, { mode: 'cors', credentials: 'omit', referrerPolicy: 'no-referrer' });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      return response.json();
+    /* A page that never answers is a real failure mode, and the browser had
+       no defence against it: no timeout, so the tab spun forever, and no
+       cancellation, so a slow response for a page you had already navigated
+       away from still landed and replaced what you were reading. */
+    TIMEOUT_MS: 12000,
+
+    async request(url, { signal } = {}) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => {
+        const reason = new Error('The server did not respond in time');
+        reason.timedOut = true;
+        controller.abort(reason);
+      }, this.TIMEOUT_MS);
+      // Cancelling the tab's load cancels this request too.
+      const relay = () => controller.abort(signal.reason);
+      if (signal) {
+        if (signal.aborted) controller.abort(signal.reason);
+        else signal.addEventListener('abort', relay, { once: true });
+      }
+      try {
+        const response = await fetch(url, {
+          mode: 'cors', credentials: 'omit', referrerPolicy: 'no-referrer', signal: controller.signal,
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return await response.json();
+      } finally {
+        clearTimeout(timer);
+        signal?.removeEventListener('abort', relay);
+      }
     },
 
     /** Fetch a parsed article. Redirects are followed by the API. */
-    async article(target) {
+    async article(target, options) {
       const params = new URLSearchParams({
         action: 'parse',
         page: target.title,
@@ -126,7 +168,7 @@
         format: 'json',
         origin: '*',
       });
-      const data = await this.request(`${this.apiBase(target)}?${params}`);
+      const data = await this.request(`${this.apiBase(target)}?${params}`, options);
       if (data.error) {
         const error = new Error(data.error.info || 'Page not found');
         error.code = data.error.code;
@@ -138,7 +180,7 @@
       };
     },
 
-    async search(target, query) {
+    async search(target, query, options) {
       const params = new URLSearchParams({
         action: 'query',
         list: 'search',
@@ -148,7 +190,7 @@
         format: 'json',
         origin: '*',
       });
-      const data = await this.request(`${this.apiBase(target)}?${params}`);
+      const data = await this.request(`${this.apiBase(target)}?${params}`, options);
       return (data.query?.search || []).map(hit => ({
         title: hit.title,
         snippet: this.stripTags(hit.snippet),
@@ -156,7 +198,7 @@
       }));
     },
 
-    async randomTitle(target) {
+    async randomTitle(target, options) {
       const params = new URLSearchParams({
         action: 'query',
         list: 'random',
@@ -166,9 +208,13 @@
         format: 'json',
         origin: '*',
       });
-      const data = await this.request(`${this.apiBase(target)}?${params}`);
+      const data = await this.request(`${this.apiBase(target)}?${params}`, options);
       return data.query?.random?.[0]?.title || 'Macintosh';
     },
+
+    /* Exposed so Safari can turn a URL fragment into the id the sanitiser
+       actually wrote, without either side hard-coding the prefix. */
+    anchorId(value) { return anchorId(value); },
 
     stripTags(html) {
       const parsed = new DOMParser().parseFromString(String(html || ''), 'text/html');
@@ -216,6 +262,9 @@
           if (name.startsWith('on')) continue;
           if (ALLOWED_ATTRS.has(name)) clone.setAttribute(name, attribute.value);
         }
+        // Namespaced, so section links resolve without colliding with the app.
+        const id = node.getAttribute('id');
+        if (id) clone.id = anchorId(id);
 
         if (node.tagName === 'A') this.rewriteLink(node, clone, target);
         if (node.tagName === 'IMG' && !this.rewriteImage(node, clone)) return;
@@ -231,16 +280,19 @@
       const project = target.project === 'wikipedia' ? 'wikipedia' : target.project;
 
       if (href.startsWith('#')) {
-        clone.setAttribute('data-web-anchor', href.slice(1));
+        clone.setAttribute('data-web-anchor', anchorId(decodeURIComponent(href.slice(1))));
         clone.setAttribute('role', 'link');
         return;
       }
       const wiki = href.match(/^(?:https?:)?(?:\/\/[^/]+)?\/wiki\/([^#?]+)(#.*)?$/);
       if (wiki) {
         const title = decodeURIComponent(wiki[1]);
+        const fragment = wiki[2] || '';
+        /* A link to another article's section keeps its fragment, so the
+           load lands on the section rather than the top of the page. */
         clone.setAttribute('data-command', 'browse');
-        clone.setAttribute('data-arg', `${target.lang}.${project}.org/wiki/${encodeURIComponent(title)}`);
-        clone.setAttribute('title', title.replace(/_/g, ' '));
+        clone.setAttribute('data-arg', `${target.lang}.${project}.org/wiki/${encodeURIComponent(title)}${fragment}`);
+        clone.setAttribute('title', title.replace(/_/g, ' ') + (fragment ? ` ${fragment}` : ''));
         return;
       }
       if (/^https?:\/\//i.test(href)) {
@@ -271,6 +323,15 @@
      * populated; the caller re-renders.
      */
     async load(win, tab, target) {
+      /* Cancel whatever this tab was already fetching, and stamp this load
+         so a response that arrives after the next navigation is discarded
+         rather than pasted over whatever the user is reading now. */
+      this.cancel(tab);
+      const controller = new AbortController();
+      const generation = (tab.loadGeneration = (tab.loadGeneration || 0) + 1);
+      tab.loadController = controller;
+      const current = () => tab.loadGeneration === generation;
+
       tab.live = { kind: target.kind, state: 'loading' };
 
       if (!this.simulatedOnline()) {
@@ -285,23 +346,44 @@
         return;
       }
 
+      const options = { signal: controller.signal };
       try {
-        if (target.title === '__random__') target.title = await this.randomTitle(target);
+        if (target.title === '__random__') target.title = await this.randomTitle(target, options);
         if (target.search) {
-          const results = await this.search(target, target.search);
+          const results = await this.search(target, target.search, options);
+          if (!current()) return;
           tab.live = { kind: 'wiki-search', query: target.search, results, target, state: 'ready' };
           return;
         }
-        const article = await this.article(target);
+        const article = await this.article(target, options);
+        if (!current()) return;
         tab.live = { kind: 'wiki', ...article, target, hash: target.hash, state: 'ready' };
       } catch (error) {
+        /* `abort(reason)` rejects the fetch with that reason verbatim, not
+           with a DOMException — so the cancellation is identified by the
+           marker put on it, not by error.name, which is just 'Error'. A load
+           the user cancelled is not a failure to report back to them. */
+        if (error.superseded) return;
+        if (!current()) return;
         tab.live = {
           kind: 'error',
-          reason: error.code === 'missingtitle' ? 'missing' : 'fetch',
+          reason: error.code === 'missingtitle' ? 'missing'
+            : error.timedOut ? 'timeout' : 'fetch',
           message: error.message,
           target,
         };
+      } finally {
+        if (current()) tab.loadController = null;
       }
+    },
+
+    /** Abort a tab's in-flight load, if it has one. */
+    cancel(tab) {
+      if (!tab?.loadController) return;
+      const reason = new Error('superseded');
+      reason.superseded = true;
+      tab.loadController.abort(reason);
+      tab.loadController = null;
     },
   };
 }(window.Mac));

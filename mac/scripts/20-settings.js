@@ -324,7 +324,7 @@
       General(win) {
         return `${UI.header('General')}
           ${UI.group(
-            UI.action('About', 'settings-sub', `${Mac.state.settings.computerName} — macOS ${Mac.OS_VERSION}`, '', { arg: 'About' }),
+            UI.action('About', 'settings-sub', `${Mac.state.settings.computerName} — macOS ${Mac.OS.version()}`, '', { arg: 'About' }),
             UI.action('Software Update', 'settings-sub', Mac.state.settings.autoUpdates ? 'Automatic updates on' : 'Automatic updates off', 'Up to date', { arg: 'Software Update' }),
             UI.action('Storage', 'settings-sub', 'Manage the simulated startup volume', Mac.bytes(Mac.state.volumes[0].totalBytes - Mac.state.volumes[0].usedBytes) + ' free', { arg: 'Storage' }),
           )}
@@ -670,7 +670,7 @@
             UI.info('Memory', '24 GB'),
             UI.info('Startup disk', volume.name),
             UI.info('Serial number', 'SIMULATED'),
-            UI.info('macOS', `Tahoe ${Mac.OS_VERSION} (${Mac.OS_BUILD})`),
+            UI.info('macOS', `Tahoe ${Mac.OS.version()} (${Mac.OS.build()})`),
           )}
           ${UI.group(
             UI.action('System Report…', 'open-app', 'The complete hardware and software inventory.', '', { arg: 'system-info' }),
@@ -682,14 +682,34 @@
 
       'Software Update'() {
         const updates = Mac.state.appUpdates;
-        return `${UI.header('Software Update', updates.length
-          ? `${Mac.plural(updates.length, 'app update')} available for this Mac`
-          : 'This Mac is up to date')}
+        const os = Mac.OS.update();
+        const pending = Mac.OS.pending();
+        /* The OS row used to be a permanent "Up to date" badge, so the one
+           thing this pane exists for could not be done. It now downloads,
+           installs and restarts, and the Mac comes back on the new build. */
+        const osRow = !pending
+          ? `<div class="row"><span style="width:44px;height:44px;display:grid;place-items:center;border-radius:11px;background:var(--fill);color:var(--accent)">${glyph('update', { size: 24 })}</span>
+              <div class="row-text"><strong>macOS Tahoe ${Mac.OS.version()}</strong>
+                <p>Your Mac is up to date. Build ${esc(Mac.OS.build())}.</p></div>
+              <span class="badge ok">Up to date</span></div>`
+          : os.stage === 'downloading' || os.stage === 'installing'
+            ? `<div class="row block"><div class="row-text" style="width:100%">
+                <strong>${os.stage === 'downloading' ? 'Downloading' : 'Preparing'} macOS Tahoe ${esc(os.version)}</strong>
+                <p>${os.progress}% — ${os.stage === 'downloading' ? Mac.bytes(os.bytes) : 'this Mac will restart to finish installing'}</p>
+                <span class="meter" style="margin-top:8px"><i style="width:${os.progress}%;background:var(--accent)"></i></span></div></div>`
+            : `<div class="row"><span style="width:44px;height:44px;display:grid;place-items:center;border-radius:11px;background:var(--fill);color:var(--accent)">${glyph('update', { size: 24 })}</span>
+                <div class="row-text"><strong>macOS Tahoe ${esc(os.version)}</strong>
+                  <p>${esc(os.notes)} — ${Mac.bytes(os.bytes)}</p></div>
+                <div class="row-action"><button class="btn primary" data-command="os-update"
+                  data-arg="${os.stage === 'downloaded' ? 'install' : 'download'}">${os.stage === 'downloaded' ? 'Restart Now' : 'Upgrade Now'}</button></div></div>`;
+
+        return `${UI.header('Software Update', pending
+          ? 'An update is available for this Mac'
+          : updates.length
+            ? `${Mac.plural(updates.length, 'app update')} available for this Mac`
+            : 'This Mac is up to date')}
           ${UI.group(
-            `<div class="row"><span style="width:44px;height:44px;display:grid;place-items:center;border-radius:11px;background:var(--fill);color:var(--accent)">${glyph('update', { size: 24 })}</span>
-              <div class="row-text"><strong>macOS Tahoe ${Mac.OS_VERSION}</strong>
-                <p>Your Mac is running the latest simulated version. Build ${Mac.OS_BUILD}.</p></div>
-              <span class="badge ok">Up to date</span></div>`,
+            osRow,
             UI.toggle('Automatic updates', 'settings.autoUpdates'),
             UI.toggle('Install security responses and system files', 'settings.installSecurityResponses'),
             UI.action('Check Now', 'check-updates', 'Contact the simulated update server.'),
@@ -758,7 +778,7 @@
           ${UI.group(...Mac.state.volumes.map(volume =>
             `<div class="row">${Mac.paneIcon('Startup Disk', 'size-28')}
               <div class="row-text"><strong>${esc(volume.name)}</strong>
-                <p>${volume.kind === 'internal' ? `macOS ${Mac.OS_VERSION}` : 'Backup volume — not bootable'}</p></div>
+                <p>${volume.kind === 'internal' ? `macOS ${Mac.OS.version()}` : 'Backup volume — not bootable'}</p></div>
               ${volume.kind === 'internal' ? '<span class="badge ok">Selected</span>' : ''}</div>`))}
           ${UI.group(UI.action('Restart in Recovery', 'power', 'Boot into the recovery environment.', '', { arg: 'recovery' }))}`;
       },

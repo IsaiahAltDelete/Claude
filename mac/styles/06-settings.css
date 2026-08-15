@@ -23,8 +23,8 @@
 .account-chip:hover { background: var(--fill); }
 .account-chip .avatar { margin: 0; }
 .account-chip div { min-width: 0; flex: 1; }
-.account-chip strong { display: block; font-size: 12.5px; }
-.account-chip small { display: block; margin-top: 1px; color: var(--muted); font-size: 10.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.account-chip strong { display: block; font-size: calc(12.5px * var(--text-scale)); }
+.account-chip small { display: block; margin-top: 1px; color: var(--muted); font-size: calc(10.5px * var(--text-scale)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .account-chip.signed-out strong { color: var(--accent); }
 
 /* The rounded-square settings glyph, tinted per pane. */
@@ -73,9 +73,9 @@
   text-align: center;
 }
 .choice.on { box-shadow: 0 0 0 2.5px var(--accent); }
-.choice strong { display: block; margin-top: 7px; font-size: 11.5px; font-weight: 500; }
+.choice strong { display: block; margin-top: 7px; font-size: calc(11.5px * var(--text-scale)); font-weight: 500; }
 .choice-art { height: 62px; border-radius: 7px; background-size: cover; background-position: center; box-shadow: inset 0 0 0 0.5px var(--hair); }
-.appearance-art { display: grid; place-items: center; height: 58px; border-radius: 7px; font-size: 20px; box-shadow: inset 0 0 0 0.5px var(--hair-strong); }
+.appearance-art { display: grid; place-items: center; height: 58px; border-radius: 7px; font-size: calc(20px * var(--text-scale)); box-shadow: inset 0 0 0 0.5px var(--hair-strong); }
 .appearance-art.light { background: linear-gradient(160deg, #fdfdfe, #e2e4ea); color: #3a3a3f; }
 .appearance-art.dark { background: linear-gradient(160deg, #3a3b42, #1b1c21); color: #e8e8ee; }
 .appearance-art.auto { background: linear-gradient(100deg, #fdfdfe 48%, #23242a 52%); color: #7a7a80; }
@@ -102,8 +102,8 @@
 .network-row { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 8px; width: 100%; text-align: left; }
 .network-row:hover { background: var(--fill); }
 .network-copy { flex: 1; min-width: 0; }
-.network-copy strong { display: block; font-size: 12.5px; }
-.network-copy small { color: var(--muted); font-size: 10.5px; }
+.network-copy strong { display: block; font-size: calc(12.5px * var(--text-scale)); }
+.network-copy small { color: var(--muted); font-size: calc(10.5px * var(--text-scale)); }
 
 /* Device list used by Apple Account and Bluetooth. */
 .device-row { display: flex; align-items: center; gap: 10px; }
@@ -113,9 +113,9 @@
 .usage-chart { display: flex; align-items: flex-end; gap: 5px; height: 96px; padding: 10px 4px 0; }
 .usage-bar { flex: 1; display: grid; align-content: end; gap: 3px; text-align: center; }
 .usage-bar i { display: block; border-radius: 3px 3px 0 0; background: var(--accent); }
-.usage-bar span { color: var(--muted); font-size: 9.5px; }
+.usage-bar span { color: var(--muted); font-size: calc(9.5px * var(--text-scale)); }
 
 /* Keyboard shortcut table. */
-.shortcut-table { width: 100%; font-size: 12px; }
+.shortcut-table { width: 100%; font-size: calc(12px * var(--text-scale)); }
 .shortcut-table td { padding: 5px 8px; border-bottom: 0.5px solid var(--hair); }
-.shortcut-table td:last-child { text-align: right; color: var(--muted); font-family: var(--font-mono); font-size: 11px; white-space: nowrap; }
+.shortcut-table td:last-child { text-align: right; color: var(--muted); font-family: var(--font-mono); font-size: calc(11px * var(--text-scale)); white-space: nowrap; }

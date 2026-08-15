@@ -178,8 +178,8 @@
         updates.length ? '<button class="btn primary" data-command="store-update-all">Update All</button>' : '')}
         ${UI.group(
           `<div class="row"><span style="width:44px;height:44px;display:grid;place-items:center;border-radius:11px;background:var(--fill);color:var(--accent)">${glyph('update', { size: 24 })}</span>
-            <div class="row-text"><strong>macOS Tahoe ${Mac.OS_VERSION}</strong>
-              <p>${Mac.state.settings.autoUpdates ? 'Automatic updates are on.' : 'Automatic updates are off.'} Build ${Mac.OS_BUILD}.</p></div>
+            <div class="row-text"><strong>macOS Tahoe ${Mac.OS.version()}</strong>
+              <p>${Mac.state.settings.autoUpdates ? 'Automatic updates are on.' : 'Automatic updates are off.'} Build ${Mac.OS.build()}.</p></div>
             <div class="row-action"><span class="badge ok">Up to date</span>
               <button class="btn" data-command="open-setting" data-arg="Software Update">Details</button></div></div>`,
           UI.toggle('Automatic app updates', 'settings.autoUpdates'),

@@ -75,13 +75,13 @@ function calendarMonthView() {
 
       const header = el('div');
       header.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:8px 20px 4px';
-      header.appendChild(h(`<div style="font-size:22px;font-weight:700">
+      header.appendChild(h(`<div style="font-size:calc(22px * var(--tsize));font-weight:700">
         ${esc(cursor.toLocaleDateString(undefined, { month: 'long', year: 'numeric' }))}</div>`));
       const arrows = el('div');
       arrows.style.cssText = 'display:flex;gap:18px;color:var(--sysblue)';
       [['‹', -1], ['›', 1]].forEach(([label, delta]) => {
         const button = el('button', '', label);
-        button.style.cssText = 'font-size:26px;line-height:1';
+        button.style.cssText = 'font-size:calc(26px * var(--tsize));line-height:1';
         button.onclick = () => { store.offset += delta; save(); nav.refresh(); };
         arrows.appendChild(button);
       });
@@ -89,7 +89,7 @@ function calendarMonthView() {
       body.appendChild(header);
 
       body.appendChild(h(`<div style="display:grid;grid-template-columns:repeat(7,1fr);padding:8px 12px 4px;
-        font-size:11px;color:var(--txt3);text-align:center">
+        font-size:calc(11px * var(--tsize));color:var(--txt3);text-align:center">
         ${['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(d => `<div>${d}</div>`).join('')}</div>`));
 
       const grid = el('div');
@@ -105,7 +105,7 @@ function calendarMonthView() {
         const cell = el('div');
         cell.style.cssText = 'display:grid;justify-items:center;gap:3px;padding:6px 0 4px;cursor:default';
         cell.appendChild(h(`<div style="width:32px;height:32px;border-radius:50%;display:grid;place-items:center;
-          font-size:17px;${isToday ? 'background:#ff453a;color:#fff;font-weight:600' : ''}">${day}</div>`));
+          font-size:calc(17px * var(--tsize));${isToday ? 'background:#ff453a;color:#fff;font-weight:600' : ''}">${day}</div>`));
         const dots = el('div');
         dots.style.cssText = 'display:flex;gap:2px;height:5px';
         [...new Set(dayEvents.map(e => e.cal))].slice(0, 3).forEach(cal => {
@@ -173,15 +173,15 @@ function calendarDayView(date) {
       for (let hour = startHour; hour < endHour; hour += 1) {
         const row = el('div');
         row.style.cssText = 'display:grid;grid-template-columns:56px 1fr;gap:10px;min-height:52px;border-top:.5px solid var(--sep);padding-top:4px';
-        row.appendChild(h(`<div style="font-size:11px;color:var(--txt3)">
+        row.appendChild(h(`<div style="font-size:calc(11px * var(--tsize));color:var(--txt3)">
           ${hour === 0 ? '12 AM' : hour < 12 ? `${hour} AM` : hour === 12 ? '12 PM' : `${hour - 12} PM`}</div>`));
         const slot = el('div');
         dayEvents.filter(event => new Date(event.at).getHours() === hour).forEach(event => {
           const chip = el('div');
           chip.style.cssText = `background:${calColour(event.cal)}22;border-left:3px solid ${calColour(event.cal)};
             border-radius:6px;padding:6px 9px;margin-bottom:4px`;
-          chip.innerHTML = `<div style="font-size:14px;font-weight:500">${esc(event.title)}</div>
-            <div style="font-size:12px;color:var(--txt3)">${timeStr(new Date(event.at))} · ${event.minutes} min${event.place ? ` · ${esc(event.place)}` : ''}</div>`;
+          chip.innerHTML = `<div style="font-size:calc(14px * var(--tsize));font-weight:500">${esc(event.title)}</div>
+            <div style="font-size:calc(12px * var(--tsize));color:var(--txt3)">${timeStr(new Date(event.at))} · ${event.minutes} min${event.place ? ` · ${esc(event.place)}` : ''}</div>`;
           chip.onclick = () => nav.push(eventDetailView(event));
           slot.appendChild(chip);
         });
@@ -200,7 +200,7 @@ function eventDetailView(event) {
     build(body, nav) {
       const date = new Date(event.at);
       body.appendChild(h(`<div style="padding:16px 20px 4px">
-        <div style="font-size:24px;font-weight:700">${esc(event.title)}</div>
+        <div style="font-size:calc(24px * var(--tsize));font-weight:700">${esc(event.title)}</div>
         <div style="color:var(--txt3);margin-top:4px">${esc(date.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' }))}</div></div>`));
       group(body, { rows: [
         { label: 'Starts', value: event.minutes >= 1440 ? 'All day' : timeStr(date) },
@@ -242,11 +242,11 @@ function addEventSheet(nav, when) {
 
     const field = (label, value, type) => {
       const holder = el('div', 'compose-field');
-      holder.appendChild(h(`<div style="font-size:12px;color:var(--txt3);margin-bottom:3px">${esc(label)}</div>`));
+      holder.appendChild(h(`<div style="font-size:calc(12px * var(--tsize));color:var(--txt3);margin-bottom:3px">${esc(label)}</div>`));
       const input = el('input');
       if (type) input.type = type;
       input.value = value || '';
-      input.style.cssText = 'width:100%;border:0;outline:0;background:transparent;color:var(--txt);font-size:16px';
+      input.style.cssText = 'width:100%;border:0;outline:0;background:transparent;color:var(--txt);font-size:calc(16px * var(--tsize))';
       holder.appendChild(input);
       wrap.appendChild(holder);
       return input;
@@ -263,7 +263,7 @@ function addEventSheet(nav, when) {
     let chosen = 'work';
     CALENDARS.forEach(cal => {
       const chip = el('button', '', esc(cal.name));
-      chip.style.cssText = `padding:6px 12px;border-radius:999px;font-size:13px;
+      chip.style.cssText = `padding:6px 12px;border-radius:999px;font-size:calc(13px * var(--tsize));
         background:${cal.id === chosen ? cal.colour : 'var(--bg3)'};color:${cal.id === chosen ? '#fff' : 'var(--txt)'}`;
       chip.onclick = () => {
         chosen = cal.id;
@@ -277,7 +277,7 @@ function addEventSheet(nav, when) {
     wrap.appendChild(picker);
 
     const error = el('div');
-    error.style.cssText = 'color:var(--sysred);font-size:13px;min-height:18px;padding:2px 2px 0';
+    error.style.cssText = 'color:var(--sysred);font-size:calc(13px * var(--tsize));min-height:18px;padding:2px 2px 0';
     wrap.appendChild(error);
 
     const add = el('button', 'btn-primary', 'Add Event');
@@ -393,8 +393,8 @@ function remindersHomeView() {
         tile.style.cssText = 'background:var(--group);border-radius:12px;padding:12px';
         tile.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between">
           <span style="width:28px;height:28px;border-radius:50%;background:${colour};color:#fff;display:grid;place-items:center">${glyph}</span>
-          <span style="font-size:20px;font-weight:700">${items.length}</span></div>
-          <div style="margin-top:6px;font-size:14px;font-weight:600;color:var(--txt3)">${label}</div>`;
+          <span style="font-size:calc(20px * var(--tsize));font-weight:700">${items.length}</span></div>
+          <div style="margin-top:6px;font-size:calc(14px * var(--tsize));font-weight:600;color:var(--txt3)">${label}</div>`;
         tile.onclick = () => nav.push(reminderListView(label, () => items));
         grid.appendChild(tile);
       });
@@ -404,7 +404,7 @@ function remindersHomeView() {
       group(body, { rows: store.lists.map(list => ({
         labelHTML: `<span style="display:inline-flex;align-items:center;gap:10px">
           <span style="width:24px;height:24px;border-radius:50%;background:${list.colour};color:#fff;
-          display:inline-grid;place-items:center;font-size:12px">☰</span>${esc(list.name)}</span>`,
+          display:inline-grid;place-items:center;font-size:calc(12px * var(--tsize))">☰</span>${esc(list.name)}</span>`,
         value: String(store.items.filter(item => item.list === list.id && !item.done).length),
         onClick: () => nav.push(reminderListView(list.name, () => REM().items.filter(item => item.list === list.id), list.id)),
       })) });
@@ -416,7 +416,7 @@ function remindersHomeView() {
           holder.style.padding = '0 16px 20px';
           const input = el('input');
           input.placeholder = 'List name';
-          input.style.cssText = 'width:100%;height:44px;border:0;outline:0;border-radius:10px;background:var(--bg3);color:var(--txt);padding:0 12px;font-size:16px';
+          input.style.cssText = 'width:100%;height:44px;border:0;outline:0;border-radius:10px;background:var(--bg3);color:var(--txt);padding:0 12px;font-size:calc(16px * var(--tsize))';
           holder.appendChild(input);
           const button = el('button', 'btn-primary', 'Create');
           button.style.marginTop = '14px';
@@ -455,7 +455,7 @@ function reminderListView(title, getItems, listId) {
         const circle = el('div');
         circle.style.cssText = `width:22px;height:22px;border-radius:50%;flex:none;
           border:1.8px solid ${item.done ? 'var(--sysblue)' : 'var(--txt3)'};
-          background:${item.done ? 'var(--sysblue)' : 'transparent'};display:grid;place-items:center;color:#fff;font-size:12px`;
+          background:${item.done ? 'var(--sysblue)' : 'transparent'};display:grid;place-items:center;color:#fff;font-size:calc(12px * var(--tsize))`;
         circle.textContent = item.done ? '✓' : '';
         circle.onclick = event => {
           event.stopPropagation();
@@ -493,7 +493,7 @@ function addReminderSheet(nav, listId) {
     wrap.style.padding = '0 16px 20px';
     const input = el('input');
     input.placeholder = 'Reminder';
-    input.style.cssText = 'width:100%;height:44px;border:0;outline:0;border-radius:10px;background:var(--bg3);color:var(--txt);padding:0 12px;font-size:16px';
+    input.style.cssText = 'width:100%;height:44px;border:0;outline:0;border-radius:10px;background:var(--bg3);color:var(--txt);padding:0 12px;font-size:calc(16px * var(--tsize))';
     wrap.appendChild(input);
 
     const store = REM();
@@ -504,7 +504,7 @@ function addReminderSheet(nav, listId) {
     store.lists.forEach(list => {
       const chip = el('button', '', esc(list.name));
       const paint = () => {
-        chip.style.cssText = `padding:6px 12px;border-radius:999px;font-size:13px;
+        chip.style.cssText = `padding:6px 12px;border-radius:999px;font-size:calc(13px * var(--tsize));
           background:${list.id === chosen ? list.colour : 'var(--bg3)'};color:${list.id === chosen ? '#fff' : 'var(--txt)'}`;
       };
       chip.onclick = () => { chosen = list.id; $$('button', chips).forEach((b, i) => { void b; void i; }); [...chips.children].forEach((c, i) => {
@@ -518,7 +518,7 @@ function addReminderSheet(nav, listId) {
     wrap.appendChild(chips);
 
     const flag = el('button', '', '⚑ Flag');
-    flag.style.cssText = 'padding:6px 12px;border-radius:999px;font-size:13px;background:var(--bg3);color:var(--txt)';
+    flag.style.cssText = 'padding:6px 12px;border-radius:999px;font-size:calc(13px * var(--tsize));background:var(--bg3);color:var(--txt)';
     flag.onclick = () => {
       flagged = !flagged;
       flag.style.background = flagged ? 'var(--sysorange)' : 'var(--bg3)';
@@ -555,9 +555,13 @@ function CON() {
       { id: 'c5', first: 'Ada', last: 'Lovelace', phone: '+1 (407) 555-0177', email: 'ada@analytical.example', org: 'Engineering', fav: false },
       { id: 'c6', first: 'Grace', last: 'Hopper', phone: '+1 (407) 555-0166', email: 'grace@navy.example', org: 'Engineering', fav: false },
       { id: 'c7', first: 'Facilities', last: '', phone: '+1 (407) 555-0122', email: 'facilities@support.example', org: 'Building', fav: false },
+      /* The demo caller. She has to exist here, or the incoming-call screen
+         shows a name that Recents, Messages and Contacts have never heard
+         of and the trainee cannot follow the call anywhere afterwards. */
+      { id: 'c8', first: 'Nina', last: 'Okafor', phone: '+1 (407) 555-0139', email: 'nina.okafor@icloud.example', org: 'Family', fav: true },
     ],
-    next: 8,
-  }));
+    next: 9,
+  }), 2);
 }
 
 const personName = person => `${person.first} ${person.last}`.trim();
@@ -630,7 +634,7 @@ function contactRow(person, nav) {
   return {
     labelHTML: `<span style="display:inline-flex;align-items:center;gap:10px">
       <span style="width:30px;height:30px;border-radius:50%;background:var(--bg3);color:var(--txt2);
-        display:inline-grid;place-items:center;font-size:12px;font-weight:600">${esc((person.first[0] || '') + (person.last[0] || ''))}</span>
+        display:inline-grid;place-items:center;font-size:calc(12px * var(--tsize));font-weight:600">${esc((person.first[0] || '') + (person.last[0] || ''))}</span>
       <span>${esc(person.first)} <b>${esc(person.last)}</b></span></span>`,
     onClick: () => nav.push(personCardView(person)),
   };
@@ -645,10 +649,10 @@ function personCardView(person) {
     build(body, nav) {
       body.appendChild(h(`<div style="text-align:center;padding:10px 20px 18px">
         <div style="width:96px;height:96px;border-radius:50%;margin:0 auto 12px;background:var(--bg3);
-          display:grid;place-items:center;font-size:34px;font-weight:600;color:var(--txt2)">
+          display:grid;place-items:center;font-size:calc(34px * var(--tsize));font-weight:600;color:var(--txt2)">
           ${esc((person.first[0] || '') + (person.last[0] || ''))}</div>
-        <div style="font-size:24px;font-weight:600">${esc(personName(person))}</div>
-        <div style="color:var(--txt3);font-size:14px;margin-top:2px">${esc(person.org)}</div></div>`));
+        <div style="font-size:calc(24px * var(--tsize));font-weight:600">${esc(personName(person))}</div>
+        <div style="color:var(--txt3);font-size:calc(14px * var(--tsize));margin-top:2px">${esc(person.org)}</div></div>`));
 
       const actions = el('div');
       actions.style.cssText = 'display:flex;gap:10px;padding:0 16px 14px';
@@ -656,7 +660,7 @@ function personCardView(person) {
         .forEach(([label, glyph, app]) => {
           const button = el('button');
           button.style.cssText = `flex:1;background:var(--group);border-radius:12px;padding:10px 0;color:var(--sysblue);
-            display:grid;justify-items:center;gap:3px;font-size:11px`;
+            display:grid;justify-items:center;gap:3px;font-size:calc(11px * var(--tsize))`;
           button.innerHTML = `${glyph}<div>${label}</div>`;
           button.onclick = () => { if (Apps[app]) openApp(app); else toast(`${label} is simulated`); };
           actions.appendChild(button);
@@ -704,12 +708,12 @@ function addContactSheet(nav) {
       .forEach(([key, placeholder]) => {
         const input = el('input');
         input.placeholder = placeholder;
-        input.style.cssText = 'width:100%;height:42px;border:0;outline:0;border-radius:10px;background:var(--bg3);color:var(--txt);padding:0 12px;font-size:16px;margin-bottom:8px';
+        input.style.cssText = 'width:100%;height:42px;border:0;outline:0;border-radius:10px;background:var(--bg3);color:var(--txt);padding:0 12px;font-size:calc(16px * var(--tsize));margin-bottom:8px';
         inputs[key] = input;
         wrap.appendChild(input);
       });
     const error = el('div');
-    error.style.cssText = 'color:var(--sysred);font-size:13px;min-height:18px';
+    error.style.cssText = 'color:var(--sysred);font-size:calc(13px * var(--tsize));min-height:18px';
     wrap.appendChild(error);
     const button = el('button', 'btn-primary', 'Done');
     button.onclick = () => {
@@ -823,7 +827,7 @@ function filesBrowseView() {
 
         host.appendChild(cardHeader('Storage'));
         card(host, box => {
-          box.appendChild(h('<div style="font-size:13px;color:var(--txt3);margin-bottom:8px">iCloud Drive — 41.2 GB of 200 GB used</div>'));
+          box.appendChild(h('<div style="font-size:calc(13px * var(--tsize));color:var(--txt3);margin-bottom:8px">iCloud Drive — 41.2 GB of 200 GB used</div>'));
           box.appendChild(h(`<div style="height:12px;border-radius:6px;overflow:hidden;display:flex;background:var(--bg3)">
             <i style="width:12%;background:#0a84ff"></i><i style="width:6%;background:#bf5af2"></i><i style="width:3%;background:#ff9f0a"></i></div>`));
         });
@@ -858,7 +862,7 @@ function filesFolderView(folder) {
         wrap.style.padding = '0 16px 20px';
         const input = el('input');
         input.value = 'untitled folder';
-        input.style.cssText = 'width:100%;height:42px;border:0;outline:0;border-radius:10px;background:var(--bg3);color:var(--txt);padding:0 12px;font-size:16px';
+        input.style.cssText = 'width:100%;height:42px;border:0;outline:0;border-radius:10px;background:var(--bg3);color:var(--txt);padding:0 12px;font-size:calc(16px * var(--tsize))';
         wrap.appendChild(input);
         const button = el('button', 'btn-primary', 'Create');
         button.style.marginTop = '12px';
@@ -899,7 +903,7 @@ function fileDetailView(node) {
         preview.style.background = `url("${artURI(node.name, { w: 600, h: 500 })}") center/cover`;
       } else if (node.kind === 'txt') {
         preview.style.cssText += ';padding:16px;align-items:start';
-        preview.appendChild(h(`<pre style="margin:0;white-space:pre-wrap;font-size:12px;line-height:1.6;color:var(--txt2)">Escalation 4821 — captive portal loop
+        preview.appendChild(h(`<pre style="margin:0;white-space:pre-wrap;font-size:calc(12px * var(--tsize));line-height:1.6;color:var(--txt2)">Escalation 4821 — captive portal loop
 
 Customer joins "Cafe Welcome", receives the sign-in page,
 accepts the terms and then loses the connection.
@@ -908,8 +912,8 @@ Reproduced on the bench iPhone. Renewing the lease
 recovers it. Attaching diagnostics.</pre>`));
       } else {
         preview.appendChild(h(`<div style="text-align:center;color:var(--txt3)">
-          <div style="font-size:44px;color:${FILE_TINT[node.kind]}">${SF.note}</div>
-          <div style="margin-top:8px;font-size:13px">${esc(node.kind.toUpperCase())} preview</div></div>`));
+          <div style="font-size:calc(44px * var(--tsize));color:${FILE_TINT[node.kind]}">${SF.note}</div>
+          <div style="margin-top:8px;font-size:calc(13px * var(--tsize))">${esc(node.kind.toUpperCase())} preview</div></div>`));
       }
       body.appendChild(preview);
 
@@ -986,7 +990,7 @@ function voiceMemosView(inst) {
       dock.style.cssText = `margin:22px 0 10px;padding:18px 0 10px;border-top:.5px solid var(--sep);
         display:grid;justify-items:center;gap:10px`;
       const readout = el('div');
-      readout.style.cssText = 'font-size:15px;font-variant-numeric:tabular-nums;color:var(--txt3)';
+      readout.style.cssText = 'font-size:calc(15px * var(--tsize));font-variant-numeric:tabular-nums;color:var(--txt3)';
       readout.textContent = '00:00';
       dock.appendChild(readout);
 
@@ -1043,7 +1047,7 @@ function voiceMemosView(inst) {
         }, 1000);
       };
       dock.appendChild(button);
-      dock.appendChild(h('<div style="font-size:12px;color:var(--txt3)">Audio capture is simulated</div>'));
+      dock.appendChild(h('<div style="font-size:calc(12px * var(--tsize));color:var(--txt3)">Audio capture is simulated</div>'));
       body.appendChild(dock);
     },
   };
@@ -1055,8 +1059,8 @@ function memoDetailView(memo, inst) {
     shortTitle: 'Memo',
     build(body, nav) {
       body.appendChild(h(`<div style="text-align:center;padding:18px 20px 6px">
-        <div style="font-size:20px;font-weight:600">${esc(memo.name)}</div>
-        <div style="color:var(--txt3);font-size:13px;margin-top:3px">
+        <div style="font-size:calc(20px * var(--tsize));font-weight:600">${esc(memo.name)}</div>
+        <div style="color:var(--txt3);font-size:calc(13px * var(--tsize));margin-top:3px">
           ${esc(new Date(memo.at).toLocaleString())}</div></div>`));
 
       const wave = el('div');
@@ -1073,7 +1077,7 @@ function memoDetailView(memo, inst) {
       body.appendChild(wave);
 
       const scrub = el('div');
-      scrub.style.cssText = 'display:flex;justify-content:space-between;padding:2px 20px;font-size:12px;color:var(--txt3);font-variant-numeric:tabular-nums';
+      scrub.style.cssText = 'display:flex;justify-content:space-between;padding:2px 20px;font-size:calc(12px * var(--tsize));color:var(--txt3);font-variant-numeric:tabular-nums';
       const elapsed = el('span');
       elapsed.textContent = '0:00';
       scrub.appendChild(elapsed);
@@ -1084,7 +1088,7 @@ function memoDetailView(memo, inst) {
       const controls = el('div');
       controls.style.cssText = 'display:flex;justify-content:center;align-items:center;gap:34px;padding:18px 0';
       const play = el('button', '', '▶');
-      play.style.cssText = 'font-size:30px;color:var(--txt)';
+      play.style.cssText = 'font-size:calc(30px * var(--tsize));color:var(--txt)';
       play.onclick = () => {
         if (inst.playTimer) {
           clearInterval(inst.playTimer);
@@ -1109,9 +1113,9 @@ function memoDetailView(memo, inst) {
           });
         }, 1000);
       };
-      controls.appendChild(h('<button style="font-size:20px;color:var(--txt2)">⏮ 15</button>'));
+      controls.appendChild(h('<button style="font-size:calc(20px * var(--tsize));color:var(--txt2)">⏮ 15</button>'));
       controls.appendChild(play);
-      controls.appendChild(h('<button style="font-size:20px;color:var(--txt2)">15 ⏭</button>'));
+      controls.appendChild(h('<button style="font-size:calc(20px * var(--tsize));color:var(--txt2)">15 ⏭</button>'));
       body.appendChild(controls);
 
       group(body, { rows: [
@@ -1122,7 +1126,7 @@ function memoDetailView(memo, inst) {
             wrap.style.padding = '0 16px 20px';
             const input = el('input');
             input.value = memo.name;
-            input.style.cssText = 'width:100%;height:42px;border:0;outline:0;border-radius:10px;background:var(--bg3);color:var(--txt);padding:0 12px;font-size:16px';
+            input.style.cssText = 'width:100%;height:42px;border:0;outline:0;border-radius:10px;background:var(--bg3);color:var(--txt);padding:0 12px;font-size:calc(16px * var(--tsize))';
             wrap.appendChild(input);
             const button = el('button', 'btn-primary', 'Save');
             button.style.marginTop = '12px';

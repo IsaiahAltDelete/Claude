@@ -66,6 +66,7 @@ function libraryFolder(bucket) {
     slot.innerHTML = appIconHTML(Apps[id], 34);
     slot.title = Apps[id].name;
     slot.onclick = event => { event.stopPropagation(); closeLibrary(); openApp(id); };
+    actionable(slot, { label: `Open ${Apps[id].name}` });
     box.appendChild(slot);
   });
   tile.appendChild(box);
@@ -73,6 +74,7 @@ function libraryFolder(bucket) {
   label.textContent = bucket.name;
   tile.appendChild(label);
   tile.onclick = () => openLibraryFolder(bucket);
+  actionable(tile, { label: `${bucket.name} folder, ${bucket.members.length} apps` });
   return tile;
 }
 
@@ -119,14 +121,14 @@ function closeLibrary() {
 
 function openLibraryFolder(bucket) {
   sheet(box => {
-    box.appendChild(h(`<div style="font-size:22px;font-weight:700;margin-bottom:14px">${esc(bucket.name)}</div>`));
+    box.appendChild(h(`<div style="font-size:calc(22px * var(--tsize));font-weight:700;margin-bottom:14px">${esc(bucket.name)}</div>`));
     const grid = el('div');
     grid.style.cssText = 'display:grid;grid-template-columns:repeat(4,1fr);gap:18px 10px;max-height:52vh;overflow-y:auto';
     bucket.members.forEach(id => {
       const tile = el('div');
       tile.style.cssText = 'text-align:center;cursor:pointer';
       tile.innerHTML = `${appIconHTML(Apps[id], 54)}
-        <div style="font-size:11px;color:var(--txt);margin-top:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(Apps[id].name)}</div>`;
+        <div style="font-size:calc(11px * var(--tsize));color:var(--txt);margin-top:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(Apps[id].name)}</div>`;
       tile.onclick = () => { closeOverlay(); closeLibrary(); openApp(id); };
       grid.appendChild(tile);
     });
@@ -338,6 +340,7 @@ function spotlightRow(row, { compact = false } = {}) {
     </div>
     <div class="sl-chev">${SVG.chev}</div>`;
   item.onclick = () => { closeSpotlight(); row.onClick(); };
+  actionable(item, { label: [row.label, row.sub].filter(Boolean).join(', ') });
   return item;
 }
 
@@ -380,6 +383,7 @@ function openSpotlight() {
     const tile = el('div', 'sl-tile');
     tile.innerHTML = `${appIconHTML(Apps[id], 54)}<div class="sl-tile-name">${esc(Apps[id].name)}</div>`;
     tile.onclick = () => { closeSpotlight(); openApp(id); };
+    actionable(tile, { label: `Open ${Apps[id].name}` });
     return tile;
   };
 
@@ -542,7 +546,7 @@ renderHome = function renderHomeWithLibrary() {
   libraryBuckets().slice(0, 6).forEach(bucket => grid.appendChild(libraryFolder(bucket)));
   page.appendChild(grid);
   const all = el('button', '', 'Show all app categories');
-  all.style.cssText = 'color:#fff;opacity:.8;font-size:13px;padding:14px 0 0;margin:0 auto';
+  all.style.cssText = 'color:#fff;opacity:.8;font-size:calc(13px * var(--tsize));padding:14px 0 0;margin:0 auto';
   all.onclick = openLibrary;
   page.appendChild(all);
   pagesEl.appendChild(page);

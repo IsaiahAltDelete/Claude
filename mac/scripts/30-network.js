@@ -17,20 +17,51 @@
 
     network(name) { return Mac.NETWORKS.find(candidate => candidate.name === name) || null; },
 
-    online() {
+    /**
+     * Why the Mac cannot reach the internet, or null when it can.
+     *
+     * This is the only place that decides. Safari, Mail, Outlook, the App
+     * Store, Apple Account sign-in and the network test page all used to
+     * carry their own copy of the check, and the copies had drifted: they
+     * tested Wi-Fi, a current network and the captive portal, and stopped
+     * there. So clearing the DNS servers or setting a bad proxy — two of the
+     * faults this simulator goes out of its way to make reachable, with a
+     * whole "Edit DNS" flow behind them — left Network Settings correctly
+     * reporting "Connected — no DNS" while every app that actually uses the
+     * network carried on as if nothing were wrong. The most instructive
+     * faults in the simulator were the two that did nothing.
+     *
+     * Callers get the reason rather than a bare boolean so each can fail the
+     * way the real thing fails: a DNS fault is a name that will not resolve,
+     * a proxy fault is a connection that is refused, and neither looks like
+     * being off Wi-Fi.
+     *
+     * @returns {'wifi-off'|'no-network'|'captive'|'no-dns'|'proxy'|null}
+     */
+    offlineReason() {
       const wifi = this.wifi();
-      return wifi.enabled && Boolean(wifi.current) && !wifi.captive && wifi.dns.length > 0 && !wifi.proxy;
+      if (!wifi.enabled) return 'wifi-off';
+      if (!wifi.current) return 'no-network';
+      if (wifi.captive) return 'captive';
+      if (!wifi.dns.length) return 'no-dns';
+      if (wifi.proxy) return 'proxy';
+      return null;
+    },
+
+    online() {
+      return this.offlineReason() === null;
     },
 
     /** Human summary used by menus, panes and the widget. */
     summary() {
       const wifi = this.wifi();
-      if (!wifi.enabled) return 'Off';
-      if (!wifi.current) return 'Not connected';
-      if (wifi.captive) return 'Connected — sign-in required';
-      if (!wifi.dns.length) return 'Connected — no DNS';
-      if (wifi.proxy) return 'Connected — proxy configured';
-      return `Connected to ${wifi.current}`;
+      return {
+        'wifi-off': 'Off',
+        'no-network': 'Not connected',
+        captive: 'Connected — sign-in required',
+        'no-dns': 'Connected — no DNS',
+        proxy: 'Connected — proxy configured',
+      }[this.offlineReason()] || `Connected to ${wifi.current}`;
     },
 
     /* -------------------------------------------------------------- menu bar */
@@ -377,6 +408,21 @@
           },
         ],
       });
+    },
+
+    /* Offered straight from Safari's proxy error page, so the fix is one
+       click from the symptom rather than four panes away. */
+    clearProxy() {
+      const wifi = this.wifi();
+      if (!wifi.proxy) {
+        Mac.Dialog.info('No proxy configured', 'This network is not using a proxy server.', 'info');
+        return;
+      }
+      wifi.proxy = false;
+      Mac.save();
+      Mac.wm.refreshAll();
+      this.log('notice', 'configd', 'Proxy configuration cleared for the active service');
+      Mac.Notify.show('Network', 'Proxy turned off. Reload the page to try again.', { app: 'settings' });
     },
 
     editDNS() {

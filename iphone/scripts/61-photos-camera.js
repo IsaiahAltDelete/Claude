@@ -28,6 +28,17 @@ function PHOTOLIB() {
   });
 }
 
+/* The camera's own state, shared with Settings › Camera. Both reach it
+   through here so the viewfinder's Grid button and the Grid switch in
+   Settings can never end up describing two different settings — which is the
+   sort of inconsistency this simulator exists to teach people to spot. */
+function CAM() {
+  return slice('camera', () => ({
+    mode: 'PHOTO', flash: 'auto', zoom: 1, timer: 0, front: false, filter: 'None',
+    grid: false, level: true, mirrorFront: true,
+  }), 2);
+}
+
 const livePhotos = () => PHOTOLIB().items.filter(item => !item.deleted);
 const deletedPhotos = () => PHOTOLIB().items.filter(item => item.deleted);
 
@@ -140,8 +151,8 @@ function photosLibrary(body, nav) {
   } else if (store.scale === 'Days') {
     groupByDay(items).slice(0, 14).forEach(([day, group]) => {
       body.appendChild(h(`<div style="margin:16px 20px 8px">
-        <div style="font-size:20px;font-weight:700">${esc(relativeDay(new Date(day)))}</div>
-        <div style="font-size:13px;color:var(--txt3)">${esc(new Date(day).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' }))} · ${group.length} items</div></div>`));
+        <div style="font-size:calc(20px * var(--tsize));font-weight:700">${esc(relativeDay(new Date(day)))}</div>
+        <div style="font-size:calc(13px * var(--tsize));color:var(--txt3)">${esc(new Date(day).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' }))} · ${group.length} items</div></div>`));
       const grid = el('div', 'ph-grid');
       group.forEach(item => grid.appendChild(photoTile(item, nav, items)));
       body.appendChild(grid);
@@ -163,8 +174,8 @@ function photosLibrary(body, nav) {
       hero.style.background = `url("${artURI(group[0].seed, { w: 700, h: 420 })}") center/cover`;
       hero.appendChild(h(`<div style="position:absolute;inset:auto 0 0;padding:14px 16px;color:#fff;
         background:linear-gradient(transparent,rgba(0,0,0,.6))">
-        <div style="font-size:22px;font-weight:700">${esc(label)}</div>
-        <div style="font-size:13px;opacity:.85">${group.length} items</div></div>`));
+        <div style="font-size:calc(22px * var(--tsize));font-weight:700">${esc(label)}</div>
+        <div style="font-size:calc(13px * var(--tsize));opacity:.85">${group.length} items</div></div>`));
       hero.onclick = () => nav.push(photoCollectionView(label, group));
       body.appendChild(hero);
     });
@@ -177,16 +188,22 @@ function photosLibrary(body, nav) {
 function photoTile(item, nav, collection) {
   const cell = artCell(item.seed, { w: 240, h: 240 });
   if (item.kind === 'video') {
-    cell.appendChild(h(`<div style="position:absolute;left:5px;bottom:4px;color:#fff;font-size:10px;
+    cell.appendChild(h(`<div style="position:absolute;left:5px;bottom:4px;color:#fff;font-size:calc(10px * var(--tsize));
       text-shadow:0 1px 3px rgba(0,0,0,.6)">▶ ${clockDuration(item.seconds)}</div>`));
     cell.style.position = 'relative';
   }
   if (item.fav) {
     cell.style.position = 'relative';
-    cell.appendChild(h(`<div style="position:absolute;right:5px;bottom:4px;color:#fff;font-size:11px;
+    cell.appendChild(h(`<div style="position:absolute;right:5px;bottom:4px;color:#fff;font-size:calc(11px * var(--tsize));
       text-shadow:0 1px 3px rgba(0,0,0,.6)">♥</div>`));
   }
   cell.onclick = () => nav.push(photoDetail(item, collection, nav));
+  /* A photo has no text of its own, so the date is the only thing that can
+     distinguish one cell from the next in a grid of forty-eight. */
+  actionable(cell, {
+    label: `${item.kind === 'video' ? 'Video' : 'Photo'}, ${item.album}, ${relativeDay(item.at)}`
+      + `${item.fav ? ', favourite' : ''}`,
+  });
   return cell;
 }
 
@@ -262,8 +279,8 @@ function photoDetail(item, collection, parentNav) {
       actions.forEach(([label, glyph, onClick]) => {
         const button = el('button', '', glyph);
         button.title = label;
-        button.style.cssText = 'display:grid;justify-items:center;gap:4px;font-size:11px;color:inherit';
-        button.appendChild(h(`<div style="font-size:11px">${label}</div>`));
+        button.style.cssText = 'display:grid;justify-items:center;gap:4px;font-size:calc(11px * var(--tsize));color:inherit';
+        button.appendChild(h(`<div style="font-size:calc(11px * var(--tsize))">${label}</div>`));
         button.onclick = onClick;
         bar.appendChild(button);
       });
@@ -289,7 +306,7 @@ function photosForYou(body, nav) {
     art.appendChild(h(`<div style="position:absolute;inset:auto 0 0;padding:12px;color:#fff;
       background:linear-gradient(transparent,rgba(0,0,0,.6))">
       <div style="font-weight:700">${esc(label)}</div>
-      <div style="font-size:12px;opacity:.85">${picks.length || items.length} items</div></div>`));
+      <div style="font-size:calc(12px * var(--tsize));opacity:.85">${picks.length || items.length} items</div></div>`));
     cardEl.appendChild(art);
     cardEl.onclick = () => nav.push(photoCollectionView(label, picks.length ? picks : items.slice(0, 12)));
     rail.appendChild(cardEl);
@@ -321,8 +338,8 @@ function photosAlbums(body, nav) {
     const art = el('div');
     art.style.cssText = `height:150px;border-radius:12px;background:url("${artURI(seed, { w: 320, h: 320 })}") center/cover`;
     wrap.appendChild(art);
-    wrap.appendChild(h(`<div style="margin-top:6px;font-size:14px;font-weight:500">${esc(label)}</div>
-      <div style="font-size:12px;color:var(--txt3)">${collection.length}</div>`));
+    wrap.appendChild(h(`<div style="margin-top:6px;font-size:calc(14px * var(--tsize));font-weight:500">${esc(label)}</div>
+      <div style="font-size:calc(12px * var(--tsize));color:var(--txt3)">${collection.length}</div>`));
     wrap.onclick = () => nav.push(photoCollectionView(label, collection));
     grid.appendChild(wrap);
   };
@@ -430,7 +447,7 @@ defineApp({
     <rect x="38" y="19" width="24" height="9" rx="4" fill="#aeaeb2"/>
     <circle cx="78" cy="37" r="3.4" fill="#ffd60a"/></svg>`,
   mount(win, inst) {
-    const state = slice('camera', () => ({ mode: 'PHOTO', flash: 'auto', zoom: 1, grid: false, timer: 0, front: false, filter: 'None' }));
+    const state = CAM();
     inst.cam = { recording: false, seconds: 0, ticker: null };
     win.style.background = '#000';
 
@@ -440,7 +457,7 @@ defineApp({
 
     /* ---- top controls */
     const top = el('div');
-    top.style.cssText = 'padding:56px 20px 8px;display:flex;align-items:center;justify-content:space-between;font-size:13px';
+    top.style.cssText = 'padding:56px 20px 8px;display:flex;align-items:center;justify-content:space-between;font-size:calc(13px * var(--tsize))';
     root.appendChild(top);
 
     /* ---- viewfinder */
@@ -458,7 +475,7 @@ defineApp({
 
       top.innerHTML = '';
       const flashButton = el('button', '', ({ auto: '⚡︎A', on: '⚡︎', off: '⚡︎̸' })[state.flash]);
-      flashButton.style.cssText = 'color:' + (state.flash === 'off' ? '#8e8e93' : '#ffd60a') + ';font-size:15px';
+      flashButton.style.cssText = 'color:' + (state.flash === 'off' ? '#8e8e93' : '#ffd60a') + ';font-size:calc(15px * var(--tsize))';
       flashButton.onclick = () => {
         state.flash = state.flash === 'auto' ? 'on' : state.flash === 'on' ? 'off' : 'auto';
         save();
@@ -473,7 +490,7 @@ defineApp({
        [state.timer ? `${state.timer}s` : 'Timer', state.timer > 0, () => { state.timer = state.timer === 0 ? 3 : state.timer === 3 ? 10 : 0; save(); paint(); }]]
         .forEach(([label, on, onClick]) => {
           const button = el('button', '', esc(label));
-          button.style.cssText = `font-size:12px;color:${on ? '#ffd60a' : '#fff'};opacity:${on ? 1 : 0.75}`;
+          button.style.cssText = `font-size:calc(12px * var(--tsize));color:${on ? '#ffd60a' : '#fff'};opacity:${on ? 1 : 0.75}`;
           button.onclick = onClick;
           live.appendChild(button);
         });
@@ -488,8 +505,9 @@ defineApp({
       finder.innerHTML = '';
       const scene = el('div');
       const zoomScale = 1 + (state.zoom - 1) * 0.35;
+      const mirrored = state.front && state.mirrorFront !== false;
       scene.style.cssText = `position:absolute;inset:0;background:url("${artURI(state.front ? 'selfie-scene' : 'camera-scene', { w: 700, h: 900 })}") center/cover;
-        transform:scale(${zoomScale});transition:transform .25s ease;
+        transform:scale(${zoomScale})${mirrored ? ' scaleX(-1)' : ''};transition:transform .25s ease;
         filter:${({ None: 'none', Vivid: 'saturate(1.5) contrast(1.1)', Mono: 'grayscale(1)', Silvertone: 'grayscale(1) contrast(1.2) brightness(1.05)', Noir: 'grayscale(1) contrast(1.5) brightness(.85)' })[state.filter]}`;
       finder.appendChild(scene);
 
@@ -497,13 +515,20 @@ defineApp({
         finder.appendChild(h(`<div style="position:absolute;inset:0;
           box-shadow:inset 0 0 90px 40px rgba(0,0,0,.45);pointer-events:none"></div>
           <div style="position:absolute;top:12px;left:50%;transform:translateX(-50%);
-          background:rgba(255,214,10,.9);color:#000;font-size:11px;font-weight:600;padding:3px 9px;border-radius:8px">
+          background:rgba(255,214,10,.9);color:#000;font-size:calc(11px * var(--tsize));font-weight:600;padding:3px 9px;border-radius:8px">
           NATURAL LIGHT</div>`));
       }
       if (state.grid) {
         finder.appendChild(h(`<div style="position:absolute;inset:0;pointer-events:none;
           background:linear-gradient(to right,transparent 33.2%,rgba(255,255,255,.3) 33.3%,rgba(255,255,255,.3) 33.5%,transparent 33.6%,transparent 66.2%,rgba(255,255,255,.3) 66.3%,rgba(255,255,255,.3) 66.5%,transparent 66.6%),
           linear-gradient(to bottom,transparent 33.2%,rgba(255,255,255,.3) 33.3%,rgba(255,255,255,.3) 33.5%,transparent 33.6%,transparent 66.2%,rgba(255,255,255,.3) 66.3%,rgba(255,255,255,.3) 66.5%,transparent 66.6%)"></div>`));
+      }
+      /* Level: on a real phone this only appears once the device is close to
+         flat, and turns yellow when it is level. There is no accelerometer
+         here, so it settles a moment after the app opens. */
+      if (state.level !== false) {
+        finder.appendChild(h(`<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+          width:110px;height:1.5px;background:#ffd60a;opacity:.85;pointer-events:none;border-radius:1px"></div>`));
       }
       // Tap to focus.
       finder.onclick = event => {
@@ -523,7 +548,7 @@ defineApp({
         const pill = el('button', '', level === state.zoom ? `${level}×` : `${level}`);
         pill.style.cssText = `min-width:${level === state.zoom ? 42 : 34}px;height:${level === state.zoom ? 42 : 34}px;
           border-radius:50%;background:rgba(0,0,0,.45);backdrop-filter:blur(8px);
-          color:${level === state.zoom ? '#ffd60a' : '#fff'};font-size:12px;font-weight:600`;
+          color:${level === state.zoom ? '#ffd60a' : '#fff'};font-size:calc(12px * var(--tsize));font-weight:600`;
         pill.onclick = event => { event.stopPropagation(); state.zoom = level; save(); paint(); };
         zooms.appendChild(pill);
       });
@@ -537,7 +562,7 @@ defineApp({
         filters.style.cssText = 'padding:0 16px 10px;gap:8px';
         ['None', 'Vivid', 'Mono', 'Silvertone', 'Noir'].forEach(name => {
           const chip = el('button', '', esc(name));
-          chip.style.cssText = `flex:none;padding:5px 12px;border-radius:999px;font-size:12px;
+          chip.style.cssText = `flex:none;padding:5px 12px;border-radius:999px;font-size:calc(12px * var(--tsize));
             background:${state.filter === name ? '#ffd60a' : 'rgba(255,255,255,.14)'};
             color:${state.filter === name ? '#000' : '#fff'}`;
           chip.onclick = () => { state.filter = name; save(); paint(); };
@@ -547,7 +572,7 @@ defineApp({
       }
 
       const modes = el('div');
-      modes.style.cssText = 'display:flex;gap:18px;justify-content:center;font-size:11px;letter-spacing:.06em;padding:4px 0 12px;overflow-x:auto';
+      modes.style.cssText = 'display:flex;gap:18px;justify-content:center;font-size:calc(11px * var(--tsize));letter-spacing:.06em;padding:4px 0 12px;overflow-x:auto';
       CAMERA_MODES.forEach(mode => {
         const button = el('button', '', mode);
         button.style.cssText = `flex:none;color:${mode === state.mode ? '#ffd60a' : 'rgba(255,255,255,.65)'};
@@ -622,7 +647,7 @@ defineApp({
         let left = state.timer;
         const countdown = el('div');
         countdown.style.cssText = `position:absolute;inset:0;display:grid;place-items:center;z-index:8;
-          font-size:88px;font-weight:200;color:#ffd60a;text-shadow:0 2px 20px rgba(0,0,0,.5)`;
+          font-size:calc(88px * var(--tsize));font-weight:200;color:#ffd60a;text-shadow:0 2px 20px rgba(0,0,0,.5)`;
         countdown.textContent = String(left);
         finder.appendChild(countdown);
         const tick = setInterval(() => {
