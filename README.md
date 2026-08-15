@@ -43,6 +43,7 @@ honour reduce-motion, reduce-transparency and text-scaling preferences.
 
 ```
 index.html                   the index page at the site root
+assets/fonts/                Orbitron, VT323 and Space Grotesk, for the index
 404.html                     matching not-found page
 .github/workflows/pages.yml  publishes the site to GitHub Pages on push to main
 mac/                         the macOS simulator, served at /mac
@@ -81,6 +82,7 @@ has no browser coverage yet, just the parse and reference gates.
 
 These are independent educational simulations. They are not Apple, Microsoft or
 Roku products, and are not affiliated with or endorsed by Apple Inc., Microsoft
-or Roku, Inc. The bundled fonts are Inter and JetBrains Mono, both under the SIL
+or Roku, Inc. Every bundled typeface — Inter and JetBrains Mono in the
+simulators, Orbitron, VT323 and Space Grotesk on the index — is under the SIL
 Open Font License 1.1; licences sit alongside them in each `assets/fonts/`
 folder.
