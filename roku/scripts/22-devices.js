@@ -156,9 +156,13 @@ async function setUpTvControl() {
     }
   }
 
+  State.remote.tvControl = true;
+  save();
+  renderTop();
   await dialog({
     title: 'TV control is set up',
-    body: '<p>The power and volume buttons on this remote now control the television.</p>',
+    body: `<p>The power, volume and input buttons on this remote now control the
+      television.</p>`,
     actions: [{ id: 'ok', label: 'OK' }],
   });
 }

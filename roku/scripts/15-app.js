@@ -282,9 +282,19 @@ defineScreen('player', {
       showBar(true);
     }
 
-    function exit() {
+    let disposed = false;
+    /* Stop the clock and keep the resume point, whichever way the screen goes
+       away — Back runs exit(), Home and a channel shortcut replace the stack
+       and reach this through the shell's dispose hook. */
+    function teardown() {
+      if (disposed) return;
+      disposed = true;
       clearInterval(tick);
       remember();
+    }
+
+    function exit() {
+      teardown();
       if (!back()) goHome();
     }
 
@@ -384,6 +394,7 @@ defineScreen('player', {
       },
 
       back() { exit(); return true; },
+      dispose() { teardown(); },
       refocus() {},
     };
 

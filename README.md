@@ -64,7 +64,7 @@ deployed site. Three gates run on every push and block the deploy:
 ```
 python3 tools/check-syntax.py   parse, including the shared global scopes
 python3 tools/check-refs.py     every glyph, pane, command and app id resolves
-node tools/smoke.mjs            all 82 apps open in Chromium with no console errors
+node tools/smoke.mjs            every app and screen opens in Chromium, no console errors
 ```
 
 The iPhone's and the Roku's scripts are classic scripts that share one global
@@ -75,8 +75,15 @@ both. The Mac is exempt: each of its files wraps its body in an IIFE.
 
 The smoke test also checks the HTML sanitiser, keyboard reachability, colour
 contrast, the scenario definitions, and that the Mac and the iPhone still boot
-against a save written by an older build. It covers those two only — the Roku
-has no browser coverage yet, just the parse and reference gates.
+against a save written by an older build.
+
+The Roku is covered too. Its settings are one large tree of closures evaluated
+lazily against live state, so the suite walks every node and calls every
+`value()` and `detail()` in it, then renders each screen that has rows. It also
+opens every channel page, checks that no screen repeats a focus id, switches the
+television through all five of its inputs, asserts that HDMI-CEC one-touch play
+both works when it is on and stays quiet when it is off, and leaves the player
+by each exit to prove the playback clock stops and the resume point survives.
 
 ## Notes
 

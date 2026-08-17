@@ -449,6 +449,203 @@ async function testStaleSaves(browser, base) {
   }
 }
 
+/**
+ * The Roku.
+ *
+ * The phone's test opens every app; the box's equivalent is every screen, every
+ * channel page, and the whole settings tree — which is one large data structure
+ * of closures, so a typo in a `detail()` five levels down only throws when that
+ * row is highlighted. Walking it here calls every one of them.
+ */
+async function testRoku(browser, base) {
+  const context = await browser.newContext({ viewport: { width: 1400, height: 900 } });
+  await blockOutbound(context);
+  const page = await context.newPage();
+  watch(page, 'roku');
+
+  await page.goto(`${base}/roku/`, { waitUntil: 'load' });
+  /* Top-level lexical declarations again: probed by bare reference. */
+  await page.waitForFunction(
+    () => typeof SCREENS !== 'undefined' && typeof go === 'function' && typeof State !== 'undefined',
+    null, { timeout: 15000 });
+  await page.waitForTimeout(2600);          // boot splash
+
+  const counts = await page.evaluate(() => ({
+    screens: Object.keys(SCREENS).length,
+    channels: CHANNELS.length,
+    titles: TITLES.length,
+    inputs: TV_INPUTS.length,
+  }));
+  console.log(`  roku: ${counts.screens} screens, ${counts.channels} channels, `
+    + `${counts.titles} titles, ${counts.inputs} TV inputs`);
+
+  /* ---- every settings closure ------------------------------------------ */
+
+  /* value() and detail() are evaluated lazily against live State, so they are
+     the easiest place in the project to hide a reference error. */
+  const settingsErrors = await page.evaluate(() => {
+    const bad = [];
+    const seen = new Set();
+    (function walk(path) {
+      const key = path.join('/');
+      if (seen.has(key) || path.length > 6) return;
+      seen.add(key);
+      const { node } = nodeAt(path);
+      try { if (node.detail) node.detail(); } catch (e) { bad.push(`${key || 'root'} detail: ${e.message}`); }
+      let kids = [];
+      try { kids = node.children ? node.children() : []; } catch (e) { bad.push(`${key} children: ${e.message}`); }
+      kids.forEach(kid => {
+        try { if (kid.value) kid.value(); } catch (e) { bad.push(`${key}/${kid.id} value: ${e.message}`); }
+        try { if (kid.detail) kid.detail(); } catch (e) { bad.push(`${key}/${kid.id} detail: ${e.message}`); }
+        if (kid.children) walk(path.concat(kid.id));
+      });
+    }([]));
+    return bad;
+  });
+  settingsErrors.forEach(message => note(`roku: settings ${message}`));
+
+  /* ---- every settings screen renders ----------------------------------- */
+
+  const paths = await page.evaluate(() => {
+    const out = [];
+    (function walk(path) {
+      if (path.length > 5) return;
+      const { node } = nodeAt(path);
+      const kids = node.children ? node.children() : [];
+      if (kids.length) out.push(path);
+      kids.forEach(kid => { if (kid.children) walk(path.concat(kid.id)); });
+    }([]));
+    return out;
+  });
+
+  for (const path of paths) {
+    await page.evaluate(p => go('settings', { path: p }), path);
+    await page.waitForTimeout(70);
+    const rows = await page.evaluate(() => document.querySelectorAll('.set-menu .row').length);
+    if (!rows) note(`roku: settings ${path.join(' > ') || 'root'} rendered no rows`);
+  }
+
+  /* ---- every screen, and every channel page ---------------------------- */
+
+  const screens = [
+    ['home', null], ['rails', 'watch'], ['rails', 'sports'], ['rails', 'free'],
+    ['rails', 'movies'], ['rails', 'tvstore'], ['live', null], ['search', { q: 'the' }],
+    ['store', null], ['title', 't01'], ['netcheck', null], ['netsetup', null],
+    ['setup', null],
+  ];
+  for (const [id, arg] of screens) {
+    await page.evaluate(([i, a]) => go(i, a), [id, arg]);
+    await page.waitForTimeout(120);
+    const state = await page.evaluate(() => ({
+      filled: document.querySelector('#layer-screen').textContent.trim().length > 0,
+      focusable: typeof focusables === 'function' ? focusables().length : 0,
+    }));
+    if (!state.filled) note(`roku: the ${id} screen rendered empty`);
+    if (!state.focusable) note(`roku: the ${id} screen has nothing the remote can reach`);
+  }
+
+  const channelIds = await page.evaluate(() => CHANNELS.map(c => c.id));
+  for (const id of channelIds) {
+    await page.evaluate(cid => go('channel', { id: cid }), id);
+    await page.waitForTimeout(60);
+    const ok = await page.evaluate(() => Boolean(document.querySelector('.chpage h1')?.textContent.trim())
+      && document.querySelectorAll('.cp-facts span').length >= 6);
+    if (!ok) note(`roku: the ${id} channel page is incomplete`);
+  }
+
+  /* A focus id has to be unique inside a screen, or Back restores the wrong
+     row when it looks the previous one up. */
+  await page.evaluate(() => goHome());
+  await page.waitForTimeout(200);
+  const duplicated = await page.evaluate(() => {
+    const ids = [...document.querySelectorAll('#layer-screen [data-fid]')].map(n => n.dataset.fid);
+    return ids.filter((id, i) => ids.indexOf(id) !== i);
+  });
+  if (duplicated.length) note(`roku: the home screen repeats focus id ${duplicated[0]}`);
+
+  /* ---- the player must not outlive its screen -------------------------- */
+
+  /* Back runs the player's own exit path; Home replaces the stack from
+     underneath it. Both have to stop the playback clock and bank the resume
+     point — and the resume point is the half that is observable from here, so
+     it is what the assertion looks at. Playback starts a fifth of the way in
+     because a part-watched position under two per cent is not worth keeping
+     and is deliberately dropped. */
+  for (const leave of ['back', 'home']) {
+    await page.evaluate(() => {
+      goHome();
+      State.continueWatching = [];
+      playTitle(TITLE_BY_ID.t01, 'nimbus', 20);
+    });
+    await page.waitForTimeout(1800);        // start-up buffer, then playing
+    if (!(await page.evaluate(() => Boolean(document.querySelector('.trick .tk-bar'))))) {
+      note('roku: the player drew no trick-play bar');
+    }
+    await page.evaluate(k => press(k), leave);
+    await page.waitForTimeout(300);
+    const resumed = await page.evaluate(() => State.continueWatching.some(e => e.id === 't01'));
+    if (!resumed) note(`roku: leaving the player with ${leave} lost the resume point`);
+  }
+
+  /* ---- the television's own inputs ------------------------------------- */
+
+  for (const input of await page.evaluate(() => TV_INPUTS.map(i => i.id))) {
+    await page.evaluate(id => setInput(id, { quiet: true }), input);
+    await page.waitForTimeout(120);
+    const shown = await page.evaluate(() => ({
+      onRoku: State.tv.input === 'hdmi1',
+      source: document.querySelector('#tv-source').textContent.trim().length,
+      owned: Boolean(UI.tv),
+    }));
+    if (shown.onRoku && (shown.source || shown.owned)) {
+      note('roku: HDMI 1 still had the television drawing over the box');
+    }
+    if (!shown.onRoku && !shown.source) note(`roku: ${input} showed nothing`);
+    if (!shown.onRoku && !shown.owned) note(`roku: ${input} left the remote pointed at the box`);
+  }
+
+  /* One-touch play is the difference between Home rescuing the viewer and
+     Home doing nothing at all, so both directions are asserted. */
+  await page.evaluate(() => {
+    State.system.cec = true; State.system.cecOneTouch = true;
+    setInput('hdmi2', { quiet: true });
+  });
+  await page.evaluate(() => press('home'));
+  await page.waitForTimeout(200);
+  if (await page.evaluate(() => State.tv.input !== 'hdmi1')) {
+    note('roku: Home did not pull the set back with HDMI-CEC on');
+  }
+  await page.evaluate(() => {
+    State.system.cec = false; State.system.cecOneTouch = false;
+    setInput('hdmi2', { quiet: true });
+  });
+  await page.evaluate(() => press('home'));
+  await page.waitForTimeout(200);
+  if (await page.evaluate(() => State.tv.input === 'hdmi1')) {
+    note('roku: Home switched the set back with HDMI-CEC off');
+  }
+  await page.evaluate(() => {
+    State.system.cec = true; State.system.cecOneTouch = true;
+    setInput('hdmi1', { quiet: true });
+  });
+
+  /* ---- the button chords ------------------------------------------------ */
+
+  const chord = keys => page.evaluate(async list => {
+    for (const key of list) press(key);
+  }, keys);
+
+  await page.evaluate(() => goHome());
+  await chord(['home', 'home', 'home', 'home', 'home', 'fwd', 'fwd', 'fwd', 'rew', 'rew']);
+  await page.waitForTimeout(300);
+  if (!(await page.evaluate(() => Boolean(document.querySelector('.secret'))))) {
+    note('roku: the secret-screen chord did not open it');
+  }
+  await page.evaluate(() => clearSystem());
+
+  await context.close();
+}
+
 /* Resolved through CJS so NODE_PATH and a globally installed playwright both
    work — this repo has no package.json and should not grow one just to test. */
 const { createRequire } = await import('node:module');
@@ -476,6 +673,7 @@ const browser = await chromium.launch(launch);
 try {
   await testMac(browser, hosted.base);
   await testIphone(browser, hosted.base);
+  await testRoku(browser, hosted.base);
   await testStaleSaves(browser, hosted.base);
 } finally {
   await browser.close();
@@ -487,4 +685,4 @@ if (problems.length) {
   problems.forEach(p => console.error(`  * ${p}`));
   process.exit(1);
 }
-console.log('\nSmoke test passed: every app in both simulators mounted with no errors.');
+console.log('\nSmoke test passed: every app in all three simulators mounted with no errors.');
