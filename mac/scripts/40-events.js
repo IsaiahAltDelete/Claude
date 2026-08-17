@@ -29,6 +29,12 @@
   Mac.run = async (command, arg, element) => {
     const win = winFor(element);
 
+    /* One place records what the trainee did, because one place sees
+       everything: instrumenting individual handlers would only ever cover
+       the ones somebody remembered. Only records while a scenario is
+       running, and skips the commands that fire on their own. */
+    Mac.Scenarios?.record(command, arg);
+
     switch (command) {
       /* ------------------------------------------------------------ shell */
       case 'open-app': Mac.wm.open(arg); Mac.Surfaces.close(); break;
@@ -108,6 +114,15 @@
       case 'wifi-forget': Mac.Network.forget(arg); break;
       case 'renew-dhcp': Mac.Network.renewLease(); break;
       case 'edit-dns': Mac.Network.editDNS(); break;
+      case 'clear-proxy': Mac.Network.clearProxy(); break;
+
+      /* ------------------------------------------------------- scenarios */
+      case 'scenarios': Mac.Scenarios.panel(); break;
+      case 'scenario-start': Mac.Dialog.close(); Mac.Scenarios.start(arg); break;
+      case 'scenario-stop': Mac.Scenarios.stop(); break;
+      case 'scenario-hint': Mac.Scenarios.hint(); break;
+      case 'scenario-transcript': Mac.Scenarios.showTranscript(); break;
+      case 'scenario-fault': Mac.Scenarios.inject(arg); break;
       case 'run-diagnostics': Mac.Dialog.close(); Mac.Surfaces.close(); Mac.Network.diagnostics(); break;
       case 'reset-network': Mac.Network.resetNetwork(); break;
       case 'portal-agree': Mac.Network.portalAgree(); break;
@@ -148,6 +163,13 @@
       case 'finder-put-back': Mac.Dialog.close(); Mac.Finder.putBack(win?.appId === 'finder' ? win : appWin('finder')); break;
       case 'finder-delete': Mac.Dialog.close(); Mac.Finder.deleteForever(win?.appId === 'finder' ? win : appWin('finder')); break;
       case 'finder-duplicate': Mac.Dialog.close(); Mac.Finder.duplicate(win?.appId === 'finder' ? win : appWin('finder')); break;
+      case 'finder-copy': Mac.Dialog.close(); Mac.Finder.copyToClipboard(win?.appId === 'finder' ? win : appWin('finder')); break;
+      case 'finder-cut': Mac.Dialog.close(); Mac.Finder.copyToClipboard(win?.appId === 'finder' ? win : appWin('finder'), { cut: true }); break;
+      case 'finder-paste': Mac.Dialog.close(); Mac.Finder.paste(win?.appId === 'finder' ? win : appWin('finder')); break;
+      case 'finder-move-to': Mac.Dialog.close(); Mac.Finder.transferTo(win?.appId === 'finder' ? win : appWin('finder'), 'move'); break;
+      case 'finder-copy-to': Mac.Dialog.close(); Mac.Finder.transferTo(win?.appId === 'finder' ? win : appWin('finder'), 'copy'); break;
+      case 'finder-go-folder': Mac.Dialog.close(); Mac.Finder.goToFolder(win?.appId === 'finder' ? win : appWin('finder')); break;
+      case 'disk-eject': Mac.Finder.eject(arg); break;
       case 'finder-open': {
         const target = win?.appId === 'finder' ? win : appWin('finder');
         Mac.Dialog.close();
@@ -363,11 +385,21 @@
         Mac.wm.render(target);
         break;
       }
-      case 'check-updates':
-        Mac.Notify.show('Software Update', Mac.Network.online()
-          ? `Checked for updates — ${Mac.state.appUpdates.length || 'no'} app updates available.`
-          : 'Unable to check for updates. Connect to the internet and try again.', { app: 'appstore' });
+      case 'check-updates': {
+        if (!Mac.Network.online()) {
+          Mac.Notify.show('Software Update',
+            `Unable to check for updates. ${Mac.Network.summary()}.`, { app: 'appstore' });
+          break;
+        }
+        const parts = [];
+        if (Mac.OS.pending()) parts.push(`macOS Tahoe ${Mac.OS.update().version}`);
+        if (Mac.state.appUpdates.length) parts.push(Mac.plural(Mac.state.appUpdates.length, 'app update'));
+        Mac.Notify.show('Software Update',
+          parts.length ? `Checked for updates — ${parts.join(' and ')} available.`
+            : 'Checked for updates — this Mac is up to date.', { app: 'appstore' });
         break;
+      }
+      case 'os-update': Mac.OS.run(arg); break;
 
       /* -------------------------------------------------------------- Notes */
       case 'new-note': Mac.Notes.create(); break;
@@ -588,7 +620,7 @@
           icon: { app: 'system-info' },
           body: `<div style="text-align:center;margin-bottom:14px">
               <strong style="font-size:19px">macOS Tahoe</strong>
-              <p class="muted" style="margin:3px 0 0;font-size:12px">Version ${Mac.OS_VERSION} — Simulator ${Mac.VERSION}</p></div>
+              <p class="muted" style="margin:3px 0 0;font-size:12px">Version ${Mac.OS.version()} — Simulator ${Mac.VERSION}</p></div>
             ${UI.group(
               UI.info('MacBook Pro', '14-inch, M4 Pro'),
               UI.info('Chip', 'Apple M4 Pro'),
@@ -689,7 +721,7 @@
           icon: 'person',
           body: UI.group(
             UI.info('Account type', 'Administrator'),
-            UI.info('Short name', 'alex'),
+            UI.info('Short name', Mac.PERSONA.shortName),
             UI.info('Home folder', '/Users/alex'),
             UI.action('Change Password…', 'change-password', `The lab password is “${Mac.LOGIN_PASSWORD}”.`),
           ),
@@ -1147,6 +1179,31 @@
     }
   };
 
+  /**
+   * The search fields, which were eight near-identical blocks.
+   *
+   * `apply` writes the query wherever that app keeps it; `app` is set for
+   * the two whose query lives in persisted state rather than on the window,
+   * so the field can be typed into from a window other than the one that
+   * has to re-render.
+   */
+  const SEARCH_FIELDS = [
+    { attr: 'data-settings-search', apply: (win, value) => { win.state.query = value; } },
+    { attr: 'data-finder-search', apply: (win, value) => { win.state.query = value; } },
+    { attr: 'data-store-search', apply: (win, value) => { win.state.query = value; win.state.detail = null; } },
+    { attr: 'data-activity-search', apply: (win, value) => { win.state.query = value; } },
+    { attr: 'data-console-search', apply: (win, value) => { win.state.query = value; } },
+    { attr: 'data-notes-search', apply: (win, value) => { win.state.query = value; } },
+    { attr: 'data-mail-search', app: 'mail', apply: (win, value) => { Mac.state.mail.search = value; Mac.save(); } },
+    { attr: 'data-outlook-search', app: 'outlook', apply: (win, value) => { Mac.state.outlook.search = value; Mac.save(); } },
+  ];
+
+  /* One shared debounce: only one field can be typed into at a time. */
+  const rerenderSearch = Mac.debounce(
+    (win, selector) => { if (Mac.wm.windows.has(win.id)) rerenderKeepingCaret(win, selector); },
+    130,
+  );
+
   document.addEventListener('input', event => {
     const target = event.target;
     const win = winFor(target);
@@ -1164,49 +1221,16 @@
       return;
     }
 
-    if (target.matches('[data-settings-search]') && win) {
-      win.state.query = target.value;
-      rerenderKeepingCaret(win, '[data-settings-search]');
-      return;
-    }
-    if (target.matches('[data-finder-search]') && win) {
-      win.state.query = target.value;
-      rerenderKeepingCaret(win, '[data-finder-search]');
-      return;
-    }
-    if (target.matches('[data-store-search]') && win) {
-      win.state.query = target.value;
-      win.state.detail = null;
-      rerenderKeepingCaret(win, '[data-store-search]');
-      return;
-    }
-    if (target.matches('[data-activity-search]') && win) {
-      win.state.query = target.value;
-      rerenderKeepingCaret(win, '[data-activity-search]');
-      return;
-    }
-    if (target.matches('[data-console-search]') && win) {
-      win.state.query = target.value;
-      rerenderKeepingCaret(win, '[data-console-search]');
-      return;
-    }
-    if (target.matches('[data-notes-search]') && win) {
-      win.state.query = target.value;
-      rerenderKeepingCaret(win, '[data-notes-search]');
-      return;
-    }
-    if (target.matches('[data-mail-search]')) {
-      Mac.state.mail.search = target.value;
-      Mac.save();
-      const host = Mac.wm.forApp('mail')[0];
-      if (host) rerenderKeepingCaret(host, '[data-mail-search]');
-      return;
-    }
-    if (target.matches('[data-outlook-search]')) {
-      Mac.state.outlook.search = target.value;
-      Mac.save();
-      const host = Mac.wm.forApp('outlook')[0];
-      if (host) rerenderKeepingCaret(host, '[data-outlook-search]');
+    const search = SEARCH_FIELDS.find(field => target.matches(`[${field.attr}]`));
+    if (search) {
+      const host = search.app ? Mac.wm.forApp(search.app)[0] : win;
+      if (!host) return;
+      search.apply(host, target.value);
+      /* Debounced: the field is a real <input> and keeps its own text
+         without any help, so only the filtered result waits. Every keystroke
+         used to re-render the whole window, which in Mail means rebuilding a
+         message list of several hundred rows per character typed. */
+      rerenderSearch(host, `[${search.attr}]`);
       return;
     }
     if (target.id === 'launchpad-input') {
@@ -1276,6 +1300,12 @@
       }
     }
 
+    // An open menu owns the arrow keys.
+    if (Mac.session.surface && Mac.session.surface !== 'spotlight' && Mac.Surfaces.keyboard(event)) {
+      event.preventDefault();
+      return;
+    }
+
     // Spotlight navigation.
     if (Mac.session.surface === 'spotlight') {
       if (event.key === 'ArrowDown') { event.preventDefault(); Mac.Spotlight.move(1); return; }
@@ -1327,16 +1357,46 @@
     if (cmd && key === ',' && !inField) { event.preventDefault(); Mac.run('app-settings'); return; }
     if (cmd && event.ctrlKey && key === 'f') { event.preventDefault(); Mac.wm.toggleFullscreen(); return; }
 
-    // Trap focus inside an open dialog.
-    if (Mac.Dialog.current && event.key === 'Tab') {
-      const focusable = Mac.$$('#modal-layer button:not(:disabled), #modal-layer input, #modal-layer select, #modal-layer textarea');
-      if (!focusable.length) return;
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
-      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    /* Finder file operations. Guarded on the active window being Finder so
+       ⌘C in Mail still copies text, and skipped inside a field for the same
+       reason. */
+    const finderWin = Mac.wm.windows.get(Mac.session.activeWindow);
+    if (finderWin?.appId === 'finder' && !inField) {
+      if (cmd && event.shiftKey && key === 'g') { event.preventDefault(); Mac.Finder.goToFolder(finderWin); return; }
+      if (cmd && !event.shiftKey && key === 'c') { event.preventDefault(); Mac.Finder.copyToClipboard(finderWin); return; }
+      if (cmd && !event.shiftKey && key === 'x') { event.preventDefault(); Mac.Finder.copyToClipboard(finderWin, { cut: true }); return; }
+      if (cmd && !event.shiftKey && key === 'v') { event.preventDefault(); Mac.Finder.paste(finderWin); return; }
+      if (cmd && !event.shiftKey && key === 'd') { event.preventDefault(); Mac.Finder.duplicate(finderWin); return; }
+      if (cmd && !event.shiftKey && key === 'e') { event.preventDefault(); Mac.Finder.eject('vol-backup'); return; }
     }
+
   });
+
+  /**
+   * Keep Tab inside an open dialog.
+   *
+   * This used to live at the end of the handler above, behind an early
+   * return for "the desktop is hidden" — so it did nothing on the login
+   * window, the lock screen or the Setup Assistant, which are exactly where
+   * a modal is most likely to be the only thing on screen. It also only
+   * redirected at the two boundaries, so focus that started outside the
+   * dialog (on the desktop behind it) walked the background freely.
+   *
+   * Registered separately, in the capture phase, so no earlier `return` in
+   * the shortcut table can skip it.
+   */
+  document.addEventListener('keydown', event => {
+    if (event.key !== 'Tab' || !Mac.Dialog.current) return;
+    const focusable = Mac.$$('#modal-layer button:not(:disabled), #modal-layer input:not([type=hidden]), '
+      + '#modal-layer select, #modal-layer textarea, #modal-layer [tabindex="0"]');
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    const inside = Mac.$('#modal-layer').contains(document.activeElement);
+    if (!inside) { event.preventDefault(); (event.shiftKey ? last : first).focus(); return; }
+    if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+    else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+  }, true);
 
   /* --------------------------------------------------------- context menus */
 

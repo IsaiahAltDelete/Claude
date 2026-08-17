@@ -14,7 +14,7 @@
   const Terminal = Mac.Terminal = {
     banner() {
       return `Last login: ${new Date().toLocaleString()} on ttys000\n` +
-        `macOS ${Mac.OS_VERSION} (${Mac.OS_BUILD}) — training shell\n` +
+        `macOS ${Mac.OS.version()} (${Mac.OS.build()}) — training shell\n` +
         'Type "help" for the list of simulated commands.\n\n';
     },
 
@@ -23,7 +23,7 @@
       const wifi = Mac.state.wifi;
       const out = text => { win.state.output += `${text}\n`; };
 
-      win.state.output += `alex@mac ~ % ${command}\n`;
+      win.state.output += `${Mac.PERSONA.shortName}@mac ~ % ${command}\n`;
       if (command) win.state.history.push(command);
 
       const [name, ...args] = command.split(/\s+/);
@@ -39,7 +39,7 @@
           break;
         case 'clear': win.state.output = ''; break;
         case 'date': out(new Date().toString()); break;
-        case 'whoami': out('alex'); break;
+        case 'whoami': out(Mac.PERSONA.shortName); break;
         case 'hostname': out(Mac.state.settings.computerName.toLowerCase().replace(/[^a-z0-9]+/g, '-')); break;
         case 'uname':
           out(args.includes('-a')
@@ -48,11 +48,11 @@
           break;
         case 'sw_vers':
           out('ProductName:\t\tmacOS');
-          out(`ProductVersion:\t\t${Mac.OS_VERSION}`);
-          out(`BuildVersion:\t\t${Mac.OS_BUILD}`);
+          out(`ProductVersion:\t\t${Mac.OS.version()}`);
+          out(`BuildVersion:\t\t${Mac.OS.build()}`);
           break;
         case 'uptime': out(`${Mac.formatTime()}  up 3 days, 14:22, 2 users, load averages: 1.42 1.28 1.11`); break;
-        case 'pwd': out('/Users/alex'); break;
+        case 'pwd': out(`/Users/${Mac.PERSONA.shortName}`); break;
         case 'ls':
           out(Mac.FS.children('dir-home').map(node => node.name).join('\t') || '');
           break;
@@ -128,7 +128,7 @@
         case 'system_profiler':
           out('Hardware:\n    Model Name: MacBook Pro');
           out('    Chip: Apple M4 Pro\n    Total Number of Cores: 12\n    Memory: 24 GB');
-          out(`    Serial Number: SIMULATED\n    macOS: ${Mac.OS_VERSION}`);
+          out(`    Serial Number: SIMULATED\n    macOS: ${Mac.OS.version()}`);
           break;
         case 'softwareupdate':
           out('Software Update Tool');
@@ -207,7 +207,7 @@
     }),
     render: win => `<div class="terminal" data-terminal-view>
       <div class="terminal-out">${esc(win.state.output)}</div>
-      <div class="terminal-line"><span class="terminal-prompt">alex@mac ~ %</span>
+      <div class="terminal-line"><span class="terminal-prompt">${Mac.PERSONA.shortName}@mac ~ %</span>
         <input class="terminal-in" data-terminal-input value="${esc(win.state.input)}" autocomplete="off"
           spellcheck="false" aria-label="Terminal command"></div></div>`,
     mount(win) {
@@ -446,10 +446,12 @@
         Mac.Dialog.info('The startup volume cannot be unmounted', 'Restart in Recovery to work on Macintosh HD.', 'warning');
         return;
       }
-      volume.mounted = volume.mounted === false;
-      Mac.save();
+      /* Through Finder, which also has to move any window left sitting
+         inside the volume — a Finder window pointed at an unmounted disk
+         renders an empty list that reads as data loss. */
+      if (volume.mounted === false) Mac.Finder.mount(id);
+      else Mac.Finder.eject(id);
       Mac.wm.refresh('disk-utility');
-      Mac.Notify.show('Disk Utility', `${volume.name} was ${volume.mounted ? 'mounted' : 'unmounted'}.`, { app: 'disk-utility' });
     },
 
     async erase(id) {
@@ -872,7 +874,7 @@
           ['Status', Mac.state.wifi.current ? 'Connected' : 'Not connected'],
           ['Network', Mac.state.wifi.current || '--'], ['IPv4 Address', Mac.state.wifi.current ? Mac.state.wifi.ip : '--'],
           ['Router', Mac.state.wifi.current ? Mac.state.wifi.router : '--'], ['DNS', Mac.state.wifi.dns.join(', ') || 'None']],
-        Software: [['System Version', `macOS ${Mac.OS_VERSION}`], ['Kernel Version', 'Darwin 26.6.0'],
+        Software: [['System Version', `macOS ${Mac.OS.version()}`], ['Kernel Version', 'Darwin 26.6.0'],
           ['Boot Volume', 'Macintosh HD'], ['Boot Mode', Mac.session.safeMode ? 'Safe' : 'Normal'],
           ['Computer Name', Mac.state.settings.computerName], ['User Name', `${Mac.state.account.name} (alex)`],
           ['Secure Virtual Memory', 'Enabled'], ['FileVault', Mac.state.settings.fileVault ? 'Enabled' : 'Disabled']],
@@ -893,7 +895,7 @@
             <span class="side-glyph">${glyph('info', { size: 15 })}</span>
             <span class="side-label">${section}</span></button>`).join('')}</aside>
         <section class="main-pane"><div class="pane-scroll"><div class="pane-pad">
-          ${UI.header(win.state.section, `${Mac.state.settings.computerName} — macOS ${Mac.OS_VERSION}`)}
+          ${UI.header(win.state.section, `${Mac.state.settings.computerName} — macOS ${Mac.OS.version()}`)}
           ${UI.group(...content.map(([label, value]) => UI.info(label, value)))}
           <button class="btn" data-command="export-report">Save Report to Desktop</button>
         </div></div></section></div>`;

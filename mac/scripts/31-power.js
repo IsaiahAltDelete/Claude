@@ -15,6 +15,118 @@
   const SCREENS = ['boot-screen', 'login-screen', 'lock-screen', 'sleep-screen',
     'power-off-screen', 'recovery-screen', 'setup-screen'];
 
+  /* -------------------------------------------------------- software update */
+
+  const OS_UPDATE = {
+    version: '26.7', build: '25H24-SIM', bytes: 7194841088,
+    notes: 'Security fixes and improvements for Wi-Fi roaming and external displays',
+  };
+
+  /**
+   * The macOS update, from "available" to a Mac running the new build.
+   *
+   * Software Update used to show a permanent "Up to date" badge with no
+   * update behind it, so the single thing that pane exists for — running an
+   * update — could not be practised. It lives next to Power because the
+   * install genuinely restarts the machine, and a version string that
+   * changes without a restart is the clearest possible tell that nothing
+   * actually happened.
+   */
+  const OS = Mac.OS = {
+    update() { return Object.assign({}, OS_UPDATE, Mac.state.osUpdate); },
+    version() { return Mac.state.osVersion || Mac.OS_VERSION; },
+    build() { return Mac.state.osBuild || Mac.OS_BUILD; },
+    pending() { return this.version() !== OS_UPDATE.version; },
+
+    /** Blockers the real installer checks before it will start. */
+    blocker() {
+      if (!Mac.Network.online()) return ['Unable to check for updates', Mac.Network.summary()];
+      const volume = Mac.state.volumes[0];
+      if (volume.totalBytes - volume.usedBytes < OS_UPDATE.bytes)
+        return ['Not enough disk space',
+          `This update needs ${Mac.bytes(OS_UPDATE.bytes)} and only ${Mac.bytes(volume.totalBytes - volume.usedBytes)} is available. Empty the Bin or remove some files first.`];
+      if (Mac.state.battery && Mac.state.battery.percent < 20 && !Mac.state.battery.charging)
+        return ['Connect to power', 'Plug in your Mac, or charge it above 20%, before installing an update.'];
+      return null;
+    },
+
+    run(step) {
+      const state = Mac.state.osUpdate;
+      if (step === 'install' || state.stage === 'downloaded') return this.install();
+      const blocker = this.blocker();
+      if (blocker) return Mac.Dialog.info(blocker[0], blocker[1], 'warning');
+      state.stage = 'downloading';
+      state.progress = 0;
+      Mac.save();
+      Mac.wm.refreshAll();
+      this.tick(() => {
+        state.stage = 'downloaded';
+        state.progress = 0;
+        Mac.save();
+        Mac.wm.refreshAll();
+        Mac.Notify.show('Software Update',
+          `macOS Tahoe ${OS_UPDATE.version} has been downloaded and is ready to install.`, { app: 'settings' });
+      });
+    },
+
+    install() {
+      Mac.Dialog.open({
+        title: `Install macOS Tahoe ${OS_UPDATE.version}?`,
+        icon: 'update',
+        body: '<p style="margin:0;font-size:12.5px;color:var(--text-2)">Your Mac will restart to finish installing. Open applications will be closed.</p>',
+        buttons: [
+          { label: 'Later' },
+          {
+            label: 'Restart',
+            primary: true,
+            action: () => {
+              const state = Mac.state.osUpdate;
+              state.stage = 'installing';
+              state.progress = 0;
+              Mac.save();
+              Mac.wm.refreshAll();
+              this.tick(() => {
+                Mac.state.osVersion = OS_UPDATE.version;
+                Mac.state.osBuild = OS_UPDATE.build;
+                Mac.state.osUpdate = { stage: 'installed', progress: 100 };
+                Mac.save();
+                Mac.Power.execute('restart');
+                Mac.Notify.show('Software Update',
+                  `This Mac is now running macOS Tahoe ${OS_UPDATE.version}.`, { app: 'settings' });
+              });
+            },
+          },
+        ],
+      });
+    },
+
+    /* One interval, held on the module rather than in a closure, so a second
+       click cannot start a second one racing the first. */
+    tick(done) {
+      clearInterval(this._timer);
+      this._timer = setInterval(() => {
+        const state = Mac.state.osUpdate;
+        state.progress = Math.min(100, state.progress + (state.stage === 'downloading' ? 8 : 14));
+        Mac.wm.refreshAll();
+        if (state.progress >= 100) {
+          clearInterval(this._timer);
+          this._timer = null;
+          done();
+        }
+      }, 300);
+    },
+
+    /* A transfer interrupted by a reload cannot resume — its interval is
+       gone — so it rewinds to something the user can act on instead of
+       sitting at a percentage that will never move. */
+    recover() {
+      const state = Mac.state.osUpdate;
+      if (!state) return;
+      if (state.stage === 'downloading') { state.stage = 'available'; state.progress = 0; }
+      if (state.stage === 'installing') { state.stage = 'downloaded'; state.progress = 0; }
+    },
+  };
+
   const Screens = Mac.Screens = {
     show(id) {
       SCREENS.forEach(name => Mac.$(`#${name}`).classList.toggle('hidden', name !== id));
@@ -275,7 +387,7 @@
       Mac.$('#recovery-body').innerHTML = `
         <div class="apple-mark">${Mac.appleMark()}</div>
         <h1>macOS Recovery</h1>
-        <p>Choose a utility to diagnose or restore this simulated Mac. macOS ${Mac.OS_VERSION} (${Mac.OS_BUILD}).</p>
+        <p>Choose a utility to diagnose or restore this simulated Mac. macOS ${OS.version()} (${OS.build()}).</p>
         <div class="panel-grid">${tiles.map(([id, title, text, icon]) =>
           `<button class="panel-tile ${this.recoveryState.detail === id ? 'on' : ''}" data-command="recovery" data-arg="${id}">
             <strong>${glyph(icon)}${esc(title)}</strong><span>${esc(text)}</span></button>`).join('')}</div>
@@ -519,7 +631,7 @@
       if (id === 'welcome') {
         return UI.group(
           UI.info('Model', 'MacBook Pro 14-inch, M4 Pro'),
-          UI.info('macOS', `Tahoe ${Mac.OS_VERSION}`),
+          UI.info('macOS', `Tahoe ${OS.version()}`),
           UI.info('Storage', `${Mac.bytes(Mac.state.volumes[0].totalBytes)} — erased`),
         ) + '<p class="section-note">Everything from the previous session has been removed. The lab password is “support”.</p>';
       }

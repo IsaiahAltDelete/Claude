@@ -21,7 +21,7 @@
     { id: 'dir-library', name: 'Library', kind: 'folder', parent: 'vol-hd', system: true },
     { id: 'dir-system', name: 'System', kind: 'folder', parent: 'vol-hd', system: true },
     { id: 'dir-users', name: 'Users', kind: 'folder', parent: 'vol-hd', system: true },
-    { id: 'dir-home', name: 'alex', kind: 'folder', parent: 'dir-users', home: true },
+    { id: 'dir-home', name: Mac.PERSONA.shortName, kind: 'folder', parent: 'dir-users', home: true },
 
     { id: 'dir-desktop', name: 'Desktop', kind: 'folder', parent: 'dir-home' },
     { id: 'dir-documents', name: 'Documents', kind: 'folder', parent: 'dir-home' },
@@ -47,10 +47,22 @@
     { id: 'f-installer', name: 'PrinterDriver.pkg', kind: 'file', ext: 'pkg', parent: 'dir-downloads', size: 15728640, modified: now - 8 * DAY },
     { id: 'f-shared', name: 'Read Me First.txt', kind: 'file', ext: 'txt', parent: 'dir-public', size: 2048, modified: now - 40 * DAY },
     { id: 'f-old', name: 'Old Ticket Export.csv', kind: 'file', ext: 'csv', parent: 'trash', trashedFrom: 'dir-documents', size: 71680, modified: now - 15 * DAY },
+
+    /* The external disk. It is always in the file system; whether Finder
+       shows it is decided by `mounted` on the matching entry in `volumes`,
+       so plugging it in and ejecting it are one flag rather than two
+       parallel models that can disagree. */
+    { id: 'vol-backup', name: 'Time Machine Backup', kind: 'volume', parent: null, external: true },
+    { id: 'dir-backups', name: 'Backups.backupdb', kind: 'folder', parent: 'vol-backup', system: true },
+    { id: 'dir-backup-mac', name: Mac.PERSONA.computer, kind: 'folder', parent: 'dir-backups' },
+    { id: 'f-backup-latest', name: 'Latest.backup', kind: 'file', ext: 'backup', parent: 'dir-backup-mac', size: 182536110080, modified: now - 3 * 3600e3 },
+    { id: 'dir-backup-archive', name: 'Archive', kind: 'folder', parent: 'vol-backup' },
+    { id: 'f-backup-tickets', name: 'Ticket Exports 2025.csv', kind: 'file', ext: 'csv', parent: 'dir-backup-archive', size: 3421184, modified: now - 120 * DAY },
+    { id: 'f-backup-photos', name: 'Photo Library Archive.zip', kind: 'file', ext: 'zip', parent: 'dir-backup-archive', size: 24696061952, modified: now - 90 * DAY },
   ];
 
   Mac.DefaultState = {
-    schema: 9,
+    schema: 10,
 
     /* ------------------------------------------------------------ settings */
     settings: {
@@ -140,7 +152,7 @@
       language: 'English (US)',
       region: 'United States',
       autoTimezone: true,
-      computerName: "Alex's MacBook Pro",
+      computerName: Mac.PERSONA.computer,
       airdropVisibility: 'Contacts Only',
       handoff: true,
       screenSharing: false,
@@ -158,9 +170,9 @@
     /* ------------------------------------------------------- Apple Account */
     account: {
       signedIn: true,
-      name: 'Alex Rivera',
-      email: 'alex.rivera@icloud.example',
-      appleId: 'alex.rivera@icloud.example',
+      name: Mac.PERSONA.name,
+      email: Mac.PERSONA.personal,
+      appleId: Mac.PERSONA.personal,
       initials: 'AR',
       twoFactor: true,
       trustedPhone: '+1 (407) •••-••42',
@@ -192,9 +204,9 @@
       },
       family: {
         enabled: true,
-        organizer: 'Alex Rivera',
+        organizer: Mac.PERSONA.name,
         members: [
-          { name: 'Alex Rivera', role: 'Organizer', initials: 'AR' },
+          { name: Mac.PERSONA.name, role: 'Organizer', initials: 'AR' },
           { name: 'Dana Whitfield', role: 'Adult', initials: 'DW' },
           { name: 'Milo Rivera', role: 'Child · 11', initials: 'MR' },
         ],
@@ -203,7 +215,7 @@
         screenTimeForKids: true,
       },
       devices: [
-        { name: "Alex's MacBook Pro", kind: 'This Mac', model: 'MacBook Pro 14-inch, M4 Pro', os: 'macOS 26.6', icon: 'system-info', trusted: true },
+        { name: Mac.PERSONA.computer, kind: 'This Mac', model: 'MacBook Pro 14-inch, M4 Pro', os: 'macOS 26.6', icon: 'system-info', trusted: true },
         { name: "Alex's iPhone", kind: 'iPhone 17 Pro', model: 'iPhone 17 Pro', os: 'iOS 26.6', icon: 'facetime', trusted: true },
         { name: 'Studio iPad', kind: 'iPad Air', model: 'iPad Air (M3)', os: 'iPadOS 26.5', icon: 'freeform', trusted: true },
         { name: 'Support Watch', kind: 'Apple Watch', model: 'Apple Watch Series 11', os: 'watchOS 26.4', icon: 'time-machine', trusted: true },
@@ -263,6 +275,15 @@
       { id: 'outlook', version: '16.92', size: 604897280, notes: 'Adds Focused Inbox controls and resolves a sync stall on shared mailboxes.' },
     ],
     storeInstalls: [],
+    /* The scenario in progress: which one, when it started, what has been
+       done, and which goals have been met. Persisted so a reload does not
+       lose a half-finished exercise. */
+    scenario: { id: null, startedAt: 0, log: [], done: [] },
+    /* The pending macOS update. `stage` walks available → downloading →
+       downloaded → installing, and installing ends in a restart. */
+    osUpdate: { stage: 'available', progress: 0 },
+    osVersion: null,   // null means still on Mac.OS_VERSION
+    osBuild: null,
 
     /* --------------------------------------------------------------- notes */
     notes: [
@@ -310,16 +331,16 @@
     mail: {
       accounts: [
         {
-          id: 'acct-icloud', provider: 'iCloud', name: 'Alex Rivera',
-          address: 'alex.rivera@icloud.example', description: 'iCloud', enabled: true,
+          id: 'acct-icloud', provider: 'iCloud', name: Mac.PERSONA.name,
+          address: Mac.PERSONA.personal, description: 'iCloud', enabled: true,
           color: '#2f7cf6', status: 'Online', lastChecked: 'Just now',
           incoming: { host: 'imap.mail.me.example', port: '993', tls: true, auth: 'Password' },
           outgoing: { host: 'smtp.mail.me.example', port: '587', tls: true, auth: 'Password' },
           mailboxes: { drafts: 'Drafts', sent: 'Sent', junk: 'Junk', trash: 'Bin', archive: 'Archive' },
         },
         {
-          id: 'acct-work', provider: 'Exchange', name: 'Alex Rivera',
-          address: 'alex.rivera@support.example', description: 'Support Desk', enabled: true,
+          id: 'acct-work', provider: 'Exchange', name: Mac.PERSONA.name,
+          address: Mac.PERSONA.work, description: 'Support Desk', enabled: true,
           color: '#0f9d58', status: 'Online', lastChecked: '2 minutes ago',
           incoming: { host: 'outlook.office365.example', port: '993', tls: true, auth: 'OAuth' },
           outgoing: { host: 'smtp.office365.example', port: '587', tls: true, auth: 'OAuth' },
@@ -354,7 +375,7 @@
         { id: 'mail-4', accountId: 'acct-icloud', mailbox: 'Inbox', category: 'Transactions', from: 'Apple', email: 'no_reply@apple.example', subject: 'Your receipt from Apple', preview: 'iCloud+ 200 GB — $2.99', body: 'Receipt\n\niCloud+ 200 GB monthly plan — $2.99\nBilled to Visa •••• 4412\n\nThis is a simulated receipt.', date: now - DAY, unread: false, flagged: false },
         { id: 'mail-5', accountId: 'acct-work', mailbox: 'Inbox', category: 'Promotions', from: 'Bench Tools', email: 'news@benchtools.example', subject: 'New diagnostics utilities this month', preview: 'Disk, network and battery utilities refreshed.', body: 'This month we refreshed the diagnostics utilities used on the support bench.\n\nSimulated newsletter content.', date: now - 2 * DAY, unread: false, flagged: false },
         { id: 'mail-6', accountId: 'acct-icloud', mailbox: 'Archive', category: 'Primary', from: 'Milo', email: 'milo.rivera@icloud.example', subject: 'Screen time request', preview: 'Can I get 30 more minutes?', body: 'Can I get 30 more minutes on the iPad today?', date: now - 4 * DAY, unread: false, flagged: false },
-        { id: 'mail-7', accountId: 'acct-work', mailbox: 'Sent', category: 'Primary', from: 'Alex Rivera', email: 'alex.rivera@support.example', to: 'dana@support.example', subject: 'Re: ESCALATION 4821 — captive portal loop', preview: 'Reproduced on the bench Mac. Details inside.', body: 'Dana,\n\nReproduced it. Accepting the portal terms clears the “No Internet” state, but abandoning the portal drops the association entirely. Renewing the lease afterwards recovers it.\n\nAlex', date: now - 7 * 3600e3, unread: false, flagged: false },
+        { id: 'mail-7', accountId: 'acct-work', mailbox: 'Sent', category: 'Primary', from: Mac.PERSONA.name, email: Mac.PERSONA.work, to: 'dana@support.example', subject: 'Re: ESCALATION 4821 — captive portal loop', preview: 'Reproduced on the bench Mac. Details inside.', body: 'Dana,\n\nReproduced it. Accepting the portal terms clears the “No Internet” state, but abandoning the portal drops the association entirely. Renewing the lease afterwards recovers it.\n\nAlex', date: now - 7 * 3600e3, unread: false, flagged: false },
         { id: 'mail-8', accountId: 'acct-icloud', mailbox: 'Junk', category: 'Primary', from: 'Offers', email: 'offers@spam.example', subject: 'You have won a device', preview: 'Claim your prize now.', body: 'This message is included to demonstrate junk filtering. It is not a real offer.', date: now - 3 * DAY, unread: true, flagged: false },
       ],
     },
@@ -365,8 +386,8 @@
          way the real Accounts pane describes it — type, server and mailbox
          quota all show up in support conversations. */
       account: {
-        name: 'Alex Rivera',
-        address: 'alex.rivera@support.example',
+        name: Mac.PERSONA.name,
+        address: Mac.PERSONA.work,
         org: 'Support Desk',
         initials: 'AR',
         type: 'Microsoft Exchange',
@@ -418,8 +439,8 @@
         { id: 'ol-2', folder: 'Inbox', focused: true, from: 'Dana Whitfield', email: 'dana@support.example', subject: 'Tier 2 rota for August', preview: 'Attached is the updated rota.', body: 'Hi Alex,\n\nAttached is the updated Tier 2 rota for August. You are on the late shift on the 12th and 19th.\n\nDana', date: now - 6 * 3600e3, unread: true, flagged: true, attachment: 'August Rota.pdf' },
         { id: 'ol-3', folder: 'Inbox', focused: false, from: 'Bench Tools', email: 'news@benchtools.example', subject: 'Your monthly utilities digest', preview: 'Ten diagnostics tips.', body: 'Simulated newsletter for the Other inbox.', date: now - 26 * 3600e3, unread: false, flagged: false },
         { id: 'ol-4', folder: 'Inbox', focused: false, from: 'Facilities', email: 'facilities@support.example', subject: 'Parking permits renewal', preview: 'Renew before the end of the month.', body: 'Simulated facilities notice.', date: now - 3 * DAY, unread: false, flagged: false },
-        { id: 'ol-5', folder: 'Sent Items', focused: true, from: 'Alex Rivera', email: 'alex.rivera@support.example', to: 'servicedesk@support.example', subject: 'RE: Weekly change window — Thursday 22:00', preview: 'Bench Mac will be offline, acknowledged.', body: 'Acknowledged — I will pause bench testing during the window.\n\nAlex', date: now - 90 * 60e3, unread: false, flagged: false },
-        { id: 'ol-6', folder: 'Drafts', focused: true, from: 'Alex Rivera', email: 'alex.rivera@support.example', to: 'dana@support.example', subject: 'Captive portal findings', preview: 'Draft — findings from ticket 4821.', body: 'Draft in progress.', date: now - 40 * 60e3, unread: false, flagged: false },
+        { id: 'ol-5', folder: 'Sent Items', focused: true, from: Mac.PERSONA.name, email: Mac.PERSONA.work, to: 'servicedesk@support.example', subject: 'RE: Weekly change window — Thursday 22:00', preview: 'Bench Mac will be offline, acknowledged.', body: 'Acknowledged — I will pause bench testing during the window.\n\nAlex', date: now - 90 * 60e3, unread: false, flagged: false },
+        { id: 'ol-6', folder: 'Drafts', focused: true, from: Mac.PERSONA.name, email: Mac.PERSONA.work, to: 'dana@support.example', subject: 'Captive portal findings', preview: 'Draft — findings from ticket 4821.', body: 'Draft in progress.', date: now - 40 * 60e3, unread: false, flagged: false },
         { id: 'ol-7', folder: 'Deleted Items', focused: true, from: 'Old Vendor', email: 'sales@vendor.example', subject: 'Quote expiring', preview: 'Deleted item retained for 30 days.', body: 'Simulated deleted message.', date: now - 9 * DAY, unread: false, flagged: false },
         { id: 'ol-8', folder: 'Archive', focused: true, from: 'HR', email: 'hr@support.example', subject: 'Compliance training complete', preview: 'Certificate attached.', body: 'Your compliance training is recorded as complete.', date: now - 21 * DAY, unread: false, flagged: false, attachment: 'Certificate.pdf' },
       ],

@@ -145,6 +145,11 @@
     'date-time': 'clock', 'language-region': 'language', 'login-items': 'apps',
     'transfer-reset': 'restart', 'about': 'info', 'screen-time': 'screen-time',
     'wallet-payment': 'storage', 'startup-disk': 'disk',
+    /* Mac.paneIcon slugifies a pane's display name, so the hyphenated forms of
+       multi-word panes need entries too — without them Mac.glyph silently
+       substitutes the generic 'info' icon and the pane looks unfinished. */
+    'wi-fi': 'wifi', 'family-sharing': 'family', 'transfer-or-reset': 'restart',
+    'wallet-apple-pay': 'storage',
   };
 
   /**

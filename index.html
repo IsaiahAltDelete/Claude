@@ -7,19 +7,39 @@
 <title>Simulators</title>
 <meta name="description" content="Browser simulators of real devices, built for support training.">
 <link rel="icon" href="favicon.svg">
+<link rel="stylesheet" href="assets/fonts/fonts.css">
+<link rel="preload" as="font" type="font/woff2" href="assets/fonts/orbitron-latin-900-normal.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="assets/fonts/space-grotesk-latin-400-normal.woff2" crossorigin>
 
 <style>
   /* --------------------------------------------------------------------
-     Minimal white-on-black index. Self-contained: no fonts, no scripts,
-     no requests beyond the favicon.
+     Cassette-futurism index: a starfield with a black hole drifting
+     through it, under a CRT overlay.
+
+     Self-contained. The three typefaces are bundled in assets/fonts, the
+     starfield is one inline canvas script, and nothing else is fetched —
+     the page works offline and from file:// like everything it links to.
      -------------------------------------------------------------------- */
   :root {
-    --fg: #fff;
-    --dim: #8a8a8a;      /* 6.1:1 on black */
-    --faint: #757575;    /* 4.6:1 — the dimmest tone still used for text */
-    --decor: #3a3a3a;    /* non-text only: arrows, separators */
-    --hair: #1f1f1f;
-    --bg: #000;
+    --bg: #05060c;
+    --fg: #eaf3ff;
+    --dim: #a8bdd4;      /* 8.6:1 on the panel ground */
+    --faint: #8397ae;    /* 5.9:1 — the dimmest tone still used for text */
+    --cyan: #67e8f9;
+    --violet: #a68bff;
+    --magenta: #ff6ad5;
+    --amber: #ffb454;
+    --hair: rgba(133, 208, 231, 0.16);
+    --hair-hot: rgba(133, 232, 249, 0.42);
+    --panel: rgba(7, 11, 22, 0.58);
+
+    --display: "Orbitron", "Space Grotesk", system-ui, sans-serif;
+    --term: "VT323", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --body: "Space Grotesk", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+
+    /* Written by the pointer loop; drives the parallax on the wordmark. */
+    --tilt-x: 0px;
+    --tilt-y: 0px;
   }
 
   * { box-sizing: border-box; }
@@ -29,171 +49,400 @@
     min-height: 100%;
     background: var(--bg);
     color: var(--fg);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    font-family: var(--body);
     font-size: 16px;
-    line-height: 1.5;
+    line-height: 1.55;
     -webkit-font-smoothing: antialiased;
   }
 
-  ::selection { background: #fff; color: #000; }
+  body { overflow-x: hidden; }
+
+  ::selection { background: var(--cyan); color: #04060d; }
 
   a { color: inherit; text-decoration: none; }
 
+  /* ------------------------------------------------------------ canvas */
+
+  #sky {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    z-index: 0;
+  }
+
+  /* CRT: scanlines, a phosphor tint at the edges, and a vignette that pushes
+     the middle of the screen forward. Purely decorative.
+
+     Deliberately plain alpha compositing rather than mix-blend-mode: the
+     overlay sits on an animating canvas, and a blend mode makes every frame
+     read the backdrop back — measured at roughly half the frame rate on a
+     1920x1080 viewport. Both layers darken with black anyway, so the result
+     is the same picture for half the cost. */
+  .crt {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background:
+      repeating-linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0) 0 2px,
+        rgba(0, 0, 0, 0.26) 2px 3px
+      ),
+      radial-gradient(120% 90% at 50% 45%, rgba(0, 0, 0, 0) 42%, rgba(0, 0, 0, 0.55) 100%);
+  }
+
+  /* The phosphor band that rolls down the screen. Animated on transform, not
+     background-position, so it stays on the compositor instead of repainting
+     a full-screen gradient every frame. Both ends fade out, so the loop seam
+     is invisible. */
+  .crt::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -100%;
+    height: 200%;
+    background: linear-gradient(
+      to bottom,
+      rgba(103, 232, 249, 0) 0%,
+      rgba(166, 139, 255, 0.05) 50%,
+      rgba(103, 232, 249, 0) 100%
+    );
+    animation: sweep 9s linear infinite;
+    will-change: transform;
+  }
+
+  @keyframes sweep {
+    from { transform: translate3d(0, 0, 0); }
+    to   { transform: translate3d(0, 75%, 0); }
+  }
+
+  /* ------------------------------------------------------------- shell */
+
   .page {
-    max-width: 760px;
+    position: relative;
+    z-index: 2;
+    max-width: 860px;
     margin: 0 auto;
-    padding: clamp(48px, 12vh, 132px) 24px 72px;
+    padding: clamp(40px, 10vh, 108px) 22px 64px;
   }
 
   /* ------------------------------------------------------------ header */
 
-  header { margin-bottom: clamp(40px, 9vh, 84px); }
+  header { margin-bottom: clamp(36px, 8vh, 72px); }
+
+  .hud {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 14px;
+    margin: 0 0 20px;
+    font-family: var(--term);
+    font-size: 19px;
+    line-height: 1;
+    letter-spacing: 0.06em;
+    color: var(--cyan);
+    text-transform: uppercase;
+    /* The header sits straight on the starfield, so every line of it carries
+       its own shadow to stay legible when a bright star passes behind. */
+    text-shadow: 0 0 14px rgba(5, 6, 12, 0.95), 0 1px 2px rgba(5, 6, 12, 0.9);
+  }
+
+  .hud .sep { color: rgba(133, 208, 231, 0.35); }
+  .hud .warm { color: var(--amber); }
+
+  /* Segmented level meter — the one bit of pure cassette-deck jewellery. */
+  .bars { display: inline-flex; gap: 3px; }
+  .bars i {
+    width: 4px;
+    height: 11px;
+    background: var(--cyan);
+    opacity: 0.28;
+    animation: blip 2.4s steps(1, end) infinite;
+  }
+  .bars i:nth-child(1) { animation-delay: 0s; }
+  .bars i:nth-child(2) { animation-delay: 0.2s; }
+  .bars i:nth-child(3) { animation-delay: 0.4s; }
+  .bars i:nth-child(4) { animation-delay: 0.6s; }
+  .bars i:nth-child(5) { animation-delay: 0.8s; }
+  .bars i:nth-child(6) { animation-delay: 1s; opacity: 0.28; background: var(--amber); }
+
+  @keyframes blip {
+    0%, 45% { opacity: 1; }
+    46%, 100% { opacity: 0.24; }
+  }
+
+  .caret {
+    display: inline-block;
+    width: 9px;
+    height: 15px;
+    background: var(--cyan);
+    animation: caret 1.05s steps(1, end) infinite;
+    vertical-align: -2px;
+  }
+  @keyframes caret { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
 
   h1 {
     margin: 0;
-    font-size: clamp(30px, 6.4vw, 46px);
-    font-weight: 500;
-    letter-spacing: -0.035em;
-    line-height: 1.05;
+    font-family: var(--display);
+    font-weight: 900;
+    font-size: clamp(38px, 10.5vw, 92px);
+    line-height: 0.94;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    /* Chromatic fringing, the way a badly converged CRT would show it. */
+    text-shadow:
+      -2px 0 rgba(255, 106, 213, 0.55),
+       2px 0 rgba(103, 232, 249, 0.55),
+       0 0 32px rgba(166, 139, 255, 0.45);
+    transform: translate3d(var(--tilt-x), var(--tilt-y), 0);
+    will-change: transform;
+  }
+
+  .rule {
+    margin: 18px 0 0;
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      var(--hair-hot),
+      rgba(166, 139, 255, 0.3) 40%,
+      rgba(133, 208, 231, 0) 92%
+    );
   }
 
   .tagline {
-    margin: 14px 0 0;
-    max-width: 46ch;
+    margin: 18px 0 0;
+    max-width: 54ch;
     color: var(--dim);
-    font-size: 14.5px;
+    font-size: 15px;
+    text-shadow: 0 0 16px rgba(5, 6, 12, 0.95), 0 1px 3px rgba(5, 6, 12, 0.85);
   }
 
   /* -------------------------------------------------------------- list */
 
   .label {
-    margin: 0 0 6px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 14px;
     color: var(--faint);
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.16em;
+    font-family: var(--term);
+    font-size: 19px;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
   }
+  .label::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--hair);
+  }
 
-  .index { border-top: 1px solid var(--hair); }
+  .index { display: grid; gap: 12px; }
 
   .entry {
+    position: relative;
     display: grid;
-    grid-template-columns: 34px 1fr auto;
-    gap: 0 16px;
-    align-items: baseline;
-    padding: 22px 4px 24px;
-    border-bottom: 1px solid var(--hair);
-    transition: background 0.18s ease, padding-left 0.18s ease;
+    grid-template-columns: 46px 1fr auto;
+    gap: 0 18px;
+    align-items: start;
+    padding: 20px 20px 22px;
+    border: 1px solid var(--hair);
+    background: var(--panel);
+    backdrop-filter: blur(7px);
+    -webkit-backdrop-filter: blur(7px);
+    transition: border-color 0.22s ease, background 0.22s ease,
+                transform 0.22s ease, box-shadow 0.22s ease;
   }
+
+  /* Corner brackets, drawn as two clipped border boxes. */
+  .entry::before,
+  .entry::after {
+    content: "";
+    position: absolute;
+    width: 13px;
+    height: 13px;
+    border: 1px solid var(--hair-hot);
+    opacity: 0;
+    transition: opacity 0.22s ease;
+  }
+  .entry::before { top: -1px; left: -1px; border-right: 0; border-bottom: 0; }
+  .entry::after { bottom: -1px; right: -1px; border-left: 0; border-top: 0; }
 
   a.entry:hover,
   a.entry:focus-visible {
-    background: #0b0b0b;
-    padding-left: 12px;
-    outline: 0;
+    border-color: var(--hair-hot);
+    background: rgba(11, 19, 34, 0.72);
+    transform: translateY(-2px);
+    box-shadow: 0 0 0 1px rgba(103, 232, 249, 0.08), 0 18px 44px -26px rgba(103, 232, 249, 0.55);
   }
-  a.entry:focus-visible { box-shadow: inset 2px 0 0 #fff; }
+  a.entry:hover::before, a.entry:focus-visible::before,
+  a.entry:hover::after,  a.entry:focus-visible::after { opacity: 1; }
+
+  /* Keyboard focus keeps a real outline — the hover treatment alone is too
+     quiet to serve as a focus indicator. */
+  a.entry:focus-visible {
+    outline: 2px solid var(--cyan);
+    outline-offset: 3px;
+    box-shadow: inset 3px 0 0 var(--cyan), 0 18px 44px -26px rgba(103, 232, 249, 0.55);
+  }
 
   .num {
-    color: var(--faint);
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 12px;
-    font-variant-numeric: tabular-nums;
+    color: var(--violet);
+    font-family: var(--term);
+    font-size: 30px;
+    line-height: 1;
+    letter-spacing: 0.02em;
   }
 
   .entry h2 {
     margin: 0;
-    font-size: 19px;
+    font-family: var(--display);
     font-weight: 500;
-    letter-spacing: -0.015em;
+    font-size: clamp(15px, 2.4vw, 18px);
+    line-height: 1.3;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
   }
 
   .entry p {
-    margin: 7px 0 0;
-    max-width: 52ch;
+    margin: 10px 0 0;
+    max-width: 56ch;
     color: var(--dim);
-    font-size: 14px;
+    font-size: 14.5px;
   }
 
   .meta {
-    margin: 11px 0 0;
+    margin: 13px 0 0;
     display: flex;
     flex-wrap: wrap;
-    gap: 6px 10px;
+    gap: 4px 12px;
     color: var(--faint);
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 11.5px;
+    font-family: var(--term);
+    font-size: 17px;
+    line-height: 1.2;
+    letter-spacing: 0.05em;
   }
-
-  /* Middots between meta items, so they don't read as one run of text. */
-  .meta span + span::before { content: "·"; margin-right: 10px; color: var(--decor); }
+  .meta span + span::before {
+    content: "//";
+    margin-right: 12px;
+    color: rgba(166, 139, 255, 0.45);
+  }
 
   .status {
-    align-self: baseline;
-    padding: 3px 9px;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 4px 11px 3px;
     border: 1px solid var(--hair);
-    border-radius: 999px;
-    color: var(--dim);
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 11px;
+    color: var(--faint);
+    font-family: var(--term);
+    font-size: 17px;
+    line-height: 1.2;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
     white-space: nowrap;
   }
-  .status.live { border-color: #2b2b2b; color: #fff; }
+  .status::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .status.live {
+    border-color: rgba(103, 232, 249, 0.4);
+    color: var(--cyan);
+    text-shadow: 0 0 12px rgba(103, 232, 249, 0.6);
+  }
+  .status.live::before { animation: pulse 1.9s ease-in-out infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
 
   .arrow {
     display: inline-block;
-    margin-left: 8px;
-    color: var(--decor);
-    transition: transform 0.18s ease, color 0.18s ease;
+    margin-left: 10px;
+    color: var(--cyan);
+    transition: transform 0.22s ease;
   }
-  a.entry:hover .arrow, a.entry:focus-visible .arrow { transform: translateX(4px); color: #fff; }
+  a.entry:hover .arrow, a.entry:focus-visible .arrow { transform: translateX(5px); }
 
   /* ------------------------------------------------------------ footer */
 
   footer {
-    margin-top: clamp(40px, 9vh, 76px);
+    margin-top: clamp(36px, 8vh, 64px);
+    padding-top: 18px;
+    border-top: 1px solid var(--hair);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
     color: var(--faint);
-    font-size: 12.5px;
+    font-family: var(--term);
+    font-size: 18px;
+    letter-spacing: 0.08em;
   }
-  footer a { border-bottom: 1px solid var(--hair); }
-  footer a:hover { color: #fff; border-bottom-color: #666; }
+  footer a { color: var(--cyan); border-bottom: 1px solid rgba(103, 232, 249, 0.3); }
+  footer a:hover { border-bottom-color: var(--cyan); }
 
-  @media (max-width: 560px) {
-    .entry { grid-template-columns: 24px 1fr; gap: 0 12px; }
-    .status { grid-column: 2; margin-top: 12px; justify-self: start; }
-    .entry h2 { font-size: 17.5px; }
+  @media (max-width: 620px) {
+    .entry { grid-template-columns: 34px 1fr; gap: 0 14px; padding: 18px 16px 20px; }
+    .num { font-size: 24px; }
+    .status { grid-column: 2; margin-top: 14px; justify-self: start; }
   }
 
+  /* Everything that moves is decoration; none of it is load-bearing. */
   @media (prefers-reduced-motion: reduce) {
-    * { transition: none !important; }
+    *, *::before, *::after {
+      transition: none !important;
+      animation: none !important;
+    }
+    h1 { transform: none; }
+    .bars i { opacity: 0.7; }
+    .caret { opacity: 1; }
   }
 </style>
 </head>
 <body>
+
+<canvas id="sky" aria-hidden="true"></canvas>
+<div class="crt" aria-hidden="true"></div>
+
 <main class="page">
   <header>
+    <p class="hud">
+      <span class="bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>
+      <span>SYS.INDEX</span>
+      <span class="sep">//</span>
+      <span class="warm">04 UNITS ONLINE</span>
+      <span class="sep">//</span>
+      <span>NO INSTALL REQ<span class="caret" aria-hidden="true"></span></span>
+    </p>
+
     <h1>Simulators</h1>
+    <div class="rule"></div>
+
     <p class="tagline">Devices rebuilt in the browser, close enough to the real
-      thing to practise on. No installs, no accounts — open one and start
-      breaking it.</p>
+      thing to practise on — plus whatever else has ended up here. No installs,
+      no accounts — open one and start breaking it.</p>
   </header>
 
   <p class="label">Index</p>
 
   <div class="index">
-    <!-- To add a simulator, copy one entry block and keep the numbers
+    <!-- To add a project, copy one entry block and keep the numbers
          sequential. The status pill reads "live" when there is something to
          open; use "wip" for anything still being built. -->
 
     <a class="entry" href="mac/">
       <span class="num">01</span>
       <span>
-        <h2>macOS Troubleshooting Simulator<span class="arrow" aria-hidden="true">→</span></h2>
+        <h2>macOS Troubleshooting Simulator<span class="arrow" aria-hidden="true">&rarr;</span></h2>
         <p>A full macOS Tahoe desktop in the browser — window management, Finder,
           Safari, Mail, Outlook, System Settings, Recovery — built for support
           training. Its Safari browses Wikipedia for real; everything else runs offline.</p>
-        <span class="meta"><span>/mac</span><span>html · css · js</span><span>no dependencies</span></span>
+        <span class="meta"><span>/mac</span><span>html &middot; css &middot; js</span><span>no dependencies</span></span>
       </span>
       <span class="status live">live</span>
     </a>
@@ -211,20 +460,8 @@
       <span class="status live">live</span>
     </a>
 
-    <a class="entry" href="design/">
-      <span class="num">03</span>
-      <span>
-        <h2>ISAIART Design<span class="arrow" aria-hidden="true">→</span></h2>
-        <p>A type-in-space generator. Words and emoji thrown through 3D formations
-          on a canvas you size yourself, with eighteen treatments applied to the
-          letterforms and a hand-written WebGL renderer underneath.</p>
-        <span class="meta"><span>/design</span><span>html · css · webgl</span><span>no dependencies</span></span>
-      </span>
-      <span class="status live">live</span>
-    </a>
-
     <a class="entry" href="roku/">
-      <span class="num">04</span>
+      <span class="num">03</span>
       <span>
         <h2>Roku Troubleshooting Simulator<span class="arrow" aria-hidden="true">&rarr;</span></h2>
         <p>A streaming player on a television, driven by a mock-up remote — home
@@ -235,11 +472,443 @@
       </span>
       <span class="status live">live</span>
     </a>
+
+    <a class="entry" href="design/">
+      <span class="num">04</span>
+      <span>
+        <h2>ISAIART Design<span class="arrow" aria-hidden="true">&rarr;</span></h2>
+        <p>A type-in-space generator. Words and emoji thrown through 3D formations
+          on a canvas you size yourself, with eighteen treatments applied to the
+          letterforms and a hand-written WebGL renderer underneath.</p>
+        <span class="meta"><span>/design</span><span>html &middot; css &middot; webgl</span><span>no dependencies</span></span>
+      </span>
+      <span class="status live">live</span>
+    </a>
   </div>
 
   <footer>
-    Source on <a href="https://github.com/IsaiahAltDelete/Claude">GitHub</a>.
+    <span>Source on <a href="https://github.com/IsaiahAltDelete/Claude">GitHub</a>.</span>
+    <span>&#9679; 4 units &middot; 0 dependencies</span>
   </footer>
 </main>
+
+<script>
+/* ---------------------------------------------------------------------------
+   Starfield, pointer parallax, and a black hole on a slow bounce.
+
+   The lensing is the real thing, cheaply: for a point mass, a source sitting
+   at radius r from the lens is seen at
+
+       r' = ( r + sqrt(r^2 + 4E^2) ) / 2
+
+   where E is the Einstein radius. Every star gets pushed outward, the disc
+   inside E empties out on its own (r' >= E always, so nothing needs culling),
+   and the pile-up at the edge draws its own Einstein ring. Magnification comes
+   from the same expression's derivative, which is what makes stars flare as
+   the hole drifts past them. A bounded twist on top drags them around it.
+
+   Everything here is decoration: under prefers-reduced-motion the whole thing
+   collapses to one static frame, and nothing on the page depends on it.
+   --------------------------------------------------------------------------- */
+(function () {
+  "use strict";
+
+  var canvas = document.getElementById("sky");
+  if (!canvas || !canvas.getContext) return;
+
+  var ctx = canvas.getContext("2d", { alpha: false });
+  if (!ctx) return;
+
+  var TAU = Math.PI * 2;
+  var reduceMotion = window.matchMedia
+    ? window.matchMedia("(prefers-reduced-motion: reduce)")
+    : { matches: false, addEventListener: null };
+
+  /* Star tints: mostly cold white, with a few warm and violet ones so the
+     field does not read as a single flat colour. */
+  var TINTS = [
+    "#dff1ff", "#dff1ff", "#dff1ff", "#dff1ff",
+    "#bcd8ff", "#bcd8ff",
+    "#a9c0ff",
+    "#ffd9b0",
+    "#ffb9e6"
+  ];
+
+  var W = 0, H = 0, dpr = 1;
+  var stars = [];
+  var backdrop = null;          // pre-rendered nebula, redrawn only on resize
+  var running = false, rafId = 0, lastTime = 0, clock = 0;
+
+  /* Pointer: `target` is where it actually is, `eased` is what the field
+     follows, so a flick of the mouse glides instead of snapping. */
+  var pointer = {
+    target: { x: 0, y: 0 },
+    eased: { x: 0, y: 0 },
+    active: false,
+    idlePhase: 0
+  };
+
+  var hole = { x: 0, y: 0, vx: 26, vy: 17.5, r: 34, E: 82 };
+
+  var PARALLAX = 52;            // px of drift between the nearest and farthest layer
+  var CURSOR_PUSH = 150;        // px radius of the pointer's shove on nearby stars
+
+  /* ------------------------------------------------------------- layout */
+
+  function resize() {
+    W = Math.max(1, window.innerWidth);
+    H = Math.max(1, window.innerHeight);
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    canvas.width = Math.round(W * dpr);
+    canvas.height = Math.round(H * dpr);
+    canvas.style.width = W + "px";
+    canvas.style.height = H + "px";
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    hole.r = Math.max(24, Math.min(58, Math.min(W, H) * 0.055));
+    hole.E = hole.r * 2.35;
+
+    /* Keep the hole on-screen after a resize, and seed it off-centre so the
+       first bounce is not a straight diagonal. */
+    var m = hole.E * 1.15;
+    if (!hole.placed) {
+      hole.x = W * 0.68;
+      hole.y = H * 0.32;
+      hole.placed = true;
+    }
+    hole.x = Math.min(Math.max(hole.x, m), Math.max(m, W - m));
+    hole.y = Math.min(Math.max(hole.y, m), Math.max(m, H - m));
+
+    if (!pointer.active) {
+      pointer.target.x = pointer.eased.x = W * 0.5;
+      pointer.target.y = pointer.eased.y = H * 0.5;
+    }
+
+    buildStars();
+    buildBackdrop();
+  }
+
+  function buildStars() {
+    var count = Math.round(Math.min(900, Math.max(240, (W * H) / 1900)));
+    stars = new Array(count);
+
+    for (var i = 0; i < count; i++) {
+      /* Skewed so most stars sit far away and only a handful come forward —
+         that is what sells the parallax. */
+      var z = Math.pow(Math.random(), 1.8);
+      stars[i] = {
+        x: Math.random() * W,
+        y: Math.random() * H,
+        z: z,
+        r: 0.32 + z * 1.5,
+        base: 0.28 + z * 0.62,
+        tint: TINTS[(Math.random() * TINTS.length) | 0],
+        phase: Math.random() * TAU,
+        rate: 0.5 + Math.random() * 1.7,
+        drift: 1.4 + z * 5.5
+      };
+    }
+
+    /* Grouped by tint so the draw loop changes fillStyle a handful of times
+       per frame instead of once per star. Order is irrelevant for points. */
+    stars.sort(function (a, b) { return a.tint < b.tint ? -1 : a.tint > b.tint ? 1 : 0; });
+  }
+
+  /* The static part of the sky: ground colour plus two very soft clouds.
+     Rendered once per resize into an offscreen canvas and blitted per frame,
+     which keeps gradient work out of the animation loop. */
+  function buildBackdrop() {
+    backdrop = document.createElement("canvas");
+    backdrop.width = canvas.width;
+    backdrop.height = canvas.height;
+
+    var b = backdrop.getContext("2d");
+    if (!b) { backdrop = null; return; }
+    b.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    b.fillStyle = "#05060c";
+    b.fillRect(0, 0, W, H);
+
+    var clouds = [
+      { x: W * 0.2, y: H * 0.18, r: Math.max(W, H) * 0.6, c: "rgba(88, 60, 170, 0.20)" },
+      { x: W * 0.85, y: H * 0.85, r: Math.max(W, H) * 0.55, c: "rgba(20, 96, 130, 0.18)" }
+    ];
+
+    for (var i = 0; i < clouds.length; i++) {
+      var c = clouds[i];
+      var g = b.createRadialGradient(c.x, c.y, 0, c.x, c.y, c.r);
+      g.addColorStop(0, c.c);
+      g.addColorStop(1, "rgba(5, 6, 12, 0)");
+      b.fillStyle = g;
+      b.fillRect(0, 0, W, H);
+    }
+  }
+
+  /* --------------------------------------------------------------- input */
+
+  function setPointer(x, y) {
+    pointer.target.x = x;
+    pointer.target.y = y;
+    pointer.active = true;
+  }
+
+  window.addEventListener("pointermove", function (e) {
+    setPointer(e.clientX, e.clientY);
+  }, { passive: true });
+
+  window.addEventListener("pointerdown", function (e) {
+    setPointer(e.clientX, e.clientY);
+  }, { passive: true });
+
+  window.addEventListener("pointerleave", function () {
+    pointer.active = false;
+  }, { passive: true });
+
+  /* ---------------------------------------------------------------- step */
+
+  function step(dt) {
+    clock += dt;
+
+    /* With no pointer — a touch screen, or the cursor parked outside the
+       window — walk a slow Lissajous so the field never sits perfectly
+       still. */
+    if (!pointer.active) {
+      pointer.idlePhase += dt * 0.16;
+      pointer.target.x = W * (0.5 + 0.3 * Math.cos(pointer.idlePhase));
+      pointer.target.y = H * (0.5 + 0.22 * Math.sin(pointer.idlePhase * 1.31));
+    }
+
+    var ease = 1 - Math.pow(0.0015, dt);   // frame-rate independent smoothing
+    pointer.eased.x += (pointer.target.x - pointer.eased.x) * ease;
+    pointer.eased.y += (pointer.target.y - pointer.eased.y) * ease;
+
+    /* Black hole: constant velocity, reflected at the edges with the ring
+       kept fully in frame. */
+    var m = hole.E * 1.1;
+    hole.x += hole.vx * dt;
+    hole.y += hole.vy * dt;
+
+    if (hole.x < m) { hole.x = m; hole.vx = Math.abs(hole.vx); }
+    else if (hole.x > W - m) { hole.x = W - m; hole.vx = -Math.abs(hole.vx); }
+
+    if (hole.y < m) { hole.y = m; hole.vy = Math.abs(hole.vy); }
+    else if (hole.y > H - m) { hole.y = H - m; hole.vy = -Math.abs(hole.vy); }
+
+    /* Star drift, wrapped. Kept in world space so parallax and lensing are
+       applied fresh at draw time. */
+    for (var i = 0; i < stars.length; i++) {
+      var s = stars[i];
+      s.x -= s.drift * dt;
+      if (s.x < -8) { s.x += W + 16; s.y = Math.random() * H; }
+      s.phase += s.rate * dt;
+    }
+
+    /* Hand the pointer offset to CSS for the wordmark's counter-parallax. */
+    var tiltX = ((pointer.eased.x / W) - 0.5) * -14;
+    var tiltY = ((pointer.eased.y / H) - 0.5) * -8;
+    document.documentElement.style.setProperty("--tilt-x", tiltX.toFixed(2) + "px");
+    document.documentElement.style.setProperty("--tilt-y", tiltY.toFixed(2) + "px");
+  }
+
+  /* ---------------------------------------------------------------- draw */
+
+  function draw(animated) {
+    if (backdrop) ctx.drawImage(backdrop, 0, 0, W, H);
+    else { ctx.fillStyle = "#05060c"; ctx.fillRect(0, 0, W, H); }
+
+    var offX = (pointer.eased.x - W * 0.5) / W;
+    var offY = (pointer.eased.y - H * 0.5) / H;
+    var E2 = hole.E * hole.E;
+    var twistBase = animated ? 0.75 + clock * 0.28 : 0.75;
+    var lastTint = "";
+
+    for (var i = 0; i < stars.length; i++) {
+      var s = stars[i];
+
+      /* 1. Parallax: near stars swing further than far ones, against the
+            pointer, so the field reads as depth rather than a flat pan. */
+      var x = s.x - offX * PARALLAX * s.z;
+      var y = s.y - offY * PARALLAX * s.z;
+
+      /* 2. The pointer shoves nearby stars aside and brightens them. */
+      var boost = 0;
+      var mdx = x - pointer.eased.x;
+      var mdy = y - pointer.eased.y;
+      var md2 = mdx * mdx + mdy * mdy;
+      if (md2 < CURSOR_PUSH * CURSOR_PUSH) {
+        var near = 1 - Math.sqrt(md2) / CURSOR_PUSH;
+        x += mdx * near * 0.22;
+        y += mdy * near * 0.22;
+        boost = near * 0.55;
+      }
+
+      /* 3. Lensing. */
+      var dx = x - hole.x;
+      var dy = y - hole.y;
+      var r = Math.sqrt(dx * dx + dy * dy) || 0.001;
+      var root = Math.sqrt(r * r + 4 * E2);
+      var rImg = 0.5 * (r + root);
+
+      /* Magnification = (r'/r) * dr'/dr, and the visible size follows its
+         root — a star sitting on the ring flares, one far away does not. */
+      var mag = (rImg / r) * (0.5 * (1 + r / root));
+      var flare = Math.min(Math.sqrt(mag), 2.8);
+
+      var twist = twistBase * Math.min(E2 / (rImg * rImg), 1.15);
+      var angle = Math.atan2(dy, dx) + twist;
+
+      var sx = hole.x + Math.cos(angle) * rImg;
+      var sy = hole.y + Math.sin(angle) * rImg;
+
+      if (sx < -4 || sx > W + 4 || sy < -4 || sy > H + 4) continue;
+
+      var twinkle = animated ? 0.78 + 0.22 * Math.sin(s.phase) : 1;
+      var alpha = Math.min(1, s.base * twinkle * Math.min(flare, 2) + boost);
+      var size = Math.max(0.5, s.r * Math.min(flare, 2.2));
+
+      if (s.tint !== lastTint) { ctx.fillStyle = s.tint; lastTint = s.tint; }
+      ctx.globalAlpha = alpha;
+      ctx.fillRect(sx - size * 0.5, sy - size * 0.5, size, size);
+
+      /* Halo on the few stars bright enough to earn one. */
+      if (alpha > 0.8 && size > 1.7) {
+        ctx.globalAlpha = alpha * 0.13;
+        ctx.fillRect(sx - size * 1.7, sy - size * 1.7, size * 3.4, size * 3.4);
+      }
+    }
+
+    ctx.globalAlpha = 1;
+    drawHole(animated);
+    drawCursor();
+  }
+
+  function drawHole(animated) {
+    var E = hole.E;
+    var spin = animated ? clock * 0.34 : 0.6;
+
+    /* Halo: violet close in, cyan further out, gone by the edge. */
+    var halo = ctx.createRadialGradient(hole.x, hole.y, hole.r * 0.85, hole.x, hole.y, E * 2.7);
+    halo.addColorStop(0, "rgba(150, 110, 255, 0.34)");
+    halo.addColorStop(0.34, "rgba(103, 232, 249, 0.13)");
+    halo.addColorStop(1, "rgba(5, 6, 12, 0)");
+    ctx.fillStyle = halo;
+    ctx.beginPath();
+    ctx.arc(hole.x, hole.y, E * 2.7, 0, TAU);
+    ctx.fill();
+
+    /* Accretion disc: two thin ellipses tilted against each other, turning
+       slowly, both kept inside the ring so they read as a disc rather than
+       as orbits around an atom. */
+    ctx.save();
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "rgba(255, 180, 84, 0.34)";
+    ctx.lineWidth = 2.6;
+    ctx.beginPath();
+    ctx.ellipse(hole.x, hole.y, E * 0.84, E * 0.23, spin, 0, TAU);
+    ctx.stroke();
+
+    ctx.strokeStyle = "rgba(255, 106, 213, 0.24)";
+    ctx.lineWidth = 1.8;
+    ctx.beginPath();
+    ctx.ellipse(hole.x, hole.y, E * 0.64, E * 0.15, -spin * 0.7 + 0.6, 0, TAU);
+    ctx.stroke();
+    ctx.restore();
+
+    /* Einstein ring: a soft pass and a sharp one on top. */
+    ctx.strokeStyle = "rgba(133, 232, 249, 0.18)";
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.arc(hole.x, hole.y, E, 0, TAU);
+    ctx.stroke();
+
+    ctx.strokeStyle = "rgba(224, 250, 255, 0.42)";
+    ctx.lineWidth = 1.1;
+    ctx.beginPath();
+    ctx.arc(hole.x, hole.y, E, 0, TAU);
+    ctx.stroke();
+
+    /* Photon rim and the shadow itself. */
+    ctx.strokeStyle = "rgba(180, 150, 255, 0.5)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.arc(hole.x, hole.y, hole.r * 1.12, 0, TAU);
+    ctx.stroke();
+
+    ctx.fillStyle = "#000";
+    ctx.beginPath();
+    ctx.arc(hole.x, hole.y, hole.r, 0, TAU);
+    ctx.fill();
+  }
+
+  function drawCursor() {
+    var g = ctx.createRadialGradient(
+      pointer.eased.x, pointer.eased.y, 0,
+      pointer.eased.x, pointer.eased.y, CURSOR_PUSH * 0.9
+    );
+    g.addColorStop(0, "rgba(103, 232, 249, 0.10)");
+    g.addColorStop(1, "rgba(103, 232, 249, 0)");
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(pointer.eased.x, pointer.eased.y, CURSOR_PUSH * 0.9, 0, TAU);
+    ctx.fill();
+  }
+
+  /* ---------------------------------------------------------------- loop */
+
+  function frame(now) {
+    rafId = requestAnimationFrame(frame);
+    var dt = Math.min((now - lastTime) / 1000, 0.05);   // clamp after a stall
+    lastTime = now;
+    step(dt);
+    draw(true);
+  }
+
+  function start() {
+    if (running) return;
+    running = true;
+    lastTime = performance.now();
+    rafId = requestAnimationFrame(frame);
+  }
+
+  function stop() {
+    running = false;
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = 0;
+  }
+
+  function apply() {
+    stop();
+    if (reduceMotion.matches) {
+      /* One still frame: the same sky, holding its breath. */
+      pointer.eased.x = pointer.target.x = W * 0.5;
+      pointer.eased.y = pointer.target.y = H * 0.5;
+      draw(false);
+    } else {
+      start();
+    }
+  }
+
+  var resizeTimer = 0;
+  window.addEventListener("resize", function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () {
+      resize();
+      if (!running) draw(false);
+    }, 120);
+  }, { passive: true });
+
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden) stop();
+    else if (!reduceMotion.matches) start();
+  });
+
+  if (reduceMotion.addEventListener) reduceMotion.addEventListener("change", apply);
+  else if (reduceMotion.addListener) reduceMotion.addListener(apply);
+
+  resize();
+  apply();
+})();
+</script>
 </body>
 </html>

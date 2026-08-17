@@ -86,13 +86,31 @@
       const q = String(query).toLowerCase();
       if (!q) return [];
       return Mac.state.fs.filter(node =>
-        node.parent !== 'trash' && node.kind !== 'volume' && node.name.toLowerCase().includes(q));
+        node.parent !== 'trash' && node.kind !== 'volume'
+        && node.name.toLowerCase().includes(q) && this.reachable(node));
+    },
+
+    /** The volume a node sits on, or null for the startup volume. */
+    volumeOf(id) {
+      const root = this.path(id)[0];
+      return root && root.kind === 'volume' ? root : null;
+    },
+
+    /* An unplugged disk's files must not turn up in Recents or in a search;
+       that is the difference between a disk being ejected and merely
+       hidden. */
+    reachable(node) {
+      const volume = this.volumeOf(node.id);
+      if (!volume || volume.id === 'vol-hd') return true;
+      const record = Mac.state.volumes.find(entry => entry.id === volume.id);
+      return !record || record.mounted !== false;
     },
 
     /** Recently modified files, used for the Recents sidebar item. */
     recents() {
       return Mac.state.fs
         .filter(node => node.kind === 'file' && node.parent !== 'trash')
+        .filter(node => this.reachable(node))
         .sort((a, b) => (b.modified || 0) - (a.modified || 0))
         .slice(0, 24);
     },
@@ -129,6 +147,101 @@
       node.modified = Date.now();
       Mac.save();
       return true;
+    },
+
+    /**
+     * Move a node into another folder.
+     *
+     * Finder could navigate and delete and nothing else, so the single most
+     * common thing anyone is walked through on a call — "drag that into your
+     * Documents folder" — had no equivalent here at all.
+     *
+     * @returns {true|string} true, or why it was refused
+     */
+    move(id, targetId) {
+      const node = this.node(id);
+      const target = this.node(targetId);
+      if (!node) return 'That item no longer exists.';
+      if (node.system || node.home || node.kind === 'volume') return `“${node.name}” is required by macOS and cannot be moved.`;
+      if (!target || !this.isFolder(target)) return 'Choose a folder to move it into.';
+      if (targetId === node.parent) return `“${node.name}” is already in “${target.name}”.`;
+      /* Moving a folder inside itself would orphan the whole subtree, and
+         the flat parent-pointer model would not notice. */
+      if (targetId === id || this.descendants(id).some(child => child.id === targetId))
+        return `“${node.name}” cannot be moved inside itself.`;
+      node.name = this.uniqueName(targetId, node.name);
+      node.parent = targetId;
+      node.modified = Date.now();
+      delete node.trashedFrom;
+      delete node.trashedAt;
+      this.descendants(id).forEach(child => { delete child.hiddenInTrash; });
+      Mac.save();
+      return true;
+    },
+
+    /**
+     * Copy a node — and everything inside it — into another folder.
+     * @returns {object|string} the new node, or why it was refused
+     */
+    copy(id, targetId, { name = null } = {}) {
+      const node = this.node(id);
+      const target = this.node(targetId);
+      if (!node) return 'That item no longer exists.';
+      if (!target || !this.isFolder(target)) return 'Choose a folder to copy it into.';
+      if (targetId === id || this.descendants(id).some(child => child.id === targetId))
+        return `“${node.name}” cannot be copied inside itself.`;
+
+      const clone = (source, parentId, forcedName) => {
+        const copyNode = Object.assign({}, source, {
+          id: Mac.uid(source.kind === 'folder' ? 'dir' : 'f'),
+          name: this.uniqueName(parentId, forcedName || source.name),
+          parent: parentId,
+          modified: Date.now(),
+        });
+        delete copyNode.trashedFrom;
+        delete copyNode.trashedAt;
+        delete copyNode.hiddenInTrash;
+        Mac.state.fs.push(copyNode);
+        /* Depth-first, so a copied folder arrives with its contents. Duplicate
+           used to clone the folder alone and leave the copy empty. */
+        this.children(source.id).forEach(child => clone(child, copyNode.id));
+        return copyNode;
+      };
+
+      const created = clone(node, targetId, name);
+      Mac.save();
+      return created;
+    },
+
+    /**
+     * Resolve a POSIX path the way Go to Folder does.
+     * Accepts ~, /, and a trailing slash; matching is case-insensitive.
+     * @returns {string|null} the node id, or null
+     */
+    resolvePath(input) {
+      let path = String(input || '').trim();
+      if (!path) return null;
+      if (path === '~' || path === '~/') return 'dir-home';
+      let current;
+      if (path.startsWith('~/')) { current = 'dir-home'; path = path.slice(2); }
+      else if (path.startsWith('/')) { current = 'vol-hd'; path = path.slice(1); }
+      else { current = 'dir-home'; }
+      const parts = path.split('/').filter(Boolean);
+      for (const part of parts) {
+        if (part === '.') continue;
+        if (part === '..') { current = this.node(current)?.parent || current; continue; }
+        const match = this.children(current).find(child => child.name.toLowerCase() === part.toLowerCase());
+        if (!match) return null;
+        current = match.id;
+      }
+      return current;
+    },
+
+    /** The POSIX path of a node, for display and for Copy as Pathname. */
+    posixPath(id) {
+      const chain = this.path(id);
+      if (!chain.length) return '';
+      return `/${chain.slice(1).map(node => node.name).join('/')}` || '/';
     },
 
     /** Move to the Bin, remembering where it came from for Put Back. */
@@ -195,7 +308,7 @@
       { id: 'dir-pictures', name: 'Pictures', glyph: 'photo' },
       { id: 'dir-music', name: 'Music', glyph: 'play' },
       { id: 'dir-movies', name: 'Movies', glyph: 'gallery' },
-      { id: 'dir-home', name: 'alex', glyph: 'person' },
+      { id: 'dir-home', name: Mac.PERSONA.shortName, glyph: 'person' },
       { id: 'applications', name: 'Applications', glyph: 'apps' },
     ] },
     { label: 'iCloud', items: [
@@ -204,6 +317,7 @@
     ] },
     { label: 'Locations', items: [
       { id: 'vol-hd', name: 'Macintosh HD', glyph: 'disk' },
+      // vol-backup is spliced in here by sidebarGroups() while it is mounted.
       { id: 'network', name: 'Network', glyph: 'globe' },
       { id: 'trash', name: 'Bin', glyph: 'trash' },
     ] },
@@ -307,15 +421,38 @@
       </div>`;
     },
 
+    /** Whether the external disk is currently plugged in. */
+    volumeMounted(id) {
+      const volume = Mac.state.volumes.find(entry => entry.id === id);
+      return Boolean(volume) && volume.mounted !== false;
+    },
+
+    /* SIDEBAR is a constant; connected volumes are not, so they are spliced
+       in at render time. Without this, mounting the backup disk in Disk
+       Utility changed a flag and nothing else — Finder never showed it, so
+       "plug the drive in and copy your files across" had no visible effect
+       anywhere in the simulator. */
+    sidebarGroups() {
+      if (!this.volumeMounted('vol-backup')) return SIDEBAR;
+      return SIDEBAR.map(section => {
+        if (section.label !== 'Locations') return section;
+        const items = [...section.items];
+        items.splice(1, 0, { id: 'vol-backup', name: 'Time Machine Backup', glyph: 'volume-external', eject: true });
+        return { label: section.label, items };
+      });
+    },
+
     sidebar(win) {
-      return `<aside class="sidebar">${SIDEBAR.map(section =>
+      return `<aside class="sidebar">${this.sidebarGroups().map(section =>
         `<div class="sidebar-heading">${esc(section.label)}</div>` +
         section.items.map(item => {
           const count = item.id === 'trash' ? FS.children('trash').length : 0;
           return `<button class="side-item ${win.state.location === item.id ? 'on' : ''}" data-finder-go="${item.id}">
             <span class="side-glyph">${glyph(item.glyph, { size: 15 })}</span>
             <span class="side-label">${esc(item.name)}</span>
-            ${count ? `<span class="side-count">${count}</span>` : ''}</button>`;
+            ${item.eject ? `<span class="side-count" role="button" tabindex="0" title="Eject ${esc(item.name)}"
+              data-command="disk-eject" data-arg="${item.id}" aria-label="Eject ${esc(item.name)}">⏏</span>`
+              : count ? `<span class="side-count">${count}</span>` : ''}</button>`;
         }).join('')).join('')}</aside>`;
     },
 
@@ -558,6 +695,11 @@
           { label: 'Rename', command: 'finder-rename', disabled: !node },
           { label: 'Duplicate', command: 'finder-duplicate', disabled: !node },
           'sep',
+          { label: 'Copy', command: 'finder-copy', disabled: !node },
+          { label: 'Cut', command: 'finder-cut', disabled: !node },
+          { label: 'Move To…', command: 'finder-move-to', disabled: !node },
+          { label: 'Copy To…', command: 'finder-copy-to', disabled: !node },
+          'sep',
           inTrash
             ? { label: 'Put Back', command: 'finder-put-back' }
             : { label: 'Move to Bin', command: 'finder-trash', disabled: !node },
@@ -567,7 +709,9 @@
       return [
         { label: 'New Folder', command: 'finder-new-folder' },
         { label: 'New Text Document', command: 'finder-new-file' },
+        { label: 'Paste Item', command: 'finder-paste', disabled: !this.clipboard },
         'sep',
+        { label: 'Go to Folder…', command: 'finder-go-folder' },
         { label: 'Get Info', command: 'finder-info' },
         { label: 'Change Wallpaper…', command: 'open-setting', arg: 'Wallpaper' },
         'sep',
@@ -582,16 +726,173 @@
       const copyName = dot > 0
         ? `${node.name.slice(0, dot)} copy${node.name.slice(dot)}`
         : `${node.name} copy`;
-      const clone = Object.assign({}, node, {
-        id: Mac.uid(node.kind === 'folder' ? 'dir' : 'f'),
-        name: FS.uniqueName(node.parent, copyName),
-        modified: Date.now(),
-      });
-      Mac.state.fs.push(clone);
-      Mac.save();
+      /* Through FS.copy so a duplicated folder arrives with its contents.
+         This used to clone the folder node alone, which produced an empty
+         copy that looked right in the list and was wrong the moment you
+         opened it. */
+      const clone = FS.copy(node.id, node.parent, { name: copyName });
+      if (typeof clone === 'string') { Mac.Dialog.info('Cannot duplicate', clone, 'warning'); return; }
       win.state.selected = clone.id;
       Mac.wm.refresh('finder');
       Mac.Shell.renderDesktop();
+    },
+
+    /* ------------------------------------------------------- move and copy */
+
+    /* One clipboard for the whole simulator, like the real one. `cut` marks
+       the item for a move; the pasteboard is not cleared until it lands, so
+       Paste can be pressed in the wrong window and corrected. */
+    clipboard: null,
+
+    copyToClipboard(win, { cut = false } = {}) {
+      const node = this.selected(win);
+      if (!node || node.kind === 'app') { this.requireSelection(); return; }
+      this.clipboard = { id: node.id, cut };
+      Mac.Notify.show('Finder', `${cut ? 'Cut' : 'Copied'} “${node.name}”.`,
+        { app: 'finder', transient: true, duration: 1600 });
+    },
+
+    paste(win) {
+      const target = win.state.location;
+      if (!this.clipboard) {
+        Mac.Notify.show('Finder', 'The Clipboard is empty.', { app: 'finder', transient: true });
+        return;
+      }
+      if (!FS.isFolder(FS.node(target))) {
+        Mac.Dialog.info('Cannot paste here', 'Open a folder first — Recents, Applications and Network are not real locations.', 'warning');
+        return;
+      }
+      const { id, cut } = this.clipboard;
+      const result = cut ? FS.move(id, target) : FS.copy(id, target);
+      if (typeof result === 'string') { Mac.Dialog.info(cut ? 'Cannot move' : 'Cannot copy', result, 'warning'); return; }
+      if (cut) this.clipboard = null;
+      win.state.selected = cut ? id : result.id;
+      Mac.wm.refreshAll();
+      Mac.Shell.renderDesktop();
+    },
+
+    /**
+     * Move or copy the selection into a folder chosen from a list.
+     *
+     * There is no drag-and-drop here, so this is the equivalent of the real
+     * "Move to…" — and it is arguably better for a training tool, because
+     * the destination is named out loud rather than aimed at.
+     */
+    transferTo(win, mode) {
+      const node = this.selected(win);
+      if (!node || node.kind === 'app') { this.requireSelection(); return; }
+      const folders = Mac.state.fs
+        .filter(entry => FS.isFolder(entry) && entry.id !== node.id && entry.parent !== 'trash')
+        .filter(entry => !FS.descendants(node.id).some(child => child.id === entry.id))
+        .sort((a, b) => FS.posixPath(a.id).localeCompare(FS.posixPath(b.id)));
+
+      Mac.Dialog.open({
+        title: `${mode === 'move' ? 'Move' : 'Copy'} “${node.name}” to…`,
+        icon: 'folder',
+        body: `<div class="dialog-field"><label for="finder-dest">Destination</label>
+          <select id="finder-dest">${folders.map(folder =>
+            `<option value="${esc(folder.id)}" ${folder.id === node.parent ? 'disabled' : ''}>${esc(FS.posixPath(folder.id) || '/')}</option>`).join('')}</select></div>`,
+        buttons: [
+          { label: 'Cancel' },
+          {
+            label: mode === 'move' ? 'Move' : 'Copy',
+            primary: true,
+            action: () => {
+              const target = document.getElementById('finder-dest').value;
+              const result = mode === 'move' ? FS.move(node.id, target) : FS.copy(node.id, target);
+              if (typeof result === 'string') { Mac.Dialog.info(`Cannot ${mode}`, result, 'warning'); return; }
+              // Follow the item, so it is obvious where it went.
+              this.navigate(win, target);
+              win.state.selected = mode === 'move' ? node.id : result.id;
+              Mac.wm.refreshAll();
+              Mac.Shell.renderDesktop();
+              Mac.Notify.show('Finder',
+                `“${node.name}” ${mode === 'move' ? 'moved' : 'copied'} to “${FS.node(target).name}”.`,
+                { app: 'finder', transient: true, duration: 1800 });
+            },
+          },
+        ],
+      });
+    },
+
+    /**
+     * Eject a removable volume.
+     *
+     * The interesting part is not the flag, it is the windows: a Finder
+     * window sitting inside a disk that has just been pulled has to go
+     * somewhere, and macOS sends it home. Leaving them pointed at an
+     * unreachable location is how you get a list that renders empty and
+     * looks like data loss.
+     */
+    eject(volumeId) {
+      const volume = Mac.state.volumes.find(entry => entry.id === volumeId);
+      if (!volume) return;
+      if (volume.kind !== 'external') {
+        Mac.Dialog.info('The startup volume cannot be ejected',
+          'Restart in Recovery to work on Macintosh HD.', 'warning');
+        return;
+      }
+      volume.mounted = false;
+      Mac.save();
+      const stranded = FS.descendants(volumeId).map(node => node.id).concat(volumeId);
+      Mac.wm.windows.forEach(win => {
+        if (win.appId !== 'finder') return;
+        if (stranded.includes(win.state.location)) this.navigate(win, 'dir-home');
+        win.state.history = win.state.history.filter(entry => !stranded.includes(entry));
+        win.state.historyIndex = Math.min(win.state.historyIndex, win.state.history.length - 1);
+      });
+      Mac.wm.refreshAll();
+      Mac.Notify.show('Finder', `“${volume.name}” has been ejected. It is now safe to disconnect it.`,
+        { app: 'finder' });
+    },
+
+    mount(volumeId) {
+      const volume = Mac.state.volumes.find(entry => entry.id === volumeId);
+      if (!volume) return;
+      volume.mounted = true;
+      Mac.save();
+      Mac.wm.refreshAll();
+      Mac.Notify.show('Finder', `“${volume.name}” is now available in the Finder sidebar.`, { app: 'finder' });
+    },
+
+    /** Go to Folder (⇧⌘G) — the fastest way to reach a path over the phone. */
+    goToFolder(win) {
+      Mac.Dialog.open({
+        title: 'Go to Folder',
+        icon: 'folder',
+        body: `<p style="margin:0 0 8px;font-size:12.5px;color:var(--text-2)">Type a path, for example <code>~/Documents</code> or <code>/Applications</code>.</p>
+          <div class="dialog-field"><label for="finder-path">Path</label>
+            <input id="finder-path" value="~/" spellcheck="false" autocapitalize="off"></div>
+          <p id="finder-path-error" style="margin:8px 0 0;font-size:12px;color:var(--red)"></p>`,
+        buttons: [
+          { label: 'Cancel' },
+          {
+            label: 'Go',
+            primary: true,
+            close: false,
+            action: () => {
+              const value = document.getElementById('finder-path').value;
+              const id = FS.resolvePath(value);
+              if (!id) {
+                document.getElementById('finder-path-error').textContent = `The folder “${value}” can’t be found.`;
+                return;
+              }
+              if (!FS.isFolder(FS.node(id))) {
+                document.getElementById('finder-path-error').textContent = `“${value}” is a file, not a folder.`;
+                return;
+              }
+              Mac.Dialog.close();
+              const target = win?.appId === 'finder' ? win : Mac.wm.open('finder');
+              this.navigate(target, id);
+            },
+          },
+        ],
+        onMount: () => setTimeout(() => {
+          const field = document.getElementById('finder-path');
+          field?.focus();
+          field?.setSelectionRange(field.value.length, field.value.length);
+        }, 30),
+      });
     },
   };
 
@@ -643,6 +944,14 @@
           { label: 'Move to Bin', command: 'finder-trash', shortcut: '⌘⌫' },
           { label: 'Empty Bin…', command: 'empty-trash', shortcut: '⇧⌘⌫' },
         ],
+        Edit: [
+          { label: 'Cut', command: 'finder-cut', shortcut: '⌘X' },
+          { label: 'Copy', command: 'finder-copy', shortcut: '⌘C' },
+          { label: 'Paste Item', command: 'finder-paste', shortcut: '⌘V' },
+          'sep',
+          { label: 'Move To…', command: 'finder-move-to' },
+          { label: 'Copy To…', command: 'finder-copy-to' },
+        ],
         View: [
           { label: 'as Icons', command: 'finder-view', arg: 'icon', checked: win?.state.view === 'icon' },
           { label: 'as List', command: 'finder-view', arg: 'list', checked: win?.state.view === 'list' },
@@ -655,6 +964,11 @@
           { label: 'Downloads', command: 'finder-go', arg: 'dir-downloads' },
           { label: 'Applications', command: 'finder-go', arg: 'applications' },
           { label: 'Bin', command: 'finder-go', arg: 'trash' },
+          'sep',
+          { label: 'Go to Folder…', command: 'finder-go-folder', shortcut: '⇧⌘G' },
+          ...(Finder.volumeMounted('vol-backup')
+            ? [{ label: 'Eject “Time Machine Backup”', command: 'disk-eject', arg: 'vol-backup', shortcut: '⌘E' }]
+            : [{ label: 'Connect Time Machine Backup', command: 'disk-mount', arg: 'vol-backup' }]),
         ],
       };
     },
