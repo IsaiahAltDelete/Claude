@@ -20,6 +20,7 @@ const UI = {
   overlays: [],
   system: null,        /* { node, api } */
   tv: null,            /* set while the television, not the box, owns the remote */
+  rendered: null,      /* the api whose DOM is currently mounted */
   canvas: null,
   layers: {},
 
@@ -49,6 +50,12 @@ function renderTop({ restore = true } = {}) {
   const entry = UI.stack[UI.stack.length - 1];
   if (!entry) return;
 
+  /* Tear the outgoing screen down before its DOM goes. A screen that owns a
+     timer has no other chance to stop it: Back runs through the screen's own
+     handler, but Home replaces the stack from underneath it. */
+  if (UI.rendered && UI.rendered.dispose) UI.rendered.dispose();
+  UI.rendered = null;
+
   UI.layers.screen.innerHTML = '';
   const host = el('div', 'layer-inner anim-fade');
   host.style.cssText = 'position:absolute;inset:0';
@@ -56,6 +63,7 @@ function renderTop({ restore = true } = {}) {
 
   entry.api = SCREENS[entry.id].render(host, entry.arg) || {};
   entry.node = host;
+  UI.rendered = entry.api;
   UI.refreshScope();
 
   const wanted = restore && entry.focusId

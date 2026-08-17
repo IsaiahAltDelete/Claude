@@ -188,6 +188,27 @@ With no internet, a channel draws its own branded error inside its own splash
 rather than throwing a system dialog — which is exactly the state that confuses
 people on a real call, because everything else on the box still works.
 
+## Checks
+
+The repository's three gates cover this simulator; they run on every push and
+block the deploy. From the repository root:
+
+```
+python3 tools/check-syntax.py   parse, including the merged global scope
+python3 tools/check-refs.py     every glyph and reference resolves
+node tools/smoke.mjs            every screen opens in Chromium, no console errors
+```
+
+The scripts here are classic scripts sharing one global lexical environment, so
+a duplicate top-level `const` between any two of them is a SyntaxError that only
+appears once the browser merges them — check-syntax reproduces that merge.
+
+The smoke test walks the entire settings tree, calling every `value()` and
+`detail()` closure in it, renders each screen that has rows, opens every channel
+page, switches the television through all five inputs, asserts one-touch play
+works with HDMI-CEC on and stays quiet with it off, and leaves the player by
+each exit to prove the clock stops and the resume point survives.
+
 ## Project layout
 
 Paths are relative to the repository root; everything below `roku/` belongs to
