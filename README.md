@@ -12,6 +12,7 @@ or rehearse one, without touching a real machine.
 | [iPhone Simulator](iphone/README.md) | [`/iphone`](https://isaiahaltdelete.github.io/Claude/iphone/) | A full iOS phone — lock screen, Control Centre, Spotlight, App Library and 51 apps |
 | [Roku Troubleshooting Simulator](roku/README.md) | [`/roku`](https://isaiahaltdelete.github.io/Claude/roku/) | A streaming player on a TV with a mock-up remote — home screen, channels, live guide, search, store, settings, restarts and factory reset |
 | [ISAIART DESIGN](design/README.md) | [`/design`](https://isaiahaltdelete.github.io/Claude/design/) | A type-in-space generator — not a simulator, but it lives here too |
+| [ISAIART IMAGE](image/README.md) | [`/image`](https://isaiahaltdelete.github.io/Claude/image/) | A photograph processor — grading, screens, and subject cut-out by a graph cut running on your device |
 
 Each folder has its own README with credentials, a feature list, its layout and
 the console commands for staging scenarios.
@@ -50,6 +51,8 @@ mac/                         the macOS simulator, served at /mac
 iphone/                      the iPhone simulator, served at /iphone
 roku/                        the Roku simulator, served at /roku
 design/                      ISAIART DESIGN, served at /design
+image/                       ISAIART IMAGE, served at /image
+common/                      controls, styling and the parameter store both share
 tools/build-assets.py        regenerates the Mac's icons and wallpapers
 tools/check-syntax.py        parses every script, alone and merged into one scope
 tools/check-refs.py          resolves every icon, pane and command reference

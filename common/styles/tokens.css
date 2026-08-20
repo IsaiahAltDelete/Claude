@@ -44,6 +44,17 @@
   --status: 26px;
   --sheet-peek: 116px;   /* how much of the mobile sheet stays on screen */
 
+
+  /* Panel tones. Each rail panel carries one muted hue so the eye can tell
+     where it is without reading the tab — desaturated far enough that the
+     interface stays achromatic and the canvas keeps all the colour. */
+  --tone-1: #b9a17a;   /* sand  */
+  --tone-2: #8fa58c;   /* sage  */
+  --tone-3: #8795a8;   /* slate */
+  --tone-4: #a68fa0;   /* mauve */
+  --tone-5: #7fa8a2;   /* teal  */
+  --tone-6: #b08d7f;   /* clay  */
+
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
@@ -68,6 +79,14 @@
   --accent-ink: #fbfbfc;
 
   --stage: #e4e4e6;
+
+  /* The same hues, taken darker so they hold against a white rail. */
+  --tone-1: #8a734c;
+  --tone-2: #5f7a5c;
+  --tone-3: #59677a;
+  --tone-4: #7a5f72;
+  --tone-5: #4f7a74;
+  --tone-6: #855f52;
 }
 
 * { box-sizing: border-box; }
@@ -127,3 +146,34 @@ button, input, select, textarea { font: inherit; color: inherit; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
 }
+
+/* ------------------------------------------------------------------- tones
+
+   The rail sets --tone on each panel and on its tab; everything below just
+   spends it. Kept here rather than in the control sheet because it is a
+   cross-cutting decision about the whole interface, and because it has to
+   out-specify the neutral defaults the controls ship with. */
+
+.rail .tab[aria-selected="true"]::after { background: var(--tone, var(--fg)); }
+.rail .tab[aria-selected="true"] { color: var(--fg); }
+
+.sec-head h2 { display: flex; align-items: center; gap: 7px; }
+.sec-head h2::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  flex: none;
+  background: var(--tone, var(--fg-ghost));
+}
+
+.panel .slider-fill { background: color-mix(in srgb, var(--tone, var(--fg-dim)) 62%, var(--fg-dim)); }
+.panel .slider:hover .slider-fill,
+.panel .slider.live .slider-fill { background: var(--tone, var(--fg)); }
+.panel .slider.live .slider-knob { background: var(--tone, var(--fg)); }
+.panel .pad-dot { background: var(--tone, var(--fg)); }
+.panel .tgl[aria-checked="true"] { background: var(--tone, var(--accent)); border-color: var(--tone, var(--accent)); }
+.panel .seg-b[aria-checked="true"] { background: var(--tone, var(--accent)); color: var(--accent-ink); }
+
+/* In the light theme the tones are dark, so ink on them must flip. */
+:root[data-theme="light"] .panel .tgl[aria-checked="true"] .tgl-dot { background: var(--bg-1); }
+:root[data-theme="light"] .panel .seg-b[aria-checked="true"] { color: var(--bg-1); }

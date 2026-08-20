@@ -277,6 +277,56 @@ iso-slider, iso-seg, iso-select, iso-color, iso-pad, iso-text, iso-vec {
   letter-spacing: 0.08em;
 }
 
+/* --------------------------------------------------------------- tooltips
+
+   One element for the whole page, borrowing the popover's shell so a tooltip
+   reads as the same material. It never takes a pointer event, so it can sit
+   above every other layer without ever being in the way. */
+
+.tip {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 95;
+  max-width: 264px;
+  padding: 8px 11px 9px;
+  border: 1px solid var(--line-2);
+  background: var(--bg-1);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.12s var(--ease);
+}
+:root[data-theme="light"] .tip { box-shadow: 0 14px 40px rgba(0, 0, 0, 0.16); }
+.tip.on { visibility: visible; opacity: 1; }
+
+.tip-line {
+  display: block;
+  font-family: var(--ui);
+  font-size: 11.5px;
+  line-height: 1.4;
+  letter-spacing: -0.005em;
+  color: var(--fg-dim);
+  text-wrap: pretty;
+}
+
+/* The hint is about gestures rather than meaning, so it steps back into the
+   monospace face the rest of the interface uses for mechanics. */
+.tip-hint {
+  display: block;
+  margin-top: 6px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  line-height: 1.45;
+  color: var(--fg-faint);
+}
+.tip-hint:empty { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tip { transition: none; }
+}
+
 /* ----------------------------------------------------------------- colour */
 
 .swatch {

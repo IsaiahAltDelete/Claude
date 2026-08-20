@@ -1,0 +1,570 @@
+/* ---------------------------------------------------------------------------
+   Layout: a fixed bar, a stage that owns the artboard, and a control rail.
+
+   The whole app is one viewport-height grid — nothing scrolls except the rail
+   body, so the picture never moves under your hands. The proportions, the
+   hairlines and the small-screen behaviour are shared with the design page on
+   purpose: the two tools are the same instrument pointed at different work,
+   and the common controls already assume this shell.
+   --------------------------------------------------------------------------- */
+
+.app {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--rail);
+  grid-template-rows: var(--bar) minmax(0, 1fr) var(--status);
+  height: 100dvh;
+  width: 100vw;
+}
+
+/* -------------------------------------------------------------------- bar */
+
+.bar {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 12px 0 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-1);
+  z-index: 20;
+}
+
+.wordmark {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+.wordmark b { font-weight: 700; }
+.wordmark span {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  color: var(--fg-faint);
+  text-transform: uppercase;
+}
+
+.bar-spacer { flex: 1; }
+.bar-tools { display: flex; align-items: center; gap: 6px; }
+
+/* ------------------------------------------------------------------ stage */
+
+.stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  min-height: 0;
+  padding: 22px;
+  background: var(--stage);
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 32px 32px;
+  overflow: hidden;
+}
+
+.artboard {
+  position: relative;
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  outline: 1px solid var(--line-2);
+  /* A transparent background is a real output of this tool — a cut-out subject
+     on nothing — so alpha has to read as alpha rather than as the stage. */
+  background-color: var(--bg-1);
+  background-image:
+    linear-gradient(45deg, var(--bg-2) 25%, transparent 25%),
+    linear-gradient(-45deg, var(--bg-2) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, var(--bg-2) 75%),
+    linear-gradient(-45deg, transparent 75%, var(--bg-2) 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+}
+
+.artboard canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+/* The mask overlay is a second canvas laid exactly over the first. It is
+   inert until a brush mode is on, so a plain drag still reaches the page. */
+#mask-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+#mask-overlay.painting {
+  pointer-events: auto;
+  cursor: crosshair;
+}
+#mask-overlay.painting.erasing { cursor: cell; }
+
+/* Crop marks: four corner ticks that read as a print register, not a border. */
+.artboard::before,
+.artboard::after {
+  content: "";
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border: 1px solid var(--fg-ghost);
+  pointer-events: none;
+}
+.artboard::before { top: -5px; left: -5px; border-right: 0; border-bottom: 0; }
+.artboard::after { bottom: -5px; right: -5px; border-left: 0; border-top: 0; }
+
+/* -------------------------------------------------------------- drop target
+
+   Shown over the empty artboard until a picture arrives. It covers the
+   chequerboard rather than replacing it, so the first thing you learn about
+   this tool is that the canvas can be transparent. */
+
+.drop {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 7px;
+  padding: 18px;
+  text-align: center;
+  background: color-mix(in srgb, var(--bg-0) 74%, transparent);
+  border: 1px dashed color-mix(in srgb, var(--fg-ghost) 72%, transparent);
+  transition: background 0.16s var(--ease), border-color 0.16s var(--ease);
+}
+
+.drop-ico {
+  width: 26px;
+  height: 26px;
+  color: var(--fg-ghost);
+  transition: color 0.16s var(--ease);
+}
+
+.drop-title {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--fg-dim);
+}
+
+.drop-note {
+  margin: 0;
+  max-width: 30ch;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  line-height: 1.5;
+  color: var(--fg-faint);
+  text-transform: uppercase;
+}
+
+/* While a file is over the window the target has to be unmistakably the place
+   to let go, since the pointer is already carrying something. */
+.drop.over {
+  background: color-mix(in srgb, var(--bg-0) 88%, transparent);
+  border-color: var(--fg-dim);
+  border-style: solid;
+}
+.drop.over .drop-ico { color: var(--fg); }
+.drop.over .drop-title { color: var(--fg); }
+
+/* The plate lays out as a grid, which outranks the reset's [hidden] rule. */
+.drop[hidden] { display: none; }
+
+/* ------------------------------------------------------------------ readouts */
+
+.stage-hud {
+  position: absolute;
+  left: 14px;
+  bottom: 10px;
+  display: flex;
+  gap: 6px;
+  pointer-events: none;
+}
+
+/* The artboard can sit directly under this, so each readout gets its own
+   plate rather than relying on whatever happens to be behind it. */
+.stage-hud span {
+  padding: 2px 6px;
+  background: var(--bg-0);
+  border: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  color: var(--fg-faint);
+  text-transform: uppercase;
+  white-space: nowrap;
+  max-width: 34vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* The HUD is mostly readouts, but one chip is a real control. */
+.hud-btn {
+  padding: 2px 7px;
+  border: 1px solid var(--line-2);
+  background: var(--bg-0);
+  color: var(--fg-dim);
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  pointer-events: auto;
+  white-space: nowrap;
+}
+.hud-btn:hover { color: var(--fg); border-color: var(--fg-ghost); }
+.hud-btn[aria-pressed="true"] { color: var(--fg); border-color: var(--fg-ghost); }
+
+.stage-msg {
+  position: absolute;
+  inset: auto 0 50% 0;
+  text-align: center;
+  color: var(--fg-dim);
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 0 24px;
+}
+.stage-msg.soft {
+  color: var(--fg-faint);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+/* ------------------------------------------------------------------- rail */
+
+.rail {
+  grid-column: 2;
+  grid-row: 2 / span 2;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-left: 1px solid var(--line);
+  background: var(--bg-1);
+  z-index: 15;
+}
+
+.rail-tabs {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  border-bottom: 1px solid var(--line);
+  flex: none;
+}
+
+.tab {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--fg-faint);
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 11px 2px 10px;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.12s var(--ease);
+}
+.tab:hover { color: var(--fg-dim); }
+.tab[aria-selected="true"] { color: var(--fg); }
+.tab[aria-selected="true"]::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -1px;
+  height: 1px;
+  background: var(--fg);
+}
+
+.rail-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-bottom: 28px;
+}
+
+.panel { display: none; }
+.panel.on { display: block; }
+
+.sec { border-bottom: 1px solid var(--line); padding: 13px 14px 15px; }
+.sec:last-child { border-bottom: 0; }
+
+.sec-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 11px;
+}
+.sec-head h2 {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+}
+.sec-head .hint { font-family: var(--mono); font-size: 9px; color: var(--fg-ghost); }
+
+.sec-body { display: grid; gap: 11px; }
+.sec-body.tight { gap: 7px; }
+.sec-body .split { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* Rows that fold away when their parent option is off. */
+.dep { display: none; }
+.dep.on { display: block; }
+
+/* ----------------------------------------------------------------- status */
+
+.status {
+  grid-column: 1;
+  grid-row: 3;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 16px;
+  border-top: 1px solid var(--line);
+  background: var(--bg-1);
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  color: var(--fg-faint);
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.status b { color: var(--fg-dim); font-weight: 500; }
+.status #stat-msg { color: var(--fg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.status .dot { width: 5px; height: 5px; border-radius: 99px; background: var(--fg-ghost); }
+.status .dot.live { background: var(--accent); }
+.status .dot.busy { background: var(--fg-dim); animation: blink 1.1s steps(2, end) infinite; }
+.status .dot.rec { background: var(--hot); animation: blink 1.1s steps(2, end) infinite; }
+@keyframes blink { 50% { opacity: 0.15; } }
+
+/* --------------------------------------------------------------- overlays */
+
+.sheet-handle { display: none; }
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 46px;
+  transform: translate(-50%, 8px);
+  padding: 8px 14px;
+  border: 1px solid var(--line-2);
+  background: var(--bg-1);
+  color: var(--fg);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s var(--ease), transform 0.2s var(--ease);
+  z-index: 90;
+}
+.toast.on { opacity: 1; transform: translate(-50%, 0); }
+
+.modal {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: color-mix(in srgb, var(--bg-0) 78%, transparent);
+  z-index: 80;
+}
+.modal-card {
+  width: min(440px, 100%);
+  max-height: 80dvh;
+  overflow: auto;
+  padding: 20px;
+  border: 1px solid var(--line-2);
+  background: var(--bg-1);
+}
+.modal-card h2 { margin: 0 0 12px; font-size: 14px; font-weight: 600; letter-spacing: -0.01em; }
+.modal-card dl { display: grid; grid-template-columns: auto 1fr; gap: 7px 14px; margin: 0 0 16px; font-size: 12px; }
+.modal-card dt { font-family: var(--mono); font-size: 10px; color: var(--fg); }
+.modal-card dd { margin: 0; color: var(--fg-dim); }
+.modal-card p { margin: 0 0 14px; color: var(--fg-dim); font-size: 12.5px; }
+.modal-card code {
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 1px 4px;
+  background: var(--bg-2);
+  color: var(--fg);
+}
+
+/* ---------------------------------------------------------------------------
+   Small screens.
+
+   Under 900px the rail leaves the grid and becomes a bottom sheet with three
+   heights: peek (tabs only), half and full. The stage keeps the full viewport
+   underneath so the artboard never gets squeezed by an open panel.
+   --------------------------------------------------------------------------- */
+
+@media (min-width: 401px) {
+  #btn-export .ico { display: none; }
+}
+
+@media (max-width: 900px) {
+  :root { --bar: 44px; --status: 0px; }
+
+  .app {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: var(--bar) minmax(0, 1fr);
+  }
+
+  .stage {
+    grid-column: 1;
+    grid-row: 2;
+    padding: 12px 12px calc(var(--sheet-peek, 116px) + 12px);
+    background-size: 26px 26px;
+  }
+
+  .stage-hud { bottom: calc(var(--sheet-peek, 116px) + 8px); left: 12px; }
+
+  .status { display: none; }
+
+  .rail {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: auto;
+    height: 82dvh;
+    border-left: 0;
+    border-top: 1px solid var(--line-2);
+    box-shadow: 0 -18px 40px color-mix(in srgb, var(--bg-0) 62%, transparent);
+    transform: translateY(calc(100% - var(--sheet-peek, 116px)));
+    transition: transform 0.28s var(--ease);
+    touch-action: pan-y;
+  }
+  /* While a finger is on the handle the sheet tracks it directly. */
+  .rail.dragging { transition: none; }
+  .rail[data-sheet="half"] { transform: translateY(42%); }
+  .rail[data-sheet="full"] { transform: translateY(0); }
+
+  .sheet-handle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    height: 20px;
+    cursor: grab;
+    touch-action: none;
+  }
+  .sheet-handle::before {
+    content: "";
+    width: 34px;
+    height: 3px;
+    border-radius: 99px;
+    background: var(--fg-ghost);
+  }
+
+  .rail-tabs { position: sticky; top: 0; background: var(--bg-1); z-index: 2; }
+  .tab { padding: 12px 2px 11px; font-size: 9.5px; }
+
+  .rail-body { padding-bottom: max(34px, env(safe-area-inset-bottom)); }
+
+  .sec { padding: 14px 14px 16px; }
+  .sec-body { gap: 13px; }
+
+  /* Fingers need more than 22px of slider. */
+  .slider { height: 30px; }
+  .slider-knob { height: 19px; width: 4px; margin-left: -2px; }
+  .seg-b { min-height: 32px; font-size: 10px; }
+  .btn { min-height: 34px; }
+  .btn.icon { width: 34px; }
+  .row-value { font-size: 11px; }
+
+  /* Under 16px, iOS Safari zooms the page on focus — and with a 100dvh
+     overflow-hidden layout it never zooms back out. Tighten the padding so
+     the extra type does not change the rhythm of the rail. */
+  .field, textarea.field, .vec input, .pop-filter, .row-value.editing {
+    font-size: 16px;
+  }
+  .vec input { padding: 6px 4px; letter-spacing: -0.02em; }
+  textarea.field { line-height: 1.35; }
+  .row-value.editing { width: 84px; }
+  .pop { max-height: 46dvh; }
+  .picker { width: min(258px, 82vw); }
+  .picker-sv { height: 132px; }
+  .picker-strip { height: 18px; }
+
+  .toast { bottom: calc(var(--sheet-peek, 116px) + 16px); }
+
+  .drop { gap: 6px; padding: 14px; }
+  .drop-title { font-size: 12px; }
+}
+
+
+
+@media (max-width: 460px) {
+  .bar { padding: 0 8px 0 12px; gap: 8px; }
+  .wordmark span { display: none; }
+  .stage { padding: 8px 8px calc(var(--sheet-peek, 116px) + 8px); }
+
+  /* The tool row does not fit across a phone. Fullscreen goes first — mobile
+     browsers are already fullscreen and iOS Safari refuses the API — then the
+     shortcut sheet, which is mostly about a keyboard. */
+  #btn-full, #btn-help { display: none; }
+  .bar-tools { gap: 4px; }
+  .bar-tools .btn.icon { width: 32px; }
+  .bar-tools .btn.solid { padding: 0 9px; }
+
+  .pop.menu { width: min(280px, 88vw); }
+  .menu-grid .pop-item, .menu-list .pop-item { padding: 9px 8px; }
+  .chip { padding: 9px 2px; }
+
+  .stage-hud span { max-width: 40vw; }
+}
+
+/* The narrowest phones still carry the whole tool row, just tighter. */
+@media (max-width: 400px) {
+  .bar { gap: 6px; padding: 0 6px 0 10px; }
+  .bar-tools { gap: 3px; }
+  .bar-tools .btn.icon { width: 27px; }
+  .wordmark { font-size: 12px; }
+
+  /* Export keeps its filled treatment but drops to an icon, which is the
+     last 20px the row needs to fit a 360px screen. */
+  #btn-export { width: 27px; padding: 0; }
+  #btn-export span { display: none; }
+
+  /* At this width the second line of the drop target is longer than the
+     instruction it supports, so the instruction stands alone. */
+  .drop-note { display: none; }
+}
+
+/* Landscape phones: the sheet takes a side instead of the bottom. */
+@media (max-width: 900px) and (orientation: landscape) and (max-height: 560px) {
+  .rail {
+    left: auto;
+    top: var(--bar);
+    width: min(320px, 62vw);
+    height: auto;
+    border-top: 0;
+    border-left: 1px solid var(--line-2);
+    transform: translateX(calc(100% - 34px));
+  }
+  .rail[data-sheet="half"], .rail[data-sheet="full"] { transform: translateX(0); }
+  .sheet-handle { display: none; }
+  .stage { padding: 10px; }
+  .stage-hud { bottom: 8px; }
+}
+
+/* Wide desktops get a slightly roomier rail. */
+@media (min-width: 1500px) {
+  :root { --rail: 372px; }
+}
