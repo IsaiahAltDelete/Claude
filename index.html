@@ -1,926 +1,620 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="color-scheme" content="dark">
-<title>Simulators</title>
-<meta name="description" content="Browser simulators of real devices, built for support training.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#0b0a09">
+<title>ISAIART — Index</title>
+<meta name="description" content="Browser simulators of real devices, and the tools that ended up alongside them.">
 <link rel="icon" href="favicon.svg">
-<link rel="stylesheet" href="assets/fonts/fonts.css">
-<link rel="preload" as="font" type="font/woff2" href="assets/fonts/orbitron-latin-900-normal.woff2" crossorigin>
-<link rel="preload" as="font" type="font/woff2" href="assets/fonts/space-grotesk-latin-400-normal.woff2" crossorigin>
+
+<!-- The palette, the reset and the type pack are the same files the two tools
+     load, so the index cannot drift away from them: a retune is tokens.css
+     alone. -->
+<link rel="stylesheet" href="common/styles/tokens.css">
+<link rel="preload" as="font" type="font/woff2" href="common/assets/fonts/inter-latin-400-normal.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="common/assets/fonts/jetbrains-mono-latin-600-normal.woff2" crossorigin>
+
+<script>
+  /* Applied before first paint so the page never flashes the wrong ground.
+     One key across the index, both tools and the 404, so the choice follows
+     you between them. */
+  (function () {
+    try {
+      /* JSON, because the two tools write this key through their shared
+         store helper, which stringifies. */
+      var raw = localStorage.getItem("isaiart.theme");
+      var saved = raw == null ? null : JSON.parse(raw);
+      if (saved !== "light" && saved !== "dark") {
+        saved = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+      }
+      document.documentElement.dataset.theme = saved;
+    } catch (e) { /* private mode: the dark default in the markup stands */ }
+  }());
+</script>
 
 <style>
   /* --------------------------------------------------------------------
-     Cassette-futurism index: a starfield with a black hole drifting
-     through it, under a CRT overlay.
+     The index.
 
-     Self-contained. The three typefaces are bundled in assets/fonts, the
-     starfield is one inline canvas script, and nothing else is fetched —
-     the page works offline and from file:// like everything it links to.
+     Cassette futurism as an interface rather than a costume: hairline
+     rules, square corners, monospaced tabular readouts, uppercase micro
+     labels, one phosphor accent. No bezels, no scanline overlay, no
+     narration pretending the page is a machine.
+
+     The one moving thing is the signal strip under the masthead, and it
+     earns its place by being the rule between the masthead and the
+     directory rather than an ornament sitting beside one.
      -------------------------------------------------------------------- */
-  :root {
-    --bg: #05060c;
-    --fg: #eaf3ff;
-    --dim: #a8bdd4;      /* 8.6:1 on the panel ground */
-    --faint: #8397ae;    /* 5.9:1 — the dimmest tone still used for text */
-    --cyan: #67e8f9;
-    --violet: #a68bff;
-    --magenta: #ff6ad5;
-    --amber: #ffb454;
-    --hair: rgba(133, 208, 231, 0.16);
-    --hair-hot: rgba(133, 232, 249, 0.42);
-    --panel: rgba(7, 11, 22, 0.58);
 
-    --display: "Orbitron", "Space Grotesk", system-ui, sans-serif;
-    --term: "VT323", ui-monospace, SFMono-Regular, Menlo, monospace;
-    --body: "Space Grotesk", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-
-    /* Written by the pointer loop; drives the parallax on the wordmark. */
-    --tilt-x: 0px;
-    --tilt-y: 0px;
-  }
-
-  * { box-sizing: border-box; }
-
-  html, body {
-    margin: 0;
-    min-height: 100%;
-    background: var(--bg);
-    color: var(--fg);
-    font-family: var(--body);
-    font-size: 16px;
+  body {
+    font-family: var(--ui);
+    font-size: 15px;
     line-height: 1.55;
+    color: var(--fg);
     -webkit-font-smoothing: antialiased;
   }
 
-  body { overflow-x: hidden; }
-
-  ::selection { background: var(--cyan); color: #04060d; }
-
   a { color: inherit; text-decoration: none; }
 
-  /* ------------------------------------------------------------ canvas */
+  .wrap { max-width: 940px; margin: 0 auto; padding: 0 24px; }
 
-  #sky {
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    display: block;
-    z-index: 0;
+  /* ---------------------------------------------------------------- bar */
+
+  .bar {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--bg-1);
+    border-bottom: 1px solid var(--line);
   }
 
-  /* CRT: scanlines, a phosphor tint at the edges, and a vignette that pushes
-     the middle of the screen forward. Purely decorative.
-
-     Deliberately plain alpha compositing rather than mix-blend-mode: the
-     overlay sits on an animating canvas, and a blend mode makes every frame
-     read the backdrop back — measured at roughly half the frame rate on a
-     1920x1080 viewport. Both layers darken with black anyway, so the result
-     is the same picture for half the cost. */
-  .crt {
-    position: fixed;
-    inset: 0;
-    z-index: 1;
-    pointer-events: none;
-    background:
-      repeating-linear-gradient(
-        to bottom,
-        rgba(0, 0, 0, 0) 0 2px,
-        rgba(0, 0, 0, 0.26) 2px 3px
-      ),
-      radial-gradient(120% 90% at 50% 45%, rgba(0, 0, 0, 0) 42%, rgba(0, 0, 0, 0.55) 100%);
-  }
-
-  /* The phosphor band that rolls down the screen. Animated on transform, not
-     background-position, so it stays on the compositor instead of repainting
-     a full-screen gradient every frame. Both ends fade out, so the loop seam
-     is invisible. */
-  .crt::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: -100%;
-    height: 200%;
-    background: linear-gradient(
-      to bottom,
-      rgba(103, 232, 249, 0) 0%,
-      rgba(166, 139, 255, 0.05) 50%,
-      rgba(103, 232, 249, 0) 100%
-    );
-    animation: sweep 9s linear infinite;
-    will-change: transform;
-  }
-
-  @keyframes sweep {
-    from { transform: translate3d(0, 0, 0); }
-    to   { transform: translate3d(0, 75%, 0); }
-  }
-
-  /* ------------------------------------------------------------- shell */
-
-  .page {
-    position: relative;
-    z-index: 2;
-    max-width: 860px;
-    margin: 0 auto;
-    padding: clamp(40px, 10vh, 108px) 22px 64px;
-  }
-
-  /* ------------------------------------------------------------ header */
-
-  header { margin-bottom: clamp(36px, 8vh, 72px); }
-
-  .hud {
+  .bar-in {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
-    gap: 8px 14px;
-    margin: 0 0 20px;
-    font-family: var(--term);
-    font-size: 19px;
-    line-height: 1;
-    letter-spacing: 0.06em;
-    color: var(--cyan);
+    gap: 14px;
+    height: var(--bar);
+    max-width: 940px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* Same lockup as the two tools' title bars, so the three pages read as one
+     set: the name in the UI face, the section in mono beside it. */
+  .wordmark {
+    font-family: var(--ui);
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin: 0;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  .wordmark span {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    /* The header sits straight on the starfield, so every line of it carries
-       its own shadow to stay legible when a bright star passes behind. */
-    text-shadow: 0 0 14px rgba(5, 6, 12, 0.95), 0 1px 2px rgba(5, 6, 12, 0.9);
+    color: var(--fg-faint);
   }
 
-  .hud .sep { color: rgba(133, 208, 231, 0.35); }
-  .hud .warm { color: var(--amber); }
+  .bar-spacer { flex: 1; }
 
-  /* Segmented level meter — the one bit of pure cassette-deck jewellery. */
-  .bars { display: inline-flex; gap: 3px; }
-  .bars i {
-    width: 4px;
-    height: 11px;
-    background: var(--cyan);
-    opacity: 0.28;
-    animation: blip 2.4s steps(1, end) infinite;
+  .bar-link,
+  .bar-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 26px;
+    padding: 0 9px;
+    border: 1px solid var(--line-2);
+    border-radius: var(--r-1);
+    background: none;
+    color: var(--fg-dim);
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color 0.12s var(--ease), border-color 0.12s var(--ease), background 0.12s var(--ease);
   }
-  .bars i:nth-child(1) { animation-delay: 0s; }
-  .bars i:nth-child(2) { animation-delay: 0.2s; }
-  .bars i:nth-child(3) { animation-delay: 0.4s; }
-  .bars i:nth-child(4) { animation-delay: 0.6s; }
-  .bars i:nth-child(5) { animation-delay: 0.8s; }
-  .bars i:nth-child(6) { animation-delay: 1s; opacity: 0.28; background: var(--amber); }
+  .bar-link:hover,
+  .bar-btn:hover { color: var(--fg); border-color: var(--fg-ghost); background: var(--bg-2); }
 
-  @keyframes blip {
-    0%, 45% { opacity: 1; }
-    46%, 100% { opacity: 0.24; }
-  }
+  .bar-btn b { font-weight: 400; color: var(--accent); }
+  .bar-btn .sep { color: var(--fg-ghost); }
 
-  .caret {
-    display: inline-block;
-    width: 9px;
-    height: 15px;
-    background: var(--cyan);
-    animation: caret 1.05s steps(1, end) infinite;
-    vertical-align: -2px;
-  }
-  @keyframes caret { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+  /* ----------------------------------------------------------- masthead */
+
+  header.masthead { padding: clamp(44px, 9vh, 96px) 0 0; }
 
   h1 {
     margin: 0;
-    font-family: var(--display);
-    font-weight: 900;
-    font-size: clamp(38px, 10.5vw, 92px);
-    line-height: 0.94;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-    /* Chromatic fringing, the way a badly converged CRT would show it. */
-    text-shadow:
-      -2px 0 rgba(255, 106, 213, 0.55),
-       2px 0 rgba(103, 232, 249, 0.55),
-       0 0 32px rgba(166, 139, 255, 0.45);
-    transform: translate3d(var(--tilt-x), var(--tilt-y), 0);
-    will-change: transform;
-  }
-
-  .rule {
-    margin: 18px 0 0;
-    height: 1px;
-    background: linear-gradient(
-      to right,
-      var(--hair-hot),
-      rgba(166, 139, 255, 0.3) 40%,
-      rgba(133, 208, 231, 0) 92%
-    );
+    font-family: var(--mono);
+    font-size: clamp(34px, 7.6vw, 68px);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1;
   }
 
   .tagline {
     margin: 18px 0 0;
     max-width: 54ch;
-    color: var(--dim);
+    color: var(--fg-dim);
     font-size: 15px;
-    text-shadow: 0 0 16px rgba(5, 6, 12, 0.95), 0 1px 3px rgba(5, 6, 12, 0.85);
   }
 
-  /* -------------------------------------------------------------- list */
+  .tagline a { color: var(--fg); box-shadow: inset 0 -1px 0 var(--fg-ghost); }
+  .tagline a:hover { box-shadow: inset 0 -1px 0 var(--accent); }
+
+  /* ------------------------------------------------------------- signal
+
+     A chart-recorder trace on a hairline graticule. It is the rule between
+     the masthead and the directory — hence full-bleed to the wrap, hence
+     no border of its own. */
+
+  .signal {
+    position: relative;
+    margin: clamp(28px, 5vh, 52px) 0 0;
+    height: 74px;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .signal canvas { display: block; width: 100%; height: 100%; }
+
+  /* ---------------------------------------------------------- directory */
 
   .label {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 0 0 14px;
-    color: var(--faint);
-    font-family: var(--term);
-    font-size: 19px;
-    letter-spacing: 0.22em;
+    margin: 26px 0 0;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
-  }
-  .label::after {
-    content: "";
-    flex: 1;
-    height: 1px;
-    background: var(--hair);
+    color: var(--fg-faint);
   }
 
-  .index { display: grid; gap: 12px; }
+  .index { margin: 10px 0 0; border-top: 1px solid var(--line); }
 
   .entry {
-    position: relative;
     display: grid;
-    grid-template-columns: 46px 1fr auto;
+    grid-template-columns: 40px 1fr auto;
     gap: 0 18px;
-    align-items: start;
-    padding: 20px 20px 22px;
-    border: 1px solid var(--hair);
-    background: var(--panel);
-    backdrop-filter: blur(7px);
-    -webkit-backdrop-filter: blur(7px);
-    transition: border-color 0.22s ease, background 0.22s ease,
-                transform 0.22s ease, box-shadow 0.22s ease;
+    align-items: baseline;
+    padding: 20px 10px 22px;
+    border-bottom: 1px solid var(--line);
+    transition: background 0.14s var(--ease), padding-left 0.14s var(--ease);
   }
-
-  /* Corner brackets, drawn as two clipped border boxes. */
-  .entry::before,
-  .entry::after {
-    content: "";
-    position: absolute;
-    width: 13px;
-    height: 13px;
-    border: 1px solid var(--hair-hot);
-    opacity: 0;
-    transition: opacity 0.22s ease;
-  }
-  .entry::before { top: -1px; left: -1px; border-right: 0; border-bottom: 0; }
-  .entry::after { bottom: -1px; right: -1px; border-left: 0; border-top: 0; }
 
   a.entry:hover,
-  a.entry:focus-visible {
-    border-color: var(--hair-hot);
-    background: rgba(11, 19, 34, 0.72);
-    transform: translateY(-2px);
-    box-shadow: 0 0 0 1px rgba(103, 232, 249, 0.08), 0 18px 44px -26px rgba(103, 232, 249, 0.55);
-  }
-  a.entry:hover::before, a.entry:focus-visible::before,
-  a.entry:hover::after,  a.entry:focus-visible::after { opacity: 1; }
-
-  /* Keyboard focus keeps a real outline — the hover treatment alone is too
-     quiet to serve as a focus indicator. */
-  a.entry:focus-visible {
-    outline: 2px solid var(--cyan);
-    outline-offset: 3px;
-    box-shadow: inset 3px 0 0 var(--cyan), 0 18px 44px -26px rgba(103, 232, 249, 0.55);
-  }
+  a.entry:focus-visible { background: var(--bg-1); padding-left: 18px; }
+  a.entry:focus-visible { outline: 0; box-shadow: inset 2px 0 0 var(--accent); }
 
   .num {
-    color: var(--violet);
-    font-family: var(--term);
-    font-size: 30px;
-    line-height: 1;
-    letter-spacing: 0.02em;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    color: var(--fg-faint);
   }
+  a.entry:hover .num, a.entry:focus-visible .num { color: var(--accent); }
 
   .entry h2 {
     margin: 0;
-    font-family: var(--display);
-    font-weight: 500;
-    font-size: clamp(15px, 2.4vw, 18px);
-    line-height: 1.3;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
   }
 
   .entry p {
-    margin: 10px 0 0;
-    max-width: 56ch;
-    color: var(--dim);
-    font-size: 14.5px;
+    margin: 7px 0 0;
+    max-width: 58ch;
+    color: var(--fg-dim);
+    font-size: 14px;
   }
 
   .meta {
-    margin: 13px 0 0;
+    margin: 12px 0 0;
     display: flex;
     flex-wrap: wrap;
-    gap: 4px 12px;
-    color: var(--faint);
-    font-family: var(--term);
-    font-size: 17px;
-    line-height: 1.2;
-    letter-spacing: 0.05em;
+    gap: 5px 9px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+    color: var(--fg-faint);
   }
-  .meta span + span::before {
-    content: "//";
-    margin-right: 12px;
-    color: rgba(166, 139, 255, 0.45);
-  }
-
-  .status {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    padding: 4px 11px 3px;
-    border: 1px solid var(--hair);
-    color: var(--faint);
-    font-family: var(--term);
-    font-size: 17px;
-    line-height: 1.2;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    white-space: nowrap;
-  }
-  .status::before {
-    content: "";
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: currentColor;
-  }
-  .status.live {
-    border-color: rgba(103, 232, 249, 0.4);
-    color: var(--cyan);
-    text-shadow: 0 0 12px rgba(103, 232, 249, 0.6);
-  }
-  .status.live::before { animation: pulse 1.9s ease-in-out infinite; }
-  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+  .meta span + span::before { content: "·"; margin-right: 9px; color: var(--fg-ghost); }
 
   .arrow {
     display: inline-block;
-    margin-left: 10px;
-    color: var(--cyan);
-    transition: transform 0.22s ease;
+    margin-left: 9px;
+    color: var(--fg-ghost);
+    transition: transform 0.14s var(--ease), color 0.14s var(--ease);
   }
-  a.entry:hover .arrow, a.entry:focus-visible .arrow { transform: translateX(5px); }
+  a.entry:hover .arrow, a.entry:focus-visible .arrow { transform: translateX(4px); color: var(--accent); }
 
-  /* ------------------------------------------------------------ footer */
+  .tag {
+    align-self: baseline;
+    padding: 2px 8px;
+    border: 1px solid var(--line-2);
+    border-radius: var(--r-1);
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-faint);
+    white-space: nowrap;
+  }
+  .tag.live { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 40%, var(--line-2)); }
+
+  /* ------------------------------------------------------------- footer */
 
   footer {
-    margin-top: clamp(36px, 8vh, 64px);
-    padding-top: 18px;
-    border-top: 1px solid var(--hair);
     display: flex;
     flex-wrap: wrap;
-    gap: 6px 16px;
-    color: var(--faint);
-    font-family: var(--term);
-    font-size: 18px;
-    letter-spacing: 0.08em;
+    gap: 6px 18px;
+    margin: 40px 0 0;
+    padding: 18px 10px 56px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: var(--fg-faint);
   }
-  footer a { color: var(--cyan); border-bottom: 1px solid rgba(103, 232, 249, 0.3); }
-  footer a:hover { border-bottom-color: var(--cyan); }
+  footer a { color: var(--fg-dim); box-shadow: inset 0 -1px 0 var(--line-2); }
+  footer a:hover { color: var(--fg); box-shadow: inset 0 -1px 0 var(--accent); }
+  footer .spacer { flex: 1; }
 
   @media (max-width: 620px) {
-    .entry { grid-template-columns: 34px 1fr; gap: 0 14px; padding: 18px 16px 20px; }
-    .num { font-size: 24px; }
-    .status { grid-column: 2; margin-top: 14px; justify-self: start; }
-  }
-
-  /* Everything that moves is decoration; none of it is load-bearing. */
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-      transition: none !important;
-      animation: none !important;
-    }
-    h1 { transform: none; }
-    .bars i { opacity: 0.7; }
-    .caret { opacity: 1; }
+    .entry { grid-template-columns: 26px 1fr; gap: 0 12px; }
+    .arrow { display: none; }
+    .tag { grid-column: 2; margin-top: 12px; justify-self: start; }
+    .entry h2 { font-size: 16px; }
+    .bar-link .full { display: none; }
   }
 </style>
 </head>
 <body>
 
-<canvas id="sky" aria-hidden="true"></canvas>
-<div class="crt" aria-hidden="true"></div>
-
-<main class="page">
-  <header>
-    <p class="hud">
-      <span class="bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span>
-      <span>SYS.INDEX</span>
-      <span class="sep">//</span>
-      <span class="warm">04 UNITS ONLINE</span>
-      <span class="sep">//</span>
-      <span>NO INSTALL REQ<span class="caret" aria-hidden="true"></span></span>
-    </p>
-
-    <h1>Simulators</h1>
-    <div class="rule"></div>
-
-    <p class="tagline">Devices rebuilt in the browser, close enough to the real
-      thing to practise on — plus whatever else has ended up here. No installs,
-      no accounts — open one and start breaking it.</p>
-  </header>
-
-  <p class="label">Index</p>
-
-  <div class="index">
-    <!-- To add a project, copy one entry block and keep the numbers
-         sequential. The status pill reads "live" when there is something to
-         open; use "wip" for anything still being built. -->
-
-    <a class="entry" href="mac/">
-      <span class="num">01</span>
-      <span>
-        <h2>macOS Troubleshooting Simulator<span class="arrow" aria-hidden="true">&rarr;</span></h2>
-        <p>A full macOS Tahoe desktop in the browser — window management, Finder,
-          Safari, Mail, Outlook, System Settings, Recovery — built for support
-          training. Its Safari browses Wikipedia for real; everything else runs offline.</p>
-        <span class="meta"><span>/mac</span><span>html &middot; css &middot; js</span><span>no dependencies</span></span>
-      </span>
-      <span class="status live">live</span>
-    </a>
-
-    <a class="entry" href="iphone/">
-      <span class="num">02</span>
-      <span>
-        <h2>iPhone Simulator<span class="arrow" aria-hidden="true">&rarr;</span></h2>
-        <p>A full iOS phone — lock screen, Control Centre, Spotlight, App Library,
-          and thirty-odd apps from Photos and Camera through Health, Home, Music and
-          Settings. Wi-Fi, cellular and account faults can be staged deliberately.
-          Its Maps loads a real map; everything else runs offline.</p>
-        <span class="meta"><span>/iphone</span><span>html &middot; css &middot; js</span><span>no dependencies</span></span>
-      </span>
-      <span class="status live">live</span>
-    </a>
-
-    <a class="entry" href="roku/">
-      <span class="num">03</span>
-      <span>
-        <h2>Roku Troubleshooting Simulator<span class="arrow" aria-hidden="true">&rarr;</span></h2>
-        <p>A streaming player on a television, driven by a mock-up remote — home
-          screen, forty channels, the live TV guide, search, the store, playback,
-          the whole settings tree, restarts, factory reset and guided setup.
-          Everything is generated locally; it runs with the network unplugged.</p>
-        <span class="meta"><span>/roku</span><span>html &middot; css &middot; js</span><span>no dependencies</span></span>
-      </span>
-      <span class="status live">live</span>
-    </a>
-
-    <a class="entry" href="design/">
-      <span class="num">04</span>
-      <span>
-        <h2>ISAIART Design<span class="arrow" aria-hidden="true">&rarr;</span></h2>
-        <p>A type-in-space generator. Words and emoji thrown through 3D formations
-          on a canvas you size yourself, with eighteen treatments applied to the
-          letterforms and a hand-written WebGL renderer underneath.</p>
-        <span class="meta"><span>/design</span><span>html &middot; css &middot; webgl</span><span>no dependencies</span></span>
-      </span>
-      <span class="status live">live</span>
-    </a>
-
-    <a class="entry" href="image/">
-      <span class="num">05</span>
-      <span>
-        <h2>ISAIART Image<span class="arrow" aria-hidden="true">&rarr;</span></h2>
-        <p>A photograph processor. Grading, screens and distortions on your own
-          picture, with the subject found and cut out from the background by a
-          graph cut running on your device &mdash; nothing is uploaded.</p>
-        <span class="meta"><span>/image</span><span>html &middot; css &middot; webgl</span><span>no dependencies</span></span>
-      </span>
-      <span class="status live">live</span>
-    </a>
+<header class="bar">
+  <div class="bar-in">
+    <p class="wordmark"><b>ISAIART</b><span>Index</span></p>
+    <span class="bar-spacer"></span>
+    <button class="bar-btn" id="theme" type="button" aria-label="Switch between the light and dark theme">
+      Theme <span class="sep" aria-hidden="true">·</span> <b id="theme-now">dark</b>
+    </button>
+    <a class="bar-link" href="https://isaiart.com" rel="noopener">isaiart.com &#8599;</a>
   </div>
+</header>
 
-  <footer>
-    <span>Source on <a href="https://github.com/IsaiahAltDelete/Claude">GitHub</a>.</span>
-    <span>&#9679; 5 units &middot; 0 dependencies</span>
-  </footer>
+<main>
+  <div class="wrap">
+    <header class="masthead">
+      <h1>Simulators</h1>
+      <p class="tagline">Devices rebuilt in the browser, close enough to the real
+        thing to practise on — and the two graphics tools that ended up alongside
+        them. Everything here is plain HTML, CSS and JavaScript with nothing to
+        install. Main site: <a href="https://isaiart.com" rel="noopener">isaiart.com</a>.</p>
+    </header>
+
+    <div class="signal">
+      <canvas id="trace" aria-hidden="true"></canvas>
+    </div>
+
+    <p class="label">Index</p>
+    <div class="index">
+      <!-- To add a project, copy one entry block and keep the numbers
+           sequential. The tag reads "live" when there is something to open;
+           use "wip" for anything still being built. -->
+      <a class="entry" href="mac/">
+        <span class="num">01</span>
+        <span>
+          <h2>macOS Troubleshooting Simulator<span class="arrow" aria-hidden="true">&rarr;</span></h2>
+          <p>A full macOS Tahoe desktop — window management, Finder, Safari, Mail,
+            Outlook, System Settings, Recovery — built for support training. Its
+            Safari browses Wikipedia for real; everything else runs offline.</p>
+          <span class="meta"><span>/mac</span><span>31 apps</span><span>html · css · js</span><span>no dependencies</span></span>
+        </span>
+        <span class="tag live">live</span>
+      </a>
+      <a class="entry" href="iphone/">
+        <span class="num">02</span>
+        <span>
+          <h2>iPhone Simulator<span class="arrow" aria-hidden="true">&rarr;</span></h2>
+          <p>A full iOS phone — lock screen, Control Centre, Spotlight, App Library
+            and 51 apps, driven either by hand or from a control panel beside the
+            device. Its Maps loads a real map; everything else runs offline.</p>
+          <span class="meta"><span>/iphone</span><span>51 apps</span><span>html · css · js</span><span>no dependencies</span></span>
+        </span>
+        <span class="tag live">live</span>
+      </a>
+      <a class="entry" href="roku/">
+        <span class="num">03</span>
+        <span>
+          <h2>Roku Troubleshooting Simulator<span class="arrow" aria-hidden="true">&rarr;</span></h2>
+          <p>A streaming player on a television, driven by a mock-up remote — home
+            screen, 43 channels, the live guide, search, the store, playback, the
+            whole settings tree, restarts and factory reset. The television is
+            simulated too, inputs and all.</p>
+          <span class="meta"><span>/roku</span><span>43 channels</span><span>html · css · js</span><span>no dependencies</span></span>
+        </span>
+        <span class="tag live">live</span>
+      </a>
+      <a class="entry" href="design/">
+        <span class="num">04</span>
+        <span>
+          <h2>ISAIART Design<span class="arrow" aria-hidden="true">&rarr;</span></h2>
+          <p>A type-in-space generator. Words and emoji thrown through 21 three
+            dimensional formations on a canvas you size yourself, with 18
+            treatments applied to the letterforms and a hand-written WebGL
+            renderer underneath.</p>
+          <span class="meta"><span>/design</span><span>86 controls</span><span>html · css · webgl</span><span>no dependencies</span></span>
+        </span>
+        <span class="tag live">live</span>
+      </a>
+      <a class="entry" href="image/">
+        <span class="num">05</span>
+        <span>
+          <h2>ISAIART Image<span class="arrow" aria-hidden="true">&rarr;</span></h2>
+          <p>A photograph processor. Grading, screens and distortions on your own
+            picture, with the subject found and cut out from the background by a
+            graph cut running on your device — nothing is uploaded.</p>
+          <span class="meta"><span>/image</span><span>100 controls</span><span>html · css · webgl</span><span>no dependencies</span></span>
+        </span>
+        <span class="tag live">live</span>
+      </a>
+    </div>
+
+    <footer>
+      <span>5 projects · 0 dependencies</span>
+      <span class="spacer"></span>
+      <span><a href="https://isaiart.com" rel="noopener">isaiart.com</a></span>
+      <span><a href="https://github.com/IsaiahAltDelete/Claude">Source on GitHub</a></span>
+    </footer>
+  </div>
 </main>
 
 <script>
 /* ---------------------------------------------------------------------------
-   Starfield, pointer parallax, and a black hole on a slow bounce.
+   Theme, and the signal strip.
 
-   The lensing is the real thing, cheaply: for a point mass, a source sitting
-   at radius r from the lens is seen at
+   The trace is a chart recorder: a beam sweeps left to right at a constant
+   rate, drawing a summed-sine signal, and the line behind it decays like
+   phosphor instead of vanishing. The ground colour is read back out of the
+   stylesheet because a canvas cannot inherit a custom property, and the two
+   themes need opposite grounds.
 
-       r' = ( r + sqrt(r^2 + 4E^2) ) / 2
-
-   where E is the Einstein radius. Every star gets pushed outward, the disc
-   inside E empties out on its own (r' >= E always, so nothing needs culling),
-   and the pile-up at the edge draws its own Einstein ring. Magnification comes
-   from the same expression's derivative, which is what makes stars flare as
-   the hole drifts past them. A bounded twist on top drags them around it.
-
-   Everything here is decoration: under prefers-reduced-motion the whole thing
-   collapses to one static frame, and nothing on the page depends on it.
+   The decay is applied to a separate transparent layer holding only the trace,
+   and the ground and graticule are repainted underneath it every frame. Fading
+   the visible canvas toward its own ground instead — the obvious way to write
+   this — is wrong twice over: 8-bit compositing does not round-trip, so a few
+   hundred washes walk a neutral ground off its own value (the light theme's
+   cream drifts visibly pink), and the graticule, painted once, gets eaten by
+   the same washes. Fading toward transparent has neither problem, because zero
+   alpha is a fixed point that quantisation lands on exactly.
    --------------------------------------------------------------------------- */
 (function () {
   "use strict";
 
-  var canvas = document.getElementById("sky");
-  if (!canvas || !canvas.getContext) return;
+  var root = document.documentElement;
 
+  /* ------------------------------------------------------------- theme */
+
+  var label = document.getElementById("theme-now");
+  var button = document.getElementById("theme");
+  var meta = document.querySelector('meta[name="theme-color"]');
+
+  /* One observer rather than a call beside every place the theme can change.
+     The attribute is the single source of truth — the button writes it, the
+     system preference writes it, and anything else that ever does gets the
+     repaint for free. This is also what keeps the trace's palette honest,
+     since the canvas cannot inherit a CSS variable. */
+  new MutationObserver(paintTheme)
+    .observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+
+  function paintTheme() {
+    var now = root.dataset.theme === "light" ? "light" : "dark";
+    label.textContent = now;
+    button.setAttribute("aria-pressed", String(now === "light"));
+    button.title = "Switch to the " + (now === "light" ? "dark" : "light") + " theme";
+    if (meta) meta.setAttribute("content", now === "light" ? "#f2ede3" : "#0b0a09");
+    reread();
+  }
+
+  button.addEventListener("click", function () {
+    var next = root.dataset.theme === "light" ? "dark" : "light";
+    root.dataset.theme = next;                    // the observer repaints
+    try { localStorage.setItem("isaiart.theme", JSON.stringify(next)); } catch (e) { /* private mode */ }
+  });
+
+  /* Follow the system only while no explicit choice has been stored. */
+  if (window.matchMedia) {
+    var system = window.matchMedia("(prefers-color-scheme: light)");
+    var follow = function () {
+      var stored;
+      try {
+        var raw = localStorage.getItem("isaiart.theme");
+        stored = raw == null ? null : JSON.parse(raw);
+      } catch (e) { stored = null; }
+      if (stored !== "light" && stored !== "dark") {
+        root.dataset.theme = system.matches ? "light" : "dark";
+      }
+    };
+    if (system.addEventListener) system.addEventListener("change", follow);
+  }
+
+  paintTheme();
+
+  /* ------------------------------------------------------------- trace */
+
+  var canvas = document.getElementById("trace");
+  if (!canvas || !canvas.getContext) return;
   var ctx = canvas.getContext("2d", { alpha: false });
   if (!ctx) return;
 
-  var TAU = Math.PI * 2;
-  var reduceMotion = window.matchMedia
+  /* The trace lives here and nowhere else; the visible canvas is rebuilt from
+     ground + graticule + this, every frame. */
+  var layer = document.createElement("canvas");
+  var lctx = layer.getContext("2d");
+
+  var reduce = window.matchMedia
     ? window.matchMedia("(prefers-reduced-motion: reduce)")
     : { matches: false, addEventListener: null };
 
-  /* Star tints: mostly cold white, with a few warm and violet ones so the
-     field does not read as a single flat colour. */
-  var TINTS = [
-    "#dff1ff", "#dff1ff", "#dff1ff", "#dff1ff",
-    "#bcd8ff", "#bcd8ff",
-    "#a9c0ff",
-    "#ffd9b0",
-    "#ffb9e6"
-  ];
-
   var W = 0, H = 0, dpr = 1;
-  var stars = [];
-  var backdrop = null;          // pre-rendered nebula, redrawn only on resize
-  var running = false, rafId = 0, lastTime = 0, clock = 0;
+  var ground = "#0b0a09", ink = "#ffb000", grid = "#24211e";
+  var x = 0, clock = 0, last = 0, raf = 0;
+  var SPEED = 168;              // px of trace per second
+  var STEP = 2;                 // px between samples — the beam is not a curve
 
-  /* Pointer: `target` is where it actually is, `eased` is what the field
-     follows, so a flick of the mouse glides instead of snapping. */
-  var pointer = {
-    target: { x: 0, y: 0 },
-    eased: { x: 0, y: 0 },
-    active: false,
-    idlePhase: 0
-  };
-
-  var hole = { x: 0, y: 0, vx: 26, vy: 17.5, r: 34, E: 82 };
-
-  var PARALLAX = 52;            // px of drift between the nearest and farthest layer
-  var CURSOR_PUSH = 150;        // px radius of the pointer's shove on nearby stars
-
-  /* ------------------------------------------------------------- layout */
-
-  function resize() {
-    W = Math.max(1, window.innerWidth);
-    H = Math.max(1, window.innerHeight);
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
-
-    canvas.width = Math.round(W * dpr);
-    canvas.height = Math.round(H * dpr);
-    canvas.style.width = W + "px";
-    canvas.style.height = H + "px";
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-    hole.r = Math.max(24, Math.min(58, Math.min(W, H) * 0.055));
-    hole.E = hole.r * 2.35;
-
-    /* Keep the hole on-screen after a resize, and seed it off-centre so the
-       first bounce is not a straight diagonal. */
-    var m = hole.E * 1.15;
-    if (!hole.placed) {
-      hole.x = W * 0.68;
-      hole.y = H * 0.32;
-      hole.placed = true;
-    }
-    hole.x = Math.min(Math.max(hole.x, m), Math.max(m, W - m));
-    hole.y = Math.min(Math.max(hole.y, m), Math.max(m, H - m));
-
-    if (!pointer.active) {
-      pointer.target.x = pointer.eased.x = W * 0.5;
-      pointer.target.y = pointer.eased.y = H * 0.5;
-    }
-
-    buildStars();
-    buildBackdrop();
+  /* The palette lives in tokens.css, so it is read back rather than repeated.
+     Called again on a theme switch and after a resize. */
+  function reread() {
+    if (!ctx) return;            // called by paintTheme before the canvas is up
+    var cs = getComputedStyle(root);
+    ground = cs.getPropertyValue("--bg-0").trim() || "#0b0a09";
+    ink = cs.getPropertyValue("--accent").trim() || "#ffb000";
+    grid = cs.getPropertyValue("--line").trim() || "#24211e";
+    wipe();
+    /* Wiping is right mid-sweep — the tail is the old theme's colour — but it
+       would leave a reduced-motion visitor with an empty strip. */
+    if (reduce && reduce.matches) still();
   }
 
-  function buildStars() {
-    var count = Math.round(Math.min(900, Math.max(240, (W * H) / 1900)));
-    stars = new Array(count);
-
-    for (var i = 0; i < count; i++) {
-      /* Skewed so most stars sit far away and only a handful come forward —
-         that is what sells the parallax. */
-      var z = Math.pow(Math.random(), 1.8);
-      stars[i] = {
-        x: Math.random() * W,
-        y: Math.random() * H,
-        z: z,
-        r: 0.32 + z * 1.5,
-        base: 0.28 + z * 0.62,
-        tint: TINTS[(Math.random() * TINTS.length) | 0],
-        phase: Math.random() * TAU,
-        rate: 0.5 + Math.random() * 1.7,
-        drift: 1.4 + z * 5.5
-      };
-    }
-
-    /* Grouped by tint so the draw loop changes fillStyle a handful of times
-       per frame instead of once per star. Order is irrelevant for points. */
-    stars.sort(function (a, b) { return a.tint < b.tint ? -1 : a.tint > b.tint ? 1 : 0; });
+  /** Ground and graticule, with the trace layer emptied. */
+  function wipe() {
+    lctx.clearRect(0, 0, W, H);
+    groundGraticule();
   }
 
-  /* The static part of the sky: ground colour plus two very soft clouds.
-     Rendered once per resize into an offscreen canvas and blitted per frame,
-     which keeps gradient work out of the animation loop. */
-  function buildBackdrop() {
-    backdrop = document.createElement("canvas");
-    backdrop.width = canvas.width;
-    backdrop.height = canvas.height;
-
-    var b = backdrop.getContext("2d");
-    if (!b) { backdrop = null; return; }
-    b.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-    b.fillStyle = "#05060c";
-    b.fillRect(0, 0, W, H);
-
-    var clouds = [
-      { x: W * 0.2, y: H * 0.18, r: Math.max(W, H) * 0.6, c: "rgba(88, 60, 170, 0.20)" },
-      { x: W * 0.85, y: H * 0.85, r: Math.max(W, H) * 0.55, c: "rgba(20, 96, 130, 0.18)" }
-    ];
-
-    for (var i = 0; i < clouds.length; i++) {
-      var c = clouds[i];
-      var g = b.createRadialGradient(c.x, c.y, 0, c.x, c.y, c.r);
-      g.addColorStop(0, c.c);
-      g.addColorStop(1, "rgba(5, 6, 12, 0)");
-      b.fillStyle = g;
-      b.fillRect(0, 0, W, H);
-    }
+  /** Ground and graticule only — the trace layer is left alone. */
+  function groundGraticule() {
+    ctx.fillStyle = ground;
+    ctx.fillRect(0, 0, W, H);
+    graticule();
   }
 
-  /* --------------------------------------------------------------- input */
-
-  function setPointer(x, y) {
-    pointer.target.x = x;
-    pointer.target.y = y;
-    pointer.active = true;
-  }
-
-  window.addEventListener("pointermove", function (e) {
-    setPointer(e.clientX, e.clientY);
-  }, { passive: true });
-
-  window.addEventListener("pointerdown", function (e) {
-    setPointer(e.clientX, e.clientY);
-  }, { passive: true });
-
-  window.addEventListener("pointerleave", function () {
-    pointer.active = false;
-  }, { passive: true });
-
-  /* ---------------------------------------------------------------- step */
-
-  function step(dt) {
-    clock += dt;
-
-    /* With no pointer — a touch screen, or the cursor parked outside the
-       window — walk a slow Lissajous so the field never sits perfectly
-       still. */
-    if (!pointer.active) {
-      pointer.idlePhase += dt * 0.16;
-      pointer.target.x = W * (0.5 + 0.3 * Math.cos(pointer.idlePhase));
-      pointer.target.y = H * (0.5 + 0.22 * Math.sin(pointer.idlePhase * 1.31));
-    }
-
-    var ease = 1 - Math.pow(0.0015, dt);   // frame-rate independent smoothing
-    pointer.eased.x += (pointer.target.x - pointer.eased.x) * ease;
-    pointer.eased.y += (pointer.target.y - pointer.eased.y) * ease;
-
-    /* Black hole: constant velocity, reflected at the edges with the ring
-       kept fully in frame. */
-    var m = hole.E * 1.1;
-    hole.x += hole.vx * dt;
-    hole.y += hole.vy * dt;
-
-    if (hole.x < m) { hole.x = m; hole.vx = Math.abs(hole.vx); }
-    else if (hole.x > W - m) { hole.x = W - m; hole.vx = -Math.abs(hole.vx); }
-
-    if (hole.y < m) { hole.y = m; hole.vy = Math.abs(hole.vy); }
-    else if (hole.y > H - m) { hole.y = H - m; hole.vy = -Math.abs(hole.vy); }
-
-    /* Star drift, wrapped. Kept in world space so parallax and lensing are
-       applied fresh at draw time. */
-    for (var i = 0; i < stars.length; i++) {
-      var s = stars[i];
-      s.x -= s.drift * dt;
-      if (s.x < -8) { s.x += W + 16; s.y = Math.random() * H; }
-      s.phase += s.rate * dt;
-    }
-
-    /* Hand the pointer offset to CSS for the wordmark's counter-parallax. */
-    var tiltX = ((pointer.eased.x / W) - 0.5) * -14;
-    var tiltY = ((pointer.eased.y / H) - 0.5) * -8;
-    document.documentElement.style.setProperty("--tilt-x", tiltX.toFixed(2) + "px");
-    document.documentElement.style.setProperty("--tilt-y", tiltY.toFixed(2) + "px");
-  }
-
-  /* ---------------------------------------------------------------- draw */
-
-  function draw(animated) {
-    if (backdrop) ctx.drawImage(backdrop, 0, 0, W, H);
-    else { ctx.fillStyle = "#05060c"; ctx.fillRect(0, 0, W, H); }
-
-    var offX = (pointer.eased.x - W * 0.5) / W;
-    var offY = (pointer.eased.y - H * 0.5) / H;
-    var E2 = hole.E * hole.E;
-    var twistBase = animated ? 0.75 + clock * 0.28 : 0.75;
-    var lastTint = "";
-
-    for (var i = 0; i < stars.length; i++) {
-      var s = stars[i];
-
-      /* 1. Parallax: near stars swing further than far ones, against the
-            pointer, so the field reads as depth rather than a flat pan. */
-      var x = s.x - offX * PARALLAX * s.z;
-      var y = s.y - offY * PARALLAX * s.z;
-
-      /* 2. The pointer shoves nearby stars aside and brightens them. */
-      var boost = 0;
-      var mdx = x - pointer.eased.x;
-      var mdy = y - pointer.eased.y;
-      var md2 = mdx * mdx + mdy * mdy;
-      if (md2 < CURSOR_PUSH * CURSOR_PUSH) {
-        var near = 1 - Math.sqrt(md2) / CURSOR_PUSH;
-        x += mdx * near * 0.22;
-        y += mdy * near * 0.22;
-        boost = near * 0.55;
-      }
-
-      /* 3. Lensing. */
-      var dx = x - hole.x;
-      var dy = y - hole.y;
-      var r = Math.sqrt(dx * dx + dy * dy) || 0.001;
-      var root = Math.sqrt(r * r + 4 * E2);
-      var rImg = 0.5 * (r + root);
-
-      /* Magnification = (r'/r) * dr'/dr, and the visible size follows its
-         root — a star sitting on the ring flares, one far away does not. */
-      var mag = (rImg / r) * (0.5 * (1 + r / root));
-      var flare = Math.min(Math.sqrt(mag), 2.8);
-
-      var twist = twistBase * Math.min(E2 / (rImg * rImg), 1.15);
-      var angle = Math.atan2(dy, dx) + twist;
-
-      var sx = hole.x + Math.cos(angle) * rImg;
-      var sy = hole.y + Math.sin(angle) * rImg;
-
-      if (sx < -4 || sx > W + 4 || sy < -4 || sy > H + 4) continue;
-
-      var twinkle = animated ? 0.78 + 0.22 * Math.sin(s.phase) : 1;
-      var alpha = Math.min(1, s.base * twinkle * Math.min(flare, 2) + boost);
-      var size = Math.max(0.5, s.r * Math.min(flare, 2.2));
-
-      if (s.tint !== lastTint) { ctx.fillStyle = s.tint; lastTint = s.tint; }
-      ctx.globalAlpha = alpha;
-      ctx.fillRect(sx - size * 0.5, sy - size * 0.5, size, size);
-
-      /* Halo on the few stars bright enough to earn one. */
-      if (alpha > 0.8 && size > 1.7) {
-        ctx.globalAlpha = alpha * 0.13;
-        ctx.fillRect(sx - size * 1.7, sy - size * 1.7, size * 3.4, size * 3.4);
-      }
-    }
-
-    ctx.globalAlpha = 1;
-    drawHole(animated);
-    drawCursor();
-  }
-
-  function drawHole(animated) {
-    var E = hole.E;
-    var spin = animated ? clock * 0.34 : 0.6;
-
-    /* Halo: violet close in, cyan further out, gone by the edge. */
-    var halo = ctx.createRadialGradient(hole.x, hole.y, hole.r * 0.85, hole.x, hole.y, E * 2.7);
-    halo.addColorStop(0, "rgba(150, 110, 255, 0.34)");
-    halo.addColorStop(0.34, "rgba(103, 232, 249, 0.13)");
-    halo.addColorStop(1, "rgba(5, 6, 12, 0)");
-    ctx.fillStyle = halo;
-    ctx.beginPath();
-    ctx.arc(hole.x, hole.y, E * 2.7, 0, TAU);
-    ctx.fill();
-
-    /* Accretion disc: two thin ellipses tilted against each other, turning
-       slowly, both kept inside the ring so they read as a disc rather than
-       as orbits around an atom. */
-    ctx.save();
-    ctx.lineCap = "round";
-    ctx.strokeStyle = "rgba(255, 180, 84, 0.34)";
-    ctx.lineWidth = 2.6;
-    ctx.beginPath();
-    ctx.ellipse(hole.x, hole.y, E * 0.84, E * 0.23, spin, 0, TAU);
-    ctx.stroke();
-
-    ctx.strokeStyle = "rgba(255, 106, 213, 0.24)";
-    ctx.lineWidth = 1.8;
-    ctx.beginPath();
-    ctx.ellipse(hole.x, hole.y, E * 0.64, E * 0.15, -spin * 0.7 + 0.6, 0, TAU);
-    ctx.stroke();
-    ctx.restore();
-
-    /* Einstein ring: a soft pass and a sharp one on top. */
-    ctx.strokeStyle = "rgba(133, 232, 249, 0.18)";
-    ctx.lineWidth = 5;
-    ctx.beginPath();
-    ctx.arc(hole.x, hole.y, E, 0, TAU);
-    ctx.stroke();
-
-    ctx.strokeStyle = "rgba(224, 250, 255, 0.42)";
-    ctx.lineWidth = 1.1;
-    ctx.beginPath();
-    ctx.arc(hole.x, hole.y, E, 0, TAU);
-    ctx.stroke();
-
-    /* Photon rim and the shadow itself. */
-    ctx.strokeStyle = "rgba(180, 150, 255, 0.5)";
+  function graticule() {
+    ctx.strokeStyle = grid;
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.arc(hole.x, hole.y, hole.r * 1.12, 0, TAU);
+    for (var gx = 0; gx <= W; gx += 48) {
+      ctx.moveTo(Math.round(gx) + 0.5, 0);
+      ctx.lineTo(Math.round(gx) + 0.5, H);
+    }
+    for (var gy = H / 4; gy < H; gy += H / 4) {
+      ctx.moveTo(0, Math.round(gy) + 0.5);
+      ctx.lineTo(W, Math.round(gy) + 0.5);
+    }
     ctx.stroke();
-
-    ctx.fillStyle = "#000";
-    ctx.beginPath();
-    ctx.arc(hole.x, hole.y, hole.r, 0, TAU);
-    ctx.fill();
   }
 
-  function drawCursor() {
-    var g = ctx.createRadialGradient(
-      pointer.eased.x, pointer.eased.y, 0,
-      pointer.eased.x, pointer.eased.y, CURSOR_PUSH * 0.9
-    );
-    g.addColorStop(0, "rgba(103, 232, 249, 0.10)");
-    g.addColorStop(1, "rgba(103, 232, 249, 0)");
-    ctx.fillStyle = g;
-    ctx.beginPath();
-    ctx.arc(pointer.eased.x, pointer.eased.y, CURSOR_PUSH * 0.9, 0, TAU);
-    ctx.fill();
+  /* Three sines whose periods do not divide each other, so the strip never
+     repeats within a sensible viewing time. */
+  function signal(t) {
+    return Math.sin(t * 1.7) * 0.42
+         + Math.sin(t * 0.61 + 1.1) * 0.3
+         + Math.sin(t * 3.3 + 0.4) * 0.12;
   }
 
-  /* ---------------------------------------------------------------- loop */
+  function resize() {
+    var rect = canvas.getBoundingClientRect();
+    W = Math.max(1, Math.round(rect.width));
+    H = Math.max(1, Math.round(rect.height));
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.round(W * dpr);
+    canvas.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    layer.width = canvas.width;
+    layer.height = canvas.height;
+    lctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    x = 0;
+    reread();
+    if (reduce.matches) still();
+  }
+
+  /* Reduced motion gets the whole waveform at once and nothing that moves. */
+  function still() {
+    wipe();
+    ctx.strokeStyle = ink;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    for (var px = 0; px <= W; px += STEP) {
+      var y = H / 2 - signal(px / 74) * (H * 0.34);
+      if (px === 0) ctx.moveTo(px, y); else ctx.lineTo(px, y);
+    }
+    ctx.stroke();
+  }
 
   function frame(now) {
-    rafId = requestAnimationFrame(frame);
-    var dt = Math.min((now - lastTime) / 1000, 0.05);   // clamp after a stall
-    lastTime = now;
-    step(dt);
-    draw(true);
+    raf = requestAnimationFrame(frame);
+    if (!last) last = now;
+    var dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    clock += dt;
+
+    /* Decay: pull the whole trace layer toward transparent. */
+    lctx.globalCompositeOperation = "destination-out";
+    lctx.fillStyle = "rgba(0,0,0,0.02)";
+    lctx.fillRect(0, 0, W, H);
+    lctx.globalCompositeOperation = "source-over";
+
+    var advance = SPEED * dt;
+    lctx.strokeStyle = ink;
+    lctx.lineWidth = 1.5;
+    lctx.lineCap = "round";
+    lctx.beginPath();
+
+    var drawn = 0;
+    while (drawn < advance) {
+      var prevX = x, prevY = H / 2 - signal(prevX / 74 + clock * 0.9) * (H * 0.34);
+      x += STEP;
+      drawn += STEP;
+      if (x > W) {                 // beam returns to the left and keeps going
+        lctx.stroke();             // flush this sweep before the layer is wiped
+        lctx.beginPath();
+        x = 0;
+        wipe();
+        continue;
+      }
+      var y = H / 2 - signal(x / 74 + clock * 0.9) * (H * 0.34);
+      lctx.moveTo(prevX, prevY);
+      lctx.lineTo(x, y);
+    }
+    lctx.stroke();
+
+    /* The beam head, brighter than its own tail. */
+    lctx.fillStyle = ink;
+    lctx.beginPath();
+    lctx.arc(x, H / 2 - signal(x / 74 + clock * 0.9) * (H * 0.34), 2, 0, Math.PI * 2);
+    lctx.fill();
+
+    /* Compose: a fresh ground and a full-strength graticule under the trace. */
+    groundGraticule();
+    ctx.drawImage(layer, 0, 0, W, H);
   }
 
   function start() {
-    if (running) return;
-    running = true;
-    lastTime = performance.now();
-    rafId = requestAnimationFrame(frame);
+    if (reduce.matches) { cancelAnimationFrame(raf); raf = 0; still(); return; }
+    if (!raf) { last = 0; raf = requestAnimationFrame(frame); }
   }
 
-  function stop() {
-    running = false;
-    if (rafId) cancelAnimationFrame(rafId);
-    rafId = 0;
-  }
+  addEventListener("resize", resize, { passive: true });
+  if (reduce.addEventListener) reduce.addEventListener("change", start);
 
-  function apply() {
-    stop();
-    if (reduceMotion.matches) {
-      /* One still frame: the same sky, holding its breath. */
-      pointer.eased.x = pointer.target.x = W * 0.5;
-      pointer.eased.y = pointer.target.y = H * 0.5;
-      draw(false);
-    } else {
-      start();
-    }
-  }
-
-  var resizeTimer = 0;
-  window.addEventListener("resize", function () {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(function () {
-      resize();
-      if (!running) draw(false);
-    }, 120);
-  }, { passive: true });
-
+  /* Nothing on the page depends on the trace, so it is stopped whenever the
+     tab is not being looked at. */
   document.addEventListener("visibilitychange", function () {
-    if (document.hidden) stop();
-    else if (!reduceMotion.matches) start();
+    if (document.hidden) { cancelAnimationFrame(raf); raf = 0; }
+    else start();
   });
 
-  if (reduceMotion.addEventListener) reduceMotion.addEventListener("change", apply);
-  else if (reduceMotion.addListener) reduceMotion.addListener(apply);
-
   resize();
-  apply();
-})();
+  start();
+}());
 </script>
 </body>
 </html>

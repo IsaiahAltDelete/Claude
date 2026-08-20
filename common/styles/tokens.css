@@ -1,9 +1,21 @@
 /* ---------------------------------------------------------------------------
    Tokens, reset and the base type scale.
 
-   The palette is deliberately achromatic: a stack of neutral grays for both
-   themes, one warm accent used only where a control is live. Nothing here is
-   blue. Dark is the default; light is a full sibling, not an afterthought.
+   Cassette futurism, taken as an interface language rather than a costume.
+   What that means here, concretely: warm neutral grounds instead of blue-grey
+   ones, one phosphor accent used only where a control is live, square corners,
+   hairline rules, and monospaced tabular readouts for anything numeric. What
+   it explicitly does not mean: bezels, screws, scanline overlays, fake CRT
+   curvature or chrome that pretends to be hardware. Nothing on screen is a
+   picture of an object.
+
+   The grounds stay achromatic-warm so the canvas keeps all the real colour.
+   Dark is the default; light is a full sibling — warm paper rather than white,
+   which is the same instrument panel under a different lamp, not an inversion.
+
+   Both themes are driven entirely by the values below. Every rule in
+   controls.css and in the two page layouts spends these names and never a
+   literal colour, so a retune is this file alone.
    --------------------------------------------------------------------------- */
 
 @import url("../assets/fonts/fonts.css");
@@ -11,26 +23,27 @@
 :root {
   color-scheme: dark;
 
-  /* Surfaces, darkest to lightest. */
-  --bg-0: #0a0a0b;      /* app ground */
-  --bg-1: #101012;      /* rails, sheets */
-  --bg-2: #17171a;      /* inputs, wells */
-  --bg-3: #1e1e22;      /* hover */
-  --bg-4: #2a2a2f;      /* pressed, filled track */
+  /* Surfaces, darkest to lightest. Warm — each carries a little amber so the
+     interface sits under the same lamp as the accent. */
+  --bg-0: #0b0a09;      /* app ground */
+  --bg-1: #121110;      /* rails, sheets */
+  --bg-2: #191715;      /* inputs, wells */
+  --bg-3: #211e1b;      /* hover */
+  --bg-4: #2c2823;      /* pressed, filled track */
 
-  --line: #212125;      /* hairline */
-  --line-2: #2f2f35;    /* stronger hairline, focus ring base */
+  --line: #24211e;      /* hairline */
+  --line-2: #332f2a;    /* stronger hairline, focus ring base */
 
-  --fg: #f2f2f3;        /* primary text */
-  --fg-dim: #a3a3a8;    /* secondary text — 7.2:1 on --bg-1 */
-  --fg-faint: #74747a;  /* labels, units — 4.6:1 on --bg-1 */
-  --fg-ghost: #46464c;  /* non-text decoration only */
+  --fg: #f4f0e8;        /* primary text — warm white, not paper white */
+  --fg-dim: #a8a29a;    /* secondary text — 7.4:1 on --bg-1 */
+  --fg-faint: #7b756c;  /* labels, units — 4.6:1 on --bg-1 */
+  --fg-ghost: #4a453f;  /* non-text decoration only */
 
-  --accent: #f2f2f3;    /* monochrome “on” state */
-  --accent-ink: #0a0a0b;
-  --hot: #ff4b2b;       /* recording / destructive only */
+  --accent: #ffb000;    /* phosphor amber — the "on" state, and nothing else */
+  --accent-ink: #0b0a09;
+  --hot: #ff5b38;       /* recording / destructive only */
 
-  --stage: #141416;     /* the surface the artboard sits on */
+  --stage: #151311;     /* the surface the artboard sits on */
 
   --r-1: 2px;
   --r-2: 4px;
@@ -44,16 +57,16 @@
   --status: 26px;
   --sheet-peek: 116px;   /* how much of the mobile sheet stays on screen */
 
-
-  /* Panel tones. Each rail panel carries one muted hue so the eye can tell
-     where it is without reading the tab — desaturated far enough that the
-     interface stays achromatic and the canvas keeps all the colour. */
-  --tone-1: #b9a17a;   /* sand  */
-  --tone-2: #8fa58c;   /* sage  */
-  --tone-3: #8795a8;   /* slate */
-  --tone-4: #a68fa0;   /* mauve */
-  --tone-5: #7fa8a2;   /* teal  */
-  --tone-6: #b08d7f;   /* clay  */
+  /* Panel tones. Each rail panel carries one hue so the eye can tell where it
+     is without reading the tab. Taken off a phosphor and filter-gel palette —
+     amber, cyan, green, magenta, sand, ice — and desaturated far enough that
+     the interface still reads as achromatic and the canvas keeps the colour. */
+  --tone-1: #c89a4e;   /* amber   */
+  --tone-2: #6fa5a8;   /* cyan    */
+  --tone-3: #86a878;   /* green   */
+  --tone-4: #b0849c;   /* magenta */
+  --tone-5: #b39d84;   /* sand    */
+  --tone-6: #8898ac;   /* ice     */
 
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
 }
@@ -61,41 +74,43 @@
 :root[data-theme="light"] {
   color-scheme: light;
 
-  --bg-0: #eeeeef;
-  --bg-1: #fbfbfc;
-  --bg-2: #f1f1f3;
-  --bg-3: #e7e7ea;
-  --bg-4: #d8d8dd;
+  /* Warm paper, not white: the printed side of the same equipment — a manual,
+     a silkscreened panel, a plotter sheet. */
+  --bg-0: #ded8cc;
+  --bg-1: #f2ede3;
+  --bg-2: #e7e1d5;
+  --bg-3: #dcd5c7;
+  --bg-4: #c9c1b1;
 
-  --line: #e0e0e4;
-  --line-2: #cbcbd1;
+  --line: #d2cabb;
+  --line-2: #b3aa99;
 
-  --fg: #121214;
-  --fg-dim: #56565c;
-  --fg-faint: #7b7b83;
-  --fg-ghost: #b6b6bd;
+  --fg: #1a1714;
+  --fg-dim: #565049;
+  --fg-faint: #7a7268;
+  --fg-ghost: #ada496;
 
-  --accent: #121214;
-  --accent-ink: #fbfbfc;
+  --accent: #a35a00;    /* the same amber, taken to 4.9:1 on paper */
+  --accent-ink: #f8f4ec;
 
-  --stage: #e4e4e6;
+  --stage: #cfc8ba;
 
-  /* The same hues, taken darker so they hold against a white rail. */
-  --tone-1: #8a734c;
-  --tone-2: #5f7a5c;
-  --tone-3: #59677a;
-  --tone-4: #7a5f72;
-  --tone-5: #4f7a74;
-  --tone-6: #855f52;
+  /* The same hues, taken darker so they hold against a paper rail. */
+  --tone-1: #8a6420;
+  --tone-2: #366e72;
+  --tone-3: #4c7040;
+  --tone-4: #7d4c68;
+  --tone-5: #7d654a;
+  --tone-6: #4e6076;
 }
 
 * { box-sizing: border-box; }
 
+/* Base only. The viewport-filling, non-scrolling shell belongs to the two
+   tool layouts, not here — this file is also loaded by the index, which is an
+   ordinary scrolling document. */
 html, body {
   margin: 0;
-  height: 100%;
-  overflow: hidden;
-  overscroll-behavior: none;
   background: var(--bg-0);
   color: var(--fg);
   font-family: var(--ui);
@@ -111,7 +126,9 @@ body { touch-action: manipulation; }
 
 button, input, select, textarea { font: inherit; color: inherit; }
 
-:focus-visible { outline: 1px solid var(--fg); outline-offset: 1px; }
+/* The focus ring is the accent on purpose: 'lit' means the same thing here
+   as it does on every control in the rail. */
+:focus-visible { outline: 1px solid var(--accent); outline-offset: 1px; }
 
 /* Scrollbars — thin, neutral, no chrome. */
 * { scrollbar-width: thin; scrollbar-color: var(--line-2) transparent; }

@@ -17,7 +17,10 @@ const Rail = window.ISO.Rail;
 const Export = window.ISO.Export;
 
 const SAVE_KEY = "isaiart.design.state";
-const THEME_KEY = "isaiart.design.theme";
+/* Shared with /image, the index and the 404, so the choice follows the
+   visitor between them. Written through `store`, so the value in
+   localStorage is JSON — the two static pages encode it the same way. */
+const THEME_KEY = "isaiart.theme";
 /* Kept out of the state blob on purpose: a preference that lives inside the
    thing it deletes cannot survive being switched off, and it has no business
    travelling in a shared link or a settings file. */

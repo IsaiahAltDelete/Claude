@@ -23,7 +23,10 @@ const Export = window.ISO.Export;
 const Segment = window.ISO.Segment;
 
 const SAVE_KEY = "isaiart.image.state";
-const THEME_KEY = "isaiart.image.theme";
+/* Shared with /image, the index and the 404, so the choice follows the
+   visitor between them. Written through `store`, so the value in
+   localStorage is JSON — the two static pages encode it the same way. */
+const THEME_KEY = "isaiart.theme";
 /* Kept out of the state blob on purpose: a preference that lives inside the
    thing it deletes cannot survive being switched off. */
 const AUTOSAVE_KEY = "isaiart.image.autosave";
