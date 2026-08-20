@@ -161,6 +161,8 @@ class Renderer {
     this.view = new Float32Array(16);
     this.eye = [0, 0, 3];
     this.target = [0, 0, 0];
+    this.frameW = 1;
+    this.frameH = 1;
 
     this.frameMs = 16;
     this.lost = false;
@@ -390,6 +392,12 @@ class Renderer {
     const far = Math.max(dist + s.depth * 2 + s.radius * 4, 12);
     perspective(this.proj, s.fov, aspect, 0.01, far);
     lookAt(this.view, this.eye, this.target, [0, 1, 0]);
+    // Half-extents of the view where it crosses z = 0. The flat layouts place
+    // themselves against these, which is how they stay exactly in frame while
+    // the lens and the camera distance move.
+    const halfH = Math.tan((s.fov * Math.PI) / 360) * dist;
+    this.frameH = halfH;
+    this.frameW = halfH * aspect;
     this.fadeNear = Math.max(0.02, dist - s.depth * 0.5 - s.radius);
     this.fadeFar = dist + s.depth * 0.75 + s.radius;
   }
@@ -463,6 +471,7 @@ class Renderer {
     gl.uniform1f(u.uDriftAmt, s.driftAmt);
     gl.uniform1f(u.uFog, s.fog);
     gl.uniform2f(u.uFade, this.fadeNear, this.fadeFar);
+    gl.uniform2f(u.uFrame, this.frameW, this.frameH);
     gl.uniform1f(u.uOpacity, s.opacity);
 
     const ta = hexToRgba(s.tintA), tb = hexToRgba(s.tintB);

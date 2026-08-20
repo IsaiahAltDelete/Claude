@@ -672,6 +672,22 @@ function rememberAutosave() {
   if (!on) store.del(SAVE_KEY);
 }
 
+/* A copy count that suits one formation can be useless in another: one copy
+   in a galaxy, or two thousand stacked on a single word. Nudge only when the
+   current count is clearly wrong for the new shape, so a deliberate choice is
+   never overridden. */
+const COUNT_FOR = { single: 1, marquee: 12, stack: 9, rows: 84, columns: 120 };
+
+function nudgeCount(formation) {
+  const count = State.get("count");
+  const want = COUNT_FOR[formation];
+  if (want !== undefined) {
+    if (count > want * 6 || count < Math.max(1, want / 6)) State.set("count", want);
+    return;
+  }
+  if (count < 24) State.set("count", 240);   // a space formation needs a crowd
+}
+
 function onChange({ keys, fx, source }) {
   // The preset tick means "this is what you last applied", so anything else
   // touching the state clears it rather than leaving a stale claim.
@@ -682,6 +698,10 @@ function onChange({ keys, fx, source }) {
   if (keys.includes("aspect") && source !== "size") applyAspect();
   if (fx.has("size")) applySize();
   if (keys.includes("font")) syncWeights();
+  if (keys.includes("formation") && source !== "preset" && source !== "undo" &&
+      source !== "redo" && source !== "random" && source !== "load") {
+    nudgeCount(State.get("formation"));
+  }
   if (keys.includes("playing")) paintPlay();
   if (keys.includes("autosave")) rememberAutosave();
   if (keys.includes("bgType") && State.get("bgType") === "pattern") scheduleTile();
@@ -689,6 +709,21 @@ function onChange({ keys, fx, source }) {
   updateStatus();
   persist();
   dirty = true;
+}
+
+/* The bar buttons and the HUD carry their description in a title attribute,
+   which is the right thing in the markup — it survives with scripting off and
+   it is what a screen reader falls back to. Once the page is up they are
+   handed to the same tooltip everything in the rail uses, so one hover
+   behaves like every other. The shortcut, where there is one, becomes the
+   second line. */
+function adoptTitles() {
+  for (const node of document.querySelectorAll("[title]")) {
+    const raw = node.getAttribute("title");
+    if (!raw) continue;
+    const [text, hint] = raw.split(" — ");
+    window.ISO.tip.attach(node, { tip: text.trim(), hint: hint ? hint.trim() : "" });
+  }
 }
 
 /* ------------------------------------------------------------------- boot */
@@ -704,6 +739,7 @@ function boot() {
   Rail.refreshDeps();
   paintPlay = setupBar();
   setupKeys();
+  adoptTitles();
   syncWeights();
 
   $("#rail").addEventListener("iso-action", (e) => handleAction(e.detail));
