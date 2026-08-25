@@ -1,6 +1,6 @@
-# Notes for Claude
+# Working notes
 
-Orientation for an agent picking this repository up cold. `README.md` is the
+Orientation for anyone picking this repository up cold. `README.md` is the
 public description; this file is the working knowledge — what the place is, what
 must not be broken, and what has already bitten someone.
 
