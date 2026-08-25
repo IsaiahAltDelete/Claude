@@ -16,8 +16,8 @@ alongside them.
 | [ISAIART Image](image/README.md) | [`/image`](https://isaiahaltdelete.github.io/Claude/image/) | A photograph processor — grading, screens, and subject cut-out by a graph cut running on your device |
 
 Each folder has its own README with credentials, a feature list, its layout and
-the console commands for staging scenarios. `CLAUDE.md` is the orientation note
-for anyone — human or agent — picking the repository up cold.
+the console commands for staging scenarios. `NOTES.md` is the orientation note
+for anyone picking the repository up cold.
 
 ## How it looks
 
@@ -158,7 +158,7 @@ by each exit to prove the playback clock stops and the resume point survives.
 at all — even though `design/` and `image/` load classic scripts into one shared
 global scope and carry exactly the same duplicate-`const` hazard the simulators
 are checked for. Changes to those four are verified by opening them, in both
-themes. `CLAUDE.md` has the recipe.
+themes. `NOTES.md` has the recipe.
 
 ## Notes
 
