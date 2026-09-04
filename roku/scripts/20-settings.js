@@ -556,6 +556,17 @@ const HELP_TOPICS = [
     <div class="det-desc">If the speed is fine, restart the device from
       <b>Settings &rsaquo; System &rsaquo; Power &rsaquo; System restart</b>, then check the signal
       strength — two bars or fewer usually means the box is too far from the router.</div>` },
+  { id: 'noinput', title: 'The TV says No Signal, or shows the wrong thing', body: `
+    <div class="det-desc">Check the television's input before anything else. This box is on
+      <b>HDMI 1</b>; if the set is showing HDMI 2, HDMI 3, AV or the antenna, the Roku is
+      running perfectly and nobody can see it.</div>
+    <div class="det-desc">Press <b>Input</b> on the remote, or the <b>Input</b> button on the
+      set itself, and choose HDMI 1. If the remote's Input button does nothing, it has not
+      learned the television's codes — run <b>Settings &rsaquo; Remotes &amp; devices &rsaquo;
+      Set up remote for TV control</b>.</div>
+    <div class="det-note">With <b>HDMI-CEC</b> turned on, pressing <b>Home</b> pulls the set
+      back to this box on its own. That is the setting under
+      <b>Settings &rsaquo; System &rsaquo; Control other devices (CEC)</b>.</div>` },
   { id: 'nopicture', title: 'The screen is blank or keeps dropping out', body: `
     <div class="det-desc">Set <b>Settings &rsaquo; Display type</b> to <b>1080p</b>, and
       <b>Advanced display settings &rsaquo; HDMI mode</b> to <b>HDMI 1.4</b>. If the picture comes

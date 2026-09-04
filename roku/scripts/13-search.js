@@ -13,11 +13,17 @@
 
 const KEYS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.split('');
 
-const POPULAR_SEARCHES = ['the long harbour', 'free movies', 'nimbus', 'live news', 'documentaries', 'kids'];
+const POPULAR_SEARCHES = [
+  'the girlie show', 'free movies', 'kickpuncher', 'live news',
+  'the rural juror', 'documentaries', 'westerns', 'kids',
+];
 
+/* What the microphone comes back with. Half of them are the things people
+   actually say to a remote; the other half are jokes. */
 const VOICE_QUERIES = [
-  'the long harbour', 'free movies', 'documentaries', 'live news',
-  'nimbus tv', 'kids shows', 'salt flats', 'sports',
+  'the girlie show', 'free movies', 'documentaries', 'live news',
+  'the rural juror', 'kickpuncher', 'horsin around', 'sports',
+  'threat level midnight', 'westerns', 'something to fall asleep to',
 ];
 
 /** Everything that matches, grouped the way the results column shows them. */

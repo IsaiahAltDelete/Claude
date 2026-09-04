@@ -1,200 +1,582 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="color-scheme" content="dark">
-<title>404 — Not found</title>
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#0b0a09">
+<title>404 — ISAIART</title>
 <meta name="robots" content="noindex">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 fill=%22%23000%22/%3E%3Crect x=%227%22 y=%227%22 width=%2218%22 height=%2218%22 rx=%223%22 fill=%22none%22 stroke=%22%23fff%22 stroke-width=%222.4%22/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 fill=%22%230b0a09%22/%3E%3Cpath d=%22M4 16h5l3-7 4 14 3-7h9%22 fill=%22none%22 stroke=%22%23ffb000%22 stroke-width=%222.4%22 stroke-linejoin=%22round%22/%3E%3C/svg%3E">
 
 <style>
   /* --------------------------------------------------------------------
-     Minimal white-on-black index. Self-contained: no fonts, no scripts,
-     no requests beyond the favicon.
+     404.
+
+     Deliberately self-contained: no stylesheet link, no webfont, no
+     external script. GitHub Pages serves this one file for a miss at ANY
+     depth under the site — /Claude/a/b/c/nope — so a relative asset path
+     would resolve against a directory that does not exist, and an
+     absolute one would break the file:// and user-fork cases. The palette
+     below is therefore a copy of common/styles/tokens.css; if that file
+     is retuned, retune the eleven values here to match.
+
+     Same language as the rest of the site: hairline rules, square
+     corners, monospaced readouts, one phosphor accent, and nothing
+     pretending to be hardware. The scope is the page's one image.
      -------------------------------------------------------------------- */
+
   :root {
-    --fg: #fff;
-    --dim: #8a8a8a;      /* 6.1:1 on black */
-    --faint: #757575;    /* 4.6:1 — the dimmest tone still used for text */
-    --decor: #3a3a3a;    /* non-text only: arrows, separators */
-    --hair: #1f1f1f;
-    --bg: #000;
+    color-scheme: dark;
+    --bg-0: #0b0a09;
+    --bg-1: #121110;
+    --bg-2: #191715;
+    --line: #24211e;
+    --line-2: #332f2a;
+    --fg: #f4f0e8;
+    --fg-dim: #a8a29a;
+    --fg-faint: #7b756c;
+    --fg-ghost: #4a453f;
+    --accent: #ffb000;
+    --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+    --mono: ui-monospace, SFMono-Regular, "JetBrains Mono", Menlo, monospace;
+    --ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif;
+  }
+
+  :root[data-theme="light"] {
+    color-scheme: light;
+    --bg-0: #ded8cc;
+    --bg-1: #f2ede3;
+    --bg-2: #e7e1d5;
+    --line: #d2cabb;
+    --line-2: #b3aa99;
+    --fg: #1a1714;
+    --fg-dim: #565049;
+    --fg-faint: #7a7268;
+    --fg-ghost: #ada496;
+    --accent: #a35a00;
   }
 
   * { box-sizing: border-box; }
 
-  html, body {
-    margin: 0;
-    min-height: 100%;
-    background: var(--bg);
+  html, body { margin: 0; min-height: 100%; }
+
+  body {
+    background: var(--bg-0);
     color: var(--fg);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-    font-size: 16px;
-    line-height: 1.5;
+    font-family: var(--ui);
+    font-size: 15px;
+    line-height: 1.55;
     -webkit-font-smoothing: antialiased;
   }
 
-  ::selection { background: #fff; color: #000; }
-
   a { color: inherit; text-decoration: none; }
 
-  .page {
-    max-width: 760px;
-    margin: 0 auto;
-    padding: clamp(48px, 12vh, 132px) 24px 72px;
+  ::selection { background: var(--accent); color: var(--bg-0); }
+
+  :focus-visible { outline: 1px solid var(--accent); outline-offset: 1px; }
+
+  /* ---------------------------------------------------------------- bar */
+
+  .bar {
+    background: var(--bg-1);
+    border-bottom: 1px solid var(--line);
   }
 
-  /* ------------------------------------------------------------ header */
+  .bar-in {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    height: 46px;
+    max-width: 940px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
 
-  header { margin-bottom: clamp(40px, 9vh, 84px); }
+  .wordmark {
+    font-family: var(--ui);
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin: 0;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  .wordmark span {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fg-faint);
+  }
+
+  .bar-spacer { flex: 1; }
+
+  .bar-link,
+  .bar-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 26px;
+    padding: 0 9px;
+    border: 1px solid var(--line-2);
+    border-radius: 2px;
+    background: none;
+    color: var(--fg-dim);
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color 0.12s var(--ease), border-color 0.12s var(--ease), background 0.12s var(--ease);
+  }
+  .bar-link:hover,
+  .bar-btn:hover { color: var(--fg); border-color: var(--fg-ghost); background: var(--bg-2); }
+  .bar-btn b { font-weight: 400; color: var(--accent); }
+  .bar-btn .sep { color: var(--fg-ghost); }
+
+  /* --------------------------------------------------------------- page */
+
+  .wrap { max-width: 940px; margin: 0 auto; padding: 0 24px 64px; }
+
+  header.head { padding: clamp(40px, 8vh, 84px) 0 0; }
 
   h1 {
     margin: 0;
-    font-size: clamp(30px, 6.4vw, 46px);
-    font-weight: 500;
-    letter-spacing: -0.035em;
-    line-height: 1.05;
-  }
-
-  .tagline {
-    margin: 14px 0 0;
-    max-width: 46ch;
-    color: var(--dim);
-    font-size: 14.5px;
-  }
-
-  /* -------------------------------------------------------------- list */
-
-  .label {
-    margin: 0 0 6px;
-    color: var(--faint);
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-  }
-
-  .index { border-top: 1px solid var(--hair); }
-
-  .entry {
-    display: grid;
-    grid-template-columns: 34px 1fr auto;
-    gap: 0 16px;
-    align-items: baseline;
-    padding: 22px 4px 24px;
-    border-bottom: 1px solid var(--hair);
-    transition: background 0.18s ease, padding-left 0.18s ease;
-  }
-
-  a.entry:hover,
-  a.entry:focus-visible {
-    background: #0b0b0b;
-    padding-left: 12px;
-    outline: 0;
-  }
-  a.entry:focus-visible { box-shadow: inset 2px 0 0 #fff; }
-
-  .num {
-    color: var(--faint);
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 12px;
+    font-family: var(--mono);
+    font-size: clamp(48px, 13vw, 120px);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 0.9;
     font-variant-numeric: tabular-nums;
   }
 
-  .entry h2 {
-    margin: 0;
-    font-size: 19px;
-    font-weight: 500;
-    letter-spacing: -0.015em;
+  .said {
+    margin: 18px 0 0;
+    max-width: 50ch;
+    color: var(--fg-dim);
   }
 
-  .entry p {
-    margin: 7px 0 0;
-    max-width: 52ch;
-    color: var(--dim);
-    font-size: 14px;
+  /* -------------------------------------------------------------- scope */
+
+  .scope {
+    position: relative;
+    margin: clamp(26px, 5vh, 44px) 0 0;
+    height: clamp(220px, 40vh, 340px);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    background: var(--bg-1);
+    overflow: hidden;
   }
 
-  .meta {
-    margin: 11px 0 0;
+  .scope canvas { display: block; width: 100%; height: 100%; }
+
+  /* The readout is the only text on the scope, and it reports what the
+     trace is actually doing rather than decorating it. */
+  .readout {
+    position: absolute;
+    left: 10px;
+    bottom: 8px;
     display: flex;
-    flex-wrap: wrap;
-    gap: 6px 10px;
-    color: var(--faint);
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 11.5px;
+    gap: 14px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-faint);
+    pointer-events: none;
   }
+  .readout b { font-weight: 400; color: var(--accent); }
 
-  /* Middots between meta items, so they don't read as one run of text. */
-  .meta span + span::before { content: "·"; margin-right: 10px; color: var(--decor); }
+  /* ---------------------------------------------------------- the exits */
 
-  .status {
-    align-self: baseline;
-    padding: 3px 9px;
-    border: 1px solid var(--hair);
-    border-radius: 999px;
-    color: var(--dim);
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  .exits { margin: 26px 0 0; border-top: 1px solid var(--line); }
+
+  .exit {
+    display: grid;
+    grid-template-columns: 40px 1fr auto;
+    gap: 0 18px;
+    align-items: baseline;
+    padding: 18px 10px 20px;
+    border-bottom: 1px solid var(--line);
+    transition: background 0.14s var(--ease), padding-left 0.14s var(--ease);
+  }
+  a.exit:hover, a.exit:focus-visible { background: var(--bg-1); padding-left: 18px; }
+  a.exit:focus-visible { outline: 0; box-shadow: inset 2px 0 0 var(--accent); }
+
+  .exit .k {
+    font-family: var(--mono);
     font-size: 11px;
-    white-space: nowrap;
+    color: var(--fg-faint);
   }
-  .status.live { border-color: #2b2b2b; color: #fff; }
+  a.exit:hover .k, a.exit:focus-visible .k { color: var(--accent); }
 
-  .arrow {
-    display: inline-block;
-    margin-left: 8px;
-    color: var(--decor);
-    transition: transform 0.18s ease, color 0.18s ease;
+  .exit h2 { margin: 0; font-size: 16px; font-weight: 600; letter-spacing: -0.01em; }
+  .exit p { margin: 5px 0 0; color: var(--fg-dim); font-size: 13.5px; }
+
+  .exit .go {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--fg-ghost);
+    transition: transform 0.14s var(--ease), color 0.14s var(--ease);
   }
-  a.entry:hover .arrow, a.entry:focus-visible .arrow { transform: translateX(4px); color: #fff; }
+  a.exit:hover .go, a.exit:focus-visible .go { transform: translateX(4px); color: var(--accent); }
 
-  /* ------------------------------------------------------------ footer */
-
-  footer {
-    margin-top: clamp(40px, 9vh, 76px);
-    color: var(--faint);
-    font-size: 12.5px;
-  }
-  footer a { border-bottom: 1px solid var(--hair); }
-  footer a:hover { color: #fff; border-bottom-color: #666; }
-
-  @media (max-width: 560px) {
-    .entry { grid-template-columns: 24px 1fr; gap: 0 12px; }
-    .status { grid-column: 2; margin-top: 12px; justify-self: start; }
-    .entry h2 { font-size: 17.5px; }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    * { transition: none !important; }
+  @media (max-width: 620px) {
+    .exit { grid-template-columns: 26px 1fr; gap: 0 12px; }
+    .exit .go { display: none; }
   }
 </style>
 </head>
 <body>
-<main class="page">
-  <header>
-    <h1>Not&nbsp;here</h1>
-    <p class="tagline">That page does not exist. Everything that does is on the index.</p>
+
+<header class="bar">
+  <div class="bar-in">
+    <p class="wordmark"><b>ISAIART</b><span>404</span></p>
+    <span class="bar-spacer"></span>
+    <button class="bar-btn" id="theme" type="button" aria-label="Switch between the light and dark theme">
+      Theme <span class="sep" aria-hidden="true">·</span> <b id="theme-now">dark</b>
+    </button>
+    <a class="bar-link" href="https://isaiart.com" rel="noopener">isaiart.com &#8599;</a>
+  </div>
+</header>
+
+<main class="wrap">
+  <header class="head">
+    <h1>404</h1>
+    <p class="said">That page does not exist. Everything that does is on the index.</p>
   </header>
-  <div class="index">
-    <a class="entry" id="home" href="/">
-      <span class="num">&larr;</span>
-      <span><h2>Back to the index<span class="arrow" aria-hidden="true">&rarr;</span></h2></span>
-      <span class="status">home</span>
+
+  <div class="scope">
+    <canvas id="scope" aria-hidden="true"></canvas>
+    <p class="readout">
+      <span>X <b id="rx">3</b></span>
+      <span>Y <b id="ry">2</b></span>
+      <span>Lock <b id="rl">—</b></span>
+    </p>
+  </div>
+
+  <div class="exits">
+    <a class="exit" id="home" href="/">
+      <span class="k">01</span>
+      <span>
+        <h2>The index</h2>
+        <p>Every simulator and tool in this repository.</p>
+      </span>
+      <span class="go" aria-hidden="true">&rarr;</span>
+    </a>
+    <a class="exit" href="https://isaiart.com" rel="noopener">
+      <span class="k">02</span>
+      <span>
+        <h2>isaiart.com</h2>
+        <p>The main site.</p>
+      </span>
+      <span class="go" aria-hidden="true">&#8599;</span>
     </a>
   </div>
 </main>
+
 <script>
-  /* A project Pages site lives under /<repo>/, and this page is served for any
-     depth beneath it, so the site root has to be worked out at runtime. */
-  (function () {
-    var root = '/';
-    if (location.hostname.endsWith('github.io')) {
-      var first = location.pathname.split('/')[1];
-      if (first) root = '/' + first + '/';
+/* ---------------------------------------------------------------------------
+   The scope.
+
+   An X–Y oscilloscope tracing a Lissajous figure: two sine waves at a small
+   integer frequency ratio driving the two axes, which is what those machines
+   were actually used for — you read the ratio off the shape. It suits a 404
+   because the interesting state is the one where the figure will not settle.
+
+   The cycle is: locked and still for a few seconds, then lock is lost — the
+   ratio goes slightly irrational and the figure precesses into a tangle — then
+   it snaps back onto a new whole-number ratio. Nothing is random-looking for
+   its own sake; every frame is the same two sines with different arguments.
+
+   Drawn with phosphor decay rather than a clear, so the beam leaves a tail.
+   That means the ground colour has to be read back out of the stylesheet,
+   because a canvas cannot inherit a custom property.
+
+   The decay is applied to a separate transparent layer holding only the trace,
+   and the ground and graticule are repainted underneath it every frame. Fading
+   the visible canvas toward its own ground instead — the obvious way to write
+   this — is wrong twice over: 8-bit compositing does not round-trip, so a few
+   hundred washes walk a neutral ground off its own value (the light theme's
+   cream drifts visibly pink), and the graticule, painted once, gets eaten by
+   the same washes. Fading toward transparent has neither problem, because zero
+   alpha is a fixed point that quantisation lands on exactly.
+   --------------------------------------------------------------------------- */
+(function () {
+  "use strict";
+
+  var root = document.documentElement;
+
+  /* --------------------------------------------------------------- theme */
+
+  try {
+    /* JSON, because the two tools write this key through their shared store
+       helper, which stringifies. */
+    var raw = localStorage.getItem("isaiart.theme");
+    var saved = raw == null ? null : JSON.parse(raw);
+    if (saved !== "light" && saved !== "dark") {
+      saved = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
     }
-    document.getElementById('home').setAttribute('href', root);
+    root.dataset.theme = saved;
+  } catch (e) { /* private mode: the dark default in the markup stands */ }
+
+  var label = document.getElementById("theme-now");
+  var button = document.getElementById("theme");
+  var meta = document.querySelector('meta[name="theme-color"]');
+
+  new MutationObserver(paintTheme)
+    .observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+
+  function paintTheme() {
+    var now = root.dataset.theme === "light" ? "light" : "dark";
+    label.textContent = now;
+    button.setAttribute("aria-pressed", String(now === "light"));
+    button.title = "Switch to the " + (now === "light" ? "dark" : "light") + " theme";
+    if (meta) meta.setAttribute("content", now === "light" ? "#f2ede3" : "#0b0a09");
+    reread();
+  }
+
+  button.addEventListener("click", function () {
+    var next = root.dataset.theme === "light" ? "dark" : "light";
+    root.dataset.theme = next;
+    try { localStorage.setItem("isaiart.theme", JSON.stringify(next)); } catch (e) { /* private mode */ }
+  });
+
+  /* ---------------------------------------------------------------- root
+
+     A project Pages site lives under /<repo>/, and this page is served for a
+     miss at any depth beneath it, so the site root has to be worked out at
+     runtime rather than written down. */
+
+  (function () {
+    var base = "/";
+    if (location.hostname.endsWith("github.io")) {
+      var first = location.pathname.split("/")[1];
+      if (first) base = "/" + first + "/";
+    }
+    document.getElementById("home").setAttribute("href", base);
   }());
+
+  /* --------------------------------------------------------------- scope */
+
+  var canvas = document.getElementById("scope");
+  var rx = document.getElementById("rx");
+  var ry = document.getElementById("ry");
+  var rl = document.getElementById("rl");
+  var ctx = canvas && canvas.getContext ? canvas.getContext("2d", { alpha: false }) : null;
+
+  /* The trace lives here and nowhere else; the visible canvas is rebuilt from
+     ground + graticule + this, every frame. */
+  var layer = document.createElement("canvas");
+  var lctx = layer.getContext("2d");
+
+  var reduce = window.matchMedia
+    ? window.matchMedia("(prefers-reduced-motion: reduce)")
+    : { matches: false, addEventListener: null };
+
+  var W = 0, H = 0, dpr = 1, cx = 0, cy = 0, radius = 0;
+  var ground = "#121110", ink = "#ffb000", grid = "#24211e";
+  var raf = 0, last = 0, t = 0;
+
+  /* Ratios worth landing on: each is a figure someone would recognise. */
+  var RATIOS = [[3, 2], [5, 4], [4, 3], [5, 2], [7, 5], [3, 1], [5, 3], [2, 1]];
+  var pick = 0;
+
+  /* The lock cycle, in seconds: hold, then slip, then hold the next one. */
+  var HOLD = 4.2, SLIP = 1.9;
+  var phase = 0;                  // seconds into the current hold+slip cycle
+  var a = 3, b = 2, drift = 0;
+
+  function reread() {
+    if (!ctx) return;
+    var cs = getComputedStyle(root);
+    ground = cs.getPropertyValue("--bg-1").trim() || "#121110";
+    ink = cs.getPropertyValue("--accent").trim() || "#ffb000";
+    grid = cs.getPropertyValue("--line").trim() || "#24211e";
+    wipe();
+    if (reduce.matches) still();
+  }
+
+  /** Ground and graticule, with the trace layer emptied. */
+  function wipe() {
+    lctx.clearRect(0, 0, W, H);
+    groundGraticule();
+  }
+
+  /** Ground and graticule only — the trace layer is left alone. */
+  function groundGraticule() {
+    ctx.fillStyle = ground;
+    ctx.fillRect(0, 0, W, H);
+    graticule();
+  }
+
+  /* One division is an eighth of the short side, and the ruling runs to the
+     edges of the tube from the centre out — so the divisions stay square on
+     any viewport instead of stretching with the box. */
+  function graticule() {
+    var step = Math.min(W, H) / 8;
+    var acrossX = Math.ceil(cx / step);
+    var acrossY = Math.ceil(cy / step);
+
+    ctx.strokeStyle = grid;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (var i = -acrossX; i <= acrossX; i++) {
+      var gx = Math.round(cx + i * step) + 0.5;
+      ctx.moveTo(gx, 0); ctx.lineTo(gx, H);
+    }
+    for (var j = -acrossY; j <= acrossY; j++) {
+      var gy = Math.round(cy + j * step) + 0.5;
+      ctx.moveTo(0, gy); ctx.lineTo(W, gy);
+    }
+    ctx.stroke();
+
+    /* The centre cross carries the fine tick marks, which is the only part of
+       a graticule anybody actually reads. */
+    var tick = step / 5;
+    ctx.beginPath();
+    for (var k = -acrossY * 5; k <= acrossY * 5; k++) {
+      var ty = Math.round(cy + k * tick) + 0.5;
+      ctx.moveTo(cx - 3, ty); ctx.lineTo(cx + 3, ty);
+    }
+    for (var m = -acrossX * 5; m <= acrossX * 5; m++) {
+      var tx = Math.round(cx + m * tick) + 0.5;
+      ctx.moveTo(tx, cy - 3); ctx.lineTo(tx, cy + 3);
+    }
+    ctx.stroke();
+  }
+
+  /** The beam position at parameter u, for the current ratio and drift. */
+  function beam(u) {
+    return [
+      cx + Math.sin(a * u + drift * 1.7) * radius,
+      cy + Math.sin(b * u + 0.6) * radius
+    ];
+  }
+
+  function resize() {
+    if (!ctx) return;
+    var rect = canvas.getBoundingClientRect();
+    W = Math.max(1, Math.round(rect.width));
+    H = Math.max(1, Math.round(rect.height));
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.round(W * dpr);
+    canvas.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    layer.width = canvas.width;
+    layer.height = canvas.height;
+    lctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    cx = W / 2;
+    cy = H / 2;
+    radius = Math.min(W, H) * 0.38;
+    reread();
+  }
+
+  /* Reduced motion gets one locked figure, drawn whole, and no cycle. */
+  function still() {
+    wipe();
+    ctx.strokeStyle = ink;
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    for (var u = 0; u <= Math.PI * 2 + 0.01; u += 0.01) {
+      var p = beam(u);
+      if (u === 0) ctx.moveTo(p[0], p[1]); else ctx.lineTo(p[0], p[1]);
+    }
+    ctx.stroke();
+    rx.textContent = a;
+    ry.textContent = b;
+    rl.textContent = "held";
+  }
+
+  function frame(now) {
+    raf = requestAnimationFrame(frame);
+    if (!last) last = now;
+    var dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    t += dt;
+    phase += dt;
+
+    /* Hold, slip, then re-lock on the next ratio in the list. During a slip
+       the drift term grows, which is exactly what an unlocked figure does:
+       it precesses instead of standing still. */
+    var slipping = phase > HOLD;
+    if (slipping) {
+      var into = (phase - HOLD) / SLIP;            // 0 → 1 across the slip
+      drift += dt * (0.35 + into * 5.5);
+      if (phase > HOLD + SLIP) {
+        phase = 0;
+        drift = 0;
+        pick = (pick + 1) % RATIOS.length;
+        a = RATIOS[pick][0];
+        b = RATIOS[pick][1];
+        wipe();                                    // a clean lock, cleanly drawn
+      }
+    }
+
+    rx.textContent = a;
+    ry.textContent = b;
+    rl.textContent = slipping ? "slipping" : "held";
+
+    /* Decay: pull the whole trace layer toward transparent. */
+    lctx.globalCompositeOperation = "destination-out";
+    lctx.fillStyle = "rgba(0,0,0," + (slipping ? 0.05 : 0.035) + ")";
+    lctx.fillRect(0, 0, W, H);
+    lctx.globalCompositeOperation = "source-over";
+
+    /* The beam sweeps a fixed arc of the parameter each frame, in small steps,
+       so the curve is drawn rather than approximated by one long line. */
+    var SWEEP = 5.4;                               // radians of u per second
+    var steps = 60;
+    var span = SWEEP * dt;
+    lctx.strokeStyle = ink;
+    lctx.lineWidth = 1.6;
+    lctx.lineCap = "round";
+    lctx.beginPath();
+    for (var i = 0; i <= steps; i++) {
+      var p = beam(t * SWEEP - span + (span * i) / steps);
+      if (i === 0) lctx.moveTo(p[0], p[1]); else lctx.lineTo(p[0], p[1]);
+    }
+    lctx.stroke();
+
+    /* The beam head, brighter than its own tail. */
+    var head = beam(t * SWEEP);
+    lctx.fillStyle = ink;
+    lctx.beginPath();
+    lctx.arc(head[0], head[1], 2.2, 0, Math.PI * 2);
+    lctx.fill();
+
+    /* Compose: a fresh ground and a full-strength graticule under the trace. */
+    groundGraticule();
+    ctx.drawImage(layer, 0, 0, W, H);
+  }
+
+  function start() {
+    if (!ctx) return;
+    if (reduce.matches) { cancelAnimationFrame(raf); raf = 0; still(); return; }
+    if (!raf) { last = 0; raf = requestAnimationFrame(frame); }
+  }
+
+  paintTheme();
+
+  if (ctx) {
+    addEventListener("resize", resize, { passive: true });
+    if (reduce.addEventListener) reduce.addEventListener("change", start);
+
+    /* Nothing on the page depends on the scope, so it stops whenever the tab
+       is not being looked at. */
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) { cancelAnimationFrame(raf); raf = 0; }
+      else start();
+    });
+
+    resize();
+    start();
+  }
+}());
 </script>
 </body>
 </html>

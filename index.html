@@ -1,259 +1,633 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="color-scheme" content="dark">
-<title>Simulators</title>
-<meta name="description" content="Browser simulators of real devices, built for support training.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#0b0a09">
+<title>ISAIART — Index</title>
+<meta name="description" content="Browser simulators of real devices, and the tools that ended up alongside them.">
 <link rel="icon" href="favicon.svg">
+
+<!-- The palette, the reset and the type pack are the same files the two tools
+     load, so the index cannot drift away from them: a retune is tokens.css
+     alone. -->
+<link rel="stylesheet" href="common/styles/tokens.css">
+<link rel="preload" as="font" type="font/woff2" href="common/assets/fonts/inter-latin-400-normal.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="common/assets/fonts/jetbrains-mono-latin-600-normal.woff2" crossorigin>
+
+<script>
+  /* Applied before first paint so the page never flashes the wrong ground.
+     One key across the index, both tools and the 404, so the choice follows
+     you between them. */
+  (function () {
+    try {
+      /* JSON, because the two tools write this key through their shared
+         store helper, which stringifies. */
+      var raw = localStorage.getItem("isaiart.theme");
+      var saved = raw == null ? null : JSON.parse(raw);
+      if (saved !== "light" && saved !== "dark") {
+        saved = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+      }
+      document.documentElement.dataset.theme = saved;
+    } catch (e) { /* private mode: the dark default in the markup stands */ }
+  }());
+</script>
 
 <style>
   /* --------------------------------------------------------------------
-     Minimal white-on-black index. Self-contained: no fonts, no scripts,
-     no requests beyond the favicon.
+     The index.
+
+     Cassette futurism as an interface rather than a costume: hairline
+     rules, square corners, monospaced tabular readouts, uppercase micro
+     labels, one phosphor accent. No bezels, no scanline overlay, no
+     narration pretending the page is a machine.
+
+     The one moving thing is the signal strip under the masthead, and it
+     earns its place by being the rule between the masthead and the
+     directory rather than an ornament sitting beside one.
      -------------------------------------------------------------------- */
-  :root {
-    --fg: #fff;
-    --dim: #8a8a8a;      /* 6.1:1 on black */
-    --faint: #757575;    /* 4.6:1 — the dimmest tone still used for text */
-    --decor: #3a3a3a;    /* non-text only: arrows, separators */
-    --hair: #1f1f1f;
-    --bg: #000;
-  }
 
-  * { box-sizing: border-box; }
-
-  html, body {
-    margin: 0;
-    min-height: 100%;
-    background: var(--bg);
+  body {
+    font-family: var(--ui);
+    font-size: 15px;
+    line-height: 1.55;
     color: var(--fg);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-    font-size: 16px;
-    line-height: 1.5;
     -webkit-font-smoothing: antialiased;
   }
 
-  ::selection { background: #fff; color: #000; }
-
   a { color: inherit; text-decoration: none; }
 
-  .page {
-    max-width: 760px;
-    margin: 0 auto;
-    padding: clamp(48px, 12vh, 132px) 24px 72px;
+  .wrap { max-width: 940px; margin: 0 auto; padding: 0 24px; }
+
+  /* ---------------------------------------------------------------- bar */
+
+  .bar {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--bg-1);
+    border-bottom: 1px solid var(--line);
   }
 
-  /* ------------------------------------------------------------ header */
+  .bar-in {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    height: var(--bar);
+    max-width: 940px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
 
-  header { margin-bottom: clamp(40px, 9vh, 84px); }
+  /* Same lockup as the two tools' title bars, so the three pages read as one
+     set: the name in the UI face, the section in mono beside it. */
+  .wordmark {
+    font-family: var(--ui);
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin: 0;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  .wordmark span {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fg-faint);
+  }
+
+  .bar-spacer { flex: 1; }
+
+  .bar-link,
+  .bar-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 26px;
+    padding: 0 9px;
+    border: 1px solid var(--line-2);
+    border-radius: var(--r-1);
+    background: none;
+    color: var(--fg-dim);
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color 0.12s var(--ease), border-color 0.12s var(--ease), background 0.12s var(--ease);
+  }
+  .bar-link:hover,
+  .bar-btn:hover { color: var(--fg); border-color: var(--fg-ghost); background: var(--bg-2); }
+
+  .bar-btn b { font-weight: 400; color: var(--accent); }
+  .bar-btn .sep { color: var(--fg-ghost); }
+
+  /* ----------------------------------------------------------- masthead */
+
+  header.masthead { padding: clamp(44px, 9vh, 96px) 0 0; }
 
   h1 {
     margin: 0;
-    font-size: clamp(30px, 6.4vw, 46px);
-    font-weight: 500;
-    letter-spacing: -0.035em;
-    line-height: 1.05;
+    font-family: var(--mono);
+    font-size: clamp(34px, 7.6vw, 68px);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1;
   }
 
   .tagline {
-    margin: 14px 0 0;
-    max-width: 46ch;
-    color: var(--dim);
-    font-size: 14.5px;
+    margin: 18px 0 0;
+    max-width: 54ch;
+    color: var(--fg-dim);
+    font-size: 15px;
   }
 
-  /* -------------------------------------------------------------- list */
+  .tagline a { color: var(--fg); box-shadow: inset 0 -1px 0 var(--fg-ghost); }
+  .tagline a:hover { box-shadow: inset 0 -1px 0 var(--accent); }
+
+  /* ------------------------------------------------------------- signal
+
+     A chart-recorder trace on a hairline graticule. It is the rule between
+     the masthead and the directory — hence full-bleed to the wrap, hence
+     no border of its own. */
+
+  .signal {
+    position: relative;
+    margin: clamp(28px, 5vh, 52px) 0 0;
+    height: 74px;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .signal canvas { display: block; width: 100%; height: 100%; }
+
+  /* ---------------------------------------------------------- directory */
 
   .label {
-    margin: 0 0 6px;
-    color: var(--faint);
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 0.16em;
+    margin: 26px 0 0;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
+    color: var(--fg-faint);
   }
 
-  .index { border-top: 1px solid var(--hair); }
+  .index { margin: 10px 0 0; border-top: 1px solid var(--line); }
 
   .entry {
     display: grid;
-    grid-template-columns: 34px 1fr auto;
-    gap: 0 16px;
+    grid-template-columns: 40px 1fr auto;
+    gap: 0 18px;
     align-items: baseline;
-    padding: 22px 4px 24px;
-    border-bottom: 1px solid var(--hair);
-    transition: background 0.18s ease, padding-left 0.18s ease;
+    padding: 20px 10px 22px;
+    border-bottom: 1px solid var(--line);
+    transition: background 0.14s var(--ease), padding-left 0.14s var(--ease);
   }
 
   a.entry:hover,
-  a.entry:focus-visible {
-    background: #0b0b0b;
-    padding-left: 12px;
-    outline: 0;
-  }
-  a.entry:focus-visible { box-shadow: inset 2px 0 0 #fff; }
+  a.entry:focus-visible { background: var(--bg-1); padding-left: 18px; }
+  a.entry:focus-visible { outline: 0; box-shadow: inset 2px 0 0 var(--accent); }
 
   .num {
-    color: var(--faint);
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 12px;
+    font-family: var(--mono);
+    font-size: 11px;
     font-variant-numeric: tabular-nums;
+    color: var(--fg-faint);
   }
+  a.entry:hover .num, a.entry:focus-visible .num { color: var(--accent); }
 
   .entry h2 {
     margin: 0;
-    font-size: 19px;
-    font-weight: 500;
-    letter-spacing: -0.015em;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
   }
 
   .entry p {
     margin: 7px 0 0;
-    max-width: 52ch;
-    color: var(--dim);
+    max-width: 58ch;
+    color: var(--fg-dim);
     font-size: 14px;
   }
 
   .meta {
-    margin: 11px 0 0;
+    margin: 12px 0 0;
     display: flex;
     flex-wrap: wrap;
-    gap: 6px 10px;
-    color: var(--faint);
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 11.5px;
+    gap: 5px 9px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+    color: var(--fg-faint);
   }
-
-  /* Middots between meta items, so they don't read as one run of text. */
-  .meta span + span::before { content: "·"; margin-right: 10px; color: var(--decor); }
-
-  .status {
-    align-self: baseline;
-    padding: 3px 9px;
-    border: 1px solid var(--hair);
-    border-radius: 999px;
-    color: var(--dim);
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 11px;
-    white-space: nowrap;
-  }
-  .status.live { border-color: #2b2b2b; color: #fff; }
+  .meta span + span::before { content: "·"; margin-right: 9px; color: var(--fg-ghost); }
 
   .arrow {
     display: inline-block;
-    margin-left: 8px;
-    color: var(--decor);
-    transition: transform 0.18s ease, color 0.18s ease;
+    margin-left: 9px;
+    color: var(--fg-ghost);
+    transition: transform 0.14s var(--ease), color 0.14s var(--ease);
   }
-  a.entry:hover .arrow, a.entry:focus-visible .arrow { transform: translateX(4px); color: #fff; }
+  a.entry:hover .arrow, a.entry:focus-visible .arrow { transform: translateX(4px); color: var(--accent); }
 
-  /* ------------------------------------------------------------ footer */
+  .tag {
+    align-self: baseline;
+    padding: 2px 8px;
+    border: 1px solid var(--line-2);
+    border-radius: var(--r-1);
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fg-faint);
+    white-space: nowrap;
+  }
+  .tag.live { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 40%, var(--line-2)); }
+
+  /* ------------------------------------------------------------- footer */
 
   footer {
-    margin-top: clamp(40px, 9vh, 76px);
-    color: var(--faint);
-    font-size: 12.5px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    margin: 40px 0 0;
+    padding: 18px 10px 56px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: var(--fg-faint);
   }
-  footer a { border-bottom: 1px solid var(--hair); }
-  footer a:hover { color: #fff; border-bottom-color: #666; }
+  footer a { color: var(--fg-dim); box-shadow: inset 0 -1px 0 var(--line-2); }
+  footer a:hover { color: var(--fg); box-shadow: inset 0 -1px 0 var(--accent); }
+  footer .spacer { flex: 1; }
 
-  @media (max-width: 560px) {
-    .entry { grid-template-columns: 24px 1fr; gap: 0 12px; }
-    .status { grid-column: 2; margin-top: 12px; justify-self: start; }
-    .entry h2 { font-size: 17.5px; }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    * { transition: none !important; }
+  @media (max-width: 620px) {
+    .entry { grid-template-columns: 26px 1fr; gap: 0 12px; }
+    .arrow { display: none; }
+    .tag { grid-column: 2; margin-top: 12px; justify-self: start; }
+    .entry h2 { font-size: 16px; }
+    .bar-link .full { display: none; }
   }
 </style>
 </head>
 <body>
-<main class="page">
-  <header>
-    <h1>Simulators</h1>
-    <p class="tagline">Devices rebuilt in the browser, close enough to the real
-      thing to practise on — plus whatever else has ended up here. No installs,
-      no accounts — open one and start breaking it.</p>
-  </header>
 
-  <p class="label">Index</p>
-
-  <div class="index">
-    <!-- To add a project, copy one entry block and keep the numbers
-         sequential. The status pill reads "live" when there is something to
-         open; use "wip" for anything still being built. -->
-
-    <a class="entry" href="mac/">
-      <span class="num">01</span>
-      <span>
-        <h2>macOS Troubleshooting Simulator<span class="arrow" aria-hidden="true">→</span></h2>
-        <p>A full macOS Tahoe desktop in the browser — window management, Finder,
-          Safari, Mail, Outlook, System Settings, Recovery — built for support
-          training. Its Safari browses Wikipedia for real; everything else runs offline.</p>
-        <span class="meta"><span>/mac</span><span>html · css · js</span><span>no dependencies</span></span>
-      </span>
-      <span class="status live">live</span>
-    </a>
-
-    <a class="entry" href="iphone/">
-      <span class="num">02</span>
-      <span>
-        <h2>iPhone Simulator<span class="arrow" aria-hidden="true">&rarr;</span></h2>
-        <p>A full iOS phone — lock screen, Control Centre, Spotlight, App Library,
-          and thirty-odd apps from Photos and Camera through Health, Home, Music and
-          Settings. Wi-Fi, cellular and account faults can be staged deliberately.
-          Its Maps loads a real map; everything else runs offline.</p>
-        <span class="meta"><span>/iphone</span><span>html &middot; css &middot; js</span><span>no dependencies</span></span>
-      </span>
-      <span class="status live">live</span>
-    </a>
-
-    <a class="entry" href="roku/">
-      <span class="num">03</span>
-      <span>
-        <h2>Roku Troubleshooting Simulator<span class="arrow" aria-hidden="true">&rarr;</span></h2>
-        <p>A streaming player on a television, driven by a mock-up remote — home
-          screen, forty channels, the live TV guide, search, the store, playback,
-          the whole settings tree, restarts, factory reset and guided setup.
-          Everything is generated locally; it runs with the network unplugged.</p>
-        <span class="meta"><span>/roku</span><span>html &middot; css &middot; js</span><span>no dependencies</span></span>
-      </span>
-      <span class="status live">live</span>
-    </a>
-
-    <a class="entry" href="design/">
-      <span class="num">04</span>
-      <span>
-        <h2>ISAIART Design<span class="arrow" aria-hidden="true">&rarr;</span></h2>
-        <p>A type-in-space generator. Words and emoji thrown through 3D formations
-          on a canvas you size yourself, with eighteen treatments applied to the
-          letterforms and a hand-written WebGL renderer underneath.</p>
-        <span class="meta"><span>/design</span><span>html &middot; css &middot; webgl</span><span>no dependencies</span></span>
-      </span>
-      <span class="status live">live</span>
-    </a>
-
-    <a class="entry" href="voxel/">
-      <span class="num">05</span>
-      <span>
-        <h2>Voxel Maker<span class="arrow" aria-hidden="true">&rarr;</span></h2>
-        <p>A headless voxel model maker for browser games — ninety-odd characters,
-          animals, weapons, items, furniture, scenery, buildings, vehicles and
-          backdrops, every one of them generated from a few lines of code rather
-          than placed by hand. Turn any of them with the mouse, edit the recipe
-          that built it, and export to JSON, OBJ, PLY, MagicaVoxel or PNG.</p>
-        <span class="meta"><span>/voxel</span><span>html &middot; css &middot; webgl</span><span>no dependencies</span></span>
-      </span>
-      <span class="status live">live</span>
-    </a>
+<header class="bar">
+  <div class="bar-in">
+    <p class="wordmark"><b>ISAIART</b><span>Index</span></p>
+    <span class="bar-spacer"></span>
+    <button class="bar-btn" id="theme" type="button" aria-label="Switch between the light and dark theme">
+      Theme <span class="sep" aria-hidden="true">·</span> <b id="theme-now">dark</b>
+    </button>
+    <a class="bar-link" href="https://isaiart.com" rel="noopener">isaiart.com &#8599;</a>
   </div>
+</header>
 
-  <footer>
-    Source on <a href="https://github.com/IsaiahAltDelete/Claude">GitHub</a>.
-  </footer>
+<main>
+  <div class="wrap">
+    <header class="masthead">
+      <h1>Simulators</h1>
+      <p class="tagline">Devices rebuilt in the browser, close enough to the real
+        thing to practise on — and the two graphics tools that ended up alongside
+        them. Everything here is plain HTML, CSS and JavaScript with nothing to
+        install. Main site: <a href="https://isaiart.com" rel="noopener">isaiart.com</a>.</p>
+    </header>
+
+    <div class="signal">
+      <canvas id="trace" aria-hidden="true"></canvas>
+    </div>
+
+    <p class="label">Index</p>
+    <div class="index">
+      <!-- To add a project, copy one entry block and keep the numbers
+           sequential. The tag reads "live" when there is something to open;
+           use "wip" for anything still being built. -->
+      <a class="entry" href="mac/">
+        <span class="num">01</span>
+        <span>
+          <h2>macOS Troubleshooting Simulator<span class="arrow" aria-hidden="true">&rarr;</span></h2>
+          <p>A full macOS Tahoe desktop — window management, Finder, Safari, Mail,
+            Outlook, System Settings, Recovery — built for support training. Its
+            Safari browses Wikipedia for real; everything else runs offline.</p>
+          <span class="meta"><span>/mac</span><span>31 apps</span><span>html · css · js</span><span>no dependencies</span></span>
+        </span>
+        <span class="tag live">live</span>
+      </a>
+      <a class="entry" href="iphone/">
+        <span class="num">02</span>
+        <span>
+          <h2>iPhone Simulator<span class="arrow" aria-hidden="true">&rarr;</span></h2>
+          <p>A full iOS phone — lock screen, Control Centre, Spotlight, App Library
+            and 51 apps, driven either by hand or from a control panel beside the
+            device. Its Maps loads a real map; everything else runs offline.</p>
+          <span class="meta"><span>/iphone</span><span>51 apps</span><span>html · css · js</span><span>no dependencies</span></span>
+        </span>
+        <span class="tag live">live</span>
+      </a>
+      <a class="entry" href="roku/">
+        <span class="num">03</span>
+        <span>
+          <h2>Roku Troubleshooting Simulator<span class="arrow" aria-hidden="true">&rarr;</span></h2>
+          <p>A streaming player on a television, driven by a mock-up remote — home
+            screen, 43 channels, the live guide, search, the store, playback, the
+            whole settings tree, restarts and factory reset. The television is
+            simulated too, inputs and all.</p>
+          <span class="meta"><span>/roku</span><span>43 channels</span><span>html · css · js</span><span>no dependencies</span></span>
+        </span>
+        <span class="tag live">live</span>
+      </a>
+      <a class="entry" href="design/">
+        <span class="num">04</span>
+        <span>
+          <h2>ISAIART Design<span class="arrow" aria-hidden="true">&rarr;</span></h2>
+          <p>A type-in-space generator. Words and emoji thrown through 21 three
+            dimensional formations on a canvas you size yourself, with 18
+            treatments applied to the letterforms and a hand-written WebGL
+            renderer underneath.</p>
+          <span class="meta"><span>/design</span><span>86 controls</span><span>html · css · webgl</span><span>no dependencies</span></span>
+        </span>
+        <span class="tag live">live</span>
+      </a>
+      <a class="entry" href="image/">
+        <span class="num">05</span>
+        <span>
+          <h2>ISAIART Image<span class="arrow" aria-hidden="true">&rarr;</span></h2>
+          <p>A photograph processor. Grading, screens and distortions on your own
+            picture, with the subject found and cut out from the background by a
+            graph cut running on your device — nothing is uploaded.</p>
+          <span class="meta"><span>/image</span><span>100 controls</span><span>html · css · webgl</span><span>no dependencies</span></span>
+        </span>
+        <span class="tag live">live</span>
+      </a>
+      <a class="entry" href="voxel/">
+        <span class="num">06</span>
+        <span>
+          <h2>ISAIART Voxel<span class="arrow" aria-hidden="true">&rarr;</span></h2>
+          <p>A headless voxel model maker for browser games. 93 characters,
+            animals, weapons, items, furniture, scenery, buildings, vehicles and
+            backdrops, every one of them generated from a few lines of code
+            rather than placed by hand — turn any of them with the mouse, edit
+            the recipe that built it, and export it to your engine.</p>
+          <span class="meta"><span>/voxel</span><span>93 models</span><span>html · css · webgl</span><span>no dependencies</span></span>
+        </span>
+        <span class="tag live">live</span>
+      </a>
+    </div>
+
+    <footer>
+      <span>6 projects · 0 dependencies</span>
+      <span class="spacer"></span>
+      <span><a href="https://isaiart.com" rel="noopener">isaiart.com</a></span>
+      <span><a href="https://github.com/IsaiahAltDelete/Claude">Source on GitHub</a></span>
+    </footer>
+  </div>
 </main>
+
+<script>
+/* ---------------------------------------------------------------------------
+   Theme, and the signal strip.
+
+   The trace is a chart recorder: a beam sweeps left to right at a constant
+   rate, drawing a summed-sine signal, and the line behind it decays like
+   phosphor instead of vanishing. The ground colour is read back out of the
+   stylesheet because a canvas cannot inherit a custom property, and the two
+   themes need opposite grounds.
+
+   The decay is applied to a separate transparent layer holding only the trace,
+   and the ground and graticule are repainted underneath it every frame. Fading
+   the visible canvas toward its own ground instead — the obvious way to write
+   this — is wrong twice over: 8-bit compositing does not round-trip, so a few
+   hundred washes walk a neutral ground off its own value (the light theme's
+   cream drifts visibly pink), and the graticule, painted once, gets eaten by
+   the same washes. Fading toward transparent has neither problem, because zero
+   alpha is a fixed point that quantisation lands on exactly.
+   --------------------------------------------------------------------------- */
+(function () {
+  "use strict";
+
+  var root = document.documentElement;
+
+  /* ------------------------------------------------------------- theme */
+
+  var label = document.getElementById("theme-now");
+  var button = document.getElementById("theme");
+  var meta = document.querySelector('meta[name="theme-color"]');
+
+  /* One observer rather than a call beside every place the theme can change.
+     The attribute is the single source of truth — the button writes it, the
+     system preference writes it, and anything else that ever does gets the
+     repaint for free. This is also what keeps the trace's palette honest,
+     since the canvas cannot inherit a CSS variable. */
+  new MutationObserver(paintTheme)
+    .observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+
+  function paintTheme() {
+    var now = root.dataset.theme === "light" ? "light" : "dark";
+    label.textContent = now;
+    button.setAttribute("aria-pressed", String(now === "light"));
+    button.title = "Switch to the " + (now === "light" ? "dark" : "light") + " theme";
+    if (meta) meta.setAttribute("content", now === "light" ? "#f2ede3" : "#0b0a09");
+    reread();
+  }
+
+  button.addEventListener("click", function () {
+    var next = root.dataset.theme === "light" ? "dark" : "light";
+    root.dataset.theme = next;                    // the observer repaints
+    try { localStorage.setItem("isaiart.theme", JSON.stringify(next)); } catch (e) { /* private mode */ }
+  });
+
+  /* Follow the system only while no explicit choice has been stored. */
+  if (window.matchMedia) {
+    var system = window.matchMedia("(prefers-color-scheme: light)");
+    var follow = function () {
+      var stored;
+      try {
+        var raw = localStorage.getItem("isaiart.theme");
+        stored = raw == null ? null : JSON.parse(raw);
+      } catch (e) { stored = null; }
+      if (stored !== "light" && stored !== "dark") {
+        root.dataset.theme = system.matches ? "light" : "dark";
+      }
+    };
+    if (system.addEventListener) system.addEventListener("change", follow);
+  }
+
+  paintTheme();
+
+  /* ------------------------------------------------------------- trace */
+
+  var canvas = document.getElementById("trace");
+  if (!canvas || !canvas.getContext) return;
+  var ctx = canvas.getContext("2d", { alpha: false });
+  if (!ctx) return;
+
+  /* The trace lives here and nowhere else; the visible canvas is rebuilt from
+     ground + graticule + this, every frame. */
+  var layer = document.createElement("canvas");
+  var lctx = layer.getContext("2d");
+
+  var reduce = window.matchMedia
+    ? window.matchMedia("(prefers-reduced-motion: reduce)")
+    : { matches: false, addEventListener: null };
+
+  var W = 0, H = 0, dpr = 1;
+  var ground = "#0b0a09", ink = "#ffb000", grid = "#24211e";
+  var x = 0, clock = 0, last = 0, raf = 0;
+  var SPEED = 168;              // px of trace per second
+  var STEP = 2;                 // px between samples — the beam is not a curve
+
+  /* The palette lives in tokens.css, so it is read back rather than repeated.
+     Called again on a theme switch and after a resize. */
+  function reread() {
+    if (!ctx) return;            // called by paintTheme before the canvas is up
+    var cs = getComputedStyle(root);
+    ground = cs.getPropertyValue("--bg-0").trim() || "#0b0a09";
+    ink = cs.getPropertyValue("--accent").trim() || "#ffb000";
+    grid = cs.getPropertyValue("--line").trim() || "#24211e";
+    wipe();
+    /* Wiping is right mid-sweep — the tail is the old theme's colour — but it
+       would leave a reduced-motion visitor with an empty strip. */
+    if (reduce && reduce.matches) still();
+  }
+
+  /** Ground and graticule, with the trace layer emptied. */
+  function wipe() {
+    lctx.clearRect(0, 0, W, H);
+    groundGraticule();
+  }
+
+  /** Ground and graticule only — the trace layer is left alone. */
+  function groundGraticule() {
+    ctx.fillStyle = ground;
+    ctx.fillRect(0, 0, W, H);
+    graticule();
+  }
+
+  function graticule() {
+    ctx.strokeStyle = grid;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (var gx = 0; gx <= W; gx += 48) {
+      ctx.moveTo(Math.round(gx) + 0.5, 0);
+      ctx.lineTo(Math.round(gx) + 0.5, H);
+    }
+    for (var gy = H / 4; gy < H; gy += H / 4) {
+      ctx.moveTo(0, Math.round(gy) + 0.5);
+      ctx.lineTo(W, Math.round(gy) + 0.5);
+    }
+    ctx.stroke();
+  }
+
+  /* Three sines whose periods do not divide each other, so the strip never
+     repeats within a sensible viewing time. */
+  function signal(t) {
+    return Math.sin(t * 1.7) * 0.42
+         + Math.sin(t * 0.61 + 1.1) * 0.3
+         + Math.sin(t * 3.3 + 0.4) * 0.12;
+  }
+
+  function resize() {
+    var rect = canvas.getBoundingClientRect();
+    W = Math.max(1, Math.round(rect.width));
+    H = Math.max(1, Math.round(rect.height));
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.round(W * dpr);
+    canvas.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    layer.width = canvas.width;
+    layer.height = canvas.height;
+    lctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    x = 0;
+    reread();
+    if (reduce.matches) still();
+  }
+
+  /* Reduced motion gets the whole waveform at once and nothing that moves. */
+  function still() {
+    wipe();
+    ctx.strokeStyle = ink;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    for (var px = 0; px <= W; px += STEP) {
+      var y = H / 2 - signal(px / 74) * (H * 0.34);
+      if (px === 0) ctx.moveTo(px, y); else ctx.lineTo(px, y);
+    }
+    ctx.stroke();
+  }
+
+  function frame(now) {
+    raf = requestAnimationFrame(frame);
+    if (!last) last = now;
+    var dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    clock += dt;
+
+    /* Decay: pull the whole trace layer toward transparent. */
+    lctx.globalCompositeOperation = "destination-out";
+    lctx.fillStyle = "rgba(0,0,0,0.02)";
+    lctx.fillRect(0, 0, W, H);
+    lctx.globalCompositeOperation = "source-over";
+
+    var advance = SPEED * dt;
+    lctx.strokeStyle = ink;
+    lctx.lineWidth = 1.5;
+    lctx.lineCap = "round";
+    lctx.beginPath();
+
+    var drawn = 0;
+    while (drawn < advance) {
+      var prevX = x, prevY = H / 2 - signal(prevX / 74 + clock * 0.9) * (H * 0.34);
+      x += STEP;
+      drawn += STEP;
+      if (x > W) {                 // beam returns to the left and keeps going
+        lctx.stroke();             // flush this sweep before the layer is wiped
+        lctx.beginPath();
+        x = 0;
+        wipe();
+        continue;
+      }
+      var y = H / 2 - signal(x / 74 + clock * 0.9) * (H * 0.34);
+      lctx.moveTo(prevX, prevY);
+      lctx.lineTo(x, y);
+    }
+    lctx.stroke();
+
+    /* The beam head, brighter than its own tail. */
+    lctx.fillStyle = ink;
+    lctx.beginPath();
+    lctx.arc(x, H / 2 - signal(x / 74 + clock * 0.9) * (H * 0.34), 2, 0, Math.PI * 2);
+    lctx.fill();
+
+    /* Compose: a fresh ground and a full-strength graticule under the trace. */
+    groundGraticule();
+    ctx.drawImage(layer, 0, 0, W, H);
+  }
+
+  function start() {
+    if (reduce.matches) { cancelAnimationFrame(raf); raf = 0; still(); return; }
+    if (!raf) { last = 0; raf = requestAnimationFrame(frame); }
+  }
+
+  addEventListener("resize", resize, { passive: true });
+  if (reduce.addEventListener) reduce.addEventListener("change", start);
+
+  /* Nothing on the page depends on the trace, so it is stopped whenever the
+     tab is not being looked at. */
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden) { cancelAnimationFrame(raf); raf = 0; }
+    else start();
+  });
+
+  resize();
+  start();
+}());
+</script>
 </body>
 </html>

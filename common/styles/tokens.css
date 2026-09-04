@@ -1,0 +1,196 @@
+/* ---------------------------------------------------------------------------
+   Tokens, reset and the base type scale.
+
+   Cassette futurism, taken as an interface language rather than a costume.
+   What that means here, concretely: warm neutral grounds instead of blue-grey
+   ones, one phosphor accent used only where a control is live, square corners,
+   hairline rules, and monospaced tabular readouts for anything numeric. What
+   it explicitly does not mean: bezels, screws, scanline overlays, fake CRT
+   curvature or chrome that pretends to be hardware. Nothing on screen is a
+   picture of an object.
+
+   The grounds stay achromatic-warm so the canvas keeps all the real colour.
+   Dark is the default; light is a full sibling — warm paper rather than white,
+   which is the same instrument panel under a different lamp, not an inversion.
+
+   Both themes are driven entirely by the values below. Every rule in
+   controls.css and in the two page layouts spends these names and never a
+   literal colour, so a retune is this file alone.
+   --------------------------------------------------------------------------- */
+
+@import url("../assets/fonts/fonts.css");
+
+:root {
+  color-scheme: dark;
+
+  /* Surfaces, darkest to lightest. Warm — each carries a little amber so the
+     interface sits under the same lamp as the accent. */
+  --bg-0: #0b0a09;      /* app ground */
+  --bg-1: #121110;      /* rails, sheets */
+  --bg-2: #191715;      /* inputs, wells */
+  --bg-3: #211e1b;      /* hover */
+  --bg-4: #2c2823;      /* pressed, filled track */
+
+  --line: #24211e;      /* hairline */
+  --line-2: #332f2a;    /* stronger hairline, focus ring base */
+
+  --fg: #f4f0e8;        /* primary text — warm white, not paper white */
+  --fg-dim: #a8a29a;    /* secondary text — 7.4:1 on --bg-1 */
+  --fg-faint: #7b756c;  /* labels, units — 4.6:1 on --bg-1 */
+  --fg-ghost: #4a453f;  /* non-text decoration only */
+
+  --accent: #ffb000;    /* phosphor amber — the "on" state, and nothing else */
+  --accent-ink: #0b0a09;
+  --hot: #ff5b38;       /* recording / destructive only */
+
+  --stage: #151311;     /* the surface the artboard sits on */
+
+  --r-1: 2px;
+  --r-2: 4px;
+  --r-3: 8px;
+
+  --ui: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --rail: 340px;
+  --bar: 46px;
+  --status: 26px;
+  --sheet-peek: 116px;   /* how much of the mobile sheet stays on screen */
+
+  /* Panel tones. Each rail panel carries one hue so the eye can tell where it
+     is without reading the tab. Taken off a phosphor and filter-gel palette —
+     amber, cyan, green, magenta, sand, ice — and desaturated far enough that
+     the interface still reads as achromatic and the canvas keeps the colour. */
+  --tone-1: #c89a4e;   /* amber   */
+  --tone-2: #6fa5a8;   /* cyan    */
+  --tone-3: #86a878;   /* green   */
+  --tone-4: #b0849c;   /* magenta */
+  --tone-5: #b39d84;   /* sand    */
+  --tone-6: #8898ac;   /* ice     */
+
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  /* Warm paper, not white: the printed side of the same equipment — a manual,
+     a silkscreened panel, a plotter sheet. */
+  --bg-0: #ded8cc;
+  --bg-1: #f2ede3;
+  --bg-2: #e7e1d5;
+  --bg-3: #dcd5c7;
+  --bg-4: #c9c1b1;
+
+  --line: #d2cabb;
+  --line-2: #b3aa99;
+
+  --fg: #1a1714;
+  --fg-dim: #565049;
+  --fg-faint: #7a7268;
+  --fg-ghost: #ada496;
+
+  --accent: #a35a00;    /* the same amber, taken to 4.9:1 on paper */
+  --accent-ink: #f8f4ec;
+
+  --stage: #cfc8ba;
+
+  /* The same hues, taken darker so they hold against a paper rail. */
+  --tone-1: #8a6420;
+  --tone-2: #366e72;
+  --tone-3: #4c7040;
+  --tone-4: #7d4c68;
+  --tone-5: #7d654a;
+  --tone-6: #4e6076;
+}
+
+* { box-sizing: border-box; }
+
+/* Base only. The viewport-filling, non-scrolling shell belongs to the two
+   tool layouts, not here — this file is also loaded by the index, which is an
+   ordinary scrolling document. */
+html, body {
+  margin: 0;
+  background: var(--bg-0);
+  color: var(--fg);
+  font-family: var(--ui);
+  font-size: 13px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+}
+
+body { touch-action: manipulation; }
+
+::selection { background: var(--fg); color: var(--bg-0); }
+
+button, input, select, textarea { font: inherit; color: inherit; }
+
+/* The focus ring is the accent on purpose: 'lit' means the same thing here
+   as it does on every control in the rail. */
+:focus-visible { outline: 1px solid var(--accent); outline-offset: 1px; }
+
+/* Scrollbars — thin, neutral, no chrome. */
+* { scrollbar-width: thin; scrollbar-color: var(--line-2) transparent; }
+*::-webkit-scrollbar { width: 9px; height: 9px; }
+*::-webkit-scrollbar-thumb { background: var(--line-2); border: 3px solid transparent; background-clip: content-box; border-radius: 99px; }
+*::-webkit-scrollbar-track { background: transparent; }
+
+/* ------------------------------------------------------------------- type */
+
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+}
+
+.num { font-family: var(--mono); font-size: 11px; font-variant-numeric: tabular-nums; }
+
+/* --------------------------------------------------------------- utilities */
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+[hidden] { display: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
+
+/* ------------------------------------------------------------------- tones
+
+   The rail sets --tone on each panel and on its tab; everything below just
+   spends it. Kept here rather than in the control sheet because it is a
+   cross-cutting decision about the whole interface, and because it has to
+   out-specify the neutral defaults the controls ship with. */
+
+.rail .tab[aria-selected="true"]::after { background: var(--tone, var(--fg)); }
+.rail .tab[aria-selected="true"] { color: var(--fg); }
+
+.sec-head h2 { display: flex; align-items: center; gap: 7px; }
+.sec-head h2::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  flex: none;
+  background: var(--tone, var(--fg-ghost));
+}
+
+.panel .slider-fill { background: color-mix(in srgb, var(--tone, var(--fg-dim)) 62%, var(--fg-dim)); }
+.panel .slider:hover .slider-fill,
+.panel .slider.live .slider-fill { background: var(--tone, var(--fg)); }
+.panel .slider.live .slider-knob { background: var(--tone, var(--fg)); }
+.panel .pad-dot { background: var(--tone, var(--fg)); }
+.panel .tgl[aria-checked="true"] { background: var(--tone, var(--accent)); border-color: var(--tone, var(--accent)); }
+.panel .seg-b[aria-checked="true"] { background: var(--tone, var(--accent)); color: var(--accent-ink); }
+
+/* In the light theme the tones are dark, so ink on them must flip. */
+:root[data-theme="light"] .panel .tgl[aria-checked="true"] .tgl-dot { background: var(--bg-1); }
+:root[data-theme="light"] .panel .seg-b[aria-checked="true"] { color: var(--bg-1); }

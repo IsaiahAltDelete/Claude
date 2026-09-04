@@ -1,66 +1,28 @@
 /* ---------------------------------------------------------------------------
-   Tokens.
+   Page-scoped tokens.
 
-   Dark by default and dark on purpose: voxel models are lit from above by a
-   warm key, and a light page fights that — every model ends up looking like a
-   sticker. The one surface that is never themed is the tile itself, so a model
-   looks the same here as it does in the baked sheets.
+   The palette, the reset and the type pack come from common/styles/tokens.css —
+   the same file the index and the two tools load — so this page cannot drift
+   away from the house theme, and a retune is still that one file. Nothing here
+   introduces a colour: these are the two measurements the gallery owns.
+
+   The tile ground is `--stage`, the same token the two tools use for the
+   surface an artboard sits on, which is exactly what a model tile is. It works
+   in both themes because the renderer clears to transparent and lets the page
+   show through, so a model is never composited against a baked-in background.
    --------------------------------------------------------------------------- */
 
 :root {
-  color-scheme: dark;
-
-  --bg: #0e1016;
-  --surface: #171a23;
-  --surface-high: #1e222d;
-  --tile: #12141c;          /* matches PAPER in tools/voxel-render.mjs */
-  --line: #262b38;
-  --line-soft: #1c202a;
-
-  --fg: #eef1f8;
-  --dim: #9aa3b8;           /* 6.4:1 on --bg */
-  --faint: #767f94;         /* 4.6:1 — the dimmest tone used for text */
-  --accent: #6fd7dc;
-  --accent-warm: #f0b94a;
-  --danger: #e0607a;
-
-  --radius: 10px;
-  --radius-lg: 16px;
-  --tap: 44px;
-
-  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
-  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-
-  --shadow: 0 12px 40px rgb(0 0 0 / 0.45);
-  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --tile-size: 180px;      /* the grid's minimum column, driven by the slider */
+  --page: 1360px;
 }
-
-* { box-sizing: border-box; }
-
-html { -webkit-text-size-adjust: 100%; }
 
 body {
-  margin: 0;
-  min-height: 100dvh;
-  background: var(--bg);
-  color: var(--fg);
-  font-family: var(--sans);
   font-size: 15px;
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
+  line-height: 1.55;
 }
 
-::selection { background: var(--accent); color: #0b0d12; }
-
-a { color: inherit; }
-
-:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-
-button, input, textarea, select { font: inherit; color: inherit; }
+a { color: inherit; text-decoration: none; }
 
 .visually-hidden {
   position: absolute;

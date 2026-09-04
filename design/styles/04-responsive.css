@@ -98,18 +98,7 @@
   .toast { bottom: calc(var(--sheet-peek, 116px) + 16px); }
 }
 
-/* The narrowest phones still carry the whole tool row, just tighter. */
-@media (max-width: 400px) {
-  .bar { gap: 6px; padding: 0 6px 0 10px; }
-  .bar-tools { gap: 3px; }
-  .bar-tools .btn.icon { width: 27px; }
-  .wordmark { font-size: 12px; }
 
-  /* Export keeps its filled treatment but drops to an icon, which is the
-     last 20px the row needs to fit a 360px screen. */
-  #btn-png { width: 27px; padding: 0; }
-  #btn-png span { display: none; }
-}
 
 @media (max-width: 460px) {
   .bar { padding: 0 8px 0 12px; gap: 8px; }
@@ -127,6 +116,19 @@
   .pop.menu { width: min(280px, 88vw); }
   .menu-grid .pop-item, .menu-list .pop-item { padding: 9px 8px; }
   .chip { padding: 9px 2px; }
+}
+
+/* The narrowest phones still carry the whole tool row, just tighter. */
+@media (max-width: 400px) {
+  .bar { gap: 6px; padding: 0 6px 0 10px; }
+  .bar-tools { gap: 3px; }
+  .bar-tools .btn.icon { width: 27px; }
+  .wordmark { font-size: 12px; }
+
+  /* Export keeps its filled treatment but drops to an icon, which is the
+     last 20px the row needs to fit a 360px screen. */
+  #btn-png { width: 27px; padding: 0; }
+  #btn-png span { display: none; }
 }
 
 /* Landscape phones: the sheet takes a side instead of the bottom. */

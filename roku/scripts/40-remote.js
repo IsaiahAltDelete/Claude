@@ -20,6 +20,8 @@ function buildRemote(mount) {
 
       <div class="remote-row">
         <button class="rk rk-round rk-power" data-key="power" title="Power" aria-label="Power">${ICON('power')}</button>
+        <button class="rk rk-round rk-input" data-key="input"
+          title="Input — switches the television's source" aria-label="Input">${ICON('hdmi')}</button>
         <button class="rk rk-round rk-mic" id="rk-mic" data-key="mic" title="Voice search" aria-label="Voice search">${ICON('mic')}</button>
       </div>
 
@@ -72,8 +74,8 @@ function buildRemote(mount) {
       <kbd>H</kbd> home <span class="sep">·</span><kbd>*</kbd> options
       <span class="sep">·</span><kbd>R</kbd> replay <span class="sep">·</span><kbd>P</kbd> play<br>
       <kbd>,</kbd><kbd>.</kbd> rewind / forward
-      <span class="sep">·</span><kbd>+</kbd><kbd>-</kbd><kbd>M</kbd> volume
-      <span class="sep">·</span><kbd>V</kbd> voice
+      <span class="sep">·</span><kbd>+</kbd><kbd>-</kbd><kbd>M</kbd> volume<br>
+      <kbd>V</kbd> voice <span class="sep">·</span><kbd>I</kbd> TV input
     </div>`;
 
   mount.addEventListener('click', event => {
@@ -132,6 +134,7 @@ const KEY_MAP = {
   '+': 'vol+', '=': 'vol+', '-': 'vol-', '_': 'vol-',
   m: 'mute', M: 'mute',
   v: 'mic', V: 'mic',
+  i: 'input', I: 'input',
 };
 
 function wireKeyboard() {

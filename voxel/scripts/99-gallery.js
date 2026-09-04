@@ -384,6 +384,29 @@ function buildChips() {
   }
 }
 
+/* ------------------------------------------------------------------- theme */
+
+/* One key across the index, both tools, the 404 and this page. The value is
+   JSON-encoded because the tools write it through common/scripts/util.js's
+   store helper, which stringifies — read or write it any other way and the
+   choice silently stops following the visitor between pages. */
+const THEME_KEY = 'isaiart.theme';
+
+function setTheme(value) {
+  document.documentElement.dataset.theme = value;
+  document.querySelector('meta[name="theme-color"]')
+    ?.setAttribute('content', getComputedStyle(document.documentElement).getPropertyValue('--bg-0').trim());
+  const button = $('#theme');
+  button.textContent = value === 'dark' ? 'Light' : 'Dark';
+  button.setAttribute('aria-pressed', String(value === 'light'));
+  try { localStorage.setItem(THEME_KEY, JSON.stringify(value)); } catch { /* private mode */ }
+}
+
+setTheme(document.documentElement.dataset.theme === 'light' ? 'light' : 'dark');
+$('#theme').addEventListener('click', () => {
+  setTheme(document.documentElement.dataset.theme === 'light' ? 'dark' : 'light');
+});
+
 /* ------------------------------------------------------------------- boot */
 
 document.addEventListener('keydown', event => {

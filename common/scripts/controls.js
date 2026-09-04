@@ -55,6 +55,162 @@ function notches(e) {
   return horizontal ? n : -n;
 }
 
+/* ---------------------------------------------------------------- tooltips
+
+   The browser's own title tooltip waits about a second, cannot be styled to
+   match anything around it, and under a finger never appears at all. Every
+   control descriptor already carries a sentence explaining what it does, so
+   that sentence is drawn here instead.
+
+   One element serves the whole page. A node is tipped by attribute rather
+   than by subscription — data-tip, plus an optional data-hint — so hover and
+   focus are watched once at the window and anything built later is covered
+   without registering anything.
+
+   The timing is the convention every desktop interface settled on: a pause
+   before the first tooltip, none at all for the next one. Reading down a rail
+   of sliders should not mean waiting once per slider, and the wait should
+   come back once the hand has been still for a moment. */
+
+const TIP_DELAY = 380;      // pause before the first tooltip of a sweep
+const TIP_GRACE = 500;      // how long the sweep stays warm after one closes
+const TIP_MARGIN = 8;       // clearance from every edge of the viewport
+const TIP_GAP = 6;          // clearance from the control being described
+
+/* The gestures a label cannot carry. A control offers one of these about
+   itself only when the schema has not written a better one. */
+const SLIDER_HINT = "Scroll to adjust · Shift for fine · double-click to reset";
+
+// Under a finger there is no hover to read intent from, and a tooltip would
+// only be something in the way of the tap, so the whole system stands down.
+const coarsePointer = matchMedia("(pointer: coarse)");
+
+let tipNode = null, tipLine = null, tipHint = null;
+let tipTarget = null;       // the node the visible or pending tooltip describes
+let tipTimer = 0;
+let tipOn = false;
+let tipHidAt = -Infinity;   // when the last tooltip came down, for the grace period
+let tipPointerAt = -Infinity;   // when a pointer last went down, to spot focus from a click
+
+function tipRoot() {
+  if (tipNode) return tipNode;
+  tipLine = el("span", { class: "tip-line" });
+  tipHint = el("span", { class: "tip-hint" });
+  // Every control keeps its own accessible name, so this element would only
+  // read the same thing twice. It is decoration for the eye alone.
+  tipNode = el("div", { class: "tip", "aria-hidden": "true" }, tipLine, tipHint);
+  document.body.append(tipNode);
+  return tipNode;
+}
+
+/* Above the control and centred on it, flipped below when the room above has
+   run out. Whichever side wins, the tooltip is clamped into the viewport but
+   never laid over its own subject: a tooltip that covers the control it
+   describes answers the question by hiding the answer. */
+function placeTip(target) {
+  const a = target.getBoundingClientRect();
+  const t = tipNode.getBoundingClientRect();
+  const above = a.top - TIP_GAP - TIP_MARGIN;
+  const below = innerHeight - a.bottom - TIP_GAP - TIP_MARGIN;
+  const top = t.height <= above || above >= below
+    ? a.top - TIP_GAP - t.height
+    : a.bottom + TIP_GAP;
+  const left = a.left + a.width / 2 - t.width / 2;
+  const room = Math.max(TIP_MARGIN, innerWidth - t.width - TIP_MARGIN);
+  tipNode.style.left = `${Math.round(clamp(left, TIP_MARGIN, room))}px`;
+  tipNode.style.top = `${Math.round(top)}px`;
+}
+
+function showTip(target) {
+  const text = target.getAttribute("data-tip");
+  if (!text) return;
+  const node = tipRoot();
+  tipLine.textContent = text;
+  tipHint.textContent = target.getAttribute("data-hint") || "";
+  // Measure from the corner. A fixed box still parked near an edge is
+  // squeezed by the viewport and would report a width it will not have once
+  // it has been placed.
+  node.style.left = "0px";
+  node.style.top = "0px";
+  placeTip(target);
+  node.classList.add("on");
+  tipOn = true;
+  tipTarget = target;
+}
+
+function hideTip() {
+  clearTimeout(tipTimer);
+  tipTimer = 0;
+  tipTarget = null;
+  if (!tipOn) return;
+  tipOn = false;
+  tipHidAt = performance.now();
+  tipNode.classList.remove("on");
+}
+
+function armTip(target, immediate) {
+  if (coarsePointer.matches || target === tipTarget) return;
+  hideTip();
+  tipTarget = target;
+  // Warm, so the tooltip before this one closed a moment ago and the hand is
+  // still moving: waiting again would only make the rail feel sticky.
+  if (immediate || performance.now() - tipHidAt < TIP_GRACE) showTip(target);
+  else tipTimer = setTimeout(() => showTip(target), TIP_DELAY);
+}
+
+const tippedNode = (node) => (node instanceof Element ? node.closest("[data-tip]") : null);
+
+addEventListener("pointerover", (e) => {
+  const target = tippedNode(e.target);
+  if (target) armTip(target, false);
+  else if (tipTarget) hideTip();
+}, true);
+
+addEventListener("pointerout", (e) => {
+  // Crossing into a child of the same control is not leaving it.
+  if (!tipTarget) return;
+  const to = e.relatedTarget;
+  if (to instanceof Node && tipTarget.contains(to)) return;
+  hideTip();
+}, true);
+
+addEventListener("focusin", (e) => {
+  // Focus that arrived with a click already has a pointer resting on the
+  // control, and that path is the hover one with its pause in front of it.
+  if (performance.now() - tipPointerAt < 400) return;
+  const target = tippedNode(e.target);
+  if (target) armTip(target, true);
+}, true);
+
+addEventListener("focusout", hideTip, true);
+addEventListener("pointerdown", () => {
+  tipPointerAt = performance.now();
+  hideTip();
+}, true);
+addEventListener("scroll", hideTip, { capture: true, passive: true });
+addEventListener("resize", hideTip);
+addEventListener("keydown", (e) => {
+  if (e.key === "Escape") hideTip();
+}, true);
+
+/** Tip any node: a plain sentence, or { tip, hint } for a second line. */
+function attachTip(node, content) {
+  if (!node) return node;
+  const c = typeof content === "string" ? { tip: content } : content || {};
+  if (!c.tip) {
+    node.removeAttribute("data-tip");
+    node.removeAttribute("data-hint");
+    return node;
+  }
+  node.setAttribute("data-tip", c.tip);
+  if (c.hint) node.setAttribute("data-hint", c.hint);
+  else node.removeAttribute("data-hint");
+  // A node cannot carry both, or the browser's tooltip turns up underneath
+  // ours a second later.
+  node.removeAttribute("title");
+  return node;
+}
+
 class Base extends HTMLElement {
   set config(v) {
     this._cfg = v;
@@ -84,6 +240,17 @@ class Base extends HTMLElement {
       el("label", { class: "row-label", text: labelText }),
       valueNode || null);
   }
+
+  /* The descriptor's tip, put on the parts of the control a pointer actually
+     rests on: the label row always, and the body wherever the body is the
+     larger and more obvious target. A hint written into the schema wins over
+     whatever the control offers about its own gestures. */
+  tip(hint, ...nodes) {
+    const c = this.cfg;
+    if (!c || !c.tip) return;
+    const content = { tip: c.tip, hint: c.hint || hint || "" };
+    for (const node of nodes) attachTip(node, content);
+  }
 }
 
 /* ----------------------------------------------------------------- slider */
@@ -91,7 +258,11 @@ class Base extends HTMLElement {
 class Slider extends Base {
   draw() {
     const c = this.cfg;
-    this.valueEl = el("button", { class: "row-value", type: "button", title: "Click to type a value" });
+    this.valueEl = el("button", {
+      class: "row-value", type: "button",
+      "data-tip": "Click to type a value",
+      "data-hint": "Or drag it sideways to scrub",
+    });
     this.slider = el("div", {
       class: "slider" + (c.bipolar ? " bipolar" : ""),
       tabindex: "0",
@@ -103,7 +274,9 @@ class Slider extends Base {
       el("div", { class: "slider-track" }, this.fill = el("div", { class: "slider-fill" })),
       this.knob = el("div", { class: "slider-knob" }));
 
-    this.append(this.head(c.l, this.valueEl), this.slider);
+    const row = this.head(c.l, this.valueEl);
+    this.append(row, this.slider);
+    this.tip(SLIDER_HINT, row, this.slider);
 
     const curve = CURVE[c.k] || 1;
     const toValue = (t) => c.min + (c.max - c.min) * Math.pow(clamp(t, 0, 1), curve);
@@ -303,7 +476,9 @@ class Segment extends Base {
       next.click();
     });
 
-    this.append(this.head(c.l), group);
+    const row = this.head(c.l);
+    this.append(row, group);
+    this.tip(null, row, group);
   }
   sync() {
     if (!this.buttons) return;
@@ -327,8 +502,10 @@ class Toggle extends Base {
       class: "tgl", type: "button", role: "switch", "aria-label": c.l,
       onclick: () => State.set(c.k, !State.get(c.k)),
     }, el("span", { class: "tgl-dot" }));
-    this.append(el("div", { class: "tgl-row" },
-      el("label", { class: "row-label", text: c.l }), this.btn));
+    const row = el("div", { class: "tgl-row" },
+      el("label", { class: "row-label", text: c.l }), this.btn);
+    this.append(row);
+    this.tip(null, row, this.btn);
   }
   sync() {
     this.btn?.setAttribute("aria-checked", String(!!State.get(this.cfg.k)));
@@ -360,6 +537,7 @@ function placePop(pop, anchor) {
 
 function showPop(pop, anchor, onClose) {
   closePop();
+  hideTip();
   placePop(pop, anchor);
 
   // Dismiss on pointerdown so it feels immediate, but swallow the click that
@@ -431,7 +609,12 @@ class Select extends Base {
         if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); this.open(); }
       },
     }, this.label, icon("chevron"));
-    this.append(this.head(c.l), this.btn);
+    const row = this.head(c.l);
+    this.append(row, this.btn);
+    // Long lists open with a filter field; short ones jump on a letter.
+    this.tip(c.opts.length > 10
+      ? "Type to filter · arrows to move · Enter to pick"
+      : "Arrows to move · type a letter to jump", row, this.btn);
   }
 
   open() {
@@ -561,7 +744,11 @@ class ColorField extends Base {
     this.chip = el("span", { class: "swatch-chip" });
     this.btn = el("button", { class: "swatch", type: "button", "aria-label": c.l,
       onclick: () => this.open() }, this.chip);
-    this.append(this.head(c.l, this.valueEl), this.btn);
+    const row = this.head(c.l, this.valueEl);
+    this.append(row, this.btn);
+    this.tip("EyeDropper" in window
+      ? "The dropper in the picker samples any colour on screen"
+      : null, row, this.btn);
   }
 
   open() {
@@ -576,7 +763,9 @@ class ColorField extends Base {
     const hex = el("input", { class: "picker-hex", spellcheck: "false", "aria-label": "Hex value" });
 
     const chip = (sw) => el("button", {
-      type: "button", title: sw,
+      type: "button",
+      "aria-label": sw === "#00000000" ? "Transparent" : sw.toUpperCase(),
+      "data-tip": sw === "#00000000" ? "Transparent" : sw.toUpperCase(),
       style: `background:${sw === "#00000000" ? "transparent" : sw};${sw === "#00000000" ? "background-image:repeating-conic-gradient(var(--bg-4) 0 25%, transparent 0 50%);background-size:8px 8px;" : ""}`,
       onclick: () => { apply(sw); refresh(); },
     });
@@ -589,7 +778,9 @@ class ColorField extends Base {
 
     // Sampling a colour from anywhere on screen, where the browser allows it.
     const dropper = "EyeDropper" in window ? el("button", {
-      class: "btn icon", type: "button", title: "Pick a colour from the screen",
+      class: "btn icon", type: "button",
+      "aria-label": "Pick a colour from the screen",
+      "data-tip": "Pick a colour from the screen",
       onclick: async () => {
         try {
           const res = await new window.EyeDropper().open();
@@ -690,7 +881,9 @@ class Pad extends Base {
     this.valueEl = el("span", { class: "row-value" });
     this.dot = el("span", { class: "pad-dot" });
     this.pad = el("div", { class: "pad", role: "application", "aria-label": c.l }, this.dot);
-    this.append(this.head(c.l, this.valueEl), this.pad);
+    const row = this.head(c.l, this.valueEl);
+    this.append(row, this.pad);
+    this.tip("Drag anywhere · arrows when focused · double-click to reset", row, this.pad);
 
     const put = (x, y) => State.patch({
       [c.keys[0]]: +clamp(x, -1, 1).toFixed(3),
@@ -767,8 +960,10 @@ class Vec extends Base {
       }, { passive: false });
       return input;
     });
-    this.append(this.head(c.l, el("span", { class: "row-value", text: c.unit || "" })),
-      el("div", { class: "vec" }, this.inputs));
+    const row = this.head(c.l, el("span", { class: "row-value", text: c.unit || "" }));
+    const group = el("div", { class: "vec" }, this.inputs);
+    this.append(row, group);
+    this.tip("Type a number, or scroll over a field · Shift for single steps", row, group);
   }
   sync() {
     this.inputs?.forEach((input, i) => {
@@ -806,14 +1001,16 @@ class TextField extends Base {
     });
 
     this.clear = el("button", {
-      class: "field-clear", type: "button", title: "Clear", "aria-label": `Clear ${c.l}`,
+      class: "field-clear", type: "button", "data-tip": "Clear", "aria-label": `Clear ${c.l}`,
       onclick: () => {
         State.patch({ [c.k]: "" }, { source: "clear" });
         this.input.focus();
       },
     }, icon("close"));
 
-    this.append(this.head(c.l, this.clear), this.input);
+    const row = this.head(c.l, this.clear);
+    this.append(row, this.input);
+    this.tip(null, row, this.input);
   }
   sync() {
     const value = String(State.get(this.cfg.k) ?? "");
@@ -835,14 +1032,18 @@ class EmojiRow extends Base {
     const c = this.cfg;
     const grid = el("div", { class: "picker-swatches", style: "grid-template-columns:repeat(10,1fr);margin-top:5px" },
       State.EMOJI.map((glyph) => el("button", {
-        type: "button", title: `Insert ${glyph}`,
+        type: "button",
+        "aria-label": `Insert ${glyph}`,
+        "data-tip": `Insert ${glyph}`,
         style: "background:var(--bg-2);font-size:13px;line-height:1;border-color:var(--line)",
         onclick: () => {
           const cur = State.get("text");
           State.set("text", cur + (cur && !cur.endsWith(" ") && !cur.endsWith("\n") ? " " : "") + glyph);
         },
       }, glyph)));
-    this.append(this.head(c.l, el("span", { class: "row-value", text: "tap to append" })), grid);
+    const row = this.head(c.l, el("span", { class: "row-value", text: "tap to append" }));
+    this.append(row, grid);
+    this.tip(null, row, grid);
   }
 }
 
@@ -852,17 +1053,24 @@ const ACTION_ICON = {
   png1: "image", png2: "image", copy: "copy", rec: "record",
   share: "link", save: "save", load: "load", reset: "reset",
   clear: "close", undo: "undo", redo: "redo",
+  // The image page's own actions. A button row where half the buttons carry
+  // an icon and half do not reads as unfinished, so every action either has
+  // one here or the whole row goes without.
+  open: "open", paste: "copy", sample: "image",
+  detect: "target", invertMask: "swap", clearMask: "close", box: "crop",
 };
 
 class Buttons extends Base {
   draw() {
     const c = this.cfg;
-    this.append(this.head(c.l),
-      el("div", { class: "btn-row", style: "margin-top:5px" },
-        c.items.map(([id, label]) => el("button", {
-          class: "btn", type: "button", "data-action": id,
-          onclick: () => this.dispatchEvent(new CustomEvent("iso-action", { detail: id, bubbles: true })),
-        }, ACTION_ICON[id] ? icon(ACTION_ICON[id]) : null, el("span", { text: label })))));
+    const row = this.head(c.l);
+    const group = el("div", { class: "btn-row", style: "margin-top:5px" },
+      c.items.map(([id, label]) => el("button", {
+        class: "btn", type: "button", "data-action": id,
+        onclick: () => this.dispatchEvent(new CustomEvent("iso-action", { detail: id, bubbles: true })),
+      }, ACTION_ICON[id] ? icon(ACTION_ICON[id]) : null, el("span", { text: label }))));
+    this.append(row, group);
+    this.tip(null, row, group);
   }
 }
 
@@ -876,7 +1084,9 @@ class Presets extends Base {
         class: "btn", type: "button", style: "justify-content:flex-start",
         onclick: () => this.dispatchEvent(new CustomEvent("iso-preset", { detail: p.id, bubbles: true })),
       }, p.name)));
-    this.append(this.head(c.l, el("span", { class: "row-value", text: `${State.PRESETS.length}` })), grid);
+    const row = this.head(c.l, el("span", { class: "row-value", text: `${State.PRESETS.length}` }));
+    this.append(row, grid);
+    this.tip(null, row, grid);
   }
 }
 
@@ -892,6 +1102,7 @@ customElements.define("iso-emoji", EmojiRow);
 customElements.define("iso-buttons", Buttons);
 customElements.define("iso-presets", Presets);
 
+window.ISO.tip = { attach: attachTip, hide: hideTip };
 window.ISO.closePop = closePop;
 window.ISO.showPop = showPop;
 window.ISO.CONTROL_TAG = {

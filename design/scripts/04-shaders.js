@@ -42,6 +42,10 @@ uniform float uDriftAmt;
 uniform vec3 uTintA, uTintB;
 uniform float uFog;
 uniform vec2 uFade;
+// Half-width and half-height of the view at the z = 0 plane. The flat layouts
+// are laid out against this instead of against uRadius alone, which is what
+// lets them hold the frame when the lens or the camera distance changes.
+uniform vec2 uFrame;
 
 out vec2 vUv;
 out vec3 vTint;
@@ -70,6 +74,28 @@ void main() {
   float f = fract(t01 + flow + aRand.w * uStagger);
   float zf = (f - 0.5) * uDepth;
   float R = uRadius;
+
+  // ---- terms shared by the flat layouts ----------------------------------
+  // Spread is read there as a fill fraction of the visible frame rather than
+  // as a radius in world units, so the default of 1.7 lands on a full frame.
+  vec2 ext = uFrame * (R / 1.7);
+  // The margin is measured against the first cell rather than against each
+  // copy's own, because every copy in a row has to share one wrap period: a
+  // margin that changed with the token would leave the repeat unevenly spaced.
+  vec4 first = uCells[0];
+  float firstAspect = (first.z * uAtlasSize.x) / max(first.w * uAtlasSize.y, 0.0001);
+  // Half of the widest diagonal a copy can reach, with size jitter, pulse and
+  // the depth term all at their largest. A wrap seam pushed this far outside
+  // the frame is only ever crossed by geometry that is already off-screen,
+  // whatever the roll, so the jump cannot be seen. Scatter, wobble and
+  // turbulence can still carry a copy over the seam, which is the price of
+  // leaving those free to work on these layouts too.
+  float bleed = 0.5 * uSize * (1.0 + uSizeVar) * (1.0 + uPulse * 0.5)
+              * max(0.02, 1.0 - uSizeDepth) * (firstAspect + 1.0);
+  // Travel is counted in whole periods per second rather than in depth units,
+  // so a slide keeps its pace whatever the lens does. At uSpeed zero this is
+  // exactly zero, which is what makes these layouts hold perfectly still.
+  float slide = uTime * uSpeed * 0.25;
 
   vec3 p = vec3(0.0);
   float fade01 = 1.0;
@@ -152,9 +178,42 @@ void main() {
     float a = (t01 - 0.5) * (0.6 + uTurns * 0.55);
     float band = (aRand.y - 0.5) * uDepth * 0.35;
     p = vec3(sin(a) * R * 1.7, band, cos(a) * R * 1.7 - R * 1.7);
-  } else {                                  // shell
+  } else if (uFormation < 16) {             // shell
     vec3 dir = normalize(aRand.xyz - 0.5 + 0.0001);
     p = dir * R * (0.65 + 0.35 * aRand.w);
+  } else if (uFormation == 16) {            // single
+    // One copy, dead centre, and nothing moving it.
+    p = vec3(0.0);
+  } else if (uFormation == 17 || uFormation == 18) {  // rows / columns
+    float lanes = clamp(floor(uTurns + 0.5), 1.0, 24.0);
+    float per = ceil(n / lanes);
+    float lane = floor(aIndex / per);
+    float idx = mod(aIndex, per);
+    // Neighbouring lanes run against each other, which is what stops a block
+    // of repeats reading as one sliding sheet.
+    float dir = mod(lane, 2.0) < 0.5 ? 1.0 : -1.0;
+    // The copies sit at even fractions of one period and the slide moves that
+    // fraction, so a copy leaving the far end arrives at the near end exactly
+    // where the run of spacing wants it and the repeat stays unbroken.
+    float u = fract((idx + 0.5) / per + slide * dir);
+    float across = (lane + 0.5) / lanes - 0.5;
+    if (uFormation == 17) {
+      // The period never closes below the frame, however small the spread,
+      // because a seam inside the frame would be a visible jump.
+      float wrap = max(ext.x, uFrame.x) + bleed;
+      p = vec3((u - 0.5) * 2.0 * wrap, -across * 2.0 * ext.y, 0.0);
+    } else {
+      float wrap = max(ext.y, uFrame.y) + bleed;
+      p = vec3(across * 2.0 * ext.x, (u - 0.5) * 2.0 * wrap, 0.0);
+    }
+  } else if (uFormation == 19) {            // stack
+    // Still by definition, so uSpeed is deliberately not read here. The first
+    // copy takes the top line, which is the order the words were written in.
+    p = vec3(0.0, (0.5 - (aIndex + 0.5) / n) * 2.0 * ext.y, 0.0);
+  } else {                                  // marquee
+    float wrap = max(ext.x, uFrame.x) + bleed;
+    float u = fract((aIndex + 0.5) / n + slide);
+    p = vec3((u - 0.5) * 2.0 * wrap, 0.0, 0.0);
   }
 
   if (travel > 0.5) fade01 = smoothstep(0.0, 0.07, f) * smoothstep(0.0, 0.07, 1.0 - f);
@@ -178,6 +237,10 @@ void main() {
   vec4 centreView = uView * vec4(p, 1.0);
   float dist = max(-centreView.z, 0.0001);
   float dn = clamp((dist - uFade.x) / max(uFade.y - uFade.x, 0.0001), 0.0, 1.0);
+  // The flat layouts are meant to read as graphic rather than as atmosphere,
+  // so the term that drives the fog, the depth colour ramp and the depth size
+  // is pinned to zero and the whole layout stays evenly lit.
+  if (uFormation >= 16) dn = 0.0;
 
   // ---- size --------------------------------------------------------------
   vec4 cell = uCells[int(aCell)];

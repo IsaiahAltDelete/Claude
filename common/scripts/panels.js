@@ -47,11 +47,17 @@ function buildRail(railBody, tabsRoot) {
       }
     }
 
+    // One muted hue per panel, assigned by position so any page that supplies
+    // a schema gets the colour coding without asking for it.
+    const tone = `var(--tone-${(panels.length % 6) + 1})`;
+    box.style.setProperty("--tone", tone);
+
     railBody.append(box);
     const tab = el("button", {
       class: "tab", type: "button", role: "tab", id: `tab-${panel.id}`,
       "aria-controls": `panel-${panel.id}`,
       onclick: () => select(panel.id),
+      style: `--tone:${tone}`,
     }, panel.label);
     tabsRoot.append(tab);
     panels.push({ id: panel.id, box, tab });

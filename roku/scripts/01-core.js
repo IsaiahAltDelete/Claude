@@ -150,7 +150,12 @@ function freshState() {
       firmware: '2.1.15',
       protocol: 'Wi-Fi Direct',
       lastPaired: 'Set up with this device',
+      tvControl: true,           /* has learned the television's power/input codes */
     },
+
+    /* The set the box is plugged into. The Roku is on HDMI 1; everything else
+       is the television's own business. */
+    tv: { input: 'hdmi1' },
 
     system: {
       fastStart: true,

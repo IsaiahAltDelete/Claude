@@ -56,14 +56,37 @@ being replaced; render targets are rebuilt only on a size change; the frame loop
 allocates nothing; and quality tiers cap total pixels so a 4K artboard cannot
 melt a phone. Context loss is caught and the whole pipeline rebuilds itself.
 
+## Formations that stand still
+
+Not everything wants to be a shape. Alongside the sixteen spatial formations
+there are five flat ones — **Single**, **Rows**, **Columns**, **Stack** and
+**Marquee** — that lay type out against the frame rather than through it. Fog,
+the depth colour ramp and depth-driven sizing are all switched off for these,
+so they read as graphic rather than as atmosphere, and at a speed of zero they
+are perfectly still.
+
+The sliding ones are the reason this took a uniform rather than a branch. Rows
+and columns are laid against the visible frame at the z = 0 plane, so a lane
+holds its width when the lens or the camera distance changes; copies sit at
+even fractions of one period and the slide moves that fraction, so a copy
+leaving the far end arrives at the near end exactly where the spacing wants it
+and the repeat never breaks. The wrap seam is pushed a full copy-diagonal
+outside the frame — computed from the largest a copy could be with size jitter
+and pulse at maximum — so the jump is only ever made by geometry nobody can
+see. Neighbouring lanes run against each other, which is what stops a block of
+repeats reading as one sliding sheet.
+
+The default is the plainest of them: one word, centred, still, on a flat
+ground. Everything else is something you asked for.
+
 ## Presets and canvas
 
 Two things get reached for constantly and belong to no panel, so they have
-their own buttons in the bar. **Presets** (`P`) opens seventeen finished looks
+their own buttons in the bar. **Presets** (`P`) opens twenty-two finished looks
 — tunnels, tickers, galaxies, corridors, emoji swarms, chrome rings, knockout
-monoliths — each a complete parameter set, each undoable. **Canvas** (`C`) sets
-the artboard: eight ratios, six named pixel sizes from HD to 4K, a turn that
-swaps width and height, and a clear.
+monoliths, and five flat ones — each a complete parameter set, each undoable.
+**Canvas** (`C`) sets the artboard: eight ratios, six named pixel sizes from HD
+to 4K, a turn that swaps width and height, and a clear.
 
 ## Controls
 
@@ -84,6 +107,14 @@ a filter field; focus moves in on open and back to the trigger on close. While
 a list is open it owns the keyboard, so typing to find a typeface cannot
 trigger a global shortcut.
 
+Hover anything and it tells you what it does, in a sentence that lives in the
+schema next to the parameter itself. The pause before the first tooltip is the
+one every desktop interface settled on, and there is none at all for the next
+one — reading down a rail of sliders should not mean waiting once per slider.
+Each panel carries one muted hue, used on its tab, its section marks, its
+slider fills and its active segments, so you can tell at a glance which part of
+the tool you are in without the page turning into colour.
+
 ⌘Z and ⇧⌘Z undo and redo everything, including Randomise, presets, Reset and
 Clear — a continuous drag collapses into one step, and each of those commands
 is always its own. Clearing the text clears the canvas (⌘⌫, or the ✕ on the
@@ -94,24 +125,37 @@ double-click or double-tap to recentre. On a phone the rail is a bottom sheet
 that tracks your finger and takes a flick; a vertical swipe that starts on a
 slider scrolls the panel rather than overwriting the setting.
 
+Randomise varies a look rather than sampling the sliders. Rolling every
+control independently reliably produces noise — the space of settings is mostly
+ugly and only a thin shell of it is design — so a roll starts from a preset,
+re-rolls the things that decide what a look *is* (typeface, weight, case,
+treatment, palette) and jitters the geometry inside the archetype it landed on.
+The result should look like something a person chose, and unlike the last one.
+
 ## Layout
 
 ```
 index.html                the whole page
-styles/01-tokens.css      palette, reset, type scale
-styles/02-controls.css    every custom element
 styles/03-layout.css      bar, stage, rail, status
 styles/04-responsive.css  the phone sheet
-scripts/01-util.js        dom, maths, colour, storage, drag
-scripts/02-state.js       schema, defaults, presets, serialisation
+scripts/02-state.js       schema, defaults, 22 presets, the randomiser
 scripts/03-atlas.js       tokenising, measuring, the 18 text treatments
 scripts/04-shaders.js     GLSL for all five programs
 scripts/05-renderer.js    WebGL 2: programs, instancing, targets, passes
-scripts/06-controls.js    slider, segment, toggle, select, colour, pad, vec…
-scripts/07-panels.js      builds the rail from the schema
 scripts/08-export.js      stills and clips
 scripts/99-boot.js        wiring and the frame loop
-assets/fonts/             20 bundled faces, all OFL 1.1
+```
+
+Shared with `/image`:
+
+```
+common/styles/tokens.css    palette, reset, type scale, the six panel hues
+common/styles/controls.css  every custom element, and the tooltip
+common/scripts/util.js      dom, maths, colour, storage, drag
+common/scripts/store.js     the parameter store: patches, undo, presets, links
+common/scripts/controls.js  slider, segment, toggle, select, colour, pad, vec…
+common/scripts/panels.js    builds a rail from any schema
+common/assets/fonts/        20 bundled faces, all OFL 1.1
 ```
 
 ## Output
@@ -127,5 +171,5 @@ Anton, Archivo Black, Bebas Neue, Oswald, Inter, Space Grotesk, Syne, Playfair
 Display, DM Serif Display, Instrument Serif, JetBrains Mono, Major Mono Display,
 VT323, Orbitron, Bungee, Monoton and Rubik Glitch, plus the system sans, serif
 and mono stacks. All bundled faces are under the SIL Open Font License 1.1 —
-copyright notices and the licence text are in `assets/fonts/LICENSES.md`. Emoji
+copyright notices and the licence text are in `../common/assets/fonts/LICENSES.md`. Emoji
 render through whichever colour emoji font your device provides.

@@ -21,6 +21,7 @@
     overlay: $('#layer-overlay'),
     system: $('#layer-system'),
     toast: $('#layer-toast'),
+    tv: $('#layer-tv'),
   };
 
   /* A box that has never been set up has no channels; one that has been
@@ -34,6 +35,7 @@
 
   buildRemote($('#remote-mount'));
   refreshRemoteBadge();
+  wireTvButtons();
   wirePointer(UI.canvas);
   wireKeyboard();
 
@@ -56,6 +58,9 @@
     quick: true,
     after() {
       resetTo(State.setupComplete ? 'home' : 'setup');
+      /* If the set was left on another input, it stays there — the box has
+         just booted behind it, exactly as it would in the living room. */
+      renderSource();
       if (!State.setupComplete) toast('This device needs setting up');
     },
   });
@@ -101,7 +106,17 @@ window.roku = {
     return 'an update is available again';
   },
 
+  /** setInput('hdmi2') — the "check your input" fault, staged in one line. */
+  setInput(id) { setInput(id); return `input: ${currentInput().name}`; },
+
+  /** noTvControl() — the remote forgets the television's codes. */
+  noTvControl() { State.remote.tvControl = false; save(); return 'the remote no longer drives the set'; },
+
+  /** noCec() — turns off one-touch play, so Home cannot pull the set back. */
+  noCec() { State.system.cec = false; State.system.cecOneTouch = false; save(); return 'HDMI-CEC off'; },
+
   restart() { runRestart('Restarting'); return 'restarting'; },
+  secret() { openSecretScreen(); return 'platform secret screen'; },
   saver() { startScreensaver(true); return 'screensaver'; },
   setup() { State.setupComplete = false; save(); resetTo('setup'); return 'guided setup'; },
   reset() { wipeState(); location.reload(); },
