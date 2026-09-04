@@ -6,9 +6,10 @@ must not be broken, and what has already bitten someone.
 
 ## What this is
 
-Five independent static pages, plus a shared theme, published to GitHub Pages
-from `main`. Three are device simulators for support training; two are graphics
-tools. There is no framework, no bundler, no package manager and no server.
+Seven independent static pages, plus a shared theme, published to GitHub Pages
+from `main`. Three are device simulators for support training, three are
+graphics tools, and one is a game built on top of one of the tools. There is no
+framework, no bundler, no package manager and no server.
 
 | Path | What | Scale |
 |---|---|---|
@@ -17,6 +18,8 @@ tools. There is no framework, no bundler, no package manager and no server.
 | `roku/` | Roku player on a simulated TV | 43 channels, 16 live, 20 scripts |
 | `design/` | Type-in-space generator, WebGL 2 | 86 controls, 21 formations, 18 treatments, 22 presets |
 | `image/` | Photograph processor, WebGL 2 | 100 controls, 20 presets, classical segmentation |
+| `voxel/` | Headless voxel model maker | 93 models, 19 scripts, bundled to `dist/voxel.js` |
+| `claudeventure/` | Isometric shop-builder built on `voxel/` | 119 models, 51 garments, 8 scripts |
 | `common/` | Theme, controls and parameter store for `design`, `image` and the index | |
 
 ## Invariants — do not break these
@@ -121,6 +124,10 @@ beside every place the theme can change.
 python3 tools/check-syntax.py   # parses each script, and each shared global scope merged
 python3 tools/check-refs.py     # every glyph, pane, command and app id resolves
 python3 tools/build-assets.py   # regenerates mac/ and iphone/ artwork; CI fails on drift
+node tools/voxel-check.mjs      # 1,400 assertions over every catalogue model
+node tools/voxel-render.mjs --check   # fail if the voxel catalogue drifted
+node tools/voxel-build.mjs --check    # fail if dist/voxel.js is stale
+node tools/claudeventure-check.mjs --check   # build, assert and simulate the game
 node tools/smoke.mjs            # opens every app in Chromium, fails on any console error
 ```
 
@@ -135,9 +142,11 @@ In this sandbox Chromium is pre-installed — set
 `CHROMIUM_PATH=/opt/pw-browsers/chromium-1194/chrome-linux/chrome` and do **not**
 run `playwright install`.
 
-**Coverage gap:** all three gates only look at `mac/`, `iphone/` and `roku/`.
-The index, the 404, `design/` and `image/` have none — including the
-duplicate-`const` check, which they need just as much. Verify those four by
+**Coverage gap:** `check-refs.py` and `build-assets.py` only look at `mac/`,
+`iphone/` and `roku/`; `check-syntax.py` also covers `voxel/` and
+`claudeventure/`, and both of those have their own drift and simulation gates
+plus a section in `smoke.mjs`. The index, the 404, `design/` and `image/` have
+none — including the duplicate-`const` check, which they need just as much. Verify those four by
 opening them in a browser, in **both themes**, and watching the console. A
 throwaway static server plus Playwright is enough; drive the theme with
 `document.documentElement.dataset.theme = "light"` and sample real pixels with
@@ -161,6 +170,14 @@ added in `iphone/scripts/69-register.js`.
 or `image/scripts/state.js`) declaring range, default, dependencies and the
 sentence that becomes its tooltip. The rail, the URL codec, the presets and the
 randomiser all read that one table. For `/image`, one more line in a shader.
+
+**A stall, a dish or a garment in ClaudeVenture** — one recipe in
+`claudeventure/scripts/01-props.js` or `02-people.js`, and for a stall an entry
+in `STATIONS` in `04-content.js` naming its machine and its dish. Nothing else
+needs touching: the check tool enumerates the registry, the cast sheets rebuild
+themselves, and the scene keys models by name. Re-run
+`node tools/claudeventure-check.mjs` and commit the sheets and `cast.json`, or
+CI fails on the drift. Every station needs all three tiers to exist.
 
 **A project on the index** — copy an entry block in `index.html` and keep the
 numbers sequential. The counts in each entry's `meta` line are real; if you

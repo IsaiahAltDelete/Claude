@@ -1,0 +1,1078 @@
+{
+  "format": "claudeventure-cast/1",
+  "models": 119,
+  "garments": 51,
+  "cast": {
+    "cv-juice-1": {
+      "print": "517ae637",
+      "voxels": 2128,
+      "size": [
+        11,
+        38,
+        11
+      ]
+    },
+    "cv-juice-2": {
+      "print": "83f21f73",
+      "voxels": 2159,
+      "size": [
+        11,
+        38,
+        11
+      ]
+    },
+    "cv-juice-3": {
+      "print": "c19706f9",
+      "voxels": 2206,
+      "size": [
+        13,
+        38,
+        12
+      ]
+    },
+    "cv-coffee-1": {
+      "print": "371c808a",
+      "voxels": 2821,
+      "size": [
+        12,
+        37,
+        10
+      ]
+    },
+    "cv-coffee-2": {
+      "print": "11c6826a",
+      "voxels": 2926,
+      "size": [
+        12,
+        39,
+        11
+      ]
+    },
+    "cv-coffee-3": {
+      "print": "24593b97",
+      "voxels": 3051,
+      "size": [
+        13,
+        41,
+        12
+      ]
+    },
+    "cv-boba-1": {
+      "print": "e770c7e6",
+      "voxels": 2427,
+      "size": [
+        13,
+        42,
+        10
+      ]
+    },
+    "cv-boba-2": {
+      "print": "bbd25d8f",
+      "voxels": 2458,
+      "size": [
+        13,
+        42,
+        11
+      ]
+    },
+    "cv-boba-3": {
+      "print": "7c52c014",
+      "voxels": 2509,
+      "size": [
+        13,
+        42,
+        12
+      ]
+    },
+    "cv-smoothie-1": {
+      "print": "aa7eb8a5",
+      "voxels": 2728,
+      "size": [
+        13,
+        43,
+        10
+      ]
+    },
+    "cv-smoothie-2": {
+      "print": "a5704b07",
+      "voxels": 2771,
+      "size": [
+        13,
+        43,
+        11
+      ]
+    },
+    "cv-smoothie-3": {
+      "print": "9a19676b",
+      "voxels": 2827,
+      "size": [
+        15,
+        43,
+        12
+      ]
+    },
+    "cv-grill-1": {
+      "print": "ac45c6df",
+      "voxels": 3617,
+      "size": [
+        15,
+        37,
+        14
+      ]
+    },
+    "cv-grill-2": {
+      "print": "49c2cb54",
+      "voxels": 3735,
+      "size": [
+        15,
+        42,
+        14
+      ]
+    },
+    "cv-grill-3": {
+      "print": "1d5619ed",
+      "voxels": 3821,
+      "size": [
+        15,
+        44,
+        14
+      ]
+    },
+    "cv-fryer-1": {
+      "print": "5074288a",
+      "voxels": 2646,
+      "size": [
+        13,
+        41,
+        10
+      ]
+    },
+    "cv-fryer-2": {
+      "print": "1e3cdcbc",
+      "voxels": 2689,
+      "size": [
+        13,
+        41,
+        11
+      ]
+    },
+    "cv-fryer-3": {
+      "print": "462d240b",
+      "voxels": 2770,
+      "size": [
+        15,
+        42,
+        12
+      ]
+    },
+    "cv-pizza-1": {
+      "print": "39cdbec0",
+      "voxels": 1826,
+      "size": [
+        22,
+        31,
+        13
+      ]
+    },
+    "cv-pizza-2": {
+      "print": "1a544016",
+      "voxels": 1878,
+      "size": [
+        22,
+        32,
+        14
+      ]
+    },
+    "cv-pizza-3": {
+      "print": "fc82955a",
+      "voxels": 1947,
+      "size": [
+        22,
+        33,
+        14
+      ]
+    },
+    "cv-taco-1": {
+      "print": "66f0c066",
+      "voxels": 2789,
+      "size": [
+        18,
+        30,
+        11
+      ]
+    },
+    "cv-taco-2": {
+      "print": "e67e4749",
+      "voxels": 2835,
+      "size": [
+        18,
+        30,
+        12
+      ]
+    },
+    "cv-taco-3": {
+      "print": "4463fcc6",
+      "voxels": 2891,
+      "size": [
+        18,
+        30,
+        12
+      ]
+    },
+    "cv-gelato-1": {
+      "print": "7a364ab3",
+      "voxels": 2644,
+      "size": [
+        13,
+        44,
+        10
+      ]
+    },
+    "cv-gelato-2": {
+      "print": "5cb97ccc",
+      "voxels": 2768,
+      "size": [
+        13,
+        47,
+        11
+      ]
+    },
+    "cv-gelato-3": {
+      "print": "27735a83",
+      "voxels": 2833,
+      "size": [
+        15,
+        48,
+        12
+      ]
+    },
+    "cv-sushi-1": {
+      "print": "f8ce4e30",
+      "voxels": 2928,
+      "size": [
+        18,
+        37,
+        14
+      ]
+    },
+    "cv-sushi-2": {
+      "print": "0f03f471",
+      "voxels": 2971,
+      "size": [
+        18,
+        37,
+        14
+      ]
+    },
+    "cv-sushi-3": {
+      "print": "cab3335b",
+      "voxels": 3042,
+      "size": [
+        18,
+        37,
+        14
+      ]
+    },
+    "cv-donut-1": {
+      "print": "db3eafe7",
+      "voxels": 1754,
+      "size": [
+        13,
+        32,
+        9
+      ]
+    },
+    "cv-donut-2": {
+      "print": "c4beaf2d",
+      "voxels": 1797,
+      "size": [
+        13,
+        32,
+        11
+      ]
+    },
+    "cv-donut-3": {
+      "print": "a6f43ae9",
+      "voxels": 1857,
+      "size": [
+        15,
+        32,
+        12
+      ]
+    },
+    "cv-bakery-1": {
+      "print": "dd627e4b",
+      "voxels": 2510,
+      "size": [
+        18,
+        29,
+        11
+      ]
+    },
+    "cv-bakery-2": {
+      "print": "c48ad21e",
+      "voxels": 2553,
+      "size": [
+        18,
+        29,
+        11
+      ]
+    },
+    "cv-bakery-3": {
+      "print": "392f18e3",
+      "voxels": 2664,
+      "size": [
+        18,
+        30,
+        12
+      ]
+    },
+    "cv-dish-lemonade": {
+      "print": "19d62c20",
+      "voxels": 80,
+      "size": [
+        5,
+        8,
+        5
+      ]
+    },
+    "cv-dish-espresso": {
+      "print": "b365d41d",
+      "voxels": 112,
+      "size": [
+        6,
+        5,
+        5
+      ]
+    },
+    "cv-dish-bobacup": {
+      "print": "eabbc6a9",
+      "voxels": 110,
+      "size": [
+        5,
+        10,
+        5
+      ]
+    },
+    "cv-dish-burger": {
+      "print": "49afe90d",
+      "voxels": 243,
+      "size": [
+        7,
+        7,
+        7
+      ]
+    },
+    "cv-dish-fries": {
+      "print": "fc74d4c9",
+      "voxels": 144,
+      "size": [
+        5,
+        10,
+        5
+      ]
+    },
+    "cv-dish-slice": {
+      "print": "f67a5e6f",
+      "voxels": 85,
+      "size": [
+        11,
+        3,
+        6
+      ]
+    },
+    "cv-dish-tacoplate": {
+      "print": "00b7debd",
+      "voxels": 160,
+      "size": [
+        9,
+        4,
+        5
+      ]
+    },
+    "cv-dish-cone": {
+      "print": "a1e6d699",
+      "voxels": 111,
+      "size": [
+        5,
+        11,
+        5
+      ]
+    },
+    "cv-dish-sushiplate": {
+      "print": "de422832",
+      "voxels": 173,
+      "size": [
+        9,
+        5,
+        7
+      ]
+    },
+    "cv-dish-donutbox": {
+      "print": "9080abff",
+      "voxels": 169,
+      "size": [
+        9,
+        5,
+        7
+      ]
+    },
+    "cv-dish-croissant": {
+      "print": "5d4bf30d",
+      "voxels": 69,
+      "size": [
+        9,
+        3,
+        3
+      ]
+    },
+    "cv-dish-smoothiecup": {
+      "print": "de15c885",
+      "voxels": 150,
+      "size": [
+        5,
+        10,
+        5
+      ]
+    },
+    "cv-counter": {
+      "print": "21ccf3d8",
+      "voxels": 863,
+      "size": [
+        15,
+        9,
+        9
+      ]
+    },
+    "cv-register": {
+      "print": "28f4c011",
+      "voxels": 413,
+      "size": [
+        9,
+        10,
+        7
+      ]
+    },
+    "cv-stool": {
+      "print": "94fff400",
+      "voxels": 96,
+      "size": [
+        7,
+        8,
+        7
+      ]
+    },
+    "cv-cafe-table": {
+      "print": "e62ad749",
+      "voxels": 259,
+      "size": [
+        11,
+        11,
+        11
+      ]
+    },
+    "cv-planter": {
+      "print": "1c375056",
+      "voxels": 1246,
+      "size": [
+        12,
+        21,
+        11
+      ]
+    },
+    "cv-menu-board": {
+      "print": "bc6a304f",
+      "voxels": 401,
+      "size": [
+        17,
+        12,
+        3
+      ]
+    },
+    "cv-neon-sign": {
+      "print": "70436627",
+      "voxels": 144,
+      "size": [
+        19,
+        9,
+        2
+      ]
+    },
+    "cv-bin": {
+      "print": "b07e2068",
+      "voxels": 378,
+      "size": [
+        7,
+        10,
+        7
+      ]
+    },
+    "cv-tip-jar": {
+      "print": "43bf287e",
+      "voxels": 191,
+      "size": [
+        7,
+        11,
+        7
+      ]
+    },
+    "cv-gift-box": {
+      "print": "99706921",
+      "voxels": 883,
+      "size": [
+        11,
+        11,
+        11
+      ]
+    },
+    "cv-lot": {
+      "print": "9662a314",
+      "voxels": 1002,
+      "size": [
+        15,
+        15,
+        12
+      ]
+    },
+    "cv-floor-mat": {
+      "print": "2198611b",
+      "voxels": 187,
+      "size": [
+        17,
+        1,
+        11
+      ]
+    },
+    "cv-crate-stack": {
+      "print": "33927ee2",
+      "voxels": 546,
+      "size": [
+        13,
+        12,
+        8
+      ]
+    },
+    "cv-arrow": {
+      "print": "b6a7e241",
+      "voxels": 420,
+      "size": [
+        9,
+        14,
+        9
+      ]
+    },
+    "cv-cash-pile": {
+      "print": "a238575a",
+      "voxels": 270,
+      "size": [
+        11,
+        7,
+        9
+      ]
+    },
+    "cv-manager": {
+      "print": "0f1367ae",
+      "voxels": 1110,
+      "size": [
+        11,
+        26,
+        9
+      ]
+    },
+    "cv-guest-1": {
+      "print": "f94bc4c4",
+      "voxels": 834,
+      "size": [
+        11,
+        24,
+        7
+      ]
+    },
+    "cv-guest-2": {
+      "print": "6db40db4",
+      "voxels": 905,
+      "size": [
+        11,
+        20,
+        9
+      ]
+    },
+    "cv-guest-3": {
+      "print": "08188dcf",
+      "voxels": 893,
+      "size": [
+        11,
+        23,
+        7
+      ]
+    },
+    "cv-guest-4": {
+      "print": "0dedd537",
+      "voxels": 940,
+      "size": [
+        11,
+        24,
+        8
+      ]
+    },
+    "cv-wear-chef-toque": {
+      "print": "44d7ec67",
+      "voxels": 990,
+      "size": [
+        11,
+        26,
+        6
+      ]
+    },
+    "cv-wear-cap": {
+      "print": "e2c1170a",
+      "voxels": 877,
+      "size": [
+        11,
+        24,
+        8
+      ]
+    },
+    "cv-wear-beanie": {
+      "print": "294c491c",
+      "voxels": 916,
+      "size": [
+        11,
+        27,
+        6
+      ]
+    },
+    "cv-wear-visor": {
+      "print": "51420b7a",
+      "voxels": 779,
+      "size": [
+        11,
+        20,
+        9
+      ]
+    },
+    "cv-wear-cat-ears": {
+      "print": "68315b76",
+      "voxels": 780,
+      "size": [
+        11,
+        23,
+        6
+      ]
+    },
+    "cv-wear-bunny-ears": {
+      "print": "2d7c9172",
+      "voxels": 790,
+      "size": [
+        11,
+        26,
+        6
+      ]
+    },
+    "cv-wear-headphones": {
+      "print": "4a1f0091",
+      "voxels": 828,
+      "size": [
+        11,
+        23,
+        6
+      ]
+    },
+    "cv-wear-party-hat": {
+      "print": "1d7a8be7",
+      "voxels": 874,
+      "size": [
+        11,
+        29,
+        7
+      ]
+    },
+    "cv-wear-flower-crown": {
+      "print": "e8025c82",
+      "voxels": 783,
+      "size": [
+        11,
+        21,
+        8
+      ]
+    },
+    "cv-wear-top-hat": {
+      "print": "95f721bc",
+      "voxels": 1082,
+      "size": [
+        11,
+        27,
+        8
+      ]
+    },
+    "cv-wear-crown": {
+      "print": "9b1470b2",
+      "voxels": 818,
+      "size": [
+        11,
+        24,
+        6
+      ]
+    },
+    "cv-wear-donut-hat": {
+      "print": "4829043a",
+      "voxels": 882,
+      "size": [
+        11,
+        24,
+        9
+      ]
+    },
+    "cv-wear-wizard-hat": {
+      "print": "e9172695",
+      "voxels": 1009,
+      "size": [
+        11,
+        30,
+        10
+      ]
+    },
+    "cv-wear-halo": {
+      "print": "e21a5268",
+      "voxels": 782,
+      "size": [
+        11,
+        25,
+        9
+      ]
+    },
+    "cv-wear-apron": {
+      "print": "15e91ec9",
+      "voxels": 898,
+      "size": [
+        11,
+        20,
+        7
+      ]
+    },
+    "cv-wear-tee": {
+      "print": "ad2643b4",
+      "voxels": 868,
+      "size": [
+        11,
+        20,
+        7
+      ]
+    },
+    "cv-wear-hoodie": {
+      "print": "b4cf9f92",
+      "voxels": 880,
+      "size": [
+        11,
+        20,
+        7
+      ]
+    },
+    "cv-wear-stripes": {
+      "print": "7a2039a6",
+      "voxels": 853,
+      "size": [
+        11,
+        20,
+        7
+      ]
+    },
+    "cv-wear-hawaiian": {
+      "print": "3cb1eda9",
+      "voxels": 860,
+      "size": [
+        11,
+        20,
+        7
+      ]
+    },
+    "cv-wear-varsity": {
+      "print": "5d5d4c88",
+      "voxels": 862,
+      "size": [
+        11,
+        20,
+        7
+      ]
+    },
+    "cv-wear-lab-coat": {
+      "print": "76633b33",
+      "voxels": 880,
+      "size": [
+        11,
+        20,
+        7
+      ]
+    },
+    "cv-wear-overalls": {
+      "print": "01599091",
+      "voxels": 881,
+      "size": [
+        11,
+        20,
+        7
+      ]
+    },
+    "cv-wear-puffer": {
+      "print": "c98cec61",
+      "voxels": 1134,
+      "size": [
+        13,
+        20,
+        8
+      ]
+    },
+    "cv-wear-tuxedo": {
+      "print": "46c853ac",
+      "voxels": 878,
+      "size": [
+        11,
+        20,
+        7
+      ]
+    },
+    "cv-wear-band-tee": {
+      "print": "877d1fbd",
+      "voxels": 868,
+      "size": [
+        11,
+        20,
+        7
+      ]
+    },
+    "cv-wear-cloud-knit": {
+      "print": "048afcd6",
+      "voxels": 922,
+      "size": [
+        11,
+        20,
+        8
+      ]
+    },
+    "cv-wear-jeans": {
+      "print": "b886d7f4",
+      "voxels": 857,
+      "size": [
+        11,
+        20,
+        7
+      ]
+    },
+    "cv-wear-shorts": {
+      "print": "d4687008",
+      "voxels": 857,
+      "size": [
+        11,
+        20,
+        7
+      ]
+    },
+    "cv-wear-skirt": {
+      "print": "f6c461d1",
+      "voxels": 939,
+      "size": [
+        11,
+        20,
+        7
+      ]
+    },
+    "cv-wear-cargo": {
+      "print": "ba35e2ca",
+      "voxels": 869,
+      "size": [
+        11,
+        20,
+        7
+      ]
+    },
+    "cv-wear-slacks": {
+      "print": "d85dcb76",
+      "voxels": 857,
+      "size": [
+        11,
+        20,
+        7
+      ]
+    },
+    "cv-wear-leggings": {
+      "print": "bfdebff8",
+      "voxels": 857,
+      "size": [
+        11,
+        20,
+        7
+      ]
+    },
+    "cv-wear-tutu": {
+      "print": "969bd2c9",
+      "voxels": 967,
+      "size": [
+        11,
+        20,
+        11
+      ]
+    },
+    "cv-wear-sneakers": {
+      "print": "d18ccd22",
+      "voxels": 853,
+      "size": [
+        11,
+        20,
+        7
+      ]
+    },
+    "cv-wear-boots": {
+      "print": "aaa1ae22",
+      "voxels": 859,
+      "size": [
+        11,
+        20,
+        7
+      ]
+    },
+    "cv-wear-loafers": {
+      "print": "e7f1eb40",
+      "voxels": 853,
+      "size": [
+        11,
+        20,
+        7
+      ]
+    },
+    "cv-wear-sandals": {
+      "print": "32055ea6",
+      "voxels": 853,
+      "size": [
+        11,
+        20,
+        7
+      ]
+    },
+    "cv-wear-skates": {
+      "print": "be0b11be",
+      "voxels": 859,
+      "size": [
+        11,
+        20,
+        7
+      ]
+    },
+    "cv-wear-glow-boots": {
+      "print": "a26e8fb4",
+      "voxels": 859,
+      "size": [
+        11,
+        20,
+        7
+      ]
+    },
+    "cv-wear-glasses": {
+      "print": "52b575e4",
+      "voxels": 868,
+      "size": [
+        11,
+        20,
+        8
+      ]
+    },
+    "cv-wear-shades": {
+      "print": "32df0ef9",
+      "voxels": 867,
+      "size": [
+        11,
+        20,
+        8
+      ]
+    },
+    "cv-wear-blush": {
+      "print": "f6821f33",
+      "voxels": 863,
+      "size": [
+        11,
+        20,
+        8
+      ]
+    },
+    "cv-wear-monocle": {
+      "print": "585d6a90",
+      "voxels": 865,
+      "size": [
+        11,
+        20,
+        8
+      ]
+    },
+    "cv-wear-moustache": {
+      "print": "9a6add36",
+      "voxels": 860,
+      "size": [
+        11,
+        20,
+        8
+      ]
+    },
+    "cv-wear-star-eyes": {
+      "print": "2edd0527",
+      "voxels": 863,
+      "size": [
+        11,
+        20,
+        8
+      ]
+    },
+    "cv-wear-satchel": {
+      "print": "e4f6d2cf",
+      "voxels": 927,
+      "size": [
+        11,
+        20,
+        7
+      ]
+    },
+    "cv-wear-cape": {
+      "print": "2c3783ab",
+      "voxels": 1029,
+      "size": [
+        11,
+        20,
+        7
+      ]
+    },
+    "cv-wear-backpack": {
+      "print": "ffe99b16",
+      "voxels": 1034,
+      "size": [
+        11,
+        20,
+        9
+      ]
+    },
+    "cv-wear-turtle": {
+      "print": "b7959ae9",
+      "voxels": 502,
+      "size": [
+        9,
+        20,
+        9
+      ]
+    },
+    "cv-wear-jetpack": {
+      "print": "fb610796",
+      "voxels": 1007,
+      "size": [
+        11,
+        20,
+        8
+      ]
+    },
+    "cv-wear-wings": {
+      "print": "40f5366a",
+      "voxels": 949,
+      "size": [
+        19,
+        20,
+        7
+      ]
+    }
+  }
+}

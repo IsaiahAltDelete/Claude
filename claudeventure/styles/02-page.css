@@ -1,0 +1,139 @@
+/* ---------------------------------------------------------------------------
+   The page around the game: the bar, the masthead, the colophon.
+
+   Straight house style, and it spends house tokens only — the same bar markup
+   and the same measurements as /voxel, /design and /image, so the game reads
+   as part of the site rather than as something bolted to the side of it.
+   --------------------------------------------------------------------------- */
+
+body { font-size: 15px; line-height: 1.55; }
+
+/* ------------------------------------------------------------------- bar */
+
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: color-mix(in srgb, var(--bg-0) 92%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+
+.bar-in {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: var(--page);
+  height: var(--bar);
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.wordmark {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--fg);
+}
+
+.wordmark span { color: var(--accent); }
+.bar-spacer { flex: 1; }
+
+.bar-link,
+.bar-btn {
+  appearance: none;
+  padding: 5px 11px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-1);
+  background: var(--bg-1);
+  color: var(--fg-dim);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.15s var(--ease), border-color 0.15s var(--ease), background 0.15s var(--ease);
+}
+
+.bar-link:hover,
+.bar-btn:hover { color: var(--fg); border-color: var(--fg-ghost); background: var(--bg-2); }
+
+/* -------------------------------------------------------------- masthead */
+
+.wrap { max-width: var(--page); margin: 0 auto; padding: 0 20px 80px; }
+
+.masthead { padding: 34px 0 18px; }
+
+.masthead h1 {
+  margin: 0 0 10px;
+  font-size: clamp(30px, 5vw, 46px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.tagline { margin: 0 0 16px; max-width: 68ch; color: var(--fg-dim); }
+.tagline em { font-style: italic; color: var(--fg); }
+
+.readout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 9px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+}
+
+.readout b { font-weight: 400; color: var(--accent); }
+.readout li + li::before { content: "·"; margin-right: 9px; color: var(--fg-ghost); }
+
+/* ------------------------------------------------------------- colophon */
+
+.colophon {
+  margin-top: 56px;
+  padding-top: 26px;
+  border-top: 1px solid var(--line);
+}
+
+.colophon h2 {
+  margin: 30px 0 10px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+}
+
+.colophon h2:first-child { margin-top: 0; }
+.colophon p { margin: 0 0 16px; max-width: 68ch; }
+.colophon code { font-family: var(--mono); font-size: 0.92em; color: var(--fg); }
+.colophon a { color: var(--accent); border-bottom: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); }
+
+.colophon pre {
+  margin: 0 0 18px;
+  padding: 14px 16px;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--r-2);
+  background: var(--bg-1);
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--fg-dim);
+}
+
+.colophon pre b { color: var(--accent); font-weight: 400; }
+
+.grid-two {
+  display: grid;
+  gap: 26px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}

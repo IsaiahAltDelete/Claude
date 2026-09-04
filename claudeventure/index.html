@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#0b0a09">
+<title>ISAIART — ClaudeVenture</title>
+<meta name="description" content="A cute isometric shop-builder played in the browser: run a lemonade stand into a five-shop food empire, dress your manager in fifty voxel garments, and watch every model in it get generated from code at load time.">
+<link rel="icon" href="../favicon.svg">
+
+<!-- The palette, the reset and the type pack are the same files the index and
+     every tool load, so the chrome around the game cannot drift away from
+     them. The game inside the frame runs its own palette on purpose — see
+     styles/01-tokens.css. -->
+<link rel="stylesheet" href="../common/styles/tokens.css">
+<link rel="preload" as="font" type="font/woff2" href="../common/assets/fonts/inter-latin-400-normal.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="../common/assets/fonts/bungee-latin-400-normal.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="../common/assets/fonts/space-grotesk-latin-700-normal.woff2" crossorigin>
+<link rel="stylesheet" href="styles/01-tokens.css">
+<link rel="stylesheet" href="styles/02-page.css">
+<link rel="stylesheet" href="styles/03-game.css">
+
+<script>
+  /* Applied before first paint so the page never flashes the wrong ground. One
+     key across the index, every tool, the 404 and this page, so the choice
+     follows you between them. */
+  (function () {
+    try {
+      var raw = localStorage.getItem("isaiart.theme");
+      var saved = raw == null ? null : JSON.parse(raw);
+      if (saved !== "light" && saved !== "dark") {
+        saved = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+      }
+      document.documentElement.dataset.theme = saved;
+    } catch (e) { /* private mode: the dark default in the markup stands */ }
+  }());
+</script>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-in">
+    <p class="wordmark">ISAIART <span>ClaudeVenture</span></p>
+    <span class="bar-spacer"></span>
+    <a class="bar-link" href="../voxel/">Voxel</a>
+    <a class="bar-link" href="../">Index</a>
+    <button class="bar-btn" id="theme" type="button" aria-pressed="false">Light</button>
+  </div>
+</div>
+
+<main class="wrap">
+
+  <header class="masthead">
+    <h1>ClaudeVenture</h1>
+    <p class="tagline">
+      A shop-builder you look down on from the corner. Guests come in, the crew run
+      orders out, and everything you make goes back into the machines. Every model on
+      screen — the stalls, the food, the guests, the fifty-odd things you can put on —
+      is <em>generated from code</em> by the voxel maker in
+      <a href="../voxel/">/voxel</a> when the page loads. There are no sprites and no
+      model files in this folder.
+    </p>
+    <ul class="readout">
+      <li><b>5</b> shops</li>
+      <li><b>12</b> stalls</li>
+      <li><b>51</b> garments</li>
+      <li>drawn with <b id="renderer-note">WebGL2</b></li>
+      <li>no dependencies</li>
+      <li>no build step</li>
+    </ul>
+  </header>
+
+  <div class="cv-frame">
+    <canvas id="stage" aria-label="The shop floor, seen from above"></canvas>
+    <div class="cv-hud" id="hud"></div>
+  </div>
+
+  <footer class="colophon">
+    <h2>How to play</h2>
+    <div class="grid-two">
+      <p>
+        Machines make food on a timer. Crew carry it to whoever is waiting at the
+        counter. Guests eat, pay, and leave the money on the floor — the till sweeps
+        it up on its own, but sweeping it by hand pays a fifth more. Tap a machine to
+        rush it. Tap a gift box to open it.
+      </p>
+      <p>
+        Spend everything, always. Upgrading a machine raises what its dish is worth
+        faster than it raises the price of the next level, so the only question is
+        which one to feed. Every tenth level changes how a machine looks, and the
+        twenty-fourth changes it again. When the lifetime bar fills, move on: the
+        machines start again at level one and the new shop pays two hundred and fifty
+        times better.
+      </p>
+    </div>
+
+    <h2>Everything here is a recipe</h2>
+    <p>
+      A voxel model in this repository is a function handed an empty grid — see
+      <a href="../voxel/">the maker</a> for the whole story. ClaudeVenture is what
+      that is <em>for</em>. The twelve stalls are one recipe each, run at three tiers;
+      the fifty-one garments are one function each, drawn onto whatever body is
+      wearing them; the guests are seeded, so guest four is always guest four. Nothing
+      is loaded from disk, because there is nothing on disk to load:
+    </p>
+    <pre>claudeventure/scripts/01-props.js   <b>62</b> models — stalls, dishes, fittings, the room
+claudeventure/scripts/02-people.js  <b>51</b> garments and the body they hang off
+claudeventure/scripts/03-stage.js   the isometric renderer, WebGL2 and CPU
+claudeventure/scripts/04-content.js the shops, the curves, the drop tables
+claudeventure/scripts/05-game.js    the simulation — 20 Hz, fixed step
+claudeventure/scripts/06-scene.js   game state -> a list of things to draw
+claudeventure/scripts/07-hud.js     the interface
+claudeventure/scripts/08-boot.js    wiring, saving, and the loop</pre>
+    <p>
+      The stage is a second renderer over the maker's own meshes: <code>VOX.mesh</code>
+      still does the greedy merge and bakes the ambient occlusion, and
+      <code>VOX.View</code> still owns the light rig, so a burger here is lit exactly
+      as it is in the catalogue. What is added is per-draw placement, which is what
+      lets one uploaded mesh be thirty guests. Where WebGL2 is missing, every model is
+      baked once to a sprite by the same software rasteriser that renders the sheets
+      in <code>voxel/assets</code>, and the frame becomes a depth-sorted stack of
+      images — which is how isometric games were drawn before anyone had a GPU.
+    </p>
+
+    <h2>Your save</h2>
+    <p>
+      Kept in this browser under <code>isaiart.claudeventure</code> and nowhere else.
+      Nothing is uploaded, there is no account, and closing the tab is fine — shut
+      shops keep earning at 40% for up to eight hours. <em>Start over</em> in the Stats
+      tab wipes it.
+    </p>
+  </footer>
+</main>
+
+<script src="../voxel/dist/voxel.js"></script>
+<script src="scripts/01-props.js"></script>
+<script src="scripts/02-people.js"></script>
+<script src="scripts/03-stage.js"></script>
+<script src="scripts/04-content.js"></script>
+<script src="scripts/05-game.js"></script>
+<script src="scripts/06-scene.js"></script>
+<script src="scripts/07-hud.js"></script>
+<script src="scripts/08-boot.js"></script>
+</body>
+</html>
