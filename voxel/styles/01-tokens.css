@@ -1,0 +1,41 @@
+/* ---------------------------------------------------------------------------
+   Page-scoped tokens.
+
+   The palette, the reset and the type pack come from common/styles/tokens.css —
+   the same file the index and the two tools load — so this page cannot drift
+   away from the house theme, and a retune is still that one file. Nothing here
+   introduces a colour: these are the two measurements the gallery owns.
+
+   The tile ground is `--stage`, the same token the two tools use for the
+   surface an artboard sits on, which is exactly what a model tile is. It works
+   in both themes because the renderer clears to transparent and lets the page
+   show through, so a model is never composited against a baked-in background.
+   --------------------------------------------------------------------------- */
+
+:root {
+  --tile-size: 180px;      /* the grid's minimum column, driven by the slider */
+  --page: 1360px;
+}
+
+body {
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+a { color: inherit; text-decoration: none; }
+
+.visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,394 @@
+/* ---------------------------------------------------------------------------
+   The grid, the tiles, and the inspector.
+
+   A tile is a canvas you can drag, so it cannot also be a button — a pointer
+   drag inside a button is a click on release, and every attempt to turn a model
+   would open a dialog. The name below it is the button instead, and the canvas
+   carries a tabindex so the keyboard can turn it with the arrow keys.
+
+   Tiles sit on `--stage`, the token the two tools use for the surface an
+   artboard sits on. The renderer clears to transparent, so a model composites
+   against the page in whichever theme is on rather than against a baked ground.
+   --------------------------------------------------------------------------- */
+
+.group { margin-top: 34px; }
+
+.group-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin: 0 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+.group-head h2 {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--fg);
+}
+
+.group-head p {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  color: var(--fg-faint);
+  font-size: 13px;
+}
+
+.group-head .count {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--fg-faint);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--tile-size), 1fr));
+  gap: 10px;
+}
+
+/* -------------------------------------------------------------------- tile */
+
+.tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line);
+  border-radius: var(--r-1);
+  background: var(--bg-1);
+  overflow: hidden;
+  transition: border-color 0.12s var(--ease);
+}
+
+.tile:hover { border-color: var(--fg-ghost); }
+.tile:focus-within { border-color: color-mix(in srgb, var(--accent) 45%, var(--line-2)); }
+
+.tile canvas {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  background: var(--stage);
+  cursor: grab;
+  touch-action: none;
+}
+
+.tile canvas.is-dragging { cursor: grabbing; }
+
+.tile-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 9px 8px;
+  border-top: 1px solid var(--line);
+}
+
+.tile-name {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1.3;
+  color: var(--fg);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tile-name:hover { color: var(--accent); }
+
+.tile-name small {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  color: var(--fg-faint);
+}
+
+.tile-open {
+  flex: none;
+  width: 22px; height: 22px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-1);
+  background: none;
+  color: var(--fg-faint);
+  cursor: pointer;
+}
+
+.tile-open:hover { color: var(--fg); border-color: var(--fg-ghost); background: var(--bg-2); }
+.tile-open svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.5; }
+
+.empty {
+  margin: 56px 0;
+  text-align: center;
+  color: var(--fg-faint);
+}
+
+.empty b { color: var(--fg); font-weight: 400; font-family: var(--mono); }
+
+/* --------------------------------------------------------------- inspector */
+
+dialog.inspector {
+  width: min(1080px, calc(100vw - 20px));
+  max-height: calc(100dvh - 20px);
+  padding: 0;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-2);
+  background: var(--bg-1);
+  color: var(--fg);
+  overflow: hidden;
+}
+
+/* The same scrim the two tools use for their modals. */
+dialog.inspector::backdrop { background: rgba(0, 0, 0, 0.6); }
+
+.inspector-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  max-height: calc(100dvh - 20px);
+}
+
+.inspector-view {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--stage);
+  border-right: 1px solid var(--line);
+}
+
+.inspector-view canvas {
+  display: block;
+  width: 100%;
+  flex: 1;
+  min-height: 300px;
+  aspect-ratio: 1;
+  cursor: grab;
+  touch-action: none;
+}
+
+.inspector-view canvas.is-dragging { cursor: grabbing; }
+
+.view-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: 9px;
+  border-top: 1px solid var(--line);
+  background: var(--bg-1);
+}
+
+.view-bar button {
+  height: 24px;
+  padding: 0 8px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-1);
+  background: none;
+  color: var(--fg-dim);
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.view-bar button:hover { color: var(--fg); border-color: var(--fg-ghost); background: var(--bg-2); }
+
+.view-bar button[aria-pressed="true"] {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--line-2));
+}
+
+.inspector-side {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.inspector-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 16px 12px;
+}
+
+.inspector-head h2 {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.inspector-head p { margin: 6px 0 0; color: var(--fg-dim); font-size: 13px; }
+
+.close {
+  flex: none;
+  width: 26px; height: 26px;
+  display: grid; place-items: center;
+  padding: 0;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-1);
+  background: none;
+  color: var(--fg-dim);
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+}
+
+.close:hover { color: var(--fg); border-color: var(--fg-ghost); background: var(--bg-2); }
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
+  gap: 1px;
+  margin: 0 16px;
+  border: 1px solid var(--line);
+  background: var(--line);
+}
+
+.facts div { padding: 8px 10px; background: var(--bg-1); }
+
+.facts dt {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+}
+
+.facts dd {
+  margin: 3px 0 0;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.swatches { display: flex; flex-wrap: wrap; gap: 3px; padding: 13px 16px 0; }
+
+.swatch {
+  width: 16px; height: 16px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-1);
+}
+
+.panel { padding: 14px 16px; }
+
+.panel h3 {
+  margin: 0 0 8px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+}
+
+.actions { display: flex; flex-wrap: wrap; gap: 5px; }
+
+.actions button {
+  height: 26px;
+  padding: 0 9px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-1);
+  background: none;
+  color: var(--fg-dim);
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+}
+
+.actions button:hover { color: var(--fg); border-color: var(--fg-ghost); background: var(--bg-2); }
+
+.recipe {
+  width: 100%;
+  min-height: 230px;
+  padding: 11px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-1);
+  background: var(--bg-2);
+  color: var(--fg-dim);
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.6;
+  tab-size: 2;
+  resize: vertical;
+}
+
+.recipe:focus { color: var(--fg); }
+
+.run-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+
+.run {
+  height: 26px;
+  padding: 0 12px;
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--line-2));
+  border-radius: var(--r-1);
+  background: var(--bg-2);
+  color: var(--accent);
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.run:hover { background: var(--bg-3); }
+
+.run-note {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  color: var(--fg-faint);
+}
+
+.run-note.is-error { color: var(--hot); }
+.run-note.is-ok { color: var(--accent); }
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%) translateY(6px);
+  z-index: 60;
+  padding: 7px 13px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-1);
+  background: var(--bg-1);
+  color: var(--fg);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.16s var(--ease), transform 0.16s var(--ease);
+}
+
+.toast.is-open { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+@media (max-width: 720px) {
+  /* The tile-size slider is hidden at this width, so the grid picks its own. */
+  .grid { grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); }
+}
+
+@media (max-width: 860px) {
+  .inspector-grid { grid-template-columns: minmax(0, 1fr); }
+  .inspector-view { border-right: 0; border-bottom: 1px solid var(--line); }
+  .inspector-view canvas { min-height: 0; }
+}

@@ -1,0 +1,258 @@
+/* ---------------------------------------------------------------------------
+   Page frame: the bar, the masthead, the toolbar, the colophon.
+
+   Same lockup as the index and the two tools — wordmark in the UI face, section
+   in mono beside it, one phosphor accent that only ever means "this is live".
+   The toolbar sticks because the grid is ninety-odd tiles long and the filters
+   are useless if you have to scroll back to reach them.
+   --------------------------------------------------------------------------- */
+
+/* -------------------------------------------------------------------- bar */
+
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: var(--bg-1);
+  border-bottom: 1px solid var(--line);
+}
+
+.bar-in {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: var(--bar);
+  max-width: var(--page);
+  margin: 0 auto;
+  padding: 0 clamp(16px, 3vw, 32px);
+}
+
+.wordmark {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.wordmark span {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+}
+
+.bar-spacer { flex: 1; }
+
+.bar-link,
+.bar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 9px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-1);
+  background: none;
+  color: var(--fg-dim);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.12s var(--ease), border-color 0.12s var(--ease), background 0.12s var(--ease);
+}
+
+.bar-link:hover,
+.bar-btn:hover { color: var(--fg); border-color: var(--fg-ghost); background: var(--bg-2); }
+
+/* ------------------------------------------------------------------- page */
+
+.wrap {
+  max-width: var(--page);
+  margin: 0 auto;
+  padding: 0 clamp(16px, 3vw, 32px) 96px;
+}
+
+header.masthead { padding: clamp(36px, 8vh, 76px) 0 0; }
+
+h1 {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: clamp(30px, 6.2vw, 56px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.tagline {
+  margin: 18px 0 0;
+  max-width: 58ch;
+  color: var(--fg-dim);
+}
+
+.tagline em { font-style: italic; color: var(--fg); }
+
+.readout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 9px;
+  margin: 20px 0 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+}
+
+.readout b { font-weight: 400; color: var(--accent); }
+.readout li + li::before { content: "·"; margin-right: 9px; color: var(--fg-ghost); }
+
+/* ---------------------------------------------------------------- toolbar */
+
+.toolbar {
+  position: sticky;
+  top: var(--bar);
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: clamp(24px, 5vh, 44px);
+  padding: 11px 0;
+  background: var(--bg-0);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.search {
+  flex: 1 1 220px;
+  min-width: 160px;
+  height: 28px;
+  padding: 0 9px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-1);
+  background: var(--bg-2);
+  font-size: 13px;
+}
+
+.search::placeholder { color: var(--fg-faint); }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.chip,
+.tool {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 26px;
+  padding: 0 9px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-1);
+  background: none;
+  color: var(--fg-dim);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.12s var(--ease), border-color 0.12s var(--ease), background 0.12s var(--ease);
+}
+
+.chip:hover,
+.tool:hover { color: var(--fg); border-color: var(--fg-ghost); background: var(--bg-2); }
+
+/* Amber means live, here as everywhere: the filter that is on, the spin that
+   is running. Nothing else on the page is allowed to use it. */
+.chip[aria-pressed="true"],
+.tool[aria-pressed="true"] {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--line-2));
+  background: var(--bg-2);
+}
+
+.chip .count {
+  margin-left: 2px;
+  font-variant-numeric: tabular-nums;
+  color: var(--fg-ghost);
+}
+
+.chip[aria-pressed="true"] .count { color: color-mix(in srgb, var(--accent) 60%, transparent); }
+
+.tool input[type="range"] {
+  width: 96px;
+  height: 2px;
+  accent-color: var(--accent);
+  background: var(--bg-4);
+}
+
+/* On a phone the chips wrap to six rows, and a sticky toolbar six rows deep
+   covers most of the screen. One scrolling row instead: the categories are a
+   short list, and swiping through them beats losing the viewport. */
+@media (max-width: 720px) {
+  .search { flex: 1 1 100%; }
+
+  .chips {
+    flex: 1 1 100%;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+    margin-inline: calc(-1 * clamp(16px, 3vw, 32px));
+    padding-inline: clamp(16px, 3vw, 32px);
+  }
+
+  .chips::-webkit-scrollbar { display: none; }
+
+  .toolbar label[for="size"] { display: none; }
+  header.masthead { padding-top: clamp(28px, 5vh, 48px); }
+}
+
+/* --------------------------------------------------------------- colophon */
+
+.colophon {
+  margin-top: 56px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+  color: var(--fg-dim);
+}
+
+.colophon h2 {
+  margin: 0 0 10px;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--fg-faint);
+}
+
+.colophon p { margin: 0 0 16px; max-width: 66ch; font-size: 14px; }
+.colophon code { font-family: var(--mono); font-size: 0.92em; color: var(--fg); }
+
+.colophon pre {
+  margin: 0 0 20px;
+  padding: 13px 15px;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--r-1);
+  background: var(--bg-1);
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.65;
+  color: var(--fg-dim);
+}
+
+.colophon pre b { color: var(--accent); font-weight: 400; }
+
+.sheet-links { display: flex; flex-wrap: wrap; gap: 6px; }

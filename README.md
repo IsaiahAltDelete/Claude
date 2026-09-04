@@ -1,7 +1,7 @@
 # ISAIART — Simulators and tools
 
-Five things that run in a browser with nothing to install: three device
-simulators built for support training, and two graphics tools that ended up
+Six things that run in a browser with nothing to install: three device
+simulators built for support training, and three graphics tools that ended up
 alongside them.
 
 **Live:** <https://isaiahaltdelete.github.io/Claude/> · **Main site:**
@@ -14,6 +14,7 @@ alongside them.
 | [Roku Troubleshooting Simulator](roku/README.md) | [`/roku`](https://isaiahaltdelete.github.io/Claude/roku/) | A streaming player on a simulated television with a mock-up remote — 43 channels, live guide, search, store, the settings tree, restarts and factory reset |
 | [ISAIART Design](design/README.md) | [`/design`](https://isaiahaltdelete.github.io/Claude/design/) | A type-in-space generator — 21 formations, 18 letterform treatments, hand-written WebGL |
 | [ISAIART Image](image/README.md) | [`/image`](https://isaiahaltdelete.github.io/Claude/image/) | A photograph processor — grading, screens, and subject cut-out by a graph cut running on your device |
+| [ISAIART Voxel](voxel/README.md) | [`/voxel`](https://isaiahaltdelete.github.io/Claude/voxel/) | A headless voxel model maker — 93 game models generated from code, turnable in the browser, exportable to five formats |
 
 Each folder has its own README with credentials, a feature list, its layout and
 the console commands for staging scenarios. `NOTES.md` is the orientation note
@@ -34,7 +35,7 @@ therefore **excluded from the site theme** and always will be. Each one carries
 its own tokens file pinned to the real product's metrics.
 
 **Everything that is not a simulator shares one theme:** the index, the 404,
-`/design` and `/image`. It is cassette futurism taken as an interface language
+`/design`, `/image` and `/voxel`. It is cassette futurism taken as an interface language
 rather than a costume — the visual grammar of instrument panels and test
 equipment, kept as actual interface:
 
@@ -57,7 +58,7 @@ equipment, kept as actual interface:
 
 Light and dark are siblings, not an inversion — the light theme is warm paper
 under the same lamp, not the dark theme with the values flipped. The choice is
-remembered under one `localStorage` key across all four pages, so it follows
+remembered under one `localStorage` key across all five pages, so it follows
 you from the index into a tool and back.
 
 All of it comes out of one file, `common/styles/tokens.css`. Every rule in the
@@ -71,8 +72,9 @@ a copy of the palette instead.
 
 Vanilla HTML, CSS and JavaScript. No dependencies, no build step, no server —
 clone the repository and open any of the `index.html` files. Every asset is
-local, so all five run straight from `file://`; the fonts are bundled and all
-artwork is generated from primitives rather than fetched.
+local, so all six run straight from `file://`; the fonts are bundled and all
+artwork — icons, wallpapers, voxel models — is generated from primitives rather
+than fetched.
 
 Everyone in the simulators is invented — Alex Rivera's Mac, Alex Rivera's iPhone
 and the Roku in Alex Rivera's living room, with the same made-up household
@@ -105,6 +107,11 @@ iphone/                      the iPhone simulator, served at /iphone
 roku/                        the Roku simulator, served at /roku
 design/                      ISAIART Design, served at /design
 image/                       ISAIART Image, served at /image
+voxel/                       ISAIART Voxel, served at /voxel
+  scripts/                   the library: model, mesher, camera, two renderers,
+                             exporters, the registry, and nine catalogue files
+  dist/voxel.js              the library as one file, generated and committed
+  assets/                    the baked contact sheet, turntable and manifest
 common/                      the theme, controls and parameter store the two tools
                              and the index share
   styles/tokens.css          the whole palette, both themes — the single source
@@ -118,6 +125,11 @@ tools/build-assets.py        regenerates the Mac's and iPhone's icons and wallpa
 tools/check-syntax.py        parses every simulator script, alone and merged into one scope
 tools/check-refs.py          resolves every icon, pane and command reference
 tools/smoke.mjs              opens every app in a real browser and asserts on it
+tools/voxel-check.mjs        builds, meshes, renders and exports every voxel model
+tools/voxel-render.mjs       bakes the voxel contact sheet, turntable and manifest
+tools/voxel-build.mjs        regenerates voxel/dist/voxel.js from voxel/scripts
+tools/voxel-load.mjs         loads the voxel library headlessly, for the three above
+tools/voxel-font.mjs         a 3x5 bitmap font, for labelling the baked sheets
 ```
 
 The three simulators each keep their own `assets/fonts/`, because they are
@@ -130,9 +142,12 @@ Nothing here has a build step, so nothing sits between a typo and the deployed
 site. Three gates run on every push and block the deploy:
 
 ```
-python3 tools/check-syntax.py   parse, including the shared global scopes
-python3 tools/check-refs.py     every glyph, pane, command and app id resolves
-node tools/smoke.mjs            every app and screen opens in Chromium, no console errors
+python3 tools/check-syntax.py         parse, including the shared global scopes
+python3 tools/check-refs.py           every glyph, pane, command and app id resolves
+node tools/smoke.mjs                  every app and screen opens in Chromium, no console errors
+node tools/voxel-check.mjs            every voxel model builds, renders and exports
+node tools/voxel-render.mjs --check   the baked voxel sheets still match the recipes
+node tools/voxel-build.mjs --check    voxel/dist/voxel.js still matches its sources
 ```
 
 The iPhone's and the Roku's scripts are classic scripts that share one global
@@ -153,12 +168,24 @@ television through all five of its inputs, asserts that HDMI-CEC one-touch play
 both works when it is on and stays quiet when it is off, and leaves the player
 by each exit to prove the playback clock stops and the resume point survives.
 
-**What the gates do not cover:** all three only look at `mac/`, `iphone/` and
-`roku/`. The index, the 404, `/design` and `/image` have no automated coverage
-at all — even though `design/` and `image/` load classic scripts into one shared
-global scope and carry exactly the same duplicate-`const` hazard the simulators
-are checked for. Changes to those four are verified by opening them, in both
-themes. `NOTES.md` has the recipe.
+`/voxel` is generated rather than authored, so its gates are drift gates. Every
+model is built twice and compared, so a recipe that reaches for `Math.random`
+fails; every model is rendered headlessly and asserted to cover part of the
+frame, because an empty tile and a model that failed to load look identical in a
+browser; and `voxel/assets/catalog.json` carries an FNV-1a fingerprint per model
+so a one-voxel change fails with the name and the old and new hashes. check-syntax
+also asserts `voxel/index.html` loads every script in `voxel/scripts`, in order —
+the failure mode there is adding a category file, forgetting the `<script>` tag,
+and losing a whole section of the gallery while the page still renders. The smoke
+test opens the gallery, reads pixels back out of the tiles, exercises the search,
+the inspector, the live workbench and the exports, then does it again with WebGL
+removed.
+
+**What the gates do not cover:** the index, the 404, `/design` and `/image` have
+no automated coverage at all — even though `design/` and `image/` load classic
+scripts into one shared global scope and carry exactly the same duplicate-`const`
+hazard the simulators are checked for. Changes to those four are verified by
+opening them, in both themes. `NOTES.md` has the recipe.
 
 ## Notes
 

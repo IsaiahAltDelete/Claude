@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#0b0a09">
+<title>ISAIART — Voxel</title>
+<meta name="description" content="A headless voxel model maker: ninety-odd game-ready models built from code, every one of them turnable in the browser and exportable to JSON, OBJ, PLY, MagicaVoxel or PNG.">
+<link rel="icon" href="../favicon.svg">
+
+<!-- The palette, the reset and the type pack are the same files the index and
+     the two tools load, so this page cannot drift away from them. -->
+<link rel="stylesheet" href="../common/styles/tokens.css">
+<link rel="preload" as="font" type="font/woff2" href="../common/assets/fonts/inter-latin-400-normal.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="../common/assets/fonts/jetbrains-mono-latin-600-normal.woff2" crossorigin>
+<link rel="stylesheet" href="styles/01-tokens.css">
+<link rel="stylesheet" href="styles/02-layout.css">
+<link rel="stylesheet" href="styles/03-gallery.css">
+
+<script>
+  /* Applied before first paint so the page never flashes the wrong ground.
+     One key across the index, both tools, the 404 and this page, so the choice
+     follows you between them. JSON-encoded, because the tools write it through
+     common/scripts/util.js's store helper, which stringifies. */
+  (function () {
+    try {
+      var raw = localStorage.getItem("isaiart.theme");
+      var saved = raw == null ? null : JSON.parse(raw);
+      if (saved !== "light" && saved !== "dark") {
+        saved = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+      }
+      document.documentElement.dataset.theme = saved;
+    } catch (e) { /* private mode: the dark default in the markup stands */ }
+  }());
+</script>
+</head>
+<body>
+
+<div class="bar">
+  <div class="bar-in">
+    <p class="wordmark">ISAIART <span>Voxel</span></p>
+    <span class="bar-spacer"></span>
+    <a class="bar-link" href="../">Index</a>
+    <button class="bar-btn" id="theme" type="button" aria-pressed="false">Light</button>
+  </div>
+</div>
+
+<main class="wrap">
+
+  <header class="masthead">
+    <h1>Voxel Maker</h1>
+    <p class="tagline">
+      A model here is a <em>recipe</em> — a function that fills an empty grid with boxes,
+      spheres and mirrored halves. Nothing was placed by hand, nothing is stored as a blob,
+      and the whole catalogue is about a hundred kilobytes of readable JavaScript. Drag any
+      model to turn it; open one to read the code that built it, edit that code, and watch it
+      rebuild.
+    </p>
+    <ul class="readout">
+      <li><b id="stat-models">0</b> models</li>
+      <li><b id="stat-categories">0</b> categories</li>
+      <li>renderer <b id="stat-renderer">…</b></li>
+      <li>no dependencies</li>
+      <li>no build step</li>
+    </ul>
+  </header>
+
+  <div class="toolbar" role="search">
+    <label class="visually-hidden" for="search">Search models</label>
+    <input class="search" id="search" type="search" placeholder="Search — try tree, glow, medieval, enemy    ( / )" autocomplete="off">
+    <div class="chips" id="chips" role="group" aria-label="Filter by category"></div>
+    <button class="tool" id="spin" type="button" aria-pressed="true">
+      <span aria-hidden="true">↻</span><span class="label">Spinning</span>
+    </button>
+    <button class="tool" id="surprise" type="button">Surprise me</button>
+    <label class="tool" for="size">
+      <span aria-hidden="true">▦</span>
+      <input id="size" type="range" min="130" max="300" value="180" step="10" aria-label="Tile size">
+    </label>
+  </div>
+
+  <p class="visually-hidden" aria-live="polite"><span id="result-count">0</span> models shown</p>
+
+  <div id="catalogue"></div>
+
+  <footer class="colophon">
+    <h2>Using these in a game</h2>
+    <p>
+      The library is plain scripts with no dependencies, so a page on GitHub Pages can drop in
+      the bundle and build models at load time — a model costs a few milliseconds and a few
+      kilobytes of source, rather than a mesh file per asset.
+    </p>
+    <pre><code>&lt;script src="voxel/dist/voxel.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+  <b>const knight = VOX.build('knight');</b>       // any name in the catalogue
+  <b>VOX.Viewer.attach(canvas, knight);</b>        // drag to turn, wheel to zoom
+
+  <b>const mesh = VOX.mesh(knight);</b>            // greedy-meshed triangles for your own renderer
+  <b>VOX.Export.toVOX(knight);</b>                 // MagicaVoxel bytes
+  <b>VOX.Export.toOBJ(knight);</b>                 // { obj, mtl }
+
+  <b>VOX.define({</b>                              // or write your own
+    name: 'watchdog', category: 'animals',
+    build(m, kit) {
+      kit.quadruped(m, { coat: kit.P.iron, legTop: 4, bodyTop: 9 });
+      m.mirrorX();
+    },
+  <b>});</b>
+&lt;/script&gt;</code></pre>
+    <p>
+      The same code runs in Node with no browser at all, which is how the two reference images
+      below are baked: <code>node tools/voxel-render.mjs</code> rasterises every model on the CPU
+      and writes them out as PNGs, and <code>node tools/voxel-check.mjs</code> asserts that every
+      recipe still builds, still lands on the floor, and still renders to something visible.
+    </p>
+    <div class="sheet-links">
+      <a class="tool" href="assets/catalog-sheet.png">Contact sheet</a>
+      <a class="tool" href="assets/turntable-sheet.png">Turntable</a>
+      <a class="tool" href="assets/catalog.json">catalog.json</a>
+      <a class="tool" href="README.md">Readme</a>
+    </div>
+  </footer>
+
+</main>
+
+<dialog class="inspector" id="inspector" aria-labelledby="inspector-title">
+  <div class="inspector-grid">
+
+    <div class="inspector-view">
+      <canvas id="inspector-canvas" role="img" aria-label="Drag to turn the model, arrow keys to rotate, wheel to zoom"></canvas>
+      <div class="view-bar">
+        <button type="button" data-face="front">Front</button>
+        <button type="button" data-face="back">Back</button>
+        <button type="button" data-face="left">Left</button>
+        <button type="button" data-face="right">Right</button>
+        <button type="button" data-face="top">Top</button>
+        <button type="button" data-face="corner">Reset</button>
+        <button type="button" id="view-spin" aria-pressed="true">Spin</button>
+      </div>
+    </div>
+
+    <div class="inspector-side">
+      <div class="inspector-head">
+        <div>
+          <h2 id="inspector-title">Model</h2>
+          <p id="inspector-note"></p>
+        </div>
+        <button class="close" id="inspector-close" type="button" aria-label="Close">×</button>
+      </div>
+
+      <dl class="facts">
+        <div><dt>Voxels</dt><dd id="fact-voxels">0</dd></div>
+        <div><dt>Size</dt><dd id="fact-size">0</dd></div>
+        <div><dt>Triangles</dt><dd id="fact-tris">0</dd></div>
+        <div><dt>Colours</dt><dd id="fact-colours">0</dd></div>
+      </dl>
+
+      <div class="swatches" id="swatches" aria-label="Palette"></div>
+
+      <div class="panel">
+        <h3>Export</h3>
+        <div class="actions">
+          <button type="button" data-export="json">.json</button>
+          <button type="button" data-export="obj">.obj</button>
+          <button type="button" data-export="ply">.ply</button>
+          <button type="button" data-export="vox">.vox</button>
+          <button type="button" data-export="png">.png</button>
+          <button type="button" id="copy-recipe">copy recipe</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Recipe — edit it and run</h3>
+        <label class="visually-hidden" for="recipe">Model recipe source</label>
+        <textarea class="recipe" id="recipe" spellcheck="false" autocomplete="off"></textarea>
+        <div class="run-row">
+          <button class="run" id="run-recipe" type="button">Run ⌘↵</button>
+          <button class="tool" id="reset-recipe" type="button">Revert</button>
+          <span class="run-note" id="run-note"></span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</dialog>
+
+<script src="scripts/01-core.js"></script>
+<script src="scripts/02-palette.js"></script>
+<script src="scripts/03-mesh.js"></script>
+<script src="scripts/04-view.js"></script>
+<script src="scripts/05-raster.js"></script>
+<script src="scripts/06-catalog.js"></script>
+<script src="scripts/07-export.js"></script>
+<script src="scripts/08-webgl.js"></script>
+<script src="scripts/09-viewer.js"></script>
+<script src="scripts/10-characters.js"></script>
+<script src="scripts/11-animals.js"></script>
+<script src="scripts/12-weapons.js"></script>
+<script src="scripts/13-items.js"></script>
+<script src="scripts/14-furniture.js"></script>
+<script src="scripts/15-scenery.js"></script>
+<script src="scripts/16-buildings.js"></script>
+<script src="scripts/17-vehicles.js"></script>
+<script src="scripts/18-backdrops.js"></script>
+<script src="scripts/99-gallery.js"></script>
+
+</body>
+</html>
