@@ -1,0 +1,323 @@
+/* ---------------------------------------------------------------------------
+   The grid, the tiles, and the inspector.
+
+   A tile is a canvas you can drag, so it cannot also be a button — a pointer
+   drag inside a button is a click on release, and every attempt to turn a
+   model would open a dialog. The name below it is the button instead, and the
+   canvas carries a tabindex so the keyboard can turn it with the arrow keys.
+   --------------------------------------------------------------------------- */
+
+.group { margin-top: 40px; }
+
+.group-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin: 0 0 14px;
+}
+
+.group-head h2 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.group-head p {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  color: var(--faint);
+  font-size: 13px;
+}
+
+.group-head .count { color: var(--faint); font-family: var(--mono); font-size: 12px; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--tile-size, 180px), 1fr));
+  gap: 12px;
+}
+
+/* -------------------------------------------------------------------- tile */
+
+.tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  background: var(--surface);
+  overflow: hidden;
+  transition: border-color 0.16s var(--ease), transform 0.16s var(--ease);
+}
+
+.tile:hover { border-color: var(--line); }
+.tile:focus-within { border-color: color-mix(in srgb, var(--accent) 50%, var(--line)); }
+
+.tile canvas {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  background: var(--tile);
+  cursor: grab;
+  touch-action: none;
+}
+
+.tile canvas.is-dragging { cursor: grabbing; }
+
+.tile-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px 9px;
+  border-top: 1px solid var(--line-soft);
+}
+
+.tile-name {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1.25;
+  color: var(--fg);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tile-name:hover { color: var(--accent); }
+.tile-name small { display: block; font-family: var(--mono); font-size: 11px; color: var(--faint); }
+
+.tile-open {
+  flex: none;
+  width: 26px; height: 26px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: transparent;
+  color: var(--faint);
+  cursor: pointer;
+}
+
+.tile-open:hover { color: var(--fg); background: var(--surface-high); }
+.tile-open svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.6; }
+
+.empty {
+  margin: 60px 0;
+  text-align: center;
+  color: var(--faint);
+}
+
+/* --------------------------------------------------------------- inspector */
+
+dialog.inspector {
+  width: min(1080px, calc(100vw - 24px));
+  max-height: calc(100dvh - 24px);
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--fg);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+dialog.inspector::backdrop { background: rgb(4 6 10 / 0.72); backdrop-filter: blur(3px); }
+
+.inspector-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  max-height: calc(100dvh - 24px);
+}
+
+.inspector-view {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--tile);
+  border-right: 1px solid var(--line);
+}
+
+.inspector-view canvas {
+  display: block;
+  width: 100%;
+  flex: 1;
+  min-height: 300px;
+  aspect-ratio: 1;
+  cursor: grab;
+  touch-action: none;
+}
+
+.inspector-view canvas.is-dragging { cursor: grabbing; }
+
+.view-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px;
+  border-top: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.view-bar button {
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: transparent;
+  color: var(--dim);
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.view-bar button:hover { color: var(--fg); background: var(--surface-high); }
+
+.inspector-side {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.inspector-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 18px 18px 12px;
+}
+
+.inspector-head h2 { margin: 0; font-size: 20px; font-weight: 500; letter-spacing: -0.02em; }
+.inspector-head p { margin: 6px 0 0; color: var(--dim); font-size: 13px; }
+
+.close {
+  flex: none;
+  width: 32px; height: 32px;
+  display: grid; place-items: center;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--dim);
+  cursor: pointer;
+  font-size: 17px;
+  line-height: 1;
+}
+
+.close:hover { color: var(--fg); background: var(--surface-high); }
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
+  gap: 1px;
+  margin: 0 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--line);
+  overflow: hidden;
+}
+
+.facts div { padding: 9px 11px; background: var(--surface); }
+.facts dt { margin: 0; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); }
+.facts dd { margin: 3px 0 0; font-family: var(--mono); font-size: 13px; }
+
+.swatches { display: flex; flex-wrap: wrap; gap: 4px; padding: 14px 18px 0; }
+.swatch { width: 18px; height: 18px; border-radius: 4px; border: 1px solid rgb(255 255 255 / 0.14); }
+
+.panel { padding: 16px 18px; }
+.panel h3 {
+  margin: 0 0 8px;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+.actions { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.actions button {
+  height: 30px;
+  padding: 0 11px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: transparent;
+  color: var(--dim);
+  cursor: pointer;
+  font-size: 12px;
+  font-family: var(--mono);
+}
+
+.actions button:hover { color: var(--fg); background: var(--surface-high); }
+
+.recipe {
+  width: 100%;
+  min-height: 240px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--tile);
+  color: var(--dim);
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.55;
+  tab-size: 2;
+  resize: vertical;
+}
+
+.recipe:focus { color: var(--fg); }
+
+.run-row { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+
+.run {
+  height: 30px;
+  padding: 0 14px;
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--line));
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.run:hover { background: color-mix(in srgb, var(--accent) 22%, transparent); }
+
+.run-note { font-size: 12px; color: var(--faint); }
+.run-note.is-error { color: var(--danger); font-family: var(--mono); }
+.run-note.is-ok { color: var(--accent); }
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 26px;
+  transform: translateX(-50%) translateY(8px);
+  z-index: 60;
+  padding: 9px 16px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-high);
+  color: var(--fg);
+  font-size: 13px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s var(--ease), transform 0.18s var(--ease);
+}
+
+.toast.is-open { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+@media (max-width: 720px) {
+  /* The tile-size slider is hidden at this width, so the grid picks its own. */
+  .grid { grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); }
+}
+
+@media (max-width: 860px) {
+  .inspector-grid { grid-template-columns: minmax(0, 1fr); }
+  .inspector-view { border-right: 0; border-bottom: 1px solid var(--line); }
+  .inspector-view canvas { min-height: 0; }
+}

@@ -61,6 +61,18 @@ jobs:
             exit 1
           fi
 
+      # The voxel models are generated, so the committed artwork, manifest and
+      # bundle are all derived files. Each gate is the same shape: rebuild, and
+      # fail if the result differs from what is checked in.
+      - name: Build, render and export every voxel model
+        run: node tools/voxel-check.mjs
+
+      - name: Fail on voxel catalogue drift
+        run: node tools/voxel-render.mjs --check
+
+      - name: Fail on a stale voxel bundle
+        run: node tools/voxel-build.mjs --check
+
   # Boots both simulators in a real browser and opens every single app, failing
   # on any console error, page error, failed request or empty window body.
   smoke:

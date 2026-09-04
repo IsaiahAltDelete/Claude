@@ -449,6 +449,141 @@ async function testStaleSaves(browser, base) {
   }
 }
 
+/* ---------------------------------------------------------------- voxel ---
+
+   The voxel gallery's failure mode is a blank tile, and a blank tile looks
+   exactly like a tile that has not scrolled into view yet. So rather than
+   assert the page "loaded", this reads pixels back out of the canvases: a tile
+   that covers none of its frame did not render, whatever the DOM says.
+
+   It also exercises the software fallback, because the two renderers have to
+   agree — the baked sheets in voxel/assets are produced by the CPU one and the
+   page is drawn by the GPU one. */
+
+async function testVoxel(browser, base) {
+  const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  await blockOutbound(context);
+  const page = await context.newPage();
+  watch(page, 'voxel');
+
+  await page.goto(`${base}/voxel/`, { waitUntil: 'load' });
+  await page.waitForFunction(() => window.VOX && document.querySelectorAll('.tile').length > 0,
+    null, { timeout: 15000 });
+  await page.waitForTimeout(2200);
+
+  const summary = await page.evaluate(() => ({
+    tiles: document.querySelectorAll('.tile').length,
+    models: window.VOX.names().length,
+    renderer: document.querySelector('#stat-renderer').textContent,
+  }));
+  if (summary.tiles !== summary.models) {
+    note(`voxel: ${summary.models} models registered but ${summary.tiles} tiles rendered`);
+  }
+  if (summary.models < 60) note(`voxel: only ${summary.models} models registered`);
+  console.log(`  voxel: ${summary.models} models, ${summary.renderer}`);
+
+  /* Every tile that is actually on screen must have painted something. */
+  const painted = await page.evaluate(() => {
+    const empty = [];
+    for (const tile of document.querySelectorAll('.tile')) {
+      const box = tile.getBoundingClientRect();
+      if (box.bottom < 0 || box.top > innerHeight) continue;
+      const canvas = tile.querySelector('canvas');
+      const data = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
+      let covered = 0;
+      for (let i = 3; i < data.length; i += 4) if (data[i] > 8) covered++;
+      if (covered / (canvas.width * canvas.height) < 0.02) empty.push(tile.dataset.model);
+    }
+    return empty;
+  });
+  if (painted.length) note(`voxel: on-screen tiles rendered nothing — ${painted.join(', ')}`);
+
+  /* Filtering rebuilds every tile; the viewers attached to the old ones have to
+     be torn down or the rebuilt grid comes back blank. */
+  await page.fill('#search', 'tree');
+  await page.waitForTimeout(500);
+  const filtered = await page.evaluate(() => Number(document.querySelector('#result-count').textContent));
+  if (filtered < 1 || filtered > 20) note(`voxel: searching "tree" matched ${filtered} models`);
+  await page.fill('#search', '');
+  await page.waitForTimeout(1800);
+  const stillBlank = await page.evaluate(() => Array.from(document.querySelectorAll('.tile'))
+    .filter(tile => {
+      const box = tile.getBoundingClientRect();
+      if (box.bottom < 0 || box.top > innerHeight) return false;
+      return tile.querySelector('.tile-name small').textContent === '\u2026';
+    }).map(tile => tile.dataset.model));
+  if (stillBlank.length) note(`voxel: tiles never remounted after a search — ${stillBlank.join(', ')}`);
+
+  /* The inspector: model, stats, recipe, and a rebuild from edited source. */
+  await page.click('.tile:first-child .tile-name');
+  await page.waitForTimeout(900);
+  const inspector = await page.evaluate(() => ({
+    open: document.querySelector('#inspector').open,
+    voxels: document.querySelector('#fact-voxels').textContent,
+    recipe: document.querySelector('#recipe').value.length,
+  }));
+  if (!inspector.open) note('voxel: the inspector did not open');
+  if (!inspector.recipe) note('voxel: the inspector showed no recipe source');
+  if (inspector.voxels === '0') note('voxel: the inspector reported an empty model');
+
+  await page.evaluate(() => {
+    document.querySelector('#recipe').value =
+      "(m, kit) => { m.sphere(0, 6, 0, 5, kit.P.gold); m.box(-2, 0, -2, 2, 2, 2, kit.P.stone); }";
+  });
+  await page.click('#run-recipe');
+  await page.waitForTimeout(600);
+  const workbench = await page.evaluate(() => document.querySelector('#run-note').textContent);
+  if (!/^Built /.test(workbench)) note(`voxel: the workbench did not rebuild — "${workbench}"`);
+
+  /* Exports have to at least run: every one of them walks the whole model. */
+  const exportErrors = await page.evaluate(() => {
+    const model = window.VOX.build('chest');
+    const out = [];
+    try { if (!JSON.parse(window.VOX.Export.toJSONText(model)).voxels.length) out.push('json: empty'); }
+    catch (error) { out.push(`json: ${error.message}`); }
+    try { if (!window.VOX.Export.toOBJ(model).obj.includes('\nf ')) out.push('obj: no faces'); }
+    catch (error) { out.push(`obj: ${error.message}`); }
+    try { if (window.VOX.Export.toVOX(model).length < 64) out.push('vox: too short'); }
+    catch (error) { out.push(`vox: ${error.message}`); }
+    try {
+      const png = window.VOX.Export.toPNG(window.VOX.Raster.image(4, 4, '#ffffff'));
+      if (png[0] !== 137) out.push('png: bad signature');
+    } catch (error) { out.push(`png: ${error.message}`); }
+    return out;
+  });
+  for (const failure of exportErrors) note(`voxel export — ${failure}`);
+
+  await context.close();
+
+  /* Now the same page with WebGL taken away. */
+  const fallback = await browser.newContext({ viewport: { width: 900, height: 800 } });
+  await blockOutbound(fallback);
+  await fallback.addInitScript(() => {
+    const real = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function (type, ...rest) {
+      return (type === 'webgl2' || type === 'webgl') ? null : real.call(this, type, ...rest);
+    };
+  });
+  const soft = await fallback.newPage();
+  watch(soft, 'voxel/software');
+  await soft.goto(`${base}/voxel/`, { waitUntil: 'load' });
+  await soft.waitForTimeout(2600);
+  const software = await soft.evaluate(() => {
+    const canvas = document.querySelector('.tile canvas');
+    const data = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
+    let covered = 0;
+    for (let i = 3; i < data.length; i += 4) if (data[i] > 8) covered++;
+    return {
+      label: document.querySelector('#stat-renderer').textContent,
+      coverage: covered / (canvas.width * canvas.height),
+    };
+  });
+  if (software.label !== 'software') note(`voxel: the fallback did not engage (${software.label})`);
+  if (software.coverage < 0.02) note('voxel: the software renderer drew nothing');
+  console.log(`  voxel: software fallback covered ${(software.coverage * 100).toFixed(0)}% of a tile`);
+  await fallback.close();
+}
+
 /* Resolved through CJS so NODE_PATH and a globally installed playwright both
    work — this repo has no package.json and should not grow one just to test. */
 const { createRequire } = await import('node:module');
@@ -477,6 +612,7 @@ try {
   await testMac(browser, hosted.base);
   await testIphone(browser, hosted.base);
   await testStaleSaves(browser, hosted.base);
+  await testVoxel(browser, hosted.base);
 } finally {
   await browser.close();
   hosted.server?.close();
@@ -487,4 +623,5 @@ if (problems.length) {
   problems.forEach(p => console.error(`  * ${p}`));
   process.exit(1);
 }
-console.log('\nSmoke test passed: every app in both simulators mounted with no errors.');
+console.log('\nSmoke test passed: every app in both simulators mounted, and the voxel '
+  + 'gallery rendered on the GPU and on the CPU, with no errors.');

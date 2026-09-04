@@ -1,0 +1,1966 @@
+{
+  "format": "vox-catalogue/1",
+  "models": 93,
+  "categories": [
+    {
+      "id": "characters",
+      "title": "Characters",
+      "count": 11
+    },
+    {
+      "id": "animals",
+      "title": "Animals",
+      "count": 12
+    },
+    {
+      "id": "weapons",
+      "title": "Weapons",
+      "count": 11
+    },
+    {
+      "id": "items",
+      "title": "Items",
+      "count": 11
+    },
+    {
+      "id": "furniture",
+      "title": "Furniture",
+      "count": 12
+    },
+    {
+      "id": "scenery",
+      "title": "Scenery",
+      "count": 15
+    },
+    {
+      "id": "buildings",
+      "title": "Buildings",
+      "count": 9
+    },
+    {
+      "id": "vehicles",
+      "title": "Vehicles",
+      "count": 6
+    },
+    {
+      "id": "backdrops",
+      "title": "Backdrops",
+      "count": 6
+    }
+  ],
+  "entries": [
+    {
+      "name": "astronaut",
+      "title": "Astronaut",
+      "category": "characters",
+      "tags": [
+        "sci-fi",
+        "space",
+        "suit"
+      ],
+      "note": "Pressure suit, gold visor, life support on the back.",
+      "voxels": 1118,
+      "size": [
+        11,
+        21,
+        11
+      ],
+      "colours": 7,
+      "quads": 407,
+      "triangles": 814,
+      "fingerprint": "bb9441ad"
+    },
+    {
+      "name": "farmer",
+      "title": "Farmer",
+      "category": "characters",
+      "tags": [
+        "npc",
+        "town",
+        "hat"
+      ],
+      "note": "Straw hat, dungarees, and the shirt sleeves rolled up.",
+      "voxels": 937,
+      "size": [
+        13,
+        23,
+        13
+      ],
+      "colours": 42,
+      "quads": 808,
+      "triangles": 1616,
+      "fingerprint": "bf521fa9"
+    },
+    {
+      "name": "king",
+      "title": "King",
+      "category": "characters",
+      "tags": [
+        "npc",
+        "royal",
+        "crown"
+      ],
+      "note": "Crown, ermine collar, and a cape that reaches the floor.",
+      "voxels": 1158,
+      "size": [
+        11,
+        23,
+        8
+      ],
+      "colours": 32,
+      "quads": 874,
+      "triangles": 1748,
+      "fingerprint": "2a4e9376"
+    },
+    {
+      "name": "knight",
+      "title": "Knight",
+      "category": "characters",
+      "tags": [
+        "hero",
+        "armour",
+        "medieval"
+      ],
+      "note": "Plate, tabard and a plume. The party leader.",
+      "voxels": 822,
+      "size": [
+        11,
+        24,
+        6
+      ],
+      "colours": 35,
+      "quads": 516,
+      "triangles": 1032,
+      "fingerprint": "0da2bb4e"
+    },
+    {
+      "name": "mage",
+      "title": "Mage",
+      "category": "characters",
+      "tags": [
+        "magic",
+        "robe",
+        "staff"
+      ],
+      "note": "Robe, beard and a hat with a slouch.",
+      "voxels": 1223,
+      "size": [
+        13,
+        28,
+        11
+      ],
+      "colours": 33,
+      "quads": 1005,
+      "triangles": 2010,
+      "fingerprint": "9d06cb7f"
+    },
+    {
+      "name": "ninja",
+      "title": "Ninja",
+      "category": "characters",
+      "tags": [
+        "stealth",
+        "enemy",
+        "scarf"
+      ],
+      "note": "All cloth. The scarf is the only thing that reads at distance.",
+      "voxels": 656,
+      "size": [
+        11,
+        19,
+        7
+      ],
+      "colours": 22,
+      "quads": 548,
+      "triangles": 1096,
+      "fingerprint": "88c0fc92"
+    },
+    {
+      "name": "pirate",
+      "title": "Pirate",
+      "category": "characters",
+      "tags": [
+        "npc",
+        "sea",
+        "hat"
+      ],
+      "note": "Coat, sash, tricorn — and the eyepatch goes on after the mirror.",
+      "voxels": 958,
+      "size": [
+        11,
+        23,
+        11
+      ],
+      "colours": 51,
+      "quads": 770,
+      "triangles": 1540,
+      "fingerprint": "4585b030"
+    },
+    {
+      "name": "robot",
+      "title": "Robot",
+      "category": "characters",
+      "tags": [
+        "sci-fi",
+        "metal",
+        "droid"
+      ],
+      "note": "Boxy, riveted, and lit from the inside.",
+      "voxels": 822,
+      "size": [
+        11,
+        24,
+        6
+      ],
+      "colours": 5,
+      "quads": 154,
+      "triangles": 308,
+      "fingerprint": "126840e8"
+    },
+    {
+      "name": "rogue",
+      "title": "Rogue",
+      "category": "characters",
+      "tags": [
+        "hood",
+        "cloak",
+        "stealth"
+      ],
+      "note": "Hooded, cloaked, and lighter on their feet than the knight.",
+      "voxels": 974,
+      "size": [
+        9,
+        22,
+        8
+      ],
+      "colours": 31,
+      "quads": 661,
+      "triangles": 1322,
+      "fingerprint": "c28c6066"
+    },
+    {
+      "name": "skeleton",
+      "title": "Skeleton",
+      "category": "characters",
+      "tags": [
+        "undead",
+        "enemy",
+        "bone"
+      ],
+      "note": "Ribs, a jaw, and two lights where the eyes were.",
+      "voxels": 460,
+      "size": [
+        9,
+        19,
+        7
+      ],
+      "colours": 15,
+      "quads": 579,
+      "triangles": 1158,
+      "fingerprint": "63967066"
+    },
+    {
+      "name": "villager",
+      "title": "Villager",
+      "category": "characters",
+      "tags": [
+        "npc",
+        "quest",
+        "town"
+      ],
+      "note": "The one who gives you the quest. Apron, boots, no weapon.",
+      "voxels": 785,
+      "size": [
+        11,
+        20,
+        6
+      ],
+      "colours": 42,
+      "quads": 578,
+      "triangles": 1156,
+      "fingerprint": "93c77ca8"
+    },
+    {
+      "name": "bear",
+      "title": "Bear",
+      "category": "animals",
+      "tags": [
+        "enemy",
+        "large",
+        "forest"
+      ],
+      "note": "Heavy through the shoulders, with a low head.",
+      "voxels": 886,
+      "size": [
+        9,
+        14,
+        17
+      ],
+      "colours": 22,
+      "quads": 655,
+      "triangles": 1310,
+      "fingerprint": "e470ee05"
+    },
+    {
+      "name": "bee",
+      "title": "Bee",
+      "category": "animals",
+      "tags": [
+        "small",
+        "flying",
+        "insect"
+      ],
+      "note": "Striped, translucent-winged, and only nine voxels long.",
+      "voxels": 280,
+      "size": [
+        11,
+        8,
+        13
+      ],
+      "colours": 4,
+      "quads": 329,
+      "triangles": 658,
+      "fingerprint": "557f54ce"
+    },
+    {
+      "name": "bird",
+      "title": "Bird",
+      "category": "animals",
+      "tags": [
+        "small",
+        "flying"
+      ],
+      "note": "A songbird, with the wings out so it reads in flight.",
+      "voxels": 173,
+      "size": [
+        9,
+        9,
+        11
+      ],
+      "colours": 20,
+      "quads": 309,
+      "triangles": 618,
+      "fingerprint": "a4e9a87b"
+    },
+    {
+      "name": "cat",
+      "title": "Cat",
+      "category": "animals",
+      "tags": [
+        "pet",
+        "small"
+      ],
+      "note": "Low, long-tailed, and built entirely from the kit quadruped.",
+      "voxels": 300,
+      "size": [
+        5,
+        13,
+        13
+      ],
+      "colours": 24,
+      "quads": 329,
+      "triangles": 658,
+      "fingerprint": "754c3f80"
+    },
+    {
+      "name": "chicken",
+      "title": "Chicken",
+      "category": "animals",
+      "tags": [
+        "farm",
+        "small"
+      ],
+      "note": "Two legs, a wattle and a comb — the smallest model in the set.",
+      "voxels": 293,
+      "size": [
+        7,
+        12,
+        10
+      ],
+      "colours": 21,
+      "quads": 369,
+      "triangles": 738,
+      "fingerprint": "c1af66c2"
+    },
+    {
+      "name": "dog",
+      "title": "Dog",
+      "category": "animals",
+      "tags": [
+        "pet",
+        "companion"
+      ],
+      "note": "Floppy ears, a stub tail and a paler muzzle.",
+      "voxels": 327,
+      "size": [
+        7,
+        11,
+        13
+      ],
+      "colours": 27,
+      "quads": 338,
+      "triangles": 676,
+      "fingerprint": "96cd7706"
+    },
+    {
+      "name": "dragon",
+      "title": "Dragon",
+      "category": "animals",
+      "tags": [
+        "boss",
+        "enemy",
+        "wings"
+      ],
+      "note": "The one big enemy: wings, horns, and a lit throat.",
+      "voxels": 1435,
+      "size": [
+        25,
+        21,
+        27
+      ],
+      "colours": 39,
+      "quads": 1344,
+      "triangles": 2688,
+      "fingerprint": "0fa62a03"
+    },
+    {
+      "name": "fish",
+      "title": "Fish",
+      "category": "animals",
+      "tags": [
+        "water",
+        "small",
+        "pickup"
+      ],
+      "note": "Reads from the side, which is how a fish is ever seen.",
+      "voxels": 244,
+      "size": [
+        7,
+        8,
+        15
+      ],
+      "colours": 19,
+      "quads": 350,
+      "triangles": 700,
+      "fingerprint": "fcf5c9c0"
+    },
+    {
+      "name": "horse",
+      "title": "Horse",
+      "category": "animals",
+      "tags": [
+        "mount",
+        "large"
+      ],
+      "note": "Tall enough to be ridden, with a mane down the neck.",
+      "voxels": 795,
+      "size": [
+        7,
+        21,
+        17
+      ],
+      "colours": 26,
+      "quads": 736,
+      "triangles": 1472,
+      "fingerprint": "9b86488c"
+    },
+    {
+      "name": "pig",
+      "title": "Pig",
+      "category": "animals",
+      "tags": [
+        "farm",
+        "livestock"
+      ],
+      "note": "Round, short, and mostly snout.",
+      "voxels": 433,
+      "size": [
+        7,
+        8,
+        14
+      ],
+      "colours": 37,
+      "quads": 387,
+      "triangles": 774,
+      "fingerprint": "142e30c5"
+    },
+    {
+      "name": "spider",
+      "title": "Spider",
+      "category": "animals",
+      "tags": [
+        "enemy",
+        "cave",
+        "insect"
+      ],
+      "note": "Eight legs, built as four mirrored pairs on an arc.",
+      "voxels": 449,
+      "size": [
+        17,
+        9,
+        15
+      ],
+      "colours": 11,
+      "quads": 794,
+      "triangles": 1588,
+      "fingerprint": "3c7fda36"
+    },
+    {
+      "name": "wolf",
+      "title": "Wolf",
+      "category": "animals",
+      "tags": [
+        "enemy",
+        "pack"
+      ],
+      "note": "The dog with the friendliness removed: lower head, bristled back.",
+      "voxels": 452,
+      "size": [
+        5,
+        14,
+        19
+      ],
+      "colours": 26,
+      "quads": 479,
+      "triangles": 958,
+      "fingerprint": "11bd3673"
+    },
+    {
+      "name": "axe",
+      "title": "Axe",
+      "category": "weapons",
+      "tags": [
+        "melee",
+        "two-handed",
+        "tool"
+      ],
+      "note": "A head heavy enough to look like it hurts.",
+      "voxels": 351,
+      "size": [
+        13,
+        19,
+        3
+      ],
+      "colours": 12,
+      "quads": 200,
+      "triangles": 400,
+      "fingerprint": "32201203"
+    },
+    {
+      "name": "blaster",
+      "title": "Blaster",
+      "category": "weapons",
+      "tags": [
+        "sci-fi",
+        "ranged",
+        "glow"
+      ],
+      "note": "The sci-fi counterpart to the sword: same hand, same height.",
+      "voxels": 346,
+      "size": [
+        7,
+        12,
+        14
+      ],
+      "colours": 3,
+      "quads": 152,
+      "triangles": 304,
+      "fingerprint": "939b63d9"
+    },
+    {
+      "name": "bow",
+      "title": "Bow",
+      "category": "weapons",
+      "tags": [
+        "ranged",
+        "wood"
+      ],
+      "note": "A curved limb built from a sampled arc, and a one-voxel string.",
+      "voxels": 105,
+      "size": [
+        4,
+        23,
+        3
+      ],
+      "colours": 8,
+      "quads": 220,
+      "triangles": 440,
+      "fingerprint": "d6db1163"
+    },
+    {
+      "name": "crossbow",
+      "title": "Crossbow",
+      "category": "weapons",
+      "tags": [
+        "ranged",
+        "wood",
+        "metal"
+      ],
+      "note": "Stock, prod and a loaded bolt.",
+      "voxels": 224,
+      "size": [
+        15,
+        8,
+        19
+      ],
+      "colours": 9,
+      "quads": 345,
+      "triangles": 690,
+      "fingerprint": "f03d5d23"
+    },
+    {
+      "name": "dagger",
+      "title": "Dagger",
+      "category": "weapons",
+      "tags": [
+        "melee",
+        "rogue",
+        "small"
+      ],
+      "note": "Half a sword, with a wrapped grip.",
+      "voxels": 60,
+      "size": [
+        5,
+        14,
+        3
+      ],
+      "colours": 5,
+      "quads": 84,
+      "triangles": 168,
+      "fingerprint": "326f86fc"
+    },
+    {
+      "name": "shield",
+      "title": "Shield",
+      "category": "weapons",
+      "tags": [
+        "defence",
+        "heraldry"
+      ],
+      "note": "A heater shield, with the boss and the rim in metal.",
+      "voxels": 372,
+      "size": [
+        15,
+        17,
+        4
+      ],
+      "colours": 4,
+      "quads": 235,
+      "triangles": 470,
+      "fingerprint": "11b35f55"
+    },
+    {
+      "name": "spear",
+      "title": "Spear",
+      "category": "weapons",
+      "tags": [
+        "melee",
+        "reach",
+        "two-handed"
+      ],
+      "note": "Long, thin, and bound below the head.",
+      "voxels": 95,
+      "size": [
+        3,
+        31,
+        3
+      ],
+      "colours": 13,
+      "quads": 203,
+      "triangles": 406,
+      "fingerprint": "e8aa60a5"
+    },
+    {
+      "name": "staff",
+      "title": "Staff",
+      "category": "weapons",
+      "tags": [
+        "magic",
+        "two-handed",
+        "glow"
+      ],
+      "note": "The only weapon here that lights the room.",
+      "voxels": 95,
+      "size": [
+        5,
+        27,
+        5
+      ],
+      "colours": 11,
+      "quads": 227,
+      "triangles": 454,
+      "fingerprint": "abd39a5f"
+    },
+    {
+      "name": "sword",
+      "title": "Sword",
+      "category": "weapons",
+      "tags": [
+        "melee",
+        "starter"
+      ],
+      "note": "The reference weapon: everything else is sized against it.",
+      "voxels": 106,
+      "size": [
+        9,
+        26,
+        3
+      ],
+      "colours": 6,
+      "quads": 113,
+      "triangles": 226,
+      "fingerprint": "b4f7a97a"
+    },
+    {
+      "name": "torch",
+      "title": "Torch",
+      "category": "weapons",
+      "tags": [
+        "light",
+        "held"
+      ],
+      "note": "Held like a weapon, so it lives here rather than with the items.",
+      "voxels": 93,
+      "size": [
+        5,
+        17,
+        5
+      ],
+      "colours": 8,
+      "quads": 166,
+      "triangles": 332,
+      "fingerprint": "d33e4cb0"
+    },
+    {
+      "name": "war-hammer",
+      "title": "War Hammer",
+      "category": "weapons",
+      "tags": [
+        "melee",
+        "two-handed",
+        "blunt"
+      ],
+      "note": "Banded head, riveted cheeks, long haft.",
+      "voxels": 553,
+      "size": [
+        11,
+        21,
+        7
+      ],
+      "colours": 13,
+      "quads": 223,
+      "triangles": 446,
+      "fingerprint": "e1bc7410"
+    },
+    {
+      "name": "apple",
+      "title": "Apple",
+      "category": "items",
+      "tags": [
+        "food",
+        "pickup"
+      ],
+      "note": "A pickup that reads at any size: red ball, brown stalk, one leaf.",
+      "voxels": 175,
+      "size": [
+        7,
+        10,
+        7
+      ],
+      "colours": 5,
+      "quads": 223,
+      "triangles": 446,
+      "fingerprint": "3beb0ed0"
+    },
+    {
+      "name": "backpack",
+      "title": "Backpack",
+      "category": "items",
+      "tags": [
+        "gear",
+        "container"
+      ],
+      "note": "Straps, buckles and a bedroll — the adventurer’s inventory icon.",
+      "voxels": 841,
+      "size": [
+        11,
+        14,
+        9
+      ],
+      "colours": 9,
+      "quads": 422,
+      "triangles": 844,
+      "fingerprint": "1d5cc419"
+    },
+    {
+      "name": "bomb",
+      "title": "Bomb",
+      "category": "items",
+      "tags": [
+        "weapon",
+        "throwable",
+        "glow"
+      ],
+      "note": "Sphere, fuse, spark. The spark is the only emissive voxel.",
+      "voxels": 419,
+      "size": [
+        9,
+        15,
+        9
+      ],
+      "colours": 6,
+      "quads": 438,
+      "triangles": 876,
+      "fingerprint": "e0626dc9"
+    },
+    {
+      "name": "book",
+      "title": "Book",
+      "category": "items",
+      "tags": [
+        "quest",
+        "magic"
+      ],
+      "note": "Closed, with a clasp — pages are one lighter slab, not fifty.",
+      "voxels": 375,
+      "size": [
+        12,
+        5,
+        9
+      ],
+      "colours": 4,
+      "quads": 92,
+      "triangles": 184,
+      "fingerprint": "ed33423c"
+    },
+    {
+      "name": "chest",
+      "title": "Chest",
+      "category": "items",
+      "tags": [
+        "loot",
+        "container"
+      ],
+      "note": "Lid open, gold inside, bands and a lock in metal.",
+      "voxels": 759,
+      "size": [
+        11,
+        11,
+        14
+      ],
+      "colours": 9,
+      "quads": 284,
+      "triangles": 568,
+      "fingerprint": "e81325e4"
+    },
+    {
+      "name": "coin-pile",
+      "title": "Coin Pile",
+      "category": "items",
+      "tags": [
+        "loot",
+        "currency"
+      ],
+      "note": "Loose coins, stacked by a hash so the heap is never symmetric.",
+      "voxels": 176,
+      "size": [
+        9,
+        7,
+        9
+      ],
+      "colours": 2,
+      "quads": 280,
+      "triangles": 560,
+      "fingerprint": "69bf9181"
+    },
+    {
+      "name": "gem",
+      "title": "Gem",
+      "category": "items",
+      "tags": [
+        "loot",
+        "currency",
+        "glow"
+      ],
+      "note": "Two pyramids, base to base. The only shape a gem needs.",
+      "voxels": 168,
+      "size": [
+        7,
+        8,
+        7
+      ],
+      "colours": 5,
+      "quads": 120,
+      "triangles": 240,
+      "fingerprint": "67a973b0"
+    },
+    {
+      "name": "key",
+      "title": "Key",
+      "category": "items",
+      "tags": [
+        "quest",
+        "small"
+      ],
+      "note": "Bow, shaft, two wards — nine voxels of unmistakable silhouette.",
+      "voxels": 144,
+      "size": [
+        7,
+        16,
+        3
+      ],
+      "colours": 5,
+      "quads": 261,
+      "triangles": 522,
+      "fingerprint": "11ecad59"
+    },
+    {
+      "name": "lantern",
+      "title": "Lantern",
+      "category": "items",
+      "tags": [
+        "light",
+        "glow",
+        "pickup"
+      ],
+      "note": "The one item meant to be carried at night.",
+      "voxels": 401,
+      "size": [
+        7,
+        13,
+        7
+      ],
+      "colours": 2,
+      "quads": 198,
+      "triangles": 396,
+      "fingerprint": "49726e2a"
+    },
+    {
+      "name": "potion",
+      "title": "Potion",
+      "category": "items",
+      "tags": [
+        "pickup",
+        "consumable",
+        "glow"
+      ],
+      "note": "Round flask, cork, and a liquid that lights itself.",
+      "voxels": 256,
+      "size": [
+        7,
+        12,
+        7
+      ],
+      "colours": 4,
+      "quads": 186,
+      "triangles": 372,
+      "fingerprint": "02050940"
+    },
+    {
+      "name": "scroll",
+      "title": "Scroll",
+      "category": "items",
+      "tags": [
+        "quest",
+        "magic"
+      ],
+      "note": "Rolled, with the ends showing and a ribbon around the middle.",
+      "voxels": 533,
+      "size": [
+        17,
+        7,
+        7
+      ],
+      "colours": 8,
+      "quads": 409,
+      "triangles": 818,
+      "fingerprint": "edf6f09d"
+    },
+    {
+      "name": "anvil",
+      "title": "Anvil",
+      "category": "furniture",
+      "tags": [
+        "smithy",
+        "workshop"
+      ],
+      "note": "The classic silhouette: waist, horn and heel.",
+      "voxels": 498,
+      "size": [
+        17,
+        8,
+        7
+      ],
+      "colours": 10,
+      "quads": 439,
+      "triangles": 878,
+      "fingerprint": "a13a40e3"
+    },
+    {
+      "name": "barrel",
+      "title": "Barrel",
+      "category": "furniture",
+      "tags": [
+        "prop",
+        "container",
+        "tavern"
+      ],
+      "note": "Staved, banded, and wider at the middle than the ends.",
+      "voxels": 925,
+      "size": [
+        11,
+        13,
+        11
+      ],
+      "colours": 19,
+      "quads": 529,
+      "triangles": 1058,
+      "fingerprint": "6cae067b"
+    },
+    {
+      "name": "bed",
+      "title": "Bed",
+      "category": "furniture",
+      "tags": [
+        "indoor",
+        "save-point"
+      ],
+      "note": "A pillow, a turned-down sheet and a frame with feet.",
+      "voxels": 1557,
+      "size": [
+        11,
+        8,
+        23
+      ],
+      "colours": 10,
+      "quads": 412,
+      "triangles": 824,
+      "fingerprint": "8094988a"
+    },
+    {
+      "name": "bookshelf",
+      "title": "Bookshelf",
+      "category": "furniture",
+      "tags": [
+        "indoor",
+        "library"
+      ],
+      "note": "Books coloured from a hash, so no two shelves repeat.",
+      "voxels": 1380,
+      "size": [
+        15,
+        20,
+        7
+      ],
+      "colours": 17,
+      "quads": 1351,
+      "triangles": 2702,
+      "fingerprint": "7648c96c"
+    },
+    {
+      "name": "cauldron",
+      "title": "Cauldron",
+      "category": "furniture",
+      "tags": [
+        "witch",
+        "cooking",
+        "glow"
+      ],
+      "note": "A pot on legs with something green in it.",
+      "voxels": 562,
+      "size": [
+        11,
+        13,
+        11
+      ],
+      "colours": 6,
+      "quads": 570,
+      "triangles": 1140,
+      "fingerprint": "c6fadd4f"
+    },
+    {
+      "name": "chair",
+      "title": "Chair",
+      "category": "furniture",
+      "tags": [
+        "tavern",
+        "indoor"
+      ],
+      "note": "Seat at five, so the kit humanoid sits without adjustment.",
+      "voxels": 203,
+      "size": [
+        9,
+        14,
+        9
+      ],
+      "colours": 10,
+      "quads": 367,
+      "triangles": 734,
+      "fingerprint": "ba9e4224"
+    },
+    {
+      "name": "crate",
+      "title": "Crate",
+      "category": "furniture",
+      "tags": [
+        "prop",
+        "container",
+        "destructible"
+      ],
+      "note": "Planked, braced diagonally, and stackable on a one-voxel grid.",
+      "voxels": 1331,
+      "size": [
+        11,
+        11,
+        11
+      ],
+      "colours": 6,
+      "quads": 381,
+      "triangles": 762,
+      "fingerprint": "df1070ae"
+    },
+    {
+      "name": "fireplace",
+      "title": "Fireplace",
+      "category": "furniture",
+      "tags": [
+        "indoor",
+        "light",
+        "glow"
+      ],
+      "note": "Stone surround, log pile, and a fire that lights the mantel.",
+      "voxels": 1986,
+      "size": [
+        19,
+        15,
+        11
+      ],
+      "colours": 15,
+      "quads": 1193,
+      "triangles": 2386,
+      "fingerprint": "51581428"
+    },
+    {
+      "name": "lamp-post",
+      "title": "Lamp Post",
+      "category": "furniture",
+      "tags": [
+        "street",
+        "light",
+        "glow"
+      ],
+      "note": "Street furniture: base, fluted post, glass head.",
+      "voxels": 305,
+      "size": [
+        7,
+        29,
+        7
+      ],
+      "colours": 2,
+      "quads": 234,
+      "triangles": 468,
+      "fingerprint": "a680ebe0"
+    },
+    {
+      "name": "rug",
+      "title": "Rug",
+      "category": "furniture",
+      "tags": [
+        "indoor",
+        "decor"
+      ],
+      "note": "One voxel thick, with a woven border and fringe.",
+      "voxels": 267,
+      "size": [
+        19,
+        1,
+        15
+      ],
+      "colours": 3,
+      "quads": 153,
+      "triangles": 306,
+      "fingerprint": "42f57c94"
+    },
+    {
+      "name": "table",
+      "title": "Table",
+      "category": "furniture",
+      "tags": [
+        "tavern",
+        "indoor"
+      ],
+      "note": "Plank top, cross-braced legs, one knot per plank.",
+      "voxels": 475,
+      "size": [
+        15,
+        10,
+        11
+      ],
+      "colours": 14,
+      "quads": 647,
+      "triangles": 1294,
+      "fingerprint": "97e91d60"
+    },
+    {
+      "name": "throne",
+      "title": "Throne",
+      "category": "furniture",
+      "tags": [
+        "royal",
+        "indoor"
+      ],
+      "note": "The chair, scaled up and given gold. Same seat height.",
+      "voxels": 1849,
+      "size": [
+        15,
+        24,
+        13
+      ],
+      "colours": 7,
+      "quads": 949,
+      "triangles": 1898,
+      "fingerprint": "944e3674"
+    },
+    {
+      "name": "bush",
+      "title": "Bush",
+      "category": "scenery",
+      "tags": [
+        "plant",
+        "filler"
+      ],
+      "note": "Three overlapping lobes and a few berries.",
+      "voxels": 289,
+      "size": [
+        12,
+        7,
+        10
+      ],
+      "colours": 4,
+      "quads": 332,
+      "triangles": 664,
+      "fingerprint": "22a06e27"
+    },
+    {
+      "name": "cactus",
+      "title": "Cactus",
+      "category": "scenery",
+      "tags": [
+        "desert",
+        "plant"
+      ],
+      "note": "Ribbed column with two arms and a flower.",
+      "voxels": 717,
+      "size": [
+        11,
+        19,
+        7
+      ],
+      "colours": 13,
+      "quads": 507,
+      "triangles": 1014,
+      "fingerprint": "563bbc0f"
+    },
+    {
+      "name": "campfire",
+      "title": "Campfire",
+      "category": "scenery",
+      "tags": [
+        "light",
+        "glow",
+        "camp"
+      ],
+      "note": "A ring of stones, four logs and a fire. Save point in a hundred games.",
+      "voxels": 554,
+      "size": [
+        15,
+        10,
+        15
+      ],
+      "colours": 9,
+      "quads": 609,
+      "triangles": 1218,
+      "fingerprint": "a9534c5a"
+    },
+    {
+      "name": "crystal",
+      "title": "Crystal",
+      "category": "scenery",
+      "tags": [
+        "cave",
+        "glow",
+        "mineral"
+      ],
+      "note": "Three shards from one base, the tallest lit brightest.",
+      "voxels": 246,
+      "size": [
+        9,
+        13,
+        7
+      ],
+      "colours": 8,
+      "quads": 305,
+      "triangles": 610,
+      "fingerprint": "f5d5a947"
+    },
+    {
+      "name": "fence",
+      "title": "Fence",
+      "category": "scenery",
+      "tags": [
+        "built",
+        "boundary"
+      ],
+      "note": "Three posts and two rails — a repeating segment, not a one-off.",
+      "voxels": 353,
+      "size": [
+        23,
+        11,
+        3
+      ],
+      "colours": 15,
+      "quads": 493,
+      "triangles": 986,
+      "fingerprint": "61c0ffe0"
+    },
+    {
+      "name": "flower-patch",
+      "title": "Flower Patch",
+      "category": "scenery",
+      "tags": [
+        "plant",
+        "filler",
+        "ground"
+      ],
+      "note": "A ground tile you can scatter: grass tufts and four colours of bloom.",
+      "voxels": 206,
+      "size": [
+        15,
+        5,
+        15
+      ],
+      "colours": 7,
+      "quads": 417,
+      "triangles": 834,
+      "fingerprint": "cacb4f0d"
+    },
+    {
+      "name": "gravestone",
+      "title": "Gravestone",
+      "category": "scenery",
+      "tags": [
+        "graveyard",
+        "spooky"
+      ],
+      "note": "Leaning, chipped, and mossy on the north side.",
+      "voxels": 580,
+      "size": [
+        11,
+        13,
+        7
+      ],
+      "colours": 20,
+      "quads": 434,
+      "triangles": 868,
+      "fingerprint": "41f4d7c8"
+    },
+    {
+      "name": "mushroom",
+      "title": "Mushroom",
+      "category": "scenery",
+      "tags": [
+        "cave",
+        "plant",
+        "glow"
+      ],
+      "note": "Cap, gills, stalk — and it glows, because it is that kind of forest.",
+      "voxels": 418,
+      "size": [
+        13,
+        14,
+        13
+      ],
+      "colours": 8,
+      "quads": 434,
+      "triangles": 868,
+      "fingerprint": "f1e12b2a"
+    },
+    {
+      "name": "oak-tree",
+      "title": "Oak Tree",
+      "category": "scenery",
+      "tags": [
+        "tree",
+        "forest"
+      ],
+      "note": "The default tree. Round canopy, offset second lobe, roots that flare.",
+      "voxels": 1054,
+      "size": [
+        14,
+        23,
+        13
+      ],
+      "colours": 8,
+      "quads": 852,
+      "triangles": 1704,
+      "fingerprint": "f8dff188"
+    },
+    {
+      "name": "palm-tree",
+      "title": "Palm Tree",
+      "category": "scenery",
+      "tags": [
+        "tree",
+        "beach"
+      ],
+      "note": "A leaning trunk with six sampled fronds.",
+      "voxels": 226,
+      "size": [
+        13,
+        19,
+        15
+      ],
+      "colours": 9,
+      "quads": 622,
+      "triangles": 1244,
+      "fingerprint": "eac84d0f"
+    },
+    {
+      "name": "pine-tree",
+      "title": "Pine Tree",
+      "category": "scenery",
+      "tags": [
+        "tree",
+        "forest",
+        "winter"
+      ],
+      "note": "Stacked skirts, each narrower than the last.",
+      "voxels": 519,
+      "size": [
+        13,
+        19,
+        13
+      ],
+      "colours": 8,
+      "quads": 532,
+      "triangles": 1064,
+      "fingerprint": "5773de70"
+    },
+    {
+      "name": "rock",
+      "title": "Rock",
+      "category": "scenery",
+      "tags": [
+        "terrain",
+        "filler"
+      ],
+      "note": "A boulder with moss on whatever faces the sky.",
+      "voxels": 402,
+      "size": [
+        11,
+        7,
+        9
+      ],
+      "colours": 6,
+      "quads": 359,
+      "triangles": 718,
+      "fingerprint": "2058f461"
+    },
+    {
+      "name": "signpost",
+      "title": "Signpost",
+      "category": "scenery",
+      "tags": [
+        "built",
+        "road"
+      ],
+      "note": "Two arms pointing opposite ways, because one always looks broken.",
+      "voxels": 333,
+      "size": [
+        21,
+        17,
+        7
+      ],
+      "colours": 12,
+      "quads": 356,
+      "triangles": 712,
+      "fingerprint": "56cb0fb6"
+    },
+    {
+      "name": "stump",
+      "title": "Stump",
+      "category": "scenery",
+      "tags": [
+        "forest",
+        "filler"
+      ],
+      "note": "Rings on the cut, roots at the base, one axe notch.",
+      "voxels": 372,
+      "size": [
+        13,
+        6,
+        13
+      ],
+      "colours": 15,
+      "quads": 377,
+      "triangles": 754,
+      "fingerprint": "e6280d40"
+    },
+    {
+      "name": "well",
+      "title": "Well",
+      "category": "scenery",
+      "tags": [
+        "built",
+        "village",
+        "water"
+      ],
+      "note": "Stone ring, timber frame, and a bucket on a rope.",
+      "voxels": 937,
+      "size": [
+        15,
+        22,
+        13
+      ],
+      "colours": 11,
+      "quads": 793,
+      "triangles": 1586,
+      "fingerprint": "476fac79"
+    },
+    {
+      "name": "castle-gate",
+      "title": "Castle Gate",
+      "category": "buildings",
+      "tags": [
+        "castle",
+        "military",
+        "landmark"
+      ],
+      "note": "Two drum towers, a portcullis and a banner over the arch.",
+      "voxels": 6523,
+      "size": [
+        43,
+        30,
+        15
+      ],
+      "colours": 27,
+      "quads": 5727,
+      "triangles": 11454,
+      "fingerprint": "716dea04"
+    },
+    {
+      "name": "cottage",
+      "title": "Cottage",
+      "category": "buildings",
+      "tags": [
+        "village",
+        "house",
+        "medieval"
+      ],
+      "note": "Plaster and timber under a thatched gable, with a chimney that smokes.",
+      "voxels": 1767,
+      "size": [
+        21,
+        22,
+        19
+      ],
+      "colours": 48,
+      "quads": 2931,
+      "triangles": 5862,
+      "fingerprint": "88bfd46b"
+    },
+    {
+      "name": "hut",
+      "title": "Hut",
+      "category": "buildings",
+      "tags": [
+        "village",
+        "house",
+        "small"
+      ],
+      "note": "The cheapest building that still reads as a home.",
+      "voxels": 904,
+      "size": [
+        13,
+        15,
+        13
+      ],
+      "colours": 44,
+      "quads": 891,
+      "triangles": 1782,
+      "fingerprint": "a5215e09"
+    },
+    {
+      "name": "lighthouse",
+      "title": "Lighthouse",
+      "category": "buildings",
+      "tags": [
+        "coast",
+        "landmark",
+        "glow"
+      ],
+      "note": "Red and white bands, a glazed lamp room, and the lamp is the light.",
+      "voxels": 2973,
+      "size": [
+        17,
+        45,
+        17
+      ],
+      "colours": 13,
+      "quads": 3484,
+      "triangles": 6968,
+      "fingerprint": "a30ab2cf"
+    },
+    {
+      "name": "shop",
+      "title": "Shop",
+      "category": "buildings",
+      "tags": [
+        "town",
+        "trade"
+      ],
+      "note": "Two storeys, an awning over the counter, and a sign on an arm.",
+      "voxels": 2229,
+      "size": [
+        23,
+        28,
+        21
+      ],
+      "colours": 42,
+      "quads": 3991,
+      "triangles": 7982,
+      "fingerprint": "2bdc13e4"
+    },
+    {
+      "name": "stone-tower",
+      "title": "Stone Tower",
+      "category": "buildings",
+      "tags": [
+        "castle",
+        "wizard",
+        "tall"
+      ],
+      "note": "A round tower: crenellations, arrow slits and a lit window.",
+      "voxels": 3900,
+      "size": [
+        19,
+        40,
+        19
+      ],
+      "colours": 15,
+      "quads": 3889,
+      "triangles": 7778,
+      "fingerprint": "8044d920"
+    },
+    {
+      "name": "tent",
+      "title": "Tent",
+      "category": "buildings",
+      "tags": [
+        "camp",
+        "cloth",
+        "small"
+      ],
+      "note": "Panelled canvas over a solid A-frame, with the flap rolled back to one side.",
+      "voxels": 1844,
+      "size": [
+        25,
+        11,
+        25
+      ],
+      "colours": 18,
+      "quads": 1386,
+      "triangles": 2772,
+      "fingerprint": "80f22dc2"
+    },
+    {
+      "name": "watchtower",
+      "title": "Watchtower",
+      "category": "buildings",
+      "tags": [
+        "military",
+        "wood",
+        "outpost"
+      ],
+      "note": "Four legs, a ladder, and a platform with a rail.",
+      "voxels": 2089,
+      "size": [
+        23,
+        39,
+        23
+      ],
+      "colours": 15,
+      "quads": 4285,
+      "triangles": 8570,
+      "fingerprint": "dea559e8"
+    },
+    {
+      "name": "windmill",
+      "title": "Windmill",
+      "category": "buildings",
+      "tags": [
+        "village",
+        "landmark"
+      ],
+      "note": "A tapered tower, a cap, and four sails on a real hub.",
+      "voxels": 2678,
+      "size": [
+        33,
+        39,
+        20
+      ],
+      "colours": 11,
+      "quads": 2938,
+      "triangles": 5876,
+      "fingerprint": "3f8d3fdc"
+    },
+    {
+      "name": "balloon",
+      "title": "Balloon",
+      "category": "vehicles",
+      "tags": [
+        "flying",
+        "landmark"
+      ],
+      "note": "Gores in four colours, a burner, and a wicker basket.",
+      "voxels": 3695,
+      "size": [
+        29,
+        41,
+        29
+      ],
+      "colours": 11,
+      "quads": 6309,
+      "triangles": 12618,
+      "fingerprint": "724c82db"
+    },
+    {
+      "name": "car",
+      "title": "Car",
+      "category": "vehicles",
+      "tags": [
+        "modern",
+        "road"
+      ],
+      "note": "A modern silhouette in as few voxels as it takes: bonnet, cabin, boot.",
+      "voxels": 3815,
+      "size": [
+        17,
+        15,
+        35
+      ],
+      "colours": 11,
+      "quads": 786,
+      "triangles": 1572,
+      "fingerprint": "efbc89e6"
+    },
+    {
+      "name": "cart",
+      "title": "Cart",
+      "category": "vehicles",
+      "tags": [
+        "medieval",
+        "transport"
+      ],
+      "note": "Two wheels, a bed of planks, and shafts for something to pull it.",
+      "voxels": 1695,
+      "size": [
+        19,
+        14,
+        27
+      ],
+      "colours": 17,
+      "quads": 1290,
+      "triangles": 2580,
+      "fingerprint": "b6949e52"
+    },
+    {
+      "name": "minecart",
+      "title": "Minecart",
+      "category": "vehicles",
+      "tags": [
+        "mine",
+        "rail",
+        "small"
+      ],
+      "note": "A tub on a frame, with a rail section under it.",
+      "voxels": 1694,
+      "size": [
+        17,
+        12,
+        25
+      ],
+      "colours": 8,
+      "quads": 706,
+      "triangles": 1412,
+      "fingerprint": "c5b5f8ca"
+    },
+    {
+      "name": "sailboat",
+      "title": "Sailboat",
+      "category": "vehicles",
+      "tags": [
+        "water",
+        "transport"
+      ],
+      "note": "Clinker hull, one mast, and a sail with a curve in it.",
+      "voxels": 1925,
+      "size": [
+        19,
+        33,
+        29
+      ],
+      "colours": 15,
+      "quads": 1243,
+      "triangles": 2486,
+      "fingerprint": "bf538c49"
+    },
+    {
+      "name": "spaceship",
+      "title": "Spaceship",
+      "category": "vehicles",
+      "tags": [
+        "sci-fi",
+        "flying",
+        "glow"
+      ],
+      "note": "Delta wing, canopy, three engines and a lit underside.",
+      "voxels": 2420,
+      "size": [
+        33,
+        12,
+        33
+      ],
+      "colours": 4,
+      "quads": 564,
+      "triangles": 1128,
+      "fingerprint": "e04ed2b5"
+    },
+    {
+      "name": "city-skyline",
+      "title": "City Skyline",
+      "category": "backdrops",
+      "tags": [
+        "modern",
+        "far",
+        "glow"
+      ],
+      "note": "Towers on a grid, windows lit by a hash — the night is the point.",
+      "voxels": 18923,
+      "size": [
+        67,
+        39,
+        25
+      ],
+      "colours": 12,
+      "quads": 2370,
+      "triangles": 4740,
+      "fingerprint": "9823a6e6"
+    },
+    {
+      "name": "cloud-bank",
+      "title": "Cloud Bank",
+      "category": "backdrops",
+      "tags": [
+        "sky",
+        "far",
+        "soft"
+      ],
+      "note": "Lobes on a hashed grid, flat underneath the way real cloud is.",
+      "voxels": 7454,
+      "size": [
+        60,
+        14,
+        27
+      ],
+      "colours": 4,
+      "quads": 3027,
+      "triangles": 6054,
+      "fingerprint": "842b7c7d"
+    },
+    {
+      "name": "desert-dunes",
+      "title": "Desert Dunes",
+      "category": "backdrops",
+      "tags": [
+        "terrain",
+        "far",
+        "desert"
+      ],
+      "note": "Long dunes with a wind-shadow side, and one arch to break the line.",
+      "voxels": 10842,
+      "size": [
+        61,
+        29,
+        21
+      ],
+      "colours": 14,
+      "quads": 3692,
+      "triangles": 7384,
+      "fingerprint": "27f920f2"
+    },
+    {
+      "name": "floating-island",
+      "title": "Floating Island",
+      "category": "backdrops",
+      "tags": [
+        "fantasy",
+        "far",
+        "water"
+      ],
+      "note": "Grass over a rock keel, a waterfall off the edge, and one tree.",
+      "voxels": 6971,
+      "size": [
+        37,
+        36,
+        29
+      ],
+      "colours": 38,
+      "quads": 4123,
+      "triangles": 8246,
+      "fingerprint": "18aa17b3"
+    },
+    {
+      "name": "forest-line",
+      "title": "Forest Line",
+      "category": "backdrops",
+      "tags": [
+        "terrain",
+        "far",
+        "trees"
+      ],
+      "note": "A hedge of canopies on a rolling bank — one silhouette, not forty trees.",
+      "voxels": 13488,
+      "size": [
+        64,
+        24,
+        23
+      ],
+      "colours": 19,
+      "quads": 7799,
+      "triangles": 15598,
+      "fingerprint": "1cca6a3d"
+    },
+    {
+      "name": "mountain-range",
+      "title": "Mountain Range",
+      "category": "backdrops",
+      "tags": [
+        "terrain",
+        "far",
+        "snow"
+      ],
+      "note": "Nine hashed peaks combined by max, so the range has summits instead of a plateau.",
+      "voxels": 11683,
+      "size": [
+        61,
+        33,
+        19
+      ],
+      "colours": 9,
+      "quads": 3812,
+      "triangles": 7624,
+      "fingerprint": "f86140f9"
+    }
+  ]
+}

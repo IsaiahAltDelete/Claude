@@ -1,8 +1,9 @@
 # Simulators
 
 Devices rebuilt in the browser, close enough to the real thing to practise on.
-All three are for support training: an agent can walk a caller through a flow,
-or rehearse one, without touching a real machine.
+The three simulators are for support training: an agent can walk a caller
+through a flow, or rehearse one, without touching a real machine. The other two
+are tools that ended up here.
 
 **Live:** <https://isaiahaltdelete.github.io/Claude/>
 
@@ -12,6 +13,7 @@ or rehearse one, without touching a real machine.
 | [iPhone Simulator](iphone/README.md) | [`/iphone`](https://isaiahaltdelete.github.io/Claude/iphone/) | A full iOS phone — lock screen, Control Centre, Spotlight, App Library and 51 apps |
 | [Roku Troubleshooting Simulator](roku/README.md) | [`/roku`](https://isaiahaltdelete.github.io/Claude/roku/) | A streaming player on a TV with a mock-up remote — home screen, channels, live guide, search, store, settings, restarts and factory reset |
 | [ISAIART DESIGN](design/README.md) | [`/design`](https://isaiahaltdelete.github.io/Claude/design/) | A type-in-space generator — not a simulator, but it lives here too |
+| [Voxel Maker](voxel/README.md) | [`/voxel`](https://isaiahaltdelete.github.io/Claude/voxel/) | A headless voxel model maker — ninety-odd game models built from code, turnable in the browser |
 
 Each folder has its own README with credentials, a feature list, its layout and
 the console commands for staging scenarios.
@@ -20,11 +22,12 @@ the console commands for staging scenarios.
 
 Vanilla HTML, CSS and JavaScript. No dependencies, no build step, no server —
 clone the repository and open any of the `index.html` files. Every asset is
-local, so all three run straight from `file://`; the fonts are bundled and all
-artwork is generated from primitives rather than fetched.
+local, so they all run straight from `file://`; the fonts are bundled and all
+artwork — icons, wallpapers, voxel models — is generated from primitives rather
+than fetched.
 
-Everyone in them is invented — Alex Rivera's Mac, Alex Rivera's iPhone and the
-Roku in Alex Rivera's living room, with the same made-up household around them,
+Everyone in the simulators is invented — Alex Rivera's Mac, Alex Rivera's iPhone
+and the Roku in Alex Rivera's living room, with the same made-up household around them,
 reserved `.example` addresses and 555 phone numbers throughout. On the Roku,
 every streaming service and programme is invented too.
 
@@ -36,7 +39,7 @@ Two things reach the network on purpose, and both are stated plainly in the UI:
 the Mac's Safari can browse real Wikipedia through its CORS API, and the iPhone's
 Maps embeds a real OpenStreetMap view. Everything else works offline.
 
-All three are responsive — usable from a 360px phone to a large desktop — and
+They are all responsive — usable from a 360px phone to a large desktop — and
 honour reduce-motion, reduce-transparency and text-scaling preferences.
 
 ## Project layout
@@ -49,10 +52,14 @@ mac/                         the macOS simulator, served at /mac
 iphone/                      the iPhone simulator, served at /iphone
 roku/                        the Roku simulator, served at /roku
 design/                      ISAIART DESIGN, served at /design
+voxel/                       the voxel model maker, served at /voxel
 tools/build-assets.py        regenerates the Mac's icons and wallpapers
 tools/check-syntax.py        parses every script, alone and merged into one scope
 tools/check-refs.py          resolves every icon, pane and command reference
 tools/smoke.mjs              opens every app in a real browser and asserts on it
+tools/voxel-check.mjs        builds, meshes, renders and exports every voxel model
+tools/voxel-render.mjs       bakes the voxel contact sheet and turntable
+tools/voxel-build.mjs        regenerates voxel/dist/voxel.js from voxel/scripts
 ```
 
 ## Checks
@@ -64,6 +71,9 @@ deployed site. Three gates run on every push and block the deploy:
 python3 tools/check-syntax.py   parse, including the shared global scopes
 python3 tools/check-refs.py     every glyph, pane, command and app id resolves
 node tools/smoke.mjs            all 82 apps open in Chromium with no console errors
+node tools/voxel-check.mjs      every voxel model builds, renders and exports
+node tools/voxel-render.mjs --check   the baked voxel sheets still match the recipes
+node tools/voxel-build.mjs --check    voxel/dist/voxel.js still matches its sources
 ```
 
 The iPhone's and the Roku's scripts are classic scripts that share one global
@@ -71,6 +81,16 @@ lexical environment, so a duplicate top-level `const` anywhere across a set is a
 SyntaxError that only exists once the browser merges them — the page still
 renders and the app throws when opened. check-syntax reproduces that merge for
 both. The Mac is exempt: each of its files wraps its body in an IIFE.
+
+The voxel library is exempt from the shared-scope check for the same reason the
+Mac is — every file wraps its body in an IIFE — but it has the opposite problem:
+adding a category file and forgetting its `<script>` tag loses a whole section of
+the gallery while the page still renders. check-syntax asserts every script in
+`voxel/scripts` is loaded, in order. Its own gates go further: the models are
+generated, so a one-voxel change to a recipe is caught by a fingerprint in
+`voxel/assets/catalog.json`, and every model is rendered headlessly and asserted
+to cover part of the frame — an empty tile and a model that failed to load look
+identical in a browser.
 
 The smoke test also checks the HTML sanitiser, keyboard reachability, colour
 contrast, the scenario definitions, and that the Mac and the iPhone still boot

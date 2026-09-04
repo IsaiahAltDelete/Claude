@@ -37,6 +37,7 @@ ROOT = Path(__file__).resolve().parent.parent
 IPHONE = ROOT / "iphone"
 MAC = ROOT / "mac"
 ROKU = ROOT / "roku"
+VOXEL = ROOT / "voxel"
 
 VERBOSE = "--verbose" in sys.argv or "-v" in sys.argv
 failures: list[str] = []
@@ -72,7 +73,7 @@ def script_files(directory: Path) -> list[Path]:
 
 def check_each_file() -> None:
     files = (script_files(MAC / "scripts") + script_files(IPHONE / "scripts")
-             + script_files(ROKU / "scripts"))
+             + script_files(ROKU / "scripts") + script_files(VOXEL / "scripts"))
     for path in files:
         error = node_check(path.read_text(encoding="utf-8"), str(path.relative_to(ROOT)))
         if error:
@@ -237,6 +238,42 @@ def check_unreferenced(iphone_source: str) -> None:
         )
 
 
+def check_voxel() -> None:
+    """The voxel library loads in filename order and must load all of itself.
+
+    Every file wraps its body in an IIFE, so the shared-scope collision the
+    checks above exist for cannot happen here. The failure this one catches is
+    the other one: adding voxel/scripts/19-something.js and forgetting the
+    <script> tag, which loses a whole category from the gallery while the page
+    still renders perfectly. Order matters too — 06-catalog.js has to run
+    before anything that calls VOX.define.
+    """
+    if not (VOXEL / "index.html").exists():
+        return
+    html = (VOXEL / "index.html").read_text(encoding="utf-8")
+    referenced = [p.name for p in loaded_scripts(html, VOXEL)]
+    on_disk = [p.name for p in script_files(VOXEL / "scripts")]
+
+    for name in on_disk:
+        if name not in referenced:
+            failures.append(
+                f"voxel/scripts/{name} exists but voxel/index.html never loads it — "
+                "the models in it will be missing from the gallery"
+            )
+    for name in referenced:
+        if name not in on_disk:
+            failures.append(f"voxel/index.html loads scripts/{name}, which does not exist")
+
+    ordered = [name for name in referenced if name in on_disk]
+    if ordered != sorted(ordered):
+        failures.append(
+            "voxel/index.html loads its scripts out of filename order: "
+            + ", ".join(ordered)
+        )
+    check_global_scope("Voxel", VOXEL)
+    print(f"voxel library: {len(on_disk)} scripts, all referenced")
+
+
 def main() -> int:
     print("Checking simulator sources…")
     check_each_file()
@@ -248,6 +285,7 @@ def main() -> int:
     check_mac_duplicates()
     check_shadowed_apps()
     check_unreferenced(iphone)
+    check_voxel()
 
     if failures:
         print(f"\nFAILED — {len(failures)} problem(s):\n", file=sys.stderr)
