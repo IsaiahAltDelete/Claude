@@ -781,6 +781,176 @@ async function testVoxel(browser, base) {
   await fallback.close();
 }
 
+/* -------------------------------------------------------- claudeventure ---
+
+   The game's failure mode is the gallery's, one layer worse: a blank canvas
+   looks exactly like a shop you have not scrolled to, and a simulation that
+   has quietly thrown looks exactly like a shop with no customers in it yet.
+   So this reads pixels back off the canvas, and then plays: buys with the real
+   buttons, opens the wardrobe, taps the floor, and checks the money moved.
+
+   It runs the whole thing twice — once on the GPU and once with WebGL taken
+   away — because the fallback is a second renderer, not a graceful degradation,
+   and a second renderer nobody exercises is a second renderer that is broken. */
+
+async function playClaudeventure(page, base, label, expected) {
+  watch(page, label);
+  await page.goto(`${base}/claudeventure/`, { waitUntil: 'load' });
+  await page.waitForFunction(() => window.CLAUDEVENTURE, null, { timeout: 25000 });
+  await page.waitForFunction(() => window.CLAUDEVENTURE.stage.warming === 0, null, { timeout: 40000 });
+  await page.waitForTimeout(1500);
+
+  const renderer = await page.evaluate(() => window.CLAUDEVENTURE.stage.renderer);
+  if (renderer !== expected) note(`${label}: renderer is "${renderer}", expected "${expected}"`);
+
+  const models = await page.evaluate(() => window.VOX.names().filter(n => n.startsWith('cv-')).length);
+  if (models < 100) note(`${label}: only ${models} game models were registered`);
+
+  /* Did anything actually get drawn? Read the middle of the canvas back. */
+  const coverage = await page.evaluate(() => {
+    const canvas = document.getElementById('stage');
+    const w = 240, h = 180;
+    const x = Math.floor(canvas.width / 2 - w / 2), y = Math.floor(canvas.height / 2 - h / 2);
+    let data;
+    const gl = canvas.getContext('webgl2');
+    if (gl) {
+      data = new Uint8Array(w * h * 4);
+      gl.readPixels(x, y, w, h, gl.RGBA, gl.UNSIGNED_BYTE, data);
+    } else {
+      data = canvas.getContext('2d').getImageData(x, y, w, h).data;
+    }
+    let lit = 0;
+    for (let i = 0; i < data.length; i += 4) if (data[i] + data[i + 1] + data[i + 2] > 150) lit++;
+    return lit / (w * h);
+  });
+  if (coverage < 0.3) note(`${label}: the shop covered only ${(coverage * 100).toFixed(0)}% of the canvas`);
+
+  /* Buy every stall through the real buttons, on the real buy-max mode. */
+  await page.evaluate(() => { window.CLAUDEVENTURE.game.cash = 5e5; });
+  await page.click('.cv-mode:nth-child(3)');
+  for (let i = 1; i <= 4; i++) await page.click(`.cv-station:nth-of-type(${i})`);
+  await page.click('.cv-tab:nth-child(2)');
+  await page.click('.cv-upgrade:nth-of-type(1)');
+  await page.click('.cv-upgrade:nth-of-type(2)');
+  const bought = await page.evaluate(() => {
+    const game = window.CLAUDEVENTURE.game;
+    return { open: game.stations.filter(s => s.unlocked).length, crew: game.crew.length, levels: game.stations[0].level };
+  });
+  if (bought.open !== 4) note(`${label}: ${bought.open} of 4 stalls opened after buying all four`);
+  if (bought.crew < 2) note(`${label}: hiring crew did not add anyone (${bought.crew} on shift)`);
+  if (bought.levels < 2) note(`${label}: buy-max bought ${bought.levels} levels of the first stall`);
+
+  /* A gift box, its modal, and the garment it hands over. */
+  await page.evaluate(() => window.CLAUDEVENTURE.game.openBox({ x: 0, z: 10 }));
+  await page.waitForTimeout(400);
+  if (await page.evaluate(() => document.querySelector('.cv-modal').hidden)) {
+    note(`${label}: opening a gift box showed no prize`);
+  }
+  await page.evaluate(() => window.CLAUDEVENTURE.hud.closeModal());
+
+  /* The wardrobe: every tile in a slot, each with a rendered voxel icon. */
+  await page.click('.cv-tab:nth-child(3)');
+  await page.waitForTimeout(1400);
+  const wardrobe = await page.evaluate(() => {
+    const tiles = Array.from(document.querySelectorAll('.cv-wear')).filter(t => !t.hidden);
+    const preview = document.querySelector('.cv-preview');
+    const pixels = preview.getContext('2d').getImageData(0, 0, preview.width, preview.height).data;
+    let drawn = 0;
+    for (let i = 3; i < pixels.length; i += 4) if (pixels[i] > 8) drawn++;
+    return {
+      shown: tiles.length,
+      icons: tiles.filter(t => (t.querySelector('img').src || '').startsWith('data:image')).length,
+      preview: drawn / (preview.width * preview.height),
+    };
+  });
+  if (!wardrobe.shown) note(`${label}: the wardrobe showed no garments`);
+  if (wardrobe.icons !== wardrobe.shown) {
+    note(`${label}: ${wardrobe.shown - wardrobe.icons} wardrobe tiles rendered no icon`);
+  }
+  if (wardrobe.preview < 0.04) note(`${label}: the wardrobe preview drew nothing`);
+
+  /* Equipping has to change the boosts the simulation reads. */
+  const dressed = await page.evaluate(() => {
+    const api = window.CLAUDEVENTURE;
+    api.game.owned['top-hat'] = true;
+    api.game.equip('hat', 'top-hat');
+    return api.game.boosts().value > 0;
+  });
+  if (!dressed) note(`${label}: equipping a garment applied no boost`);
+
+  /* Tap the floor, then let it run: money has to move. */
+  await page.click('.cv-tab:nth-child(1)');
+  const before = await page.evaluate(() => window.CLAUDEVENTURE.game.lifetime);
+  const box = await page.locator('#stage').boundingBox();
+  for (let i = 0; i < 8; i++) {
+    await page.mouse.click(box.x + box.width * (0.28 + i * 0.05), box.y + box.height * (0.45 + (i % 3) * 0.08));
+  }
+  /* Fifteen seconds, not five: a guest has to be walked a dish, sit down,
+     eat it, pay, and then have the till sweep the money up before any of it
+     reaches `lifetime`. The whole chain is about ten seconds at level one. */
+  await page.waitForTimeout(15000);
+  const after = await page.evaluate(() => {
+    const game = window.CLAUDEVENTURE.game;
+    return { lifetime: game.lifetime, served: game.served, guests: game.guests.length };
+  });
+  if (after.lifetime <= before) note(`${label}: fifteen seconds of trading earned nothing`);
+  if (after.served === 0) note(`${label}: nobody was served`);
+  if (after.guests === 0) note(`${label}: no guests ever arrived`);
+
+  /* The save has to survive a reload, and the away time has to pay out. */
+  await page.evaluate(() => window.CLAUDEVENTURE.save());
+  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem(window.CLAUDEVENTURE.SAVE_KEY) || 'null'));
+  if (!stored || stored.format !== 'claudeventure/1') note(`${label}: nothing was written to the save key`);
+  else if (!(stored.cash > 0)) note(`${label}: the save records no money`);
+
+  console.log(`  claudeventure${label.includes('software') ? '/software' : ''}: `
+    + `${models} models, ${(coverage * 100).toFixed(0)}% covered, ${after.served} served, `
+    + `${wardrobe.shown} garments on show`);
+  return { renderer, stored };
+}
+
+async function testClaudeventure(browser, base) {
+  const context = await browser.newContext({ viewport: { width: 1280, height: 940 } });
+  await blockOutbound(context);
+  const page = await context.newPage();
+  const first = await playClaudeventure(page, base, 'claudeventure', 'webgl');
+
+  /* A save from the first run has to load in the second, which is the only
+     test of the load path that a fresh profile can give. */
+  const context2 = await browser.newContext({ viewport: { width: 1280, height: 940 } });
+  await blockOutbound(context2);
+  await context2.addInitScript(save => {
+    try { localStorage.setItem('isaiart.claudeventure', JSON.stringify(save)); } catch (error) { /* fine */ }
+  }, first.stored);
+  const resumed = await context2.newPage();
+  watch(resumed, 'claudeventure/resume');
+  await resumed.goto(`${base}/claudeventure/`, { waitUntil: 'load' });
+  await resumed.waitForFunction(() => window.CLAUDEVENTURE, null, { timeout: 25000 });
+  await resumed.waitForTimeout(900);
+  const restored = await resumed.evaluate(() => {
+    const game = window.CLAUDEVENTURE.game;
+    return { cash: game.cash, open: game.stations.filter(s => s.unlocked).length, hat: game.equipped.hat };
+  });
+  if (restored.open !== 4) note(`claudeventure: a reloaded save opened ${restored.open} of 4 stalls`);
+  if (restored.hat !== 'top-hat') note('claudeventure: a reloaded save lost what was being worn');
+  console.log(`  claudeventure: save reloaded — ${restored.open} stalls, wearing ${restored.hat}`);
+  await context2.close();
+  await context.close();
+
+  /* And again with WebGL taken away. */
+  const fallback = await browser.newContext({ viewport: { width: 1100, height: 860 } });
+  await blockOutbound(fallback);
+  await fallback.addInitScript(() => {
+    const real = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function (type, ...rest) {
+      return (type === 'webgl2' || type === 'webgl') ? null : real.call(this, type, ...rest);
+    };
+  });
+  const soft = await fallback.newPage();
+  await playClaudeventure(soft, base, 'claudeventure/software', 'software');
+  await fallback.close();
+}
+
 /* Resolved through CJS so NODE_PATH and a globally installed playwright both
    work — this repo has no package.json and should not grow one just to test. */
 const { createRequire } = await import('node:module');
@@ -811,6 +981,7 @@ try {
   await testRoku(browser, hosted.base);
   await testStaleSaves(browser, hosted.base);
   await testVoxel(browser, hosted.base);
+  await testClaudeventure(browser, hosted.base);
 } finally {
   await browser.close();
   hosted.server?.close();
@@ -821,5 +992,6 @@ if (problems.length) {
   problems.forEach(p => console.error(`  * ${p}`));
   process.exit(1);
 }
-console.log('\nSmoke test passed: every app in all three simulators mounted, and the voxel '
-  + 'gallery rendered on the GPU and on the CPU, with no errors.');
+console.log('\nSmoke test passed: every app in all three simulators mounted, the voxel gallery '
+  + 'rendered on the GPU and on the CPU, and ClaudeVenture built its cast, traded, dressed '
+  + 'up and reloaded its save on both renderers — with no errors.');

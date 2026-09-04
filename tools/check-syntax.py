@@ -38,6 +38,7 @@ IPHONE = ROOT / "iphone"
 MAC = ROOT / "mac"
 ROKU = ROOT / "roku"
 VOXEL = ROOT / "voxel"
+GAME = ROOT / "claudeventure"
 
 VERBOSE = "--verbose" in sys.argv or "-v" in sys.argv
 failures: list[str] = []
@@ -73,7 +74,8 @@ def script_files(directory: Path) -> list[Path]:
 
 def check_each_file() -> None:
     files = (script_files(MAC / "scripts") + script_files(IPHONE / "scripts")
-             + script_files(ROKU / "scripts") + script_files(VOXEL / "scripts"))
+             + script_files(ROKU / "scripts") + script_files(VOXEL / "scripts")
+             + script_files(GAME / "scripts"))
     for path in files:
         error = node_check(path.read_text(encoding="utf-8"), str(path.relative_to(ROOT)))
         if error:
@@ -274,6 +276,36 @@ def check_voxel() -> None:
     print(f"voxel library: {len(on_disk)} scripts, all referenced")
 
 
+def check_ordered_scripts(name: str, directory: Path, note: str) -> None:
+    """A page whose scripts load in filename order must load all of them.
+
+    Same shape as the voxel check below, and it exists for the same failure:
+    adding scripts/09-something.js and forgetting the <script> tag, which loses
+    a whole subsystem while the page still renders. Order matters too — every
+    file here reads a global the file before it defined.
+    """
+    if not (directory / "index.html").exists():
+        return
+    html = (directory / "index.html").read_text(encoding="utf-8")
+    referenced = [p.name for p in loaded_scripts(html, directory) if p.parent == directory / "scripts"]
+    on_disk = [p.name for p in script_files(directory / "scripts")]
+
+    for filename in on_disk:
+        if filename not in referenced:
+            failures.append(
+                f"{name}/scripts/{filename} exists but {name}/index.html never loads it — {note}"
+            )
+    for filename in referenced:
+        if filename not in on_disk:
+            failures.append(f"{name}/index.html loads scripts/{filename}, which does not exist")
+
+    ordered = [f for f in referenced if f in on_disk]
+    if ordered != sorted(ordered):
+        failures.append(f"{name}/index.html loads its scripts out of filename order: " + ", ".join(ordered))
+    check_global_scope(name.title(), directory)
+    print(f"{name}: {len(on_disk)} scripts, all referenced")
+
+
 def main() -> int:
     print("Checking simulator sources…")
     check_each_file()
@@ -286,6 +318,10 @@ def main() -> int:
     check_shadowed_apps()
     check_unreferenced(iphone)
     check_voxel()
+    check_ordered_scripts(
+        "claudeventure", GAME,
+        "the game will throw on the first frame that needs it",
+    )
 
     if failures:
         print(f"\nFAILED — {len(failures)} problem(s):\n", file=sys.stderr)
