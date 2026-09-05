@@ -35,7 +35,7 @@ a house style applied over the top would make them worse at the job. They are
 therefore **excluded from the site theme** and always will be. Each one carries
 its own tokens file pinned to the real product's metrics.
 
-**Everything that is not a simulator shares one theme:** the index, the 404,
+**Everything that is not a simulator or the index shares one theme:** the 404,
 `/design`, `/image`, `/voxel` and the page around `/claudeventure`. It is cassette futurism taken as an interface language
 rather than a costume — the visual grammar of instrument panels and test
 equipment, kept as actual interface:
@@ -52,17 +52,32 @@ equipment, kept as actual interface:
   label is uppercase and letterspaced. Body text is Inter.
 - **No skeuomorphism.** No bezels, screws, scanline overlays, CRT curvature or
   chrome pretending to be hardware, and no narration pretending the page is a
-  machine. The one moving element on each static page — the chart-recorder
-  trace on the index, the X–Y oscilloscope on the 404 — is a real instrument
-  behaviour, drawn with genuine phosphor decay, and it is structural: the index
-  trace *is* the rule between the masthead and the directory.
+  machine. The one moving element on the 404 — the X–Y oscilloscope — is a real
+  instrument behaviour, drawn with genuine phosphor decay rather than as
+  decoration.
 
 Light and dark are siblings, not an inversion — the light theme is warm paper
 under the same lamp, not the dark theme with the values flipped. The choice is
-remembered under one `localStorage` key across all six pages, so it follows
-you from the index into a tool and back.
+remembered under one `localStorage` key across every page, index included, so it
+follows you from the front door into a tool and back.
 
-**The one deliberate exception is the game itself.** `/claudeventure` keeps the
+**The index is the first deliberate exception.** The front door is not a tool,
+and dressing it as an instrument panel made a directory of seven things look
+like a control surface for none of them. It is Frutiger Aero instead, played
+straight: a landscape — sun, god rays, snow on a far ridge, a lake holding the
+whole thing upside down, one absurdly green hill, bubbles going up — with wet
+glass floating in front of it. Three materials do all the work: *glass* (a
+blurred, over-saturated pane with a hard white rim and a specular band cut
+across its top half), *pebble* (a rounded gradient solid with the highlight
+baked into its shoulder and its own reflection under it), and *depth* (nine
+scenery layers on nine parallax rates, so the pointer moves a world rather than
+a picture of one). Every pixel of that landscape is drawn in the page's own
+markup — there is no photograph and no request, so the index is as offline as
+everything it points at. It carries its own palette rather than `tokens.css`,
+keeps both a day and a night sky, and holds itself to one screen: nothing on it
+ever scrolls, and at small sizes the panes shed content in stages instead.
+
+**The other deliberate exception is the game itself.** `/claudeventure` keeps the
 house chrome — the same bar, the same masthead, the same colophon, the same
 tokens — and then declares a second visual language inside the frame the game
 runs in: fat rounded corners, saturated candy colour, chunky buttons with a lip,
@@ -72,11 +87,12 @@ The colours inside the frame are not "themed to match" the shop; they are the
 voxel palette's own values, lifted straight out of the generators.
 
 All of it comes out of one file, `common/styles/tokens.css`. Every rule in the
-shared controls, both tool layouts and the index spends token names and never a
-literal colour, so retuning the whole theme is that file alone. The 404 is the
-single deliberate exception, and it says why in its own comments — GitHub Pages
-serves it for a miss at *any* depth, so it cannot link a stylesheet and carries
-a copy of the palette instead.
+shared controls and both tool layouts spends token names and never a literal
+colour, so retuning the whole theme is that file alone. Two pages sit outside
+it and say why in their own comments: the 404, because GitHub Pages serves it
+for a miss at *any* depth and it therefore cannot link a stylesheet at all, and
+the index, because it is a different visual language and tying the two together
+would mean neither could move.
 
 ## What they have in common
 
@@ -122,8 +138,8 @@ voxel/                       ISAIART Voxel, served at /voxel
                              exporters, the registry, and nine catalogue files
   dist/voxel.js              the library as one file, generated and committed
   assets/                    the baked contact sheet, turntable and manifest
-common/                      the theme, controls and parameter store the two tools
-                             and the index share
+common/                      the theme, controls and parameter store the two
+                             tools share; the index takes only its type pack
   styles/tokens.css          the whole palette, both themes — the single source
   styles/controls.css        every custom element
   scripts/util.js            dom, maths, colour, storage, drag
