@@ -20,7 +20,7 @@ framework, no bundler, no package manager and no server.
 | `image/` | Photograph processor, WebGL 2 | 100 controls, 20 presets, classical segmentation |
 | `voxel/` | Headless voxel model maker | 93 models, 19 scripts, bundled to `dist/voxel.js` |
 | `claudeventure/` | Isometric shop-builder built on `voxel/` | 119 models, 51 garments, 8 scripts |
-| `common/` | Theme, controls and parameter store for `design`, `image` and the index | |
+| `common/` | Theme, controls and parameter store for `design` and `image`; the index takes only the type pack | |
 
 ## Invariants — do not break these
 
@@ -52,8 +52,8 @@ not. A house style applied over the top would defeat the purpose: the trainee is
 supposed to be learning a real screen. If asked to "make the site consistent",
 these are excluded.
 
-**The index, the 404, `design/` and `image/` share one theme.** It is cassette
-futurism as an interface language, not a costume:
+**The 404, `design/` and `image/` share one theme.** It is cassette futurism as
+an interface language, not a costume:
 
 - warm neutral grounds (near-black / warm paper), never blue, never pure white
 - one phosphor amber accent, meaning "this is live" and nothing else
@@ -66,14 +66,24 @@ futurism as an interface language, not a costume:
 every value. Everything downstream spends token names and never a literal
 colour, so a retune is that one file. Two consequences worth knowing:
 
-- **Never introduce a colour literal** in `common/styles/controls.css`, the two
-  tool layouts, or the index. The only literals that belong are inside the
+- **Never introduce a colour literal** in `common/styles/controls.css` or the
+  two tool layouts. The only literals that belong are inside the
   colour picker, where they represent actual colour space (the hue strip, the
   saturation/value square) rather than theme.
 - **`tokens.css` sets the base reset only.** It used to also set
   `html, body { height: 100%; overflow: hidden }`; that is app-shell geometry
-  and now lives in `design/styles/03-layout.css` and `image/styles/layout.css`,
-  because the index loads the same tokens and is an ordinary scrolling document.
+  and now lives in `design/styles/03-layout.css` and `image/styles/layout.css`.
+
+**The index is deliberately outside that theme.** It is Frutiger Aero — a drawn
+landscape (sun, rays, ridges, lake, hill, bubbles, orbs) under wet glass — and
+it carries its own palette inside `index.html` rather than loading `tokens.css`.
+The only thing it takes from `common/` is `assets/fonts/fonts.css`. Two rules
+hold it together: **nothing on it may scroll** (the shell is `100dvh` with
+`overflow: hidden`, the grid divides whatever height it is handed, and the
+staged `max-height` / `max-width` blocks near the bottom of the stylesheet drop
+content — prose, then link labels, then pebble size — rather than letting the
+page grow), and **nothing on it may be fetched** (every element of the scenery
+is markup, so the front door stays as offline as the tools).
 
 ### Theme persistence
 
@@ -107,7 +117,7 @@ washing it with its own ground colour at low alpha — the obvious way to draw a
 decaying trace — walks the ground off its own value over a few hundred frames,
 because 8-bit compositing quantises. The light theme's cream drifted visibly
 pink. It also eats anything painted once underneath, like a graticule. Both the
-index trace and the 404 scope therefore keep the trace on a separate
+404 scope therefore keeps its trace on a separate
 transparent layer, fade *that* toward transparent (zero alpha is a fixed point
 quantisation lands on exactly), and repaint ground and graticule fresh every
 frame.
@@ -179,9 +189,13 @@ themselves, and the scene keys models by name. Re-run
 `node tools/claudeventure-check.mjs` and commit the sheets and `cast.json`, or
 CI fails on the drift. Every station needs all three tiers to exist.
 
-**A project on the index** — copy an entry block in `index.html` and keep the
-numbers sequential. The counts in each entry's `meta` line are real; if you
-change a project's scale, update them.
+**A project on the index** — copy a `.tile` block in `index.html`, give it the
+next `--i` (it drives the entrance stagger and the icon draw-on), a `--c` (its
+one colour, spent by the pebble, the tint, the glow and the readout) and a
+`data-kind` of `simulate` / `create` / `play` so the lenses pick it up. The
+eighth cell is the colophon, not a project. The counts in each `.foot` are real;
+if you change a project's scale, update them. Then check it at 1440×900 and at
+360×640: the page must still not scroll in either.
 
 ## Staging scenarios
 
