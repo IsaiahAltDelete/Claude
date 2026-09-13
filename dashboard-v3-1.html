@@ -1,0 +1,2407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Isaiah's Dashboard</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<style>
+:root{
+  --font-main:'Poppins',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+
+  --bg-color:#f4f7fa;
+  --card-bg:#ffffff;
+  --text-color:#002747;
+  --header-color:#003561;
+  --accent-color:#0073d1;
+  --accent-hover:#0062b2;
+  --border-color:#e3e9f0;
+  --shadow-color:rgba(0,39,71,0.09);
+  --icon-color:#003561;
+  --soft-fill:rgba(0,39,71,0.04);
+  --soft-fill-2:rgba(0,39,71,0.07);
+  --good:#16a34a;
+  --warn:#d97706;
+  --bad:#dc2626;
+  --ring:rgba(0,115,209,0.22);
+  --die-body:#0073d1;
+  --die-num:#ffffff;
+  --coin-face:#dfe7ef;
+  --coin-edge:#a9b8c6;
+  --coin-ink:#003561;
+}
+body.dark-mode{
+  --bg-color:#001221;
+  --card-bg:rgba(0,39,71,0.5);
+  --text-color:#b7cee5;
+  --header-color:#e8f8ff;
+  --accent-color:#31a2ff;
+  --accent-hover:#5db8fc;
+  --border-color:rgba(49,162,255,0.2);
+  --shadow-color:rgba(49,162,255,0.06);
+  --icon-color:#e8f8ff;
+  --soft-fill:rgba(255,255,255,0.06);
+  --soft-fill-2:rgba(255,255,255,0.11);
+  --good:#4ade80;
+  --warn:#fbbf24;
+  --bad:#f87171;
+  --ring:rgba(49,162,255,0.28);
+  --die-body:#1c7fd4;
+  --coin-face:#2a4a67;
+  --coin-edge:#16304a;
+  --coin-ink:#e8f8ff;
+}
+
+*,*::before,*::after{cursor:default}
+input,textarea,select{cursor:text}
+input[type="color"],input[type="range"],input[type="time"]{cursor:pointer}
+a,button,[onclick]{cursor:pointer!important}
+.pill,.nato-cell,.tally,.ghost-btn,.custom-btn,.chip-toggle{cursor:pointer!important}
+
+*:focus-visible{outline:2px solid var(--accent-color);outline-offset:2px;border-radius:6px}
+
+body{
+  font-family:var(--font-main);
+  background-color:var(--bg-color);
+  color:var(--text-color);
+  transition:background-color .4s ease,color .4s ease;
+  min-height:100vh;
+  overscroll-behavior-y:none;
+}
+
+body::before{
+  content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;
+  opacity:0;transition:opacity .6s ease;
+  background:
+    radial-gradient(60vw 60vw at 12% 8%,rgba(49,162,255,.12),transparent 60%),
+    radial-gradient(50vw 50vw at 88% 92%,rgba(0,115,209,.10),transparent 60%);
+  animation:drift 22s ease-in-out infinite alternate;
+}
+body.dark-mode::before{opacity:1}
+@keyframes drift{0%{transform:translate3d(0,0,0) scale(1)}100%{transform:translate3d(-2%,2%,0) scale(1.08)}}
+
+/* ============ CARDS ============ */
+.card{
+  background:var(--card-bg);
+  border-radius:1.1rem;
+  border:1px solid var(--border-color);
+  box-shadow:0 1px 2px rgba(0,39,71,.04),0 8px 24px -12px var(--shadow-color);
+  transition:transform .35s cubic-bezier(.2,.8,.2,1),box-shadow .35s ease,border-color .3s ease,opacity .3s ease;
+  display:flex;flex-direction:column;position:relative;
+  opacity:0;transform:translateY(14px);
+  animation:cardIn .55s cubic-bezier(.2,.8,.2,1) forwards;
+}
+@keyframes cardIn{to{opacity:1;transform:translateY(0)}}
+.card:hover{
+  transform:translateY(-3px);
+  box-shadow:0 2px 4px rgba(0,39,71,.05),0 20px 42px -16px var(--shadow-color);
+  border-color:color-mix(in srgb,var(--accent-color) 35%,var(--border-color));
+}
+body.dark-mode .card{backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.card-title{color:var(--header-color);letter-spacing:-.01em}
+.accent-icon{color:var(--accent-color)}
+
+.card-head{display:flex;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:1rem}
+.card-head .material-symbols-outlined{transition:transform .4s cubic-bezier(.2,.8,.2,1)}
+.card:hover .card-head .accent-icon{transform:translateY(-1px) rotate(-6deg)}
+
+/* ============ BUTTONS ============ */
+.custom-btn,.ghost-btn,.pill,.icon-btn{position:relative;overflow:hidden;isolation:isolate}
+.custom-btn{
+  background:var(--accent-color);color:#fff;border-radius:.7rem;border:none;font-weight:500;
+  transition:background-color .2s ease,transform .12s cubic-bezier(.2,.8,.2,1),box-shadow .25s ease;
+  box-shadow:0 1px 2px rgba(0,39,71,.12);
+}
+.custom-btn::before{
+  content:'';position:absolute;inset:0;z-index:-1;
+  background:linear-gradient(180deg,rgba(255,255,255,.22),rgba(255,255,255,0));
+  opacity:0;transition:opacity .25s ease;
+}
+.custom-btn:hover{background:var(--accent-hover);transform:translateY(-2px);box-shadow:0 8px 18px -8px var(--accent-color)}
+.custom-btn:hover::before{opacity:1}
+.custom-btn:active{transform:translateY(0) scale(.96);box-shadow:0 1px 2px rgba(0,39,71,.2)}
+
+.ghost-btn{
+  background:var(--soft-fill);color:var(--text-color);border:1px solid var(--border-color);
+  border-radius:.7rem;font-weight:500;
+  transition:color .2s ease,border-color .2s ease,background .2s ease,transform .12s cubic-bezier(.2,.8,.2,1);
+}
+.ghost-btn:hover{border-color:var(--accent-color);color:var(--accent-color);background:var(--soft-fill-2);transform:translateY(-1px)}
+.ghost-btn:active{transform:translateY(0) scale(.96)}
+.ghost-btn.on{background:var(--accent-color);color:#fff;border-color:var(--accent-color)}
+
+.icon-btn{
+  display:inline-grid;place-items:center;border-radius:.65rem;border:1px solid transparent;
+  background:transparent;color:var(--icon-color);
+  transition:background .2s ease,border-color .2s ease,transform .12s cubic-bezier(.2,.8,.2,1),color .2s ease;
+}
+.icon-btn:hover{background:var(--soft-fill-2);border-color:var(--border-color);transform:translateY(-1px)}
+.icon-btn:active{transform:scale(.92)}
+.icon-btn.on{background:var(--accent-color);color:#fff;border-color:var(--accent-color)}
+
+.ripple{position:absolute;border-radius:50%;transform:scale(0);pointer-events:none;
+  background:rgba(255,255,255,.45);animation:rip .6s cubic-bezier(.2,.8,.2,1) forwards}
+.ghost-btn .ripple,.icon-btn .ripple{background:var(--ring)}
+@keyframes rip{to{transform:scale(2.8);opacity:0}}
+
+/* ============ INPUTS ============ */
+.custom-input,.custom-select,.custom-textarea{
+  background:var(--soft-fill);border:1px solid var(--border-color);color:var(--text-color);
+  border-radius:.7rem;
+  transition:border-color .2s ease,box-shadow .2s ease,background .2s ease;
+}
+.custom-input::placeholder,.custom-textarea::placeholder{color:var(--text-color);opacity:.42}
+.custom-input:hover,.custom-textarea:hover,.custom-select:hover{background:var(--soft-fill-2)}
+.custom-input:focus,.custom-select:focus,.custom-textarea:focus{
+  outline:none;border-color:var(--accent-color);box-shadow:0 0 0 3px var(--ring);background:var(--card-bg);
+}
+.custom-textarea{resize:vertical}
+
+/* ============ RANGE SLIDERS ============ */
+.range{-webkit-appearance:none;appearance:none;width:100%;height:26px;background:transparent;outline:none}
+.range::-webkit-slider-runnable-track{
+  height:8px;border-radius:999px;border:1px solid var(--border-color);
+  background:linear-gradient(90deg,var(--accent-color) var(--pct,0%),var(--soft-fill) var(--pct,0%));
+  transition:filter .2s ease;
+}
+.range::-webkit-slider-thumb{
+  -webkit-appearance:none;width:20px;height:20px;margin-top:-7px;border-radius:50%;
+  background:var(--card-bg);border:3px solid var(--accent-color);
+  box-shadow:0 2px 6px rgba(0,39,71,.25);
+  transition:transform .16s cubic-bezier(.2,.8,.2,1),box-shadow .2s ease;
+}
+.range:hover::-webkit-slider-thumb{transform:scale(1.15)}
+.range:active::-webkit-slider-thumb{transform:scale(1.3);box-shadow:0 0 0 9px var(--ring)}
+.range::-moz-range-track{height:8px;border-radius:999px;border:1px solid var(--border-color);background:var(--soft-fill)}
+.range::-moz-range-progress{height:8px;border-radius:999px;background:var(--accent-color)}
+.range::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--card-bg);border:3px solid var(--accent-color);box-shadow:0 2px 6px rgba(0,39,71,.25);transition:transform .16s}
+.range:active::-moz-range-thumb{transform:scale(1.25)}
+
+/* ============ RADAR ============ */
+.radar{position:relative;width:84px;height:84px;display:grid;place-items:center;border-radius:50%;
+  background:var(--soft-fill);border:1px solid var(--border-color);overflow:hidden}
+.radar .ping-ring{position:absolute;inset:0;border-radius:50%;border:2px solid var(--accent-color);opacity:0;transform:scale(.4)}
+.radar.live .ping-ring{animation:pingPulse 1.6s ease-out infinite}
+.radar.live .ping-ring:nth-child(2){animation-delay:.5s}
+@keyframes pingPulse{0%{opacity:.7;transform:scale(.35)}80%{opacity:0;transform:scale(1.05)}100%{opacity:0}}
+.radar .tower{color:var(--accent-color);font-size:34px;z-index:2;transition:transform .3s ease}
+.radar.live .tower{animation:towerPulse 1.6s ease-in-out infinite}
+@keyframes towerPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+
+/* ============ NATO ============ */
+.nato-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:.5rem}
+.nato-cell{border:1px solid var(--border-color);background:var(--soft-fill);border-radius:.65rem;
+  padding:.5rem .25rem;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  transition:transform .18s cubic-bezier(.2,.8,.2,1),border-color .18s,background .18s,box-shadow .18s;min-height:62px}
+.nato-cell .letter{font-weight:700;font-size:1.15rem;line-height:1;color:var(--header-color);transition:color .18s}
+.nato-cell .word{font-size:.62rem;font-weight:500;opacity:.7;text-align:center;line-height:1.1;transition:color .18s,opacity .18s}
+.nato-cell:hover{transform:translateY(-3px) scale(1.04);border-color:var(--accent-color);background:var(--accent-color);box-shadow:0 8px 18px -8px var(--accent-color)}
+.nato-cell:hover .letter,.nato-cell:hover .word{color:#fff;opacity:1}
+.nato-cell:active{transform:translateY(0) scale(.97)}
+
+/* ============ TIMER ============ */
+#timer-display{font-family:var(--font-mono);font-size:2.4rem;font-weight:700;letter-spacing:-1px;color:var(--header-color);
+  font-variant-numeric:tabular-nums;transition:color .3s ease}
+#timer-display.low{color:var(--bad)}
+.timer-ring{stroke:var(--accent-color);transition:stroke-dashoffset .35s linear,stroke .3s ease}
+.timer-ring.low{stroke:var(--bad)}
+.timer-wrap.done{animation:timerDone .6s ease 2}
+@keyframes timerDone{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+
+/* ============ PROGRESS ============ */
+.progress-track{width:100%;height:18px;border-radius:999px;background:var(--soft-fill);
+  border:1px solid var(--border-color);overflow:hidden;position:relative}
+.progress-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--accent-color),var(--accent-hover));
+  width:0%;transition:width .8s cubic-bezier(.2,.8,.2,1);position:relative;box-shadow:0 0 14px -3px var(--accent-color)}
+.progress-fill::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.32),transparent);
+  transform:translateX(-100%);animation:shimmer 3s linear infinite}
+@keyframes shimmer{to{transform:translateX(100%)}}
+
+/* ============ MISC ============ */
+.tally{user-select:none;font-family:var(--font-mono);transition:transform .1s ease;font-variant-numeric:tabular-nums}
+.tally:active{transform:scale(.92)}
+.bump{animation:bump .3s cubic-bezier(.2,.8,.2,1)}
+@keyframes bump{0%{transform:scale(1)}40%{transform:scale(1.22)}100%{transform:scale(1)}}
+
+.pill{border-radius:999px;font-weight:600;font-size:.85rem;color:#fff;border:none;
+  transition:transform .15s cubic-bezier(.2,.8,.2,1),box-shadow .2s ease,filter .2s ease;
+  display:inline-flex;align-items:center;gap:.4rem}
+.pill:hover{transform:translateY(-2px);filter:brightness(1.08);box-shadow:0 8px 18px -8px rgba(0,0,0,.45)}
+.pill:active{transform:translateY(0) scale(.95)}
+.pill .x{width:0;opacity:0;overflow:hidden;transition:width .2s ease,opacity .2s ease;font-size:.9rem}
+.editing .pill .x{width:1.1rem;opacity:.9}
+
+.note-chip{border:1px solid var(--border-color);background:var(--soft-fill);border-radius:.65rem;
+  transition:all .2s ease;display:flex;align-items:center;justify-content:space-between;gap:.4rem}
+.note-chip:hover{border-color:var(--accent-color);transform:translateX(2px)}
+.note-chip.active{background:var(--accent-color);color:#fff;border-color:var(--accent-color)}
+.note-chip.active .del{color:#fff}
+
+.tz-pop{position:absolute;right:0;top:120%;min-width:220px;z-index:60;border-radius:.9rem;padding:.75rem;
+  background:var(--card-bg);border:1px solid var(--border-color);box-shadow:0 18px 40px -12px var(--shadow-color);
+  opacity:0;transform:translateY(-8px) scale(.98);pointer-events:none;transition:all .22s cubic-bezier(.2,.8,.2,1)}
+body.dark-mode .tz-pop{backdrop-filter:blur(14px)}
+.tz-pop.open{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
+
+#hdr-widget-btn{font-family:var(--font-mono);font-size:.82rem;font-weight:700;color:var(--good);white-space:nowrap}
+#hdr-widget-pop{min-width:280px}
+
+/* ============ TOAST ============ */
+#notification{
+  position:fixed;top:1rem;right:1rem;z-index:120;max-width:min(92vw,26rem);
+  display:flex;align-items:center;gap:.6rem;
+  background:#0b1f33;color:#fff;padding:.7rem 1rem;border-radius:.8rem;
+  box-shadow:0 18px 40px -12px rgba(0,0,0,.5);font-size:.875rem;
+  opacity:0;transform:translateY(-16px) scale(.96);pointer-events:none;
+  transition:opacity .3s cubic-bezier(.2,.8,.2,1),transform .3s cubic-bezier(.2,.8,.2,1);
+}
+#notification.show{opacity:1;transform:translateY(0) scale(1)}
+
+/* ============ DICE (three.js) ============ */
+#dice-stage{width:100%;height:190px;position:relative;border-radius:.85rem;
+  background:radial-gradient(120% 90% at 50% 15%,var(--soft-fill-2),transparent 70%);
+  border:1px solid var(--border-color);overflow:hidden;touch-action:manipulation}
+#dice-stage canvas{display:block;width:100%;height:100%}
+#dice-result{position:absolute;left:0;right:0;bottom:.4rem;text-align:center;font-family:var(--font-mono);
+  font-weight:700;font-size:.8rem;letter-spacing:.08em;color:var(--header-color);opacity:.55;transition:opacity .3s,color .3s}
+#dice-result.pop{animation:resPop .45s cubic-bezier(.2,.8,.2,1);opacity:1}
+@keyframes resPop{0%{transform:translateY(6px);opacity:0}100%{transform:translateY(0);opacity:1}}
+#dice-fallback{position:absolute;inset:0;display:none;place-items:center;font-family:var(--font-mono);
+  font-size:3rem;font-weight:700;color:var(--header-color)}
+.die-btn{font-family:var(--font-mono);font-size:.74rem;font-weight:700;padding:.3rem 0;border-radius:.5rem;
+  border:1px solid var(--border-color);background:var(--soft-fill);color:var(--text-color);
+  transition:all .18s cubic-bezier(.2,.8,.2,1)}
+.die-btn:hover{border-color:var(--accent-color);color:var(--accent-color);transform:translateY(-2px)}
+.die-btn.on{background:var(--accent-color);border-color:var(--accent-color);color:#fff;transform:translateY(-1px)}
+
+/* ============ COIN (css 3d) ============ */
+.coin-stage{width:100%;height:150px;display:grid;place-items:center;perspective:1000px;
+  border-radius:.85rem;background:radial-gradient(120% 90% at 50% 20%,var(--soft-fill-2),transparent 70%);
+  border:1px solid var(--border-color);position:relative;overflow:hidden}
+.coin-lift{transform-style:preserve-3d;will-change:transform}
+.coin3d{width:94px;height:94px;position:relative;transform-style:preserve-3d;will-change:transform}
+.coin-side{position:absolute;inset:0;border-radius:50%;display:grid;place-items:center;
+  font-weight:700;font-size:.78rem;letter-spacing:.14em;color:var(--coin-ink);
+  background:
+    radial-gradient(circle at 32% 26%,rgba(255,255,255,.75),transparent 55%),
+    conic-gradient(from 210deg,var(--coin-face),#fff 18%,var(--coin-face) 38%,var(--coin-edge) 58%,var(--coin-face) 78%,#fff 96%,var(--coin-face));
+  box-shadow:inset 0 0 0 4px rgba(255,255,255,.28),inset 0 0 0 7px var(--coin-edge);
+  backface-visibility:hidden}
+body.dark-mode .coin-side{background:
+    radial-gradient(circle at 32% 26%,rgba(255,255,255,.25),transparent 55%),
+    conic-gradient(from 210deg,var(--coin-face),#4d769c 18%,var(--coin-face) 38%,var(--coin-edge) 58%,var(--coin-face) 78%,#4d769c 96%,var(--coin-face))}
+.coin-front{transform:translateZ(6px)}
+.coin-back{transform:rotateX(180deg) translateZ(6px)}
+.coin-slice{position:absolute;inset:5px;border-radius:50%;background:var(--coin-edge)}
+.coin-shadow{position:absolute;bottom:16px;width:86px;height:12px;border-radius:50%;
+  background:rgba(0,39,71,.22);filter:blur(6px);transition:transform .1s linear,opacity .1s linear}
+body.dark-mode .coin-shadow{background:rgba(0,0,0,.45)}
+#coin-label{font-variant-numeric:tabular-nums}
+.coin-stage.win-h{box-shadow:inset 0 0 0 1px #7c3aed}
+.coin-stage.win-t{box-shadow:inset 0 0 0 1px #0369a1}
+
+#weather-chip.wx-stale{opacity:.5}
+
+/* ============ PASSWORD ============ */
+#pw-output{font-family:var(--font-mono);font-size:1.25rem;font-weight:700;letter-spacing:.04em;
+  color:var(--header-color);word-break:break-all;min-height:2rem;transition:opacity .18s ease}
+#pw-output.swap{animation:pwSwap .4s cubic-bezier(.2,.8,.2,1)}
+@keyframes pwSwap{0%{opacity:0;transform:translateY(-6px) scale(.98)}100%{opacity:1;transform:none}}
+
+/* ============ CONVERTER ============ */
+.chip-toggle{display:inline-flex;align-items:center;gap:.3rem;font-size:.72rem;font-weight:600;
+  padding:.28rem .6rem;border-radius:999px;border:1px solid var(--border-color);background:var(--soft-fill);
+  color:var(--text-color);opacity:.5;transition:all .18s cubic-bezier(.2,.8,.2,1)}
+.chip-toggle.on{opacity:1;border-color:var(--accent-color);color:var(--accent-color);background:var(--soft-fill-2)}
+.chip-toggle:hover{transform:translateY(-2px)}
+.chip-toggle:active{transform:scale(.95)}
+#converter-output{font-family:var(--font-mono);font-size:.78rem;line-height:1.7;white-space:pre-wrap;
+  background:var(--soft-fill);border:1px solid var(--border-color);border-radius:.7rem;transition:border-color .2s}
+#converter-output.hit{border-color:color-mix(in srgb,var(--accent-color) 45%,var(--border-color))}
+.seg{display:inline-flex;border:1px solid var(--border-color);border-radius:.6rem;overflow:hidden;background:var(--soft-fill)}
+.seg button{font-size:.7rem;font-weight:600;padding:.3rem .65rem;color:var(--text-color);opacity:.6;transition:all .18s}
+.seg button.on{background:var(--accent-color);color:#fff;opacity:1}
+
+/* ============ REMINDERS ============ */
+.rem-row{display:flex;align-items:center;gap:.6rem;padding:.6rem .7rem;border-radius:.7rem;
+  background:var(--soft-fill);border:1px solid var(--border-color);
+  transition:border-color .2s ease,transform .18s cubic-bezier(.2,.8,.2,1),opacity .25s ease}
+.rem-row:hover{border-color:var(--accent-color);transform:translateX(2px)}
+.rem-row.off{opacity:.45}
+.rem-row.fired{border-color:var(--good);animation:remFire .5s cubic-bezier(.2,.8,.2,1)}
+@keyframes remFire{0%{transform:scale(1)}45%{transform:scale(1.03)}100%{transform:scale(1)}}
+.rem-time{font-family:var(--font-mono);font-weight:700;font-size:.95rem;color:var(--header-color);white-space:nowrap}
+.rem-next{font-size:.68rem;opacity:.6;font-family:var(--font-mono)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--good);flex-shrink:0}
+.dot.off{background:var(--border-color)}
+.dot.live{box-shadow:0 0 0 0 var(--good);animation:dotPulse 2.4s ease-out infinite}
+@keyframes dotPulse{0%{box-shadow:0 0 0 0 rgba(22,163,74,.5)}70%{box-shadow:0 0 0 7px rgba(22,163,74,0)}100%{box-shadow:0 0 0 0 rgba(22,163,74,0)}}
+
+/* ============ ARRANGE MODE ============ */
+body.arranging .card{cursor:grab!important;touch-action:none}
+body.arranging .card:hover{transform:none}
+body.arranging .card::after{
+  content:'';position:absolute;inset:-1px;border-radius:1.1rem;pointer-events:none;
+  border:1.5px dashed color-mix(in srgb,var(--accent-color) 55%,transparent);
+}
+body.arranging .card > *:not(.card-tools){pointer-events:none;user-select:none}
+.card-tools{display:none;position:absolute;top:.5rem;right:.5rem;z-index:20;gap:.25rem}
+body.arranging .card-tools{display:flex}
+.card-tools button{width:28px;height:28px;display:grid;place-items:center;border-radius:.5rem;
+  background:var(--card-bg);border:1px solid var(--border-color);color:var(--text-color);
+  box-shadow:0 4px 10px -4px var(--shadow-color);transition:all .16s cubic-bezier(.2,.8,.2,1)}
+.card-tools button:hover{border-color:var(--accent-color);color:var(--accent-color);transform:scale(1.08)}
+.card.ghosting{opacity:.25;filter:saturate(.3)}
+.card.lifted{position:fixed;z-index:200;pointer-events:none;
+  box-shadow:0 32px 60px -18px rgba(0,39,71,.4);transform:rotate(1.2deg) scale(1.02);
+  transition:box-shadow .2s ease}
+.card.hidden-card{display:none}
+body.arranging .card.hidden-card{display:flex;opacity:.32;filter:grayscale(1)}
+.drop-slot{border:2px dashed var(--accent-color);border-radius:1.1rem;background:var(--ring);
+  animation:slotIn .2s cubic-bezier(.2,.8,.2,1)}
+@keyframes slotIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
+
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-thumb{background:var(--border-color);border-radius:999px}
+::-webkit-scrollbar-thumb:hover{background:var(--accent-color)}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;
+    transition-duration:.01ms!important;scroll-behavior:auto!important}
+  .card{opacity:1;transform:none}
+}
+</style>
+</head>
+<body class="p-4 sm:p-6 md:p-8">
+
+<div id="notification"><span id="notif-icon" class="material-symbols-outlined text-lg"></span><span id="notif-text"></span></div>
+
+<div class="container mx-auto max-w-7xl">
+
+  <!-- ================= HEADER ================= -->
+  <header class="flex flex-wrap justify-between items-center gap-4 mb-7">
+    <div class="flex items-center gap-3">
+      <h1 class="text-2xl sm:text-3xl font-bold card-title">Isaiah's Dashboard</h1>
+      <span id="arrange-flag" class="hidden text-xs font-semibold px-2 py-1 rounded-full" style="background:var(--ring);color:var(--accent-color)">Arranging</span>
+    </div>
+    <div class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+      <div class="relative flex-grow">
+        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 opacity-50 pointer-events-none">search</span>
+        <input type="search" id="search-bar" placeholder="Search tools..." class="custom-input w-full pl-10 p-2 text-sm">
+      </div>
+
+      <div class="relative hidden md:block">
+        <button id="hdr-widget-btn" class="hidden items-center gap-2 px-2.5 py-1.5 rounded-xl icon-btn" style="border-color:var(--border-color)">
+          <span class="material-symbols-outlined text-base" style="color:var(--accent-color)">payments</span>
+          <span id="hdr-pay-amount">$0.0000</span>
+          <span class="material-symbols-outlined text-base opacity-50">expand_more</span>
+        </button>
+        <div id="hdr-widget-pop" class="tz-pop">
+          <div class="text-xs font-semibold uppercase tracking-wide opacity-60 mb-1 px-1">Paycheck</div>
+          <div id="hdr-pay-setup-mini" class="px-1 mb-2 space-y-1.5">
+            <input type="number" id="hdr-pay-rate" step="0.01" min="0" class="custom-input w-full p-1.5 text-sm" placeholder="Hourly rate $">
+            <button onclick="startPayFromHeader()" class="custom-btn w-full p-1.5 text-sm">Start earning</button>
+          </div>
+          <div id="hdr-pay-running-mini" class="hidden px-1 mb-2">
+            <div class="flex justify-between items-center">
+              <span id="hdr-pay-big" class="font-mono font-bold text-lg" style="color:var(--good)">$0.0000</span>
+              <div class="flex gap-1">
+                <button onclick="editPay()" class="ghost-btn px-2 py-1 text-xs">Edit</button>
+                <button onclick="stopPay()" class="ghost-btn px-2 py-1 text-xs">Reset</button>
+              </div>
+            </div>
+            <div id="hdr-pay-msg" class="text-xs opacity-70 mt-0.5"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="weather-chip" class="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-sm font-medium card-title" style="border-color:var(--border-color)" title="Orlando, FL">
+        <span id="wx-icon">&#9925;</span>
+        <span id="wx-temp" class="font-mono font-bold">--&deg;</span>
+        <span id="wx-desc" class="text-xs opacity-60"></span>
+      </div>
+
+      <div class="relative">
+        <button id="clock" class="font-semibold text-lg card-title hidden md:flex items-center gap-1 px-2 py-1 icon-btn">
+          <span id="clock-text" class="font-mono"></span>
+          <span class="material-symbols-outlined text-base opacity-60">expand_more</span>
+        </button>
+        <div id="tz-pop" class="tz-pop">
+          <div class="text-xs font-semibold uppercase tracking-wide opacity-60 mb-2 px-1">US time zones</div>
+          <div id="tz-list" class="space-y-1"></div>
+        </div>
+      </div>
+
+      <button id="arrange-toggle" class="icon-btn w-10 h-10 flex-shrink-0" title="Arrange cards">
+        <span class="material-symbols-outlined">edit</span>
+      </button>
+      <button id="dark-mode-toggle" class="icon-btn w-10 h-10 flex-shrink-0" title="Theme">
+        <span class="material-symbols-outlined"></span>
+      </button>
+    </div>
+  </header>
+
+  <div id="arrange-bar" class="hidden mb-5 p-3 rounded-xl flex-wrap items-center gap-3 text-sm" style="background:var(--soft-fill);border:1px solid var(--border-color)">
+    <span class="material-symbols-outlined accent-icon">drag_pan</span>
+    <span class="opacity-80">Drag any card to move it. Use the eye to hide one.</span>
+    <div class="flex gap-2 ml-auto">
+      <button onclick="resetLayout()" class="ghost-btn px-3 py-1.5 text-xs">Reset layout</button>
+      <button onclick="setArrange(false)" class="custom-btn px-3 py-1.5 text-xs">Done</button>
+    </div>
+  </div>
+
+  <main id="tools-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+
+    <!-- WORKDAY -->
+    <div class="card p-6 md:col-span-2 xl:col-span-3" data-id="workday" data-name="workday progress shift hours">
+      <div class="card-tools"></div>
+      <div class="flex flex-wrap justify-between items-center gap-3 mb-4">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-2xl accent-icon">schedule</span>
+          <h2 class="text-xl font-semibold card-title">Workday progress</h2>
+        </div>
+        <div class="flex items-center gap-2 text-sm">
+          <input type="time" id="day-start" value="09:30" class="custom-input p-1.5">
+          <span class="opacity-60">&rarr;</span>
+          <input type="time" id="day-end" value="18:30" class="custom-input p-1.5">
+        </div>
+      </div>
+      <div class="progress-track"><div id="day-fill" class="progress-fill"></div></div>
+      <div class="flex justify-between items-center mt-3 text-sm">
+        <span id="day-pct" class="font-mono font-bold text-lg card-title">0%</span>
+        <span id="day-status" class="opacity-75"></span>
+      </div>
+    </div>
+
+    <!-- MODEM PING -->
+    <div class="card p-6" data-id="ping" data-name="modem live ping scope reset">
+      <div class="card-tools"></div>
+      <div class="card-head">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-2xl accent-icon">cell_tower</span>
+          <h2 class="text-xl font-semibold card-title">Modem live ping</h2>
+        </div>
+      </div>
+      <div class="flex items-center gap-4">
+        <div id="radar" class="radar flex-shrink-0">
+          <span class="ping-ring"></span><span class="ping-ring"></span>
+          <span class="material-symbols-outlined tower">router</span>
+        </div>
+        <div class="flex-grow space-y-3">
+          <input type="text" id="scopeid" class="custom-input w-full p-2.5" placeholder="Scope ID">
+          <button onclick="pingmodem()" class="custom-btn p-2.5 w-full flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-lg">wifi_tethering</span> Ping modem
+          </button>
+        </div>
+      </div>
+      <p id="ping-status" class="text-xs opacity-60 mt-3 h-4"></p>
+    </div>
+
+    <!-- REMINDERS -->
+    <div class="card p-6" data-id="reminders" data-name="reminders alarm notification alert ping me">
+      <div class="card-tools"></div>
+      <div class="card-head">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-2xl accent-icon">notifications_active</span>
+          <h2 class="text-xl font-semibold card-title">Reminders</h2>
+        </div>
+        <button id="notif-perm" onclick="askNotifPermission()" class="ghost-btn px-2.5 py-1 text-xs">Enable alerts</button>
+      </div>
+
+      <div class="space-y-2">
+        <input type="text" id="rem-text" class="custom-input w-full p-2.5 text-sm" placeholder="Remind me to..." maxlength="120">
+        <div class="grid grid-cols-[auto_1fr_auto] gap-2 items-center">
+          <div class="seg" id="rem-mode">
+            <button data-mode="at" class="on">At time</button>
+            <button data-mode="in">In</button>
+          </div>
+          <input type="time" id="rem-time" class="custom-input p-2 text-sm w-full">
+          <button onclick="addReminder()" class="custom-btn px-4 py-2 text-sm">Add</button>
+        </div>
+        <div id="rem-in-wrap" class="hidden">
+          <div class="flex justify-between text-xs opacity-70 mb-1">
+            <span>Fire in</span><span id="rem-in-label" class="font-mono font-bold">15 min</span>
+          </div>
+          <input type="range" id="rem-in" class="range" min="1" max="120" value="15">
+        </div>
+        <div class="flex flex-wrap gap-1.5 pt-1" id="rem-repeat">
+          <button class="chip-toggle on" data-rep="once">Once</button>
+          <button class="chip-toggle" data-rep="daily">Every day</button>
+          <button class="chip-toggle" data-rep="weekdays">Weekdays</button>
+        </div>
+      </div>
+
+      <div id="rem-list" class="space-y-2 mt-4 flex-grow"></div>
+      <p id="rem-note" class="text-xs opacity-50 mt-3">Alerts fire while this tab is open.</p>
+    </div>
+
+    <!-- COUNTDOWN -->
+    <div class="card p-6" data-id="timer" data-name="countdown timer stopwatch">
+      <div class="card-tools"></div>
+      <div class="card-head">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-2xl accent-icon">timer</span>
+          <h2 class="text-xl font-semibold card-title">Countdown</h2>
+        </div>
+      </div>
+      <div class="flex-grow flex flex-col items-center justify-center gap-4">
+        <div class="timer-wrap relative w-40 h-40 flex items-center justify-center">
+          <svg class="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
+            <circle class="opacity-20" cx="50" cy="50" r="45" fill="none" stroke="currentColor" stroke-width="5"></circle>
+            <circle id="timer-progress-ring" class="timer-ring" cx="50" cy="50" r="45" fill="none" stroke-width="5" stroke-linecap="round" transform="rotate(-90 50 50)"></circle>
+          </svg>
+          <div id="timer-display">00:00</div>
+        </div>
+        <div class="w-full">
+          <div class="flex justify-between text-xs opacity-70 mb-1">
+            <span>Set duration</span><span id="timer-slider-label" class="font-mono font-bold">2:00</span>
+          </div>
+          <input type="range" id="timer-slider" class="range" min="10" max="1800" step="10" value="120">
+        </div>
+        <div class="grid grid-cols-5 gap-2 w-full">
+          <button onclick="startTimer(30)" class="ghost-btn p-2 text-xs">30s</button>
+          <button onclick="startTimer(60)" class="ghost-btn p-2 text-xs">1m</button>
+          <button onclick="startTimer(120)" class="ghost-btn p-2 text-xs">2m</button>
+          <button onclick="startTimer(300)" class="ghost-btn p-2 text-xs">5m</button>
+          <button onclick="startTimer(600)" class="ghost-btn p-2 text-xs">10m</button>
+        </div>
+        <div class="flex gap-2 w-full">
+          <button onclick="adjustTimer(-30)" class="ghost-btn p-2 text-sm flex-1">&minus;30s</button>
+          <button onclick="toggleTimer()" id="timer-toggle" class="custom-btn p-2 text-sm flex-1">Pause</button>
+          <button onclick="adjustTimer(30)" class="ghost-btn p-2 text-sm flex-1">+30s</button>
+        </div>
+        <button onclick="resetTimer()" class="text-sm opacity-70 hover:opacity-100 transition">Reset</button>
+      </div>
+    </div>
+
+    <!-- DICE -->
+    <div class="card p-6" data-id="dice" data-name="dice d20 roll random polyhedral">
+      <div class="card-tools"></div>
+      <div class="card-head">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-2xl accent-icon">casino</span>
+          <h2 class="text-xl font-semibold card-title">Dice</h2>
+        </div>
+        <span id="dice-total" class="font-mono font-bold text-2xl card-title">&mdash;</span>
+      </div>
+      <div id="dice-stage">
+        <div id="dice-fallback">?</div>
+        <div id="dice-result">tap to throw</div>
+      </div>
+      <div class="grid grid-cols-6 gap-1.5 mt-3">
+        <button class="die-btn" data-die="4">d4</button>
+        <button class="die-btn" data-die="6">d6</button>
+        <button class="die-btn" data-die="8">d8</button>
+        <button class="die-btn" data-die="10">d10</button>
+        <button class="die-btn" data-die="12">d12</button>
+        <button class="die-btn on" data-die="20">d20</button>
+      </div>
+      <button onclick="rollDie()" class="custom-btn p-2.5 mt-2 w-full flex items-center justify-center gap-2">
+        <span class="material-symbols-outlined text-lg">casino</span> Throw
+      </button>
+      <div class="mt-4 pt-3" style="border-top:1px solid var(--border-color)">
+        <div class="text-xs opacity-50 mb-1.5">Recent</div>
+        <div id="roll-history" class="flex flex-wrap gap-1.5 min-h-[28px]"></div>
+      </div>
+    </div>
+
+    <!-- COIN -->
+    <div class="card p-6" data-id="coin" data-name="coin flip heads tails random">
+      <div class="card-tools"></div>
+      <div class="card-head">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-2xl accent-icon">paid</span>
+          <h2 class="text-xl font-semibold card-title">Coin flip</h2>
+        </div>
+        <span id="coin-tally" class="font-mono text-xs opacity-60">0H / 0T</span>
+      </div>
+      <div class="coin-stage" id="coin-stage">
+        <div class="coin-shadow" id="coin-shadow"></div>
+        <div class="coin-lift" id="coin-lift">
+          <div class="coin3d" id="coin3d">
+            <div class="coin-side coin-front">HEADS</div>
+            <div class="coin-side coin-back">TAILS</div>
+          </div>
+        </div>
+      </div>
+      <div id="coin-label" class="text-center text-sm font-semibold card-title h-5 mt-2"></div>
+      <button onclick="flipCoin()" class="custom-btn p-2.5 mt-2 w-full flex items-center justify-center gap-2">
+        <span class="material-symbols-outlined text-lg">flip</span> Flip
+      </button>
+    </div>
+
+    <!-- INFO CONVERTER -->
+    <div class="card p-6 md:col-span-2" data-id="converter" data-name="info converter customer parse account address phone">
+      <div class="card-tools"></div>
+      <div class="card-head">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-2xl accent-icon">transform</span>
+          <h2 class="text-xl font-semibold card-title">Info converter</h2>
+        </div>
+        <div class="seg" id="fmt-seg">
+          <button data-fmt="labeled" class="on">Labeled</button>
+          <button data-fmt="compact">One line</button>
+          <button data-fmt="note">Note</button>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 flex-grow">
+        <div class="flex flex-col gap-3">
+          <textarea id="converter-input" class="custom-textarea w-full p-3 text-sm flex-grow" style="min-height:170px" placeholder="Paste anything &mdash; a Scope panel, an email signature, a chat blob, scattered lines. It'll pull out what it recognizes."></textarea>
+          <div class="grid grid-cols-2 gap-3">
+            <button onclick="clearConverter()" class="ghost-btn p-2 text-sm">Clear</button>
+            <button onclick="copyConverterOutput()" class="custom-btn p-2 text-sm">Copy result</button>
+          </div>
+        </div>
+        <div class="flex flex-col gap-2">
+          <div id="field-chips" class="flex flex-wrap gap-1.5 min-h-[26px]"></div>
+          <pre id="converter-output" class="p-3 flex-grow min-h-[120px]"></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- PASSWORD -->
+    <div class="card p-6" data-id="password" data-name="password wifi generator random ssid">
+      <div class="card-tools"></div>
+      <div class="card-head">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-2xl accent-icon">wifi_password</span>
+          <h2 class="text-xl font-semibold card-title">WiFi password</h2>
+        </div>
+      </div>
+      <div class="space-y-4 flex-grow flex flex-col justify-between">
+        <div>
+          <div id="pw-output" class="p-4 rounded-xl text-center" style="background:var(--soft-fill);border:1px solid var(--border-color)">&mdash;</div>
+          <div class="mt-4">
+            <div class="flex justify-between text-xs opacity-70 mb-1">
+              <span>Digits on the end</span><span id="pw-digits-label" class="font-mono font-bold">3</span>
+            </div>
+            <input type="range" id="pw-digits" class="range" min="0" max="6" step="1" value="3">
+          </div>
+          <div class="flex gap-1.5 mt-2">
+            <button class="chip-toggle" id="pw-caps" data-on="0">Capitalize</button>
+            <button class="chip-toggle" id="pw-dash" data-on="0">Dashes</button>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <button onclick="genPassword()" class="custom-btn p-2.5 flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-lg">refresh</span> Generate
+          </button>
+          <button onclick="copyPassword()" class="ghost-btn p-2.5 flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-lg">content_copy</span> Copy
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- COUNTERS -->
+    <div class="card p-6" data-id="counters" data-name="counter tally tracker">
+      <div class="card-tools"></div>
+      <div class="card-head">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-2xl accent-icon">add_circle</span>
+          <h2 class="text-xl font-semibold card-title">Counters</h2>
+        </div>
+      </div>
+      <div id="counter-list" class="space-y-3 flex-grow"></div>
+      <div class="flex gap-2 mt-4">
+        <input type="text" id="counter-name" class="custom-input flex-grow p-2 text-sm" placeholder="New counter name...">
+        <button onclick="addCounterCard()" class="custom-btn px-4 text-sm">Add</button>
+      </div>
+    </div>
+
+    <!-- NOTES -->
+    <div class="card p-6 md:row-span-2 flex flex-col" data-id="notes" data-name="notepad notes scratch">
+      <div class="card-tools"></div>
+      <div class="flex justify-between items-center w-full mb-3">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-2xl accent-icon">edit_note</span>
+          <h2 class="text-xl font-semibold card-title">Notes</h2>
+        </div>
+        <div class="flex items-center gap-2">
+          <span id="note-status" class="text-xs opacity-60 transition-opacity duration-500"></span>
+          <button onclick="addNote()" class="icon-btn w-8 h-8"><span class="material-symbols-outlined text-base">add</span></button>
+        </div>
+      </div>
+      <div id="note-tabs" class="flex flex-col gap-1.5 mb-3 max-h-32 overflow-y-auto pr-1"></div>
+      <textarea id="notes-area" class="custom-textarea w-full flex-grow p-3 text-sm" placeholder="Start typing. Saves as you go." style="min-height:220px"></textarea>
+    </div>
+
+    <!-- BOOKMARKS -->
+    <div class="card p-6" data-id="bookmarks" data-name="bookmarks links shortcuts websites">
+      <div class="card-tools"></div>
+      <div class="card-head">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-2xl accent-icon">bookmark</span>
+          <h2 class="text-xl font-semibold card-title">Quick links</h2>
+        </div>
+        <button onclick="toggleEdit('bookmarks')" id="bm-edit" class="icon-btn w-8 h-8" title="Edit links"><span class="material-symbols-outlined text-base">edit</span></button>
+      </div>
+      <div id="bookmark-list" class="flex flex-wrap gap-2 flex-grow content-start"></div>
+      <div class="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto_auto] gap-2 mt-4 items-center">
+        <input type="text" id="bm-label" class="custom-input p-2 text-sm min-w-0" placeholder="Label">
+        <input type="text" id="bm-url" class="custom-input p-2 text-sm min-w-0" placeholder="https://...">
+        <input type="color" id="bm-color" value="#0073d1" class="w-9 h-9 rounded-lg border bg-transparent shrink-0" style="border-color:var(--border-color)">
+        <button onclick="addBookmark()" class="custom-btn px-3 py-2 text-sm shrink-0">+</button>
+      </div>
+    </div>
+
+    <!-- SNIPPETS -->
+    <div class="card p-6" data-id="snippets" data-name="copy buttons snippets text clipboard">
+      <div class="card-tools"></div>
+      <div class="card-head">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-2xl accent-icon">content_copy</span>
+          <h2 class="text-xl font-semibold card-title">Quick copy</h2>
+        </div>
+        <button onclick="toggleEdit('snippets')" id="sn-edit" class="icon-btn w-8 h-8" title="Edit snippets"><span class="material-symbols-outlined text-base">edit</span></button>
+      </div>
+      <div id="snippet-list" class="flex flex-wrap gap-2 flex-grow content-start"></div>
+      <div class="grid grid-cols-[minmax(0,1fr)_auto] gap-2 mt-4 items-start">
+        <div class="space-y-2 min-w-0">
+          <input type="text" id="sn-label" class="custom-input w-full p-2 text-sm" placeholder="Button label">
+          <textarea id="sn-text" class="custom-textarea w-full p-2 text-sm h-16" placeholder="Text to copy..."></textarea>
+        </div>
+        <div class="flex flex-col gap-2 items-center shrink-0">
+          <input type="color" id="sn-color" value="#003561" class="w-9 h-9 rounded-lg border bg-transparent" style="border-color:var(--border-color)">
+          <button onclick="addSnippet()" class="custom-btn px-3 py-2 text-sm h-full">+</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- NATO -->
+    <div class="card p-6" data-id="nato" data-name="phonetic alphabet nato spelling">
+      <div class="card-tools"></div>
+      <div class="card-head">
+        <div class="flex items-center gap-3">
+          <span class="material-symbols-outlined text-2xl accent-icon">spellcheck</span>
+          <h2 class="text-xl font-semibold card-title">Phonetic alphabet</h2>
+        </div>
+      </div>
+      <div id="nato-alphabet-grid" class="nato-grid"></div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+/* ============================================================
+   CORE
+   ============================================================ */
+const store = {
+  get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
+  set(k,v){ try{ localStorage.setItem(k,v); }catch(e){} },
+  del(k){ try{ localStorage.removeItem(k); }catch(e){} },
+  getJSON(k,f){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):f; }catch(e){ return f; } },
+  setJSON(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+};
+const uid = () => Math.random().toString(36).slice(2,9);
+const $ = id => document.getElementById(id);
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* secure random int 0..max-1 */
+function rnd(max){
+  if (!(max > 0)) return 0;
+  try{
+    const a = new Uint32Array(1);
+    const lim = Math.floor(4294967296 / max) * max;
+    let v;
+    do { crypto.getRandomValues(a); v = a[0]; } while (v >= lim);
+    return v % max;
+  }catch(e){ return Math.floor(Math.random()*max); }
+}
+
+/* ---- Toast ---- */
+const notifEl = $('notification'), notifIcon = $('notif-icon'), notifText = $('notif-text');
+let notifTimer;
+window.showNotification = (msg, icon='check_circle', ms=2600) => {
+  notifText.textContent = msg;
+  notifIcon.textContent = icon;
+  notifEl.classList.add('show');
+  clearTimeout(notifTimer);
+  notifTimer = setTimeout(()=>notifEl.classList.remove('show'), ms);
+};
+
+/* ---- Clipboard ---- */
+function copyText(text){
+  if (navigator.clipboard && window.isSecureContext){
+    navigator.clipboard.writeText(text).then(()=>showNotification('Copied')).catch(()=>fallbackCopy(text));
+  } else fallbackCopy(text);
+}
+function fallbackCopy(text){
+  const ta=document.createElement('textarea');
+  ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); showNotification('Copied'); }
+  catch(e){ showNotification('Copy failed','error'); }
+  document.body.removeChild(ta);
+}
+
+/* ---- Sound ---- */
+let audioCtx = null;
+function tone(notes, vol=0.16){
+  try{
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!audioCtx) audioCtx = new Ctx();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const now = audioCtx.currentTime;
+    notes.forEach(n=>{
+      const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+      o.type = n.type || 'sine'; o.frequency.value = n.f;
+      o.connect(g); g.connect(audioCtx.destination);
+      g.gain.setValueAtTime(0, now+n.t);
+      g.gain.linearRampToValueAtTime(vol, now+n.t+0.015);
+      g.gain.exponentialRampToValueAtTime(0.0001, now+n.t+(n.d||0.4));
+      o.start(now+n.t); o.stop(now+n.t+(n.d||0.4)+0.05);
+    });
+  }catch(e){}
+}
+const playDing  = () => tone([{f:784,t:0},{f:1046,t:0.17}]);
+const playAlert = () => tone([{f:880,t:0,d:0.25},{f:1174,t:0.2,d:0.25},{f:880,t:0.4,d:0.3}], 0.2);
+const playClack = () => tone([{f:180,t:0,d:0.09,type:'square'}], 0.05);
+
+/* ---- Ripples on every button ---- */
+document.addEventListener('pointerdown', e => {
+  const b = e.target.closest('.custom-btn,.ghost-btn,.pill,.icon-btn,.die-btn');
+  if (!b || reduceMotion || document.body.classList.contains('arranging')) return;
+  const r = b.getBoundingClientRect();
+  const size = Math.max(r.width, r.height);
+  const s = document.createElement('span');
+  s.className = 'ripple';
+  s.style.width = s.style.height = size + 'px';
+  s.style.left = (e.clientX - r.left - size/2) + 'px';
+  s.style.top  = (e.clientY - r.top  - size/2) + 'px';
+  b.appendChild(s);
+  setTimeout(()=>s.remove(), 620);
+});
+
+/* ---- Range slider fill ---- */
+function paintRange(el){
+  const min = +el.min || 0, max = +el.max || 100;
+  el.style.setProperty('--pct', (((+el.value - min)/(max-min))*100) + '%');
+}
+document.querySelectorAll('.range').forEach(el => {
+  paintRange(el);
+  el.addEventListener('input', ()=>paintRange(el));
+});
+
+/* ============================================================
+   CLOCK + TIMEZONES
+   ============================================================ */
+const clockText = $('clock-text'), tzList = $('tz-list'), tzPop = $('tz-pop');
+const zones = [
+  {label:'Eastern', tz:'America/New_York'},
+  {label:'Central', tz:'America/Chicago'},
+  {label:'Mountain', tz:'America/Denver'},
+  {label:'Pacific', tz:'America/Los_Angeles'},
+  {label:'Alaska', tz:'America/Anchorage'},
+  {label:'Hawaii', tz:'Pacific/Honolulu'}
+];
+const fmtTz = tz => { try{ return new Intl.DateTimeFormat([],{hour:'2-digit',minute:'2-digit',timeZone:tz}).format(new Date()); }catch(e){ return '--:--'; } };
+function renderTz(){
+  tzList.innerHTML = zones.map(z=>
+    `<div class="flex justify-between items-center px-2 py-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10">
+       <span class="text-sm">${z.label}</span>
+       <span class="font-mono text-sm font-semibold card-title">${fmtTz(z.tz)}</span>
+     </div>`).join('');
+}
+function updateClock(){
+  clockText.textContent = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  if (tzPop.classList.contains('open')) renderTz();
+}
+$('clock').addEventListener('click', e => {
+  e.stopPropagation();
+  tzPop.classList.toggle('open');
+  if (tzPop.classList.contains('open')) renderTz();
+});
+document.addEventListener('click', e => { if(!tzPop.contains(e.target)) tzPop.classList.remove('open'); });
+setInterval(updateClock, 1000); updateClock();
+
+/* ============================================================
+   THEME
+   ============================================================ */
+const darkToggle = $('dark-mode-toggle');
+const themeIcon = darkToggle.querySelector('.material-symbols-outlined');
+const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+function setDarkMode(isDark){
+  document.body.classList.toggle('dark-mode', isDark);
+  themeIcon.textContent = isDark ? 'light_mode' : 'dark_mode';
+  store.set('theme', isDark ? 'dark' : 'light');
+  if (window.__diceTheme) window.__diceTheme();
+}
+darkToggle.addEventListener('click', ()=>setDarkMode(!document.body.classList.contains('dark-mode')));
+const savedTheme = store.get('theme');
+if (savedTheme) setDarkMode(savedTheme === 'dark'); else setDarkMode(prefersDark.matches);
+prefersDark.addEventListener('change', e => { if(!store.get('theme')) setDarkMode(e.matches); });
+
+/* ============================================================
+   SEARCH
+   ============================================================ */
+$('search-bar').addEventListener('input', e => {
+  const term = e.target.value.toLowerCase().trim();
+  document.querySelectorAll('#tools-grid > .card').forEach(card => {
+    if (card.classList.contains('hidden-card')) return;
+    const hay = ((card.querySelector('h2')?.textContent||'') + ' ' + (card.dataset.name||'')).toLowerCase();
+    const match = !term || hay.includes(term);
+    card.style.display = match ? '' : 'none';
+  });
+});
+
+/* ============================================================
+   ARRANGE MODE  (drag to reorder + hide)
+   ============================================================ */
+const grid = $('tools-grid');
+const allCards = () => [...grid.querySelectorAll(':scope > .card')];
+const DEFAULT_ORDER = allCards().map(c => c.dataset.id);
+
+allCards().forEach(c => {
+  c.querySelector('.card-tools').innerHTML =
+    `<button data-hide="${c.dataset.id}" title="Hide card"><span class="material-symbols-outlined text-base">visibility</span></button>`;
+});
+
+function loadLayout(){
+  const order = store.getJSON('layoutOrder', null);
+  const hidden = store.getJSON('layoutHidden', []);
+  if (order){
+    order.forEach(id => {
+      const el = grid.querySelector(`[data-id="${id}"]`);
+      if (el) grid.appendChild(el);
+    });
+    allCards().forEach(c => { if (!order.includes(c.dataset.id)) grid.appendChild(c); });
+  }
+  allCards().forEach(c => {
+    const isHidden = hidden.includes(c.dataset.id);
+    c.classList.toggle('hidden-card', isHidden);
+    const b = c.querySelector('[data-hide]');
+    if (b) b.querySelector('span').textContent = isHidden ? 'visibility_off' : 'visibility';
+  });
+}
+function saveLayout(){
+  store.setJSON('layoutOrder', allCards().map(c=>c.dataset.id));
+  store.setJSON('layoutHidden', allCards().filter(c=>c.classList.contains('hidden-card')).map(c=>c.dataset.id));
+}
+window.resetLayout = () => {
+  store.del('layoutOrder'); store.del('layoutHidden');
+  DEFAULT_ORDER.forEach(id => { const el = grid.querySelector(`[data-id="${id}"]`); if (el) grid.appendChild(el); });
+  allCards().forEach(c => {
+    c.classList.remove('hidden-card');
+    const b = c.querySelector('[data-hide]'); if (b) b.querySelector('span').textContent='visibility';
+  });
+  showNotification('Layout reset','restart_alt');
+};
+
+let arranging = false;
+window.setArrange = (on) => {
+  arranging = on;
+  document.body.classList.toggle('arranging', on);
+  $('arrange-toggle').classList.toggle('on', on);
+  $('arrange-bar').classList.toggle('hidden', !on);
+  $('arrange-bar').classList.toggle('flex', on);
+  $('arrange-flag').classList.toggle('hidden', !on);
+  if (!on) saveLayout();
+};
+$('arrange-toggle').addEventListener('click', ()=>setArrange(!arranging));
+
+grid.addEventListener('click', e => {
+  const h = e.target.closest('[data-hide]');
+  if (!h || !arranging) return;
+  e.stopPropagation();
+  const card = grid.querySelector(`[data-id="${h.dataset.hide}"]`);
+  const nowHidden = !card.classList.contains('hidden-card');
+  card.classList.toggle('hidden-card', nowHidden);
+  h.querySelector('span').textContent = nowHidden ? 'visibility_off' : 'visibility';
+  saveLayout();
+});
+
+/* pointer-based drag reorder (works with touch) */
+let drag = null;
+grid.addEventListener('pointerdown', e => {
+  if (!arranging) return;
+  if (e.target.closest('[data-hide]')) return;
+  const card = e.target.closest('.card');
+  if (!card) return;
+  e.preventDefault();
+
+  const rect = card.getBoundingClientRect();
+  const slot = document.createElement('div');
+  slot.className = 'drop-slot';
+  slot.style.height = rect.height + 'px';
+  slot.style.gridColumn = getComputedStyle(card).gridColumn;
+  slot.style.gridRow = getComputedStyle(card).gridRow;
+
+  drag = { card, slot, dx: e.clientX - rect.left, dy: e.clientY - rect.top, w: rect.width, h: rect.height };
+  card.parentNode.insertBefore(slot, card);
+  card.classList.add('lifted');
+  card.style.width = rect.width + 'px';
+  card.style.height = rect.height + 'px';
+  card.style.left = rect.left + 'px';
+  card.style.top = rect.top + 'px';
+  grid.setPointerCapture(e.pointerId);
+});
+grid.addEventListener('pointermove', e => {
+  if (!drag) return;
+  e.preventDefault();
+  drag.card.style.left = (e.clientX - drag.dx) + 'px';
+  drag.card.style.top  = (e.clientY - drag.dy) + 'px';
+
+  const cx = e.clientX, cy = e.clientY;
+  const targets = allCards().filter(c => c !== drag.card && !c.classList.contains('lifted'));
+  for (const t of targets){
+    const r = t.getBoundingClientRect();
+    if (cx > r.left && cx < r.right && cy > r.top && cy < r.bottom){
+      const after = cy > r.top + r.height/2;
+      if (after) t.parentNode.insertBefore(drag.slot, t.nextSibling);
+      else t.parentNode.insertBefore(drag.slot, t);
+      break;
+    }
+  }
+});
+function endDrag(e){
+  if (!drag) return;
+  const { card, slot } = drag;
+  slot.parentNode.insertBefore(card, slot);
+  slot.remove();
+  card.classList.remove('lifted');
+  card.style.width = card.style.height = card.style.left = card.style.top = '';
+  drag = null;
+  saveLayout();
+  try{ grid.releasePointerCapture(e.pointerId); }catch(err){}
+}
+grid.addEventListener('pointerup', endDrag);
+grid.addEventListener('pointercancel', endDrag);
+
+loadLayout();
+
+/* ============================================================
+   3D DICE  (three.js — real solids, crypto-random, lands on face)
+   ============================================================ */
+const diceStage = $('dice-stage');
+const diceResult = $('dice-result');
+const diceTotal = $('dice-total');
+const diceFallback = $('dice-fallback');
+const rollHist = $('roll-history');
+let rollHistory = store.getJSON('rollHistory', []);
+let currentDie = +(store.get('currentDie') || 20);
+
+document.querySelectorAll('.die-btn').forEach(b => {
+  b.classList.toggle('on', +b.dataset.die === currentDie);
+  b.addEventListener('click', () => {
+    currentDie = +b.dataset.die;
+    store.set('currentDie', currentDie);
+    document.querySelectorAll('.die-btn').forEach(x => x.classList.toggle('on', x === b));
+    if (Dice.ready) Dice.build(currentDie);
+    diceResult.textContent = 'tap to throw';
+    diceTotal.textContent = '\u2014';
+  });
+});
+
+const Dice = (function(){
+  const api = { ready:false };
+  if (typeof THREE === 'undefined') return api;
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
+  camera.position.set(0, 9.0, 4.0);
+  camera.lookAt(0, 0, 0);
+
+  const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  diceStage.insertBefore(renderer.domElement, diceResult);
+
+  const key = new THREE.DirectionalLight(0xffffff, 0.95);
+  key.position.set(3, 8, 5);
+  const fill = new THREE.DirectionalLight(0xffffff, 0.35);
+  fill.position.set(-4, 2, -3);
+  scene.add(key, fill, new THREE.AmbientLight(0xffffff, 0.62));
+
+  /* soft contact shadow */
+  const shadowMat = new THREE.MeshBasicMaterial({ color:0x002747, transparent:true, opacity:0.18 });
+  const shadow = new THREE.Mesh(new THREE.CircleGeometry(1, 32), shadowMat);
+  shadow.rotation.x = -Math.PI/2;
+  shadow.position.y = -1.32;
+  scene.add(shadow);
+
+  let mesh = null, faceNormals = [], sides = 0;
+
+  function css(v){ return getComputedStyle(document.body).getPropertyValue(v).trim(); }
+
+  /* pentagonal trapezohedron for the d10 */
+  function d10Geometry(){
+    const verts = [], faces = [];
+    const step = Math.PI * 2 / 10;
+    /* kites are only planar when apex height = 9.47214 x equator offset */
+    const E = 0.1355, H = E * 9.47214;
+    for (let i=0;i<10;i++){
+      const a = i*step;
+      verts.push([Math.cos(a), (i%2 ? -E : E), Math.sin(a)]);
+    }
+    verts.push([0, H, 0]);   // 10 top apex
+    verts.push([0, -H, 0]);  // 11 bottom apex
+    for (let i=0;i<10;i++){
+      const a=i, b=(i+1)%10, c=(i+2)%10;
+      if (i % 2 === 0) faces.push([10, b, a], [10, c, b]);
+      else faces.push([11, a, b], [11, b, c]);
+    }
+    const pos = [];
+    faces.forEach(f => f.forEach(vi => pos.push(...verts[vi])));
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    return g;
+  }
+
+  function geomFor(n){
+    if (n === 4)  return new THREE.TetrahedronGeometry(1.25);
+    if (n === 6)  return new THREE.BoxGeometry(1.5,1.5,1.5);
+    if (n === 8)  return new THREE.OctahedronGeometry(1.25);
+    if (n === 10) return d10Geometry();
+    if (n === 12) return new THREE.DodecahedronGeometry(1.15);
+    return new THREE.IcosahedronGeometry(1.2);
+  }
+
+  const FONT_SCALE = { 4:0.30, 6:0.52, 8:0.34, 10:0.32, 12:0.42, 20:0.32 };
+
+  function makeAtlas(labels, n){
+    const cols = Math.ceil(Math.sqrt(labels.length));
+    const rows = Math.ceil(labels.length / cols);
+    const cell = 256;
+    const c = document.createElement('canvas');
+    c.width = cols*cell; c.height = rows*cell;
+    const x = c.getContext('2d');
+    x.fillStyle = css('--die-body') || '#0073d1';
+    x.fillRect(0,0,c.width,c.height);
+    const fs = Math.round(cell * (FONT_SCALE[n] || 0.32) * 2);
+    labels.forEach((lab,i)=>{
+      const ox = (i%cols)*cell + cell/2;
+      const oy = Math.floor(i/cols)*cell + cell/2;
+      x.save(); x.translate(ox, oy);
+      x.fillStyle = css('--die-num') || '#fff';
+      x.font = `700 ${lab.length>2 ? fs*0.72 : fs}px Poppins, Helvetica, sans-serif`;
+      x.textAlign = 'center'; x.textBaseline = 'middle';
+      x.fillText(lab, 0, 0);
+      if (lab === '6' || lab === '9'){
+        x.fillRect(-fs*0.28, fs*0.44, fs*0.56, Math.max(3, fs*0.07));
+      }
+      x.restore();
+    });
+    const t = new THREE.CanvasTexture(c);
+    t.anisotropy = renderer.capabilities.getMaxAnisotropy ? renderer.capabilities.getMaxAnisotropy() : 1;
+    return { tex:t, cols, rows };
+  }
+
+  function labelsFor(n){
+    if (n === 10) return ['1','2','3','4','5','6','7','8','9','10'];
+    return Array.from({length:n}, (_,i)=>String(i+1));
+  }
+
+  api.build = function(n){
+    sides = n;
+    if (mesh){ scene.remove(mesh); mesh.geometry.dispose(); mesh.material.map.dispose(); mesh.material.dispose(); }
+
+    let geo = geomFor(n);
+    if (geo.index) geo = geo.toNonIndexed();
+    const pos = geo.attributes.position;
+    const tris = pos.count / 3;
+
+    /* group coplanar triangles into faces */
+    const groups = [];
+    const A=new THREE.Vector3(), B=new THREE.Vector3(), C=new THREE.Vector3(), N=new THREE.Vector3(), E1=new THREE.Vector3(), E2=new THREE.Vector3();
+    for (let t=0;t<tris;t++){
+      A.fromBufferAttribute(pos,t*3); B.fromBufferAttribute(pos,t*3+1); C.fromBufferAttribute(pos,t*3+2);
+      E1.subVectors(B,A); E2.subVectors(C,A);
+      N.crossVectors(E1,E2).normalize();
+      let g = groups.find(gr => gr.n.dot(N) > 0.995);
+      if (!g){ g = { n:N.clone(), tris:[] }; groups.push(g); }
+      g.tris.push(t);
+    }
+    groups.sort((p,q)=> (q.n.y - p.n.y) || (q.n.x - p.n.x) || (q.n.z - p.n.z));
+
+    const labels = labelsFor(n).slice(0, groups.length);
+    const atlas = makeAtlas(labels, n);
+    const uv = new Float32Array(pos.count * 2);
+    const V = new THREE.Vector3(), AX = new THREE.Vector3(), AY = new THREE.Vector3(), UP = new THREE.Vector3();
+
+    groups.forEach((g, gi)=>{
+      const verts = [];
+      g.tris.forEach(t => { for(let k=0;k<3;k++) verts.push(new THREE.Vector3().fromBufferAttribute(pos, t*3+k)); });
+      const centroid = verts.reduce((s,v)=>s.add(v), new THREE.Vector3()).divideScalar(verts.length);
+      UP.set(0,1,0);
+      if (Math.abs(g.n.y) > 0.94) UP.set(1,0,0);
+      AX.crossVectors(UP, g.n).normalize();
+      AY.crossVectors(g.n, AX).normalize();
+      let R = 0;
+      verts.forEach(v => { V.copy(v).sub(centroid); R = Math.max(R, Math.hypot(V.dot(AX), V.dot(AY))); });
+      const span = R * 2 * 1.02;
+      const col = gi % atlas.cols, row = Math.floor(gi / atlas.cols);
+      g.tris.forEach(t=>{
+        for (let k=0;k<3;k++){
+          const idx = t*3+k;
+          V.fromBufferAttribute(pos, idx).sub(centroid);
+          const lx = V.dot(AX)/span + 0.5;
+          const ly = V.dot(AY)/span + 0.5;
+          uv[idx*2]     = (col + lx) / atlas.cols;
+          uv[idx*2 + 1] = 1 - (row + (1 - ly)) / atlas.rows;
+        }
+      });
+    });
+
+    geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+    geo.computeVertexNormals();
+
+    const mat = new THREE.MeshStandardMaterial({
+      map: atlas.tex, roughness: 0.42, metalness: 0.06, flatShading: true
+    });
+    mesh = new THREE.Mesh(geo, mat);
+    scene.add(mesh);
+
+    faceNormals = groups.map(g => g.n.clone());
+    api.faceCount = groups.length;
+    restPose();
+    render();
+  };
+
+  function restPose(){
+    if (!mesh) return;
+    const q = new THREE.Quaternion().setFromUnitVectors(faceNormals[0] || new THREE.Vector3(0,1,0), new THREE.Vector3(0,1,0));
+    mesh.quaternion.copy(q);
+    mesh.position.set(0, 0, 0);
+    mesh.rotateY(0.4);
+  }
+
+  function resize(){
+    const w = diceStage.clientWidth, h = diceStage.clientHeight;
+    if (!w || !h) return;
+    renderer.setSize(w, h, false);
+    camera.aspect = w/h;
+    camera.updateProjectionMatrix();
+    render();
+  }
+  function render(){ renderer.render(scene, camera); }
+
+  const easeOut = t => 1 - Math.pow(1 - t, 3);
+  const smooth  = t => t*t*(3 - 2*t);
+
+  let rolling = false;
+  api.roll = function(value, done){
+    if (!mesh || rolling) return;
+    rolling = true;
+    const idx = Math.min(value - 1, faceNormals.length - 1);
+    const align = new THREE.Quaternion().setFromUnitVectors(faceNormals[idx], new THREE.Vector3(0,1,0));
+    const spin  = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0), (rnd(360)/360)*Math.PI*2);
+    const target = spin.multiply(align);
+
+    const DUR = reduceMotion ? 260 : 1450;
+    const TUMBLE_END = 0.52, SETTLE_START = 0.52;
+    const axis = new THREE.Vector3(rnd(200)/100-1, rnd(200)/100-1, rnd(200)/100-1).normalize();
+    const startQ = mesh.quaternion.clone();
+    const stepQ = new THREE.Quaternion();
+    let capturedQ = null;
+    const t0 = performance.now();
+    let lastBounce = 0;
+
+    function frame(now){
+      const p = Math.min(1, (now - t0) / DUR);
+
+      /* vertical toss + decaying bounce */
+      const bounceT = p * 2.6;
+      const h = Math.abs(Math.sin(Math.PI * bounceT)) * 1.9 * Math.pow(1 - p, 1.7);
+      mesh.position.y = h;
+      const scaleS = 0.55 + 0.45 * (1 - Math.min(1, h/1.9));
+      shadow.scale.setScalar(scaleS);
+      shadowMat.opacity = 0.2 * scaleS;
+
+      if (Math.floor(bounceT) !== lastBounce && h < 0.35 && p < 0.8){
+        lastBounce = Math.floor(bounceT);
+        if (!reduceMotion) playClack();
+      }
+
+      if (p < TUMBLE_END){
+        const speed = (1 - p/TUMBLE_END);
+        stepQ.setFromAxisAngle(axis, p * 88 * speed + p * 10);
+        mesh.quaternion.copy(startQ).multiply(stepQ);
+      } else {
+        if (!capturedQ) capturedQ = mesh.quaternion.clone();
+        const k = smooth((p - SETTLE_START) / (1 - SETTLE_START));
+        mesh.quaternion.copy(capturedQ).slerp(target, k);
+      }
+
+      render();
+      if (p < 1) requestAnimationFrame(frame);
+      else {
+        mesh.quaternion.copy(target);
+        mesh.position.y = 0;
+        shadow.scale.setScalar(1); shadowMat.opacity = 0.18;
+        render();
+        rolling = false;
+        done && done();
+      }
+    }
+    requestAnimationFrame(frame);
+  };
+
+  api.retheme = function(){ if (sides) api.build(sides); };
+  api.ready = true;
+
+  window.addEventListener('resize', resize);
+  if (window.ResizeObserver) new ResizeObserver(resize).observe(diceStage);
+  setTimeout(resize, 60);
+  return api;
+})();
+
+window.__diceTheme = () => { if (Dice.ready) setTimeout(()=>Dice.retheme(), 60); };
+
+if (Dice.ready){ Dice.build(currentDie); }
+else { diceFallback.style.display='grid'; }
+
+let rollBusy = false;
+window.rollDie = () => {
+  if (rollBusy) return;
+  const n = currentDie;
+  const value = rnd(n) + 1;
+  rollBusy = true;
+  diceResult.textContent = 'throwing\u2026';
+  diceTotal.textContent = '\u2014';
+
+  const finish = () => {
+    rollBusy = false;
+    diceTotal.textContent = value;
+    const isMax = value === n, isMin = value === 1;
+    diceTotal.style.color = isMax ? 'var(--good)' : isMin ? 'var(--bad)' : 'var(--header-color)';
+    diceResult.textContent = isMax ? 'MAX' : isMin ? 'MIN' : ('d' + n);
+    diceResult.style.color = isMax ? 'var(--good)' : isMin ? 'var(--bad)' : 'var(--header-color)';
+    diceResult.classList.remove('pop'); void diceResult.offsetWidth; diceResult.classList.add('pop');
+    if (isMax) playDing();
+    rollHistory.unshift({ type:'d'+n, val:value, max:isMax, min:isMin });
+    if (rollHistory.length > 12) rollHistory.pop();
+    store.setJSON('rollHistory', rollHistory);
+    renderHistory();
+  };
+
+  if (Dice.ready) Dice.roll(value, finish);
+  else {
+    diceFallback.textContent = value;
+    diceFallback.style.display = 'grid';
+    setTimeout(finish, 180);
+  }
+};
+diceStage.addEventListener('click', () => { if (!arranging) rollDie(); });
+
+function renderHistory(){
+  if (!rollHistory.length){ rollHist.innerHTML = '<span class="text-xs opacity-40">Nothing thrown yet.</span>'; return; }
+  rollHist.innerHTML = rollHistory.map(r=>{
+    const bg = r.max ? 'var(--good)' : r.min ? 'var(--bad)' : 'var(--accent-color)';
+    return `<span class="inline-flex items-center justify-center min-w-[30px] h-7 px-1.5 rounded-lg text-xs font-bold text-white" style="background:${bg}" title="${r.type}">${r.val}</span>`;
+  }).join('');
+}
+renderHistory();
+
+/* ============================================================
+   COIN FLIP (css 3d, weighted nothing, honest 50/50)
+   ============================================================ */
+const coin3d = $('coin3d'), coinLift = $('coin-lift'), coinLabel = $('coin-label'),
+      coinShadow = $('coin-shadow'), coinStage = $('coin-stage'), coinTally = $('coin-tally');
+let coinCounts = store.getJSON('coinCounts', {h:0,t:0});
+let coinAngle = 0, coinBusy = false, coinAnims = [];
+
+/* fake the cylinder edge with stacked slices */
+(function buildEdge(){
+  for (let z = -5; z <= 5; z++){
+    const s = document.createElement('div');
+    s.className = 'coin-slice';
+    s.style.transform = `translateZ(${z}px)`;
+    coin3d.insertBefore(s, coin3d.firstChild);
+  }
+})();
+
+function updateTally(){ coinTally.textContent = `${coinCounts.h}H / ${coinCounts.t}T`; }
+updateTally();
+
+window.flipCoin = () => {
+  if (coinBusy) return;
+  coinBusy = true;
+  const heads = rnd(2) === 0;
+  coinStage.classList.remove('win-h','win-t');
+  coinLabel.textContent = '';
+
+  const turns = 5 + rnd(3);
+  const target = coinAngle + turns*360 + ((((heads ? 0 : 180) - (coinAngle % 360)) + 360) % 360);
+  const DUR = reduceMotion ? 200 : 1350;
+
+  coinAnims.forEach(a => { try{ a.cancel(); }catch(e){} });
+  coinAnims = [];
+  coinAnims.push(coin3d.animate(
+    [{ transform:`rotateX(${coinAngle}deg)` }, { transform:`rotateX(${target}deg)` }],
+    { duration:DUR, easing:'cubic-bezier(.16,.72,.24,1)', fill:'forwards' }
+  ));
+  coinAnims.push(coinLift.animate(
+    [{ transform:'translateY(0px)' },
+     { transform:'translateY(-58px)', offset:0.42 },
+     { transform:'translateY(0px)' }],
+    { duration:DUR, easing:'cubic-bezier(.33,0,.5,1)', fill:'forwards' }
+  ));
+  coinAnims.push(coinShadow.animate(
+    [{ transform:'scale(1)', opacity:1 },
+     { transform:'scale(0.55)', opacity:0.35, offset:0.42 },
+     { transform:'scale(1)', opacity:1 }],
+    { duration:DUR, easing:'cubic-bezier(.33,0,.5,1)', fill:'forwards' }
+  ));
+
+  coinAngle = target;
+  if (!reduceMotion) playClack();
+
+  setTimeout(()=>{
+    coinLabel.textContent = heads ? 'Heads' : 'Tails';
+    coinStage.classList.add(heads ? 'win-h' : 'win-t');
+    coinCounts[heads?'h':'t']++;
+    store.setJSON('coinCounts', coinCounts);
+    updateTally();
+    coinBusy = false;
+  }, DUR - 60);
+};
+coinStage.addEventListener('click', ()=>{ if(!arranging) flipCoin(); });
+
+/* ============================================================
+   REMINDERS
+   ============================================================ */
+let reminders = store.getJSON('reminders', []);
+let remMode = 'at', remRepeat = 'once';
+const remList = $('rem-list'), remPermBtn = $('notif-perm');
+
+function notifSupported(){ return ('Notification' in window); }
+function refreshPermBtn(){
+  if (!notifSupported()){ remPermBtn.textContent = 'No alerts here'; remPermBtn.disabled = true; remPermBtn.style.opacity = .5; return; }
+  const p = Notification.permission;
+  if (p === 'granted'){ remPermBtn.textContent = 'Alerts on'; remPermBtn.classList.add('on'); }
+  else if (p === 'denied'){ remPermBtn.textContent = 'Alerts blocked'; remPermBtn.style.opacity = .6; }
+  else { remPermBtn.textContent = 'Enable alerts'; remPermBtn.classList.remove('on'); }
+}
+window.askNotifPermission = () => {
+  if (!notifSupported()){ showNotification('This browser has no notification support','error'); return; }
+  if (Notification.permission === 'denied'){ showNotification('Unblock notifications in site settings','block'); return; }
+  Notification.requestPermission().then(p => {
+    refreshPermBtn();
+    if (p === 'granted') showNotification('Alerts enabled','notifications_active');
+  });
+};
+refreshPermBtn();
+(function seedRemTime(){
+  const d = new Date(Date.now() + 30*60000);
+  d.setMinutes(d.getMinutes() > 30 ? 60 : 30, 0, 0);
+  $('rem-time').value = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+})();
+
+document.querySelectorAll('#rem-mode button').forEach(b => b.addEventListener('click', () => {
+  remMode = b.dataset.mode;
+  document.querySelectorAll('#rem-mode button').forEach(x => x.classList.toggle('on', x === b));
+  $('rem-in-wrap').classList.toggle('hidden', remMode !== 'in');
+  $('rem-time').classList.toggle('hidden', remMode !== 'at');
+}));
+document.querySelectorAll('#rem-repeat button').forEach(b => b.addEventListener('click', () => {
+  remRepeat = b.dataset.rep;
+  document.querySelectorAll('#rem-repeat button').forEach(x => x.classList.toggle('on', x === b));
+}));
+$('rem-in').addEventListener('input', e => {
+  const v = +e.target.value;
+  $('rem-in-label').textContent = v >= 60 ? `${Math.floor(v/60)}h ${v%60}m` : `${v} min`;
+});
+
+function nextFire(hhmm, repeat, fromTs){
+  const [h,m] = hhmm.split(':').map(Number);
+  const base = new Date(fromTs || Date.now());
+  const d = new Date(base); d.setHours(h, m, 0, 0);
+  if (d.getTime() <= base.getTime()) d.setDate(d.getDate()+1);
+  if (repeat === 'weekdays'){ while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate()+1); }
+  return d.getTime();
+}
+function fmtNext(ts){
+  const d = new Date(ts), now = new Date();
+  const mins = Math.round((ts - Date.now())/60000);
+  const t = d.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+  if (mins < 60 && mins >= 0) return `in ${mins} min`;
+  const sameDay = d.toDateString() === now.toDateString();
+  return sameDay ? t : `${d.toLocaleDateString([], {weekday:'short'})} ${t}`;
+}
+function saveReminders(){ store.setJSON('reminders', reminders); }
+
+window.addReminder = () => {
+  const text = $('rem-text').value.trim();
+  if (!text){ showNotification('Give the reminder a name','edit'); $('rem-text').focus(); return; }
+  let at, nextAt;
+  if (remMode === 'in'){
+    const mins = +$('rem-in').value;
+    nextAt = Date.now() + mins*60000;
+    const d = new Date(nextAt);
+    at = String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+  } else {
+    at = $('rem-time').value;
+    if (!at){ showNotification('Pick a time','schedule'); return; }
+    nextAt = nextFire(at, remRepeat);
+  }
+  reminders.push({ id:uid(), text, at, repeat: remMode === 'in' ? 'once' : remRepeat, nextAt, enabled:true });
+  reminders.sort((a,b)=>a.nextAt-b.nextAt);
+  saveReminders(); renderReminders();
+  $('rem-text').value = '';
+  showNotification(`Reminder set for ${fmtNext(nextAt)}`,'alarm_add');
+  if (notifSupported() && Notification.permission === 'default') askNotifPermission();
+};
+
+function renderReminders(){
+  if (!reminders.length){
+    remList.innerHTML = '<p class="text-sm opacity-45 py-2">Nothing scheduled. Add one above.</p>';
+    return;
+  }
+  remList.innerHTML = reminders.map(r=>{
+    const rep = r.repeat === 'daily' ? 'Every day' : r.repeat === 'weekdays' ? 'Mon\u2013Fri' : 'Once';
+    const time12 = new Date(r.nextAt).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+    return `<div class="rem-row ${r.enabled?'':'off'}" data-rid="${r.id}">
+      <span class="dot ${r.enabled?'live':'off'}"></span>
+      <div class="flex-grow min-w-0">
+        <div class="text-sm font-medium truncate">${escapeHtml(r.text)}</div>
+        <div class="rem-next">${rep} \u00b7 ${r.enabled ? fmtNext(r.nextAt) : 'paused'}</div>
+      </div>
+      <span class="rem-time">${time12}</span>
+      <button class="icon-btn w-7 h-7" data-rtoggle="${r.id}"><span class="material-symbols-outlined text-base">${r.enabled?'pause':'play_arrow'}</span></button>
+      <button class="icon-btn w-7 h-7" data-rdel="${r.id}"><span class="material-symbols-outlined text-base">close</span></button>
+    </div>`;
+  }).join('');
+}
+remList.addEventListener('click', e => {
+  const tg = e.target.closest('[data-rtoggle]'), dl = e.target.closest('[data-rdel]');
+  if (dl){ reminders = reminders.filter(r=>r.id!==dl.dataset.rdel); saveReminders(); renderReminders(); return; }
+  if (tg){
+    const r = reminders.find(x=>x.id===tg.dataset.rtoggle); if(!r) return;
+    r.enabled = !r.enabled;
+    if (r.enabled && r.nextAt <= Date.now()) r.nextAt = nextFire(r.at, r.repeat);
+    saveReminders(); renderReminders();
+  }
+});
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function fireReminder(r){
+  playAlert();
+  showNotification(r.text, 'notifications_active', 8000);
+  const row = remList.querySelector(`[data-rid="${r.id}"]`);
+  if (row){ row.classList.add('fired'); setTimeout(()=>row.classList.remove('fired'), 1200); }
+  if (notifSupported() && Notification.permission === 'granted'){
+    try{
+      const n = new Notification('Reminder', { body: r.text, tag: r.id, requireInteraction: false });
+      n.onclick = () => { window.focus(); n.close(); };
+    }catch(e){}
+  }
+  if (r.repeat === 'once'){ r.enabled = false; }
+  else { r.nextAt = nextFire(r.at, r.repeat); }
+}
+function checkReminders(){
+  const now = Date.now();
+  let dirty = false;
+  reminders.forEach(r => {
+    if (r.enabled && r.nextAt <= now){
+      if (now - r.nextAt > 6*3600*1000){ r.nextAt = nextFire(r.at, r.repeat); dirty = true; return; }
+      fireReminder(r); dirty = true;
+    }
+  });
+  if (dirty){ saveReminders(); renderReminders(); }
+}
+renderReminders();
+setInterval(checkReminders, 10000);
+setInterval(renderReminders, 60000);
+setTimeout(checkReminders, 1500);
+
+/* ============================================================
+   INFO CONVERTER
+   ============================================================ */
+const LABELS = {
+  name:      ['account holder','acct holder','customer name','name on account','subscriber name','primary contact','contact name','full name','subscriber','customer','name'],
+  account:   ['account number','account no','account num','acct number','acct num','billing account','account id','account','acct'],
+  service:   ['service address','svc address','service location','install address','installation address','premise address','site address','service addr','premise','address'],
+  billing:   ['billing address','bill to','mailing address','billing addr'],
+  phone:     ['best callback','callback number','alternate phone','alternate number','primary phone','contact number','mobile phone','home phone','cell phone','work phone','phone number','telephone','callback','alt phone','mobile','phone','cell'],
+  email:     ['email address','e-mail address','email','e-mail','e mail'],
+  scope:     ['scope id','scopeid','scope'],
+  mac:       ['mac address','modem mac','device mac','cm mac','mac'],
+  serial:    ['serial number','serial no','device serial','serial','sn'],
+  equipment: ['equipment model','modem model','device model','equipment','gateway','router','modem','device','model'],
+  appt:      ['appointment time','arrival window','installation date','appointment','install date','tech visit','scheduled','appt time','schedule','appt','window'],
+  ticket:    ['reference number','ticket number','order number','incident number','case number','work order','ticket id','ticket','order','case','ref number','wo number','sr number','ref','sro'],
+  status:    ['account status','service status','status'],
+  plan:      ['service level','subscription','package','services','products','plan','tier'],
+  note:      ['reason for call','description','summary','issue','notes','note']
+};
+const FIELD_ORDER = ['name','account','service','billing','phone','email','scope','mac','serial','equipment','plan','status','appt','ticket','note'];
+const FIELD_TITLE = {
+  name:'Name', account:'Account Number', service:'Service Address', billing:'Billing Address',
+  phone:'Phone', email:'Email', scope:'Scope ID', mac:'MAC', serial:'Serial',
+  equipment:'Equipment', plan:'Package', status:'Status', appt:'Appointment', ticket:'Ticket', note:'Notes'
+};
+const SHORT_TITLE = { name:'Name', account:'Acct', service:'Svc addr', billing:'Bill addr', phone:'Ph', email:'Email',
+  scope:'Scope', mac:'MAC', serial:'SN', equipment:'Equip', plan:'Pkg', status:'Status', appt:'Appt', ticket:'Ticket', note:'Note' };
+
+const STREET_RE = /\b(st|street|ave|avenue|rd|road|dr|drive|ln|lane|blvd|boulevard|ct|court|cir|circle|way|pl|place|ter|terrace|trl|trail|pkwy|parkway|hwy|highway|loop|run|path|walk|sq|square|plaza|pike|row|bend|cove|crossing|xing|ridge|point|pt)\b\.?/i;
+const UNIT_RE   = /\b(apt|apartment|unit|ste|suite|bldg|building|lot|trlr|#)\s*[\w-]+/i;
+const CSZ_RE    = /^(.+?),?\s+([A-Za-z]{2})\.?\s+(\d{5})(?:-\d{4})?$/;
+const EMAIL_RE  = /[\w.+-]+@[\w-]+\.[\w.-]{2,}/g;
+const MAC_RE    = /\b(?:[0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}\b|\b[0-9A-Fa-f]{12}\b/g;
+const PHONE_RE  = /(?:\+?1[\s.-]?)?(?:\(\d{3}\)|\d{3})[\s.-]?\d{3}[\s.-]?\d{4}\b/g;
+const ACCT_RE   = /\b\d{4}[\s-]?\d{2}[\s-]?\d{3}[\s-]?\d{7}\b|\b\d{13,16}\b/g;
+const DATE_RE   = /\b(?:\d{1,2}\/\d{1,2}\/\d{2,4}|(?:mon|tue|wed|thu|fri|sat|sun)[a-z]*\.?,?\s+\w+\s+\d{1,2})\b/i;
+
+const KEEP_UPPER = new Set(['NE','NW','SE','SW','N','S','E','W','PO','US','USA','LLC','II','III','IV','JR','SR','APT','STE','BLDG']);
+
+function titleCase(s, addr){
+  return s.split(/\s+/).map(w => {
+    const bare = w.replace(/[^\w]/g,'');
+    if (addr && KEEP_UPPER.has(bare.toUpperCase()) && bare.length <= 3) return w.toUpperCase();
+    if (/^\d+(?:st|nd|rd|th)$/i.test(w)) return w.toLowerCase();
+    if (/^\d/.test(w)) return w.toUpperCase();
+    return w.replace(/([A-Za-z])([A-Za-z']*)/g, (m,a,b) => a.toUpperCase() + b.toLowerCase())
+            .replace(/Mc([a-z])/g, (m,a)=>'Mc'+a.toUpperCase())
+            .replace(/O'([a-z])/g, (m,a)=>"O'"+a.toUpperCase());
+  }).join(' ');
+}
+function normPhone(v){
+  const d = v.replace(/\D/g,'');
+  const t = d.length === 11 && d[0] === '1' ? d.slice(1) : d;
+  if (t.length === 10) return `(${t.slice(0,3)}) ${t.slice(3,6)}-${t.slice(6)}`;
+  return v.trim();
+}
+function normAccount(v){
+  const d = v.replace(/\D/g,'');
+  if (d.length === 16) return `${d.slice(0,4)} ${d.slice(4,6)} ${d.slice(6,9)} ${d.slice(9)}`;
+  return d || v.trim();
+}
+function normMac(v){
+  const h = v.replace(/[^0-9A-Fa-f]/g,'').toUpperCase();
+  if (h.length === 12) return h.match(/.{2}/g).join(':');
+  return v.trim().toUpperCase();
+}
+function normName(v){
+  let s = v.replace(/\s+/g,' ').trim().replace(/[,;]$/,'');
+  const m = s.match(/^([A-Za-z'\-]+)\s*,\s*(.+)$/);
+  if (m) s = m[2] + ' ' + m[1];
+  return titleCase(s);
+}
+function normAddress(v){
+  let s = v.replace(/\s+/g,' ').replace(/\s*,\s*/g, ', ').trim().replace(/[,]$/,'');
+  s = titleCase(s, true);
+  s = s.replace(/([^,])\s+([A-Za-z]{2})\.?\s+(\d{5}(?:-\d{4})?)$/, (m,a,b,c)=>a+', '+b+' '+c);
+  s = s.replace(/\b([A-Za-z]{2})\s+(\d{5}(?:-\d{4})?)$/, (m,a,b)=>a.toUpperCase()+' '+b);
+  return s;
+}
+function normLabel(raw){
+  return raw.toLowerCase().replace(/[^a-z0-9# ]/g,' ').replace(/\s+/g,' ').trim();
+}
+function labelKey(raw){
+  const l = normLabel(raw);
+  for (const k of FIELD_ORDER){
+    if (LABELS[k].some(a => l === a)) return k;
+  }
+  for (const k of FIELD_ORDER){
+    if (LABELS[k].some(a => new RegExp('(^|\\s)'+a.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'($|\\s)').test(l))) return k;
+  }
+  return null;
+}
+function isLabelLine(line){
+  const t = line.replace(/:$/,'').trim();
+  return t.length < 32 && labelKey(t) !== null;
+}
+function looksLikeName(line){
+  const t = line.trim();
+  if (!t || t.length > 42) return false;
+  if (/\d|@|:/.test(t)) return false;
+  if (labelKey(t)) return false;
+  const words = t.split(/\s+/);
+  if (words.length < 2 || words.length > 4) return false;
+  return words.every(w => /^[A-Za-z][A-Za-z'\-.]*,?$/.test(w));
+}
+
+const INLINE_KEYS = ['mac','serial','scope','account','ticket'];
+const INLINE_ALIASES = [];
+INLINE_KEYS.forEach(k => LABELS[k].forEach(a => INLINE_ALIASES.push([a,k])));
+INLINE_ALIASES.sort((a,b) => b[0].length - a[0].length);
+const VALUE_RE = {
+  mac:     /(?:[0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}|[0-9A-Fa-f]{12}/,
+  account: /\d[\d\s-]{10,20}\d/,
+  scope:   /[A-Za-z0-9._-]{3,40}/,
+  serial:  /[A-Za-z0-9-]{4,30}/,
+  ticket:  /[A-Za-z0-9-]{3,30}/
+};
+const NAME_IS_RE = /\b(?:customer|caller|subscriber|client|member|account holder)(?:'s)?(?:\s+name)?\s+is\s+([A-Z][A-Za-z'\-]+(?:\s+[A-Z][A-Za-z'\-.]+){1,3})/;
+const LOOSE_ADDR_RE = new RegExp('(\\d{1,6}\\s+[^,\\n]{0,40}?\\b(?:' +
+  'st|street|ave|avenue|rd|road|dr|drive|ln|lane|blvd|boulevard|ct|court|cir|circle|way|pl|place|' +
+  'ter|terrace|trl|trail|pkwy|parkway|hwy|highway|loop|run|path|walk|sq|square|plaza|pike|row|bend|cove|xing|ridge' +
+  ')\\b\\.?.*)$', 'i');
+const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+function parseInfo(raw){
+  const out = {};
+  const add = (k,v) => {
+    if (!v) return;
+    v = String(v).trim().replace(/^[:\-\u2013\u2014#=]+\s*/,'').replace(/[,;]$/,'').trim();
+    if (!v || v.length > 220) return;
+    if (/^(n\/a|none|null|unknown|--|-|not listed)$/i.test(v)) return;
+    if (!out[k]) out[k] = [];
+    if (!out[k].some(x => x.toLowerCase() === v.toLowerCase())) out[k].push(v);
+  };
+
+  const text = raw.replace(/\u00a0/g,' ').replace(/\r/g,'');
+  const lines = text.split('\n').map(l => l.replace(/[\t\u2022|]+/g,'  ').trim()).filter(Boolean);
+  const residual = lines.slice();
+
+  /* 1 — "Label: value" on one line (labels never contain digits) */
+  lines.forEach((line, i) => {
+    const m = line.match(/^([A-Za-z][A-Za-z #\/&'._-]{1,32}?)\s*(?::|\s-\s|\s\u2013\s|\s{2,})\s*(.+)$/);
+    if (!m) return;
+    let k = labelKey(m[1]);
+    if (!k) return;
+    let val = m[2];
+    const words = m[1].trim().split(/\s+/);
+    const exact = LABELS[k].includes(normLabel(m[1]));
+    for (let n = 1; !exact && n < words.length; n++){
+      const cand = words.slice(0,n).join(' ');
+      const ck = labelKey(cand);
+      if (ck && LABELS[ck].includes(cand.toLowerCase())){
+        k = ck;
+        val = line.slice(cand.length).replace(/^[\s:=\-\u2013]+/,'');
+        break;
+      }
+    }
+    /* city/state/zip sitting on the next line belongs to the address */
+    if ((k === 'service' || k === 'billing') && residual[i+1] && CSZ_RE.test(lines[i+1]) && !isLabelLine(lines[i+1])){
+      val += ', ' + lines[i+1];
+      residual[i+1] = '';
+    }
+    add(k, val);
+    residual[i] = '';
+  });
+
+  /* 2 — label alone on a line, value on the next one or two */
+  lines.forEach((line, i) => {
+    if (!residual[i] || !isLabelLine(line)) return;
+    const k = labelKey(line.replace(/:$/,''));
+    if (!k) return;
+    const a = lines[i+1], b = lines[i+2];
+    if (!a || !residual[i+1] || isLabelLine(a)) return;
+    if ((k === 'service' || k === 'billing') && b && residual[i+2] && !isLabelLine(b) && CSZ_RE.test(b)){
+      add(k, a + ', ' + b);
+      residual[i] = residual[i+1] = residual[i+2] = '';
+    } else {
+      add(k, a);
+      residual[i] = residual[i+1] = '';
+    }
+  });
+
+  /* 3 — inline "mac 00:1A:.. serial ABC123" style, several per line */
+  residual.forEach((line, i) => {
+    if (!line) return;
+    for (const [alias, k] of INLINE_ALIASES){
+      const re = new RegExp('\\b' + esc(alias) + '\\b[\\s:=#-]*(.{2,60})', 'i');
+      const m = line.match(re);
+      if (!m) continue;
+      const vm = m[1].match(VALUE_RE[k]);
+      if (!vm) continue;
+      if (!/\d/.test(vm[0])) continue;
+      add(k, vm[0]);
+      const cut = m[0].slice(0, m[0].indexOf(vm[0]) + vm[0].length);
+      line = line.replace(cut, ' ');
+      residual[i] = line;
+    }
+  });
+
+  /* 4 — pattern sweep across whatever is left */
+  const rest = residual.filter(Boolean);
+  const restText = rest.join('\n');
+
+  (restText.match(EMAIL_RE) || []).forEach(v => add('email', v));
+  (restText.match(MAC_RE) || []).forEach(v => { if (!/^\d+$/.test(v)) add('mac', v); });
+
+  const acctHits = restText.match(ACCT_RE) || [];
+  acctHits.forEach(v => add('account', v));
+
+  let phoneScan = restText;
+  acctHits.forEach(a => { phoneScan = phoneScan.split(a).join(' '); });
+  (phoneScan.match(PHONE_RE) || []).forEach(v => {
+    const d = v.replace(/\D/g,'');
+    if (d.length === 10 || (d.length === 11 && d[0] === '1')) add('phone', v);
+  });
+
+  /* 5 — address assembly from loose lines */
+  if (!out.service){
+    for (let i=0;i<rest.length;i++){
+      const l = rest[i];
+      if (/^\d+\s/.test(l) && (STREET_RE.test(l) || UNIT_RE.test(l))){
+        if (CSZ_RE.test(l) && /\d{5}/.test(l)){ add('service', l); break; }
+        const n1 = rest[i+1] || '', n2 = rest[i+2] || '';
+        if (CSZ_RE.test(n1)) add('service', l + ', ' + n1);
+        else if (UNIT_RE.test(n1) && CSZ_RE.test(n2)) add('service', l + ' ' + n1 + ', ' + n2);
+        else add('service', l);
+        break;
+      }
+    }
+  }
+  if (!out.service){
+    for (const l of rest){
+      const m = l.match(LOOSE_ADDR_RE);
+      if (m && /\d/.test(m[1])){ add('service', m[1]); break; }
+    }
+  }
+
+  /* 6 — name */
+  if (!out.name){
+    const m = restText.match(NAME_IS_RE);
+    if (m) add('name', m[1]);
+  }
+  if (!out.name){
+    for (const l of rest){ if (looksLikeName(l)){ add('name', l); break; } }
+  }
+
+  /* 7 — appointment sniff */
+  if (!out.appt){
+    const d = restText.match(DATE_RE);
+    if (d){
+      const line = rest.find(l => l.includes(d[0]));
+      if (line && line.length < 80 && /\b(appt|appointment|tech|arriv|between|am|pm|window|schedul)/i.test(line)) add('appt', line);
+    }
+  }
+
+  /* normalize */
+  const norm = {};
+  FIELD_ORDER.forEach(k => {
+    if (!out[k]) return;
+    norm[k] = out[k].map(v => {
+      if (k === 'phone')   return normPhone(v);
+      if (k === 'account') return normAccount(v);
+      if (k === 'mac')     return normMac(v);
+      if (k === 'name')    return normName(v);
+      if (k === 'service' || k === 'billing') return normAddress(v);
+      if (k === 'email')   return v.toLowerCase();
+      if (k === 'serial' || k === 'scope') return v.toUpperCase();
+      return v;
+    }).filter((v,i,a) => a.indexOf(v) === i).slice(0, k === 'phone' ? 3 : 2);
+  });
+  return norm;
+}
+
+const converterInput = $('converter-input'), converterOutput = $('converter-output'), fieldChips = $('field-chips');
+let parsed = {}, offFields = new Set(), outFmt = 'labeled';
+
+document.querySelectorAll('#fmt-seg button').forEach(b => b.addEventListener('click', () => {
+  outFmt = b.dataset.fmt;
+  document.querySelectorAll('#fmt-seg button').forEach(x => x.classList.toggle('on', x === b));
+  renderConverter();
+}));
+
+converterInput.addEventListener('input', () => {
+  parsed = parseInfo(converterInput.value);
+  renderConverter();
+});
+
+function activeKeys(){ return FIELD_ORDER.filter(k => parsed[k] && !offFields.has(k)); }
+
+function buildOutput(){
+  const keys = activeKeys();
+  if (!keys.length) return '';
+  if (outFmt === 'compact'){
+    return keys.map(k => `${SHORT_TITLE[k]}: ${parsed[k].join(' / ')}`).join('  |  ');
+  }
+  if (outFmt === 'note'){
+    const has = k => parsed[k] && !offFields.has(k);
+    const L = [];
+    if (has('name')) L.push(`Customer: ${parsed.name[0]}` + (has('account') ? ` (acct ${parsed.account[0]})` : ''));
+    else if (has('account')) L.push(`Account: ${parsed.account[0]}`);
+    if (has('service')) L.push(`Service address: ${parsed.service[0]}`);
+    if (has('billing')) L.push(`Billing address: ${parsed.billing[0]}`);
+    if (has('phone')) L.push(`Callback: ${parsed.phone.join(' / ')}`);
+    if (has('email')) L.push(`Email: ${parsed.email[0]}`);
+    const gear = ['equipment','mac','serial','scope'].filter(has);
+    if (gear.length) L.push('Equipment: ' + gear.map(k => `${SHORT_TITLE[k]} ${parsed[k][0]}`).join(', '));
+    ['plan','status','appt','ticket','note'].forEach(k => {
+      if (has(k)) L.push(`${FIELD_TITLE[k]}: ${parsed[k].join('; ')}`);
+    });
+    return L.join('\n');
+  }
+  return keys.map(k => `${FIELD_TITLE[k]}: ${parsed[k].join(' / ')}`).join('\n');
+}
+
+function renderConverter(){
+  const found = FIELD_ORDER.filter(k => parsed[k]);
+  fieldChips.innerHTML = found.map(k =>
+    `<button class="chip-toggle ${offFields.has(k)?'':'on'}" data-fk="${k}">
+       <span class="material-symbols-outlined" style="font-size:13px">${offFields.has(k)?'check_box_outline_blank':'check_box'}</span>${FIELD_TITLE[k]}
+     </button>`).join('');
+  const txt = buildOutput();
+  if (!converterInput.value.trim()){
+    converterOutput.textContent = '';
+    converterOutput.classList.remove('hit');
+    fieldChips.innerHTML = '';
+    return;
+  }
+  if (!found.length){
+    converterOutput.textContent = 'Nothing recognized yet. Paste a bit more context \u2014 a label, a full address line, or the account number.';
+    converterOutput.classList.remove('hit');
+    return;
+  }
+  converterOutput.textContent = txt || 'All fields toggled off.';
+  converterOutput.classList.add('hit');
+}
+fieldChips.addEventListener('click', e => {
+  const c = e.target.closest('[data-fk]'); if (!c) return;
+  const k = c.dataset.fk;
+  offFields.has(k) ? offFields.delete(k) : offFields.add(k);
+  renderConverter();
+});
+window.clearConverter = () => { converterInput.value=''; parsed={}; offFields.clear(); renderConverter(); converterInput.focus(); };
+window.copyConverterOutput = () => {
+  const t = buildOutput();
+  if (t) copyText(t); else showNotification('Nothing to copy','info');
+};
+
+/* ============================================================
+   COUNTDOWN TIMER
+   ============================================================ */
+const timerDisplay = $('timer-display'), progressRing = $('timer-progress-ring'),
+      timerToggleBtn = $('timer-toggle'), timerSlider = $('timer-slider'), timerSliderLabel = $('timer-slider-label');
+const ringR = progressRing.r.baseVal.value, ringC = 2*Math.PI*ringR;
+progressRing.style.strokeDasharray = `${ringC} ${ringC}`;
+progressRing.style.strokeDashoffset = ringC;
+let timerInterval = null, totalSeconds = 0, timeRemaining = 0, timerPaused = false;
+
+const mmss = s => `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+timerSlider.addEventListener('input', () => { timerSliderLabel.textContent = mmss(+timerSlider.value); });
+timerSlider.addEventListener('change', () => startTimer(+timerSlider.value));
+timerSliderLabel.textContent = mmss(+timerSlider.value);
+
+function tick(){
+  if (timerPaused) return;
+  timeRemaining--;
+  updateTimerDisplay();
+  if (timeRemaining <= 0){
+    clearInterval(timerInterval); timerInterval = null;
+    updateTimerDisplay();
+    playDing();
+    document.querySelector('.timer-wrap').classList.add('done');
+    setTimeout(()=>document.querySelector('.timer-wrap').classList.remove('done'), 1400);
+    showNotification('Time is up','alarm');
+    if (notifSupported() && Notification.permission === 'granted'){
+      try{ new Notification('Timer done', { body:'Countdown finished.' }); }catch(e){}
+    }
+  }
+}
+window.startTimer = sec => {
+  clearInterval(timerInterval);
+  totalSeconds = sec; timeRemaining = sec; timerPaused = false;
+  timerToggleBtn.textContent = 'Pause';
+  timerSlider.value = Math.min(+timerSlider.max, sec);
+  timerSliderLabel.textContent = mmss(sec); paintRange(timerSlider);
+  updateTimerDisplay();
+  timerInterval = setInterval(tick, 1000);
+};
+window.adjustTimer = d => {
+  timeRemaining = Math.max(0, timeRemaining + d);
+  if (timeRemaining > totalSeconds) totalSeconds = timeRemaining;
+  if (timeRemaining > 0 && !timerInterval){
+    timerPaused = false; timerToggleBtn.textContent = 'Pause';
+    timerInterval = setInterval(tick, 1000);
+  }
+  updateTimerDisplay();
+};
+window.toggleTimer = () => {
+  if (timeRemaining <= 0) return;
+  timerPaused = !timerPaused;
+  timerToggleBtn.textContent = timerPaused ? 'Resume' : 'Pause';
+};
+window.resetTimer = () => {
+  clearInterval(timerInterval); timerInterval = null;
+  timeRemaining = 0; totalSeconds = 0; timerPaused = false;
+  timerToggleBtn.textContent = 'Pause';
+  updateTimerDisplay();
+};
+function updateTimerDisplay(){
+  timerDisplay.textContent = mmss(Math.max(0,timeRemaining));
+  const prog = totalSeconds > 0 ? (totalSeconds - timeRemaining)/totalSeconds : 0;
+  progressRing.style.strokeDashoffset = ringC - prog*ringC;
+  const low = timeRemaining > 0 && timeRemaining <= 10;
+  timerDisplay.classList.toggle('low', low);
+  progressRing.classList.toggle('low', low);
+}
+updateTimerDisplay();
+
+/* ============================================================
+   PAYCHECK (header widget)
+   ============================================================ */
+const hdrWidgetBtn=$('hdr-widget-btn'), hdrWidgetPop=$('hdr-widget-pop'), hdrPayAmount=$('hdr-pay-amount'),
+      hdrPayBig=$('hdr-pay-big'), hdrPayMsg=$('hdr-pay-msg'), hdrPaySetup=$('hdr-pay-setup-mini'), hdrPayRunning=$('hdr-pay-running-mini');
+let pay = store.getJSON('payState', null), payLoop = null;
+const LUNCH_START = 13*60, LUNCH_END = 14*60;
+const hmToMin = s => { const [h,m]=(s||'0:0').split(':').map(Number); return (h||0)*60+(m||0); };
+const nowMinutes = () => { const d=new Date(); return d.getHours()*60+d.getMinutes()+d.getSeconds()/60+d.getMilliseconds()/60000; };
+function paidMinutes(nowMin, s, e){
+  const end = Math.min(nowMin, e);
+  if (end <= s) return 0;
+  let w = end - s;
+  const ls = Math.max(LUNCH_START, s), le = Math.min(LUNCH_END, end);
+  if (le > ls) w -= (le - ls);
+  return Math.max(0, w);
+}
+function renderPay(){
+  if (!pay) return;
+  const s = hmToMin($('day-start').value || '09:30'), e = hmToMin($('day-end').value || '18:30');
+  const nm = nowMinutes(), paid = paidMinutes(nm, s, e);
+  const earned = pay.rate * (paid/60);
+  const str = '$' + earned.toLocaleString('en-US',{minimumFractionDigits:4, maximumFractionDigits:4});
+  hdrPayAmount.textContent = str; hdrPayBig.textContent = str;
+  const onLunch = nm >= LUNCH_START && nm < LUNCH_END && nm >= s && nm < e;
+  let msg='', col='var(--good)';
+  if (e <= s){ msg='Set a valid workday range'; col='var(--text-color)'; }
+  else if (nm < s){ const m=Math.round(s-nm); msg=`Starts in ${Math.floor(m/60)}h ${m%60}m`; col='var(--text-color)'; }
+  else if (nm >= e){ msg='Shift complete'; }
+  else if (onLunch){ msg=`Lunch \u2014 back in ${Math.ceil(LUNCH_END-nm)}m`; col='var(--warn)'; }
+  else { msg=`On the clock \u00b7 ${(paid/60).toFixed(2)} paid hrs`; }
+  hdrPayMsg.textContent = msg;
+  hdrPayBig.style.color = col; hdrPayAmount.style.color = col; hdrPayAmount.style.opacity = '1';
+}
+const startPayLoop = () => { if (!payLoop) payLoop = setInterval(renderPay, 80); };
+function showHdrPayRunning(){ hdrPaySetup.classList.add('hidden'); hdrPayRunning.classList.remove('hidden'); hdrWidgetBtn.classList.remove('hidden'); hdrWidgetBtn.classList.add('flex'); }
+function showHdrPaySetup(){ hdrPayRunning.classList.add('hidden'); hdrPaySetup.classList.remove('hidden'); hdrWidgetBtn.classList.remove('hidden'); hdrWidgetBtn.classList.add('flex'); }
+window.startPayFromHeader = () => {
+  const rate = parseFloat($('hdr-pay-rate').value);
+  if (!rate || rate <= 0){ showNotification('Enter a valid hourly rate','error'); return; }
+  pay = { rate }; store.setJSON('payState', pay);
+  showHdrPayRunning(); renderPay(); startPayLoop();
+};
+window.editPay = () => { if (payLoop){ clearInterval(payLoop); payLoop=null; } $('hdr-pay-rate').value = pay ? pay.rate : ''; showHdrPaySetup(); };
+window.stopPay = () => {
+  if (payLoop){ clearInterval(payLoop); payLoop=null; }
+  pay = null; store.del('payState');
+  $('hdr-pay-rate').value=''; hdrPayRunning.classList.add('hidden'); hdrPaySetup.classList.remove('hidden');
+  hdrPayAmount.textContent='$ Pay'; hdrPayAmount.style.color='var(--text-color)'; hdrPayAmount.style.opacity='0.6';
+};
+hdrWidgetBtn.addEventListener('click', e => { e.stopPropagation(); hdrWidgetPop.classList.toggle('open'); });
+document.addEventListener('click', e => { if (!hdrWidgetPop.contains(e.target) && !hdrWidgetBtn.contains(e.target)) hdrWidgetPop.classList.remove('open'); });
+if (pay && pay.rate){ showHdrPayRunning(); renderPay(); startPayLoop(); }
+else { hdrWidgetBtn.classList.remove('hidden'); hdrWidgetBtn.classList.add('flex'); hdrPayAmount.textContent='$ Pay'; hdrPayAmount.style.color='var(--text-color)'; hdrPayAmount.style.opacity='0.6'; }
+
+/* ============================================================
+   WORKDAY PROGRESS
+   ============================================================ */
+const dayStart=$('day-start'), dayEnd=$('day-end'), dayFill=$('day-fill'), dayPct=$('day-pct'), dayStatus=$('day-status');
+dayStart.value = store.get('dayStart') || '09:30';
+dayEnd.value   = store.get('dayEnd')   || '18:30';
+function updateWorkday(){
+  const now = new Date();
+  const nowMin = now.getHours()*60 + now.getMinutes() + now.getSeconds()/60;
+  const s = hmToMin(dayStart.value), e = hmToMin(dayEnd.value);
+  let pct;
+  if (e <= s){ dayStatus.textContent='Set a valid range'; dayFill.style.width='0%'; dayPct.textContent='\u2014'; return; }
+  if (nowMin < s){ pct=0; const m=Math.round(s-nowMin); dayStatus.textContent=`Starts in ${Math.floor(m/60)}h ${m%60}m`; }
+  else if (nowMin >= e){ pct=100; dayStatus.textContent='Day complete'; }
+  else { pct=((nowMin-s)/(e-s))*100; const l=Math.round(e-nowMin); dayStatus.textContent=`${Math.floor(l/60)}h ${l%60}m left`; }
+  dayFill.style.width = pct.toFixed(1)+'%';
+  dayPct.textContent = pct.toFixed(1)+'%';
+}
+[dayStart,dayEnd].forEach(el => el.addEventListener('change', () => {
+  store.set('dayStart', dayStart.value); store.set('dayEnd', dayEnd.value); updateWorkday();
+}));
+setInterval(updateWorkday, 1000); updateWorkday();
+
+/* ============================================================
+   COUNTERS
+   ============================================================ */
+const counterList = $('counter-list');
+let counters = store.getJSON('counters', [{ id:uid(), name:'Counter', value:0 }]);
+const saveCounters = () => store.setJSON('counters', counters);
+function renderCounters(){
+  counterList.innerHTML = counters.map(c =>
+    `<div class="flex items-center gap-3 p-3 rounded-xl" style="background:var(--soft-fill);border:1px solid var(--border-color)">
+       <div class="flex-grow min-w-0"><div class="text-sm font-medium truncate">${escapeHtml(c.name)}</div></div>
+       <button class="ghost-btn w-8 h-8 text-lg leading-none" data-dec="${c.id}">&minus;</button>
+       <div class="tally text-3xl font-bold card-title w-16 text-center" data-inc="${c.id}" id="tally-${c.id}">${c.value}</div>
+       <button class="ghost-btn w-8 h-8 text-base" data-rst="${c.id}">&#8635;</button>
+       ${counters.length>1 ? `<button class="ghost-btn w-8 h-8 text-sm" data-delc="${c.id}">&times;</button>` : ''}
+     </div>`).join('');
+}
+counterList.addEventListener('click', e => {
+  const inc=e.target.closest('[data-inc]'), dec=e.target.closest('[data-dec]'),
+        rst=e.target.closest('[data-rst]'), del=e.target.closest('[data-delc]');
+  if (del){ counters = counters.filter(c=>c.id!==del.dataset.delc); saveCounters(); renderCounters(); return; }
+  const btn = inc||dec||rst; if(!btn) return;
+  const id = btn.dataset.inc||btn.dataset.dec||btn.dataset.rst;
+  const c = counters.find(x=>x.id===id); if(!c) return;
+  if (rst) c.value = 0; else c.value += (inc ? 1 : -1);
+  saveCounters();
+  const el = $('tally-'+id);
+  if (el){ el.textContent = c.value; el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
+});
+window.addCounterCard = () => {
+  const i = $('counter-name');
+  counters.push({ id:uid(), name:i.value.trim() || 'Counter', value:0 });
+  i.value=''; saveCounters(); renderCounters();
+};
+renderCounters();
+
+/* ============================================================
+   NOTES
+   ============================================================ */
+const notesArea=$('notes-area'), noteStatus=$('note-status'), noteTabs=$('note-tabs');
+let notes = store.getJSON('notesV2', null), activeNote;
+if (!notes){ const legacy = store.get('savedNotes'); notes = [{ id:uid(), body: legacy || '' }]; }
+activeNote = store.get('activeNote') || notes[0].id;
+if (!notes.find(n=>n.id===activeNote)) activeNote = notes[0].id;
+const noteTitle = n => {
+  const f = (n.body||'').split('\n')[0].trim();
+  return f ? (f.length>26 ? f.slice(0,26)+'\u2026' : f) : 'Untitled note';
+};
+const saveNotes = () => { store.setJSON('notesV2', notes); store.set('activeNote', activeNote); };
+function renderNoteTabs(){
+  noteTabs.innerHTML = notes.map(n =>
+    `<div class="note-chip px-3 py-1.5 text-sm ${n.id===activeNote?'active':''}" data-id="${n.id}">
+       <span class="truncate">${escapeHtml(noteTitle(n))}</span>
+       ${notes.length>1 ? `<span class="material-symbols-outlined del text-base opacity-60 hover:opacity-100" data-del="${n.id}">close</span>` : ''}
+     </div>`).join('');
+}
+const loadActive = () => { notesArea.value = (notes.find(n=>n.id===activeNote)||{}).body || ''; };
+noteTabs.addEventListener('click', e => {
+  const del = e.target.closest('[data-del]');
+  if (del){
+    e.stopPropagation();
+    notes = notes.filter(n=>n.id!==del.dataset.del);
+    if (activeNote === del.dataset.del) activeNote = notes[0].id;
+    saveNotes(); renderNoteTabs(); loadActive(); return;
+  }
+  const chip = e.target.closest('[data-id]');
+  if (chip){ activeNote = chip.dataset.id; saveNotes(); renderNoteTabs(); loadActive(); }
+});
+window.addNote = () => {
+  const n = { id:uid(), body:'' };
+  notes.unshift(n); activeNote = n.id;
+  saveNotes(); renderNoteTabs(); loadActive(); notesArea.focus();
+};
+let saveTimeout;
+notesArea.addEventListener('input', () => {
+  const n = notes.find(x=>x.id===activeNote);
+  if (n) n.body = notesArea.value;
+  noteStatus.textContent = 'Saving\u2026'; noteStatus.classList.remove('opacity-0');
+  clearTimeout(saveTimeout);
+  saveTimeout = setTimeout(()=>{
+    saveNotes(); renderNoteTabs();
+    noteStatus.textContent = 'Saved';
+    setTimeout(()=>noteStatus.classList.add('opacity-0'), 1200);
+  }, 450);
+});
+renderNoteTabs(); loadActive();
+
+/* ============================================================
+   BOOKMARKS + SNIPPETS
+   ============================================================ */
+window.toggleEdit = which => {
+  const el = $(which === 'bookmarks' ? 'bookmark-list' : 'snippet-list');
+  const btn = $(which === 'bookmarks' ? 'bm-edit' : 'sn-edit');
+  el.classList.toggle('editing');
+  const on = el.classList.contains('editing');
+  btn.classList.toggle('on', on);
+  btn.querySelector('span').textContent = on ? 'done' : 'edit';
+};
+
+const bookmarkList = $('bookmark-list');
+let bookmarks = store.getJSON('bookmarks', [{ id:uid(), label:'Scope', url:'https://scope.charter.com', color:'#0073d1' }]);
+const saveBookmarks = () => store.setJSON('bookmarks', bookmarks);
+function renderBookmarks(){
+  if (!bookmarks.length){ bookmarkList.innerHTML = '<p class="text-sm opacity-45">No links yet. Add one below.</p>'; return; }
+  bookmarkList.innerHTML = bookmarks.map(b =>
+    `<button class="pill px-3.5 py-2" style="background:${b.color}" data-bm="${b.id}">
+       <span class="material-symbols-outlined text-base">open_in_new</span>${escapeHtml(b.label)}
+       <span class="x material-symbols-outlined" data-delbm="${b.id}">close</span>
+     </button>`).join('');
+}
+bookmarkList.addEventListener('click', e => {
+  const del = e.target.closest('[data-delbm]');
+  if (del && bookmarkList.classList.contains('editing')){
+    e.stopPropagation(); bookmarks = bookmarks.filter(b=>b.id!==del.dataset.delbm); saveBookmarks(); renderBookmarks(); return;
+  }
+  const pill = e.target.closest('[data-bm]');
+  if (pill && !bookmarkList.classList.contains('editing')){
+    const b = bookmarks.find(x=>x.id===pill.dataset.bm);
+    if (b) window.open(b.url, '_blank', 'noopener');
+  }
+});
+window.addBookmark = () => {
+  const label = $('bm-label').value.trim();
+  let url = $('bm-url').value.trim();
+  const color = $('bm-color').value;
+  if (!label || !url){ showNotification('Need a label and a URL','error'); return; }
+  if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+  bookmarks.push({ id:uid(), label, url, color });
+  $('bm-label').value=''; $('bm-url').value='';
+  saveBookmarks(); renderBookmarks();
+};
+renderBookmarks();
+
+const snippetList = $('snippet-list');
+let snippets = store.getJSON('snippets', []);
+const saveSnippets = () => store.setJSON('snippets', snippets);
+function renderSnippets(){
+  if (!snippets.length){ snippetList.innerHTML = '<p class="text-sm opacity-45">No snippets yet. Save text below to copy it in one tap.</p>'; return; }
+  snippetList.innerHTML = snippets.map(s =>
+    `<button class="pill px-3.5 py-2" style="background:${s.color}" data-sn="${s.id}" title="${escapeHtml(s.text)}">
+       <span class="material-symbols-outlined text-base">content_copy</span>${escapeHtml(s.label)}
+       <span class="x material-symbols-outlined" data-delsn="${s.id}">close</span>
+     </button>`).join('');
+}
+snippetList.addEventListener('click', e => {
+  const del = e.target.closest('[data-delsn]');
+  if (del && snippetList.classList.contains('editing')){
+    e.stopPropagation(); snippets = snippets.filter(s=>s.id!==del.dataset.delsn); saveSnippets(); renderSnippets(); return;
+  }
+  const pill = e.target.closest('[data-sn]');
+  if (pill && !snippetList.classList.contains('editing')){
+    const s = snippets.find(x=>x.id===pill.dataset.sn);
+    if (s) copyText(s.text);
+  }
+});
+window.addSnippet = () => {
+  const label = $('sn-label').value.trim(), text = $('sn-text').value, color = $('sn-color').value;
+  if (!label || !text.trim()){ showNotification('Need a label and some text','error'); return; }
+  snippets.push({ id:uid(), label, text, color });
+  $('sn-label').value=''; $('sn-text').value='';
+  saveSnippets(); renderSnippets();
+};
+renderSnippets();
+
+/* ============================================================
+   NATO
+   ============================================================ */
+const NATO = {A:'Alpha',B:'Bravo',C:'Charlie',D:'Delta',E:'Echo',F:'Foxtrot',G:'Golf',H:'Hotel',I:'India',J:'Juliett',K:'Kilo',L:'Lima',M:'Mike',N:'November',O:'Oscar',P:'Papa',Q:'Quebec',R:'Romeo',S:'Sierra',T:'Tango',U:'Uniform',V:'Victor',W:'Whiskey',X:'X-ray',Y:'Yankee',Z:'Zulu'};
+const natoGrid = $('nato-alphabet-grid');
+natoGrid.innerHTML = Object.entries(NATO).map(([l,w]) =>
+  `<div class="nato-cell" data-nato="${w}"><span class="letter">${l}</span><span class="word">${w}</span></div>`).join('');
+natoGrid.addEventListener('click', e => {
+  const c = e.target.closest('[data-nato]');
+  if (c && !arranging) copyText(c.dataset.nato);
+});
+
+/* ============================================================
+   WIFI PASSWORD
+   ============================================================ */
+const WORDS = ['apple','beach','brave','bright','cable','cedar','chess','clean','cloud','coast','coral','crane','creek','crown','daily','delta','denim','disco','eagle','earth','ember','fancy','fence','field','flame','flash','fleet','frost','globe','grace','grape','grove','guard','harbor','haven','heart','honey','hotel','house','ivory','jewel','jumbo','kite','lance','lemon','level','light','lodge','lunar','magic','maple','marble','marsh','mocha','monkey','moon','mount','music','night','noble','north','ocean','olive','otter','panda','park','pearl','penny','pizza','plain','plant','polar','pond','poppy','power','punch','queen','quick','radio','rainy','rally','ranch','range','rapid','raven','river','rocky','round','route','royal','ruler','rusty','saint','salsa','sandy','sauce','scout','shade','shark','shore','silky','silver','skate','slate','smile','smoke','snake','solar','solid','south','spark','spice','sport','stone','storm','sugar','sunny','super','sweet','swift','sword','table','tiger','toast','token','tonic','torch','tower','track','trade','trail','train','treat','truck','trust','tulip','turbo','twist','ultra','union','water','wheat','white','world','zebra','zesty','zippy','amber','azure','beige','black','blush','bronze','brown','camel','chrome','cobalt','copper','cream','crisp','cyan','fawn','gold','green','hazel','indigo','jade','khaki','lavender','lilac','lime','maroon','mauve','mint','navy','peach','pink','plum','purple','rose','ruby','sage','sand','scarlet','tan','teal','violet','wine','badger','bear','beaver','bison','bobcat','buffalo','bull','bunny','cheetah','chimp','cobra','condor','coyote','crab','crow','deer','dolphin','donkey','dove','duck','falcon','ferret','finch','fish','flamingo','fox','frog','gator','gecko','goat','goose','gorilla','hawk','hippo','horse','jaguar','koala','lamb','lemur','lion','llama','lobster','lynx','mamba','mink','moose','mule','newt','ocelot','osprey','owl','parrot','pelican','penguin','pig','pigeon','pony','possum','puma','quail','rabbit','raccoon','ram','robin','salmon','seal','sheep','shrimp','skunk','sloth','snail','sparrow','squid','stag','stork','swan','tapir','toad','trout','tuna','turkey','turtle','viper','walrus','weasel','wolf','wombat','yak','bagel','bacon','basil','bean','beef','biscuit','boba','bread','broth','brownie','burger','butter','cake','candy','caramel','cashew','cheese','cherry','chip','chive','chowder','cider','clam','cobbler','coconut','cookie','crepe','crumb','curry','custard','donut','dumpling','fajita','feta','fig','fudge','garlic','ginger','glaze','granola','gravy','grits','guava','gyro','ham','herb','hummus','jam','jerky','kale','kebab','latte','leek','lychee','mango','melon','miso','mochi','muffin','noodle','oat','onion','orzo','panini','pasta','pastry','pesto','pickle','pie','pita','polenta','pretzel','pudding','radish','raisin','rice','salad','salami','salt','scone','soup','steak','sushi','syrup','taco','tahini','tamale','tater','thyme','tofu','tomato','tortilla','truffle','vanilla','waffle','walnut','yam','yogurt'];
+let lastPassword = '';
+const pwCaps = $('pw-caps'), pwDash = $('pw-dash'), pwDigits = $('pw-digits'), pwDigitsLabel = $('pw-digits-label');
+/* Declared (not assigned to window) so the listeners below and the inline
+   onclick= handlers can both reach it. The previous version referenced
+   genPassword one line before `window.genPassword = ...` ran, which threw a
+   ReferenceError and took out every script statement after it. */
+function genPassword(){
+  const w1 = WORDS[rnd(WORDS.length)];
+  let w2 = WORDS[rnd(WORDS.length)];
+  while (w2 === w1) w2 = WORDS[rnd(WORDS.length)];
+  const n = +pwDigits.value;
+  let digits = '';
+  for (let i=0;i<n;i++) digits += rnd(10);
+  const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+  const a = pwCaps.dataset.on === '1' ? cap(w1) : w1;
+  const b = pwCaps.dataset.on === '1' ? cap(w2) : w2;
+  const sep = pwDash.dataset.on === '1' ? '-' : '';
+  lastPassword = a + sep + b + (digits ? sep + digits : '');
+  const out = $('pw-output');
+  out.textContent = lastPassword;
+  out.classList.remove('swap'); void out.offsetWidth; out.classList.add('swap');
+}
+function copyPassword(){
+  lastPassword ? copyText(lastPassword) : showNotification('Generate one first','info');
+}
+window.genPassword = genPassword;
+window.copyPassword = copyPassword;
+
+[pwCaps,pwDash].forEach(b => b.addEventListener('click', () => {
+  const on = b.dataset.on === '1' ? '0' : '1';
+  b.dataset.on = on; b.classList.toggle('on', on === '1');
+  genPassword();
+}));
+pwDigits.addEventListener('input', () => { pwDigitsLabel.textContent = pwDigits.value; });
+pwDigits.addEventListener('change', genPassword);
+genPassword();
+
+/* ============================================================
+   MODEM PING
+   ============================================================ */
+window.pingmodem = () => {
+  const id = $('scopeid').value.trim();
+  const radar = $('radar'), status = $('ping-status');
+  if (!id){ showNotification('Enter a Scope ID','error'); $('scopeid').focus(); return; }
+  radar.classList.add('live');
+  status.textContent = `Pinging modem ${id}\u2026`;
+  window.open(`https://scope.charter.com/#/popout/${id}/cablemodem-modem-resetPopout`, 'newwindow', 'width=1000,height=550');
+  setTimeout(()=>{ radar.classList.remove('live'); status.textContent = 'Ping window opened.'; }, 4000);
+};
+
+/* ============================================================
+   WEATHER
+   ============================================================ */
+const WX_TEXT = {0:'Clear',1:'Mostly clear',2:'Partly cloudy',3:'Overcast',45:'Foggy',48:'Foggy',51:'Light drizzle',53:'Drizzle',55:'Heavy drizzle',61:'Light rain',63:'Rain',65:'Heavy rain',71:'Light snow',73:'Snow',75:'Heavy snow',80:'Showers',81:'Showers',82:'Heavy showers',95:'Storms',96:'Storms',99:'Storms'};
+const WX_ICON = {0:'\u2600\uFE0F',1:'\u{1F324}\uFE0F',2:'\u26C5',3:'\u2601\uFE0F',45:'\u{1F32B}\uFE0F',48:'\u{1F32B}\uFE0F',51:'\u{1F326}\uFE0F',53:'\u{1F327}\uFE0F',55:'\u{1F327}\uFE0F',61:'\u{1F327}\uFE0F',63:'\u{1F327}\uFE0F',65:'\u{1F327}\uFE0F',71:'\u{1F328}\uFE0F',73:'\u2744\uFE0F',75:'\u2744\uFE0F',80:'\u{1F326}\uFE0F',81:'\u{1F326}\uFE0F',82:'\u26C8\uFE0F',95:'\u26C8\uFE0F',96:'\u26C8\uFE0F',99:'\u26C8\uFE0F'};
+const WX_URL = 'https://api.open-meteo.com/v1/forecast'
+  + '?latitude=28.5383&longitude=-81.3792'
+  + '&current=temperature_2m,weather_code'
+  + '&temperature_unit=fahrenheit&timezone=America%2FNew_York';
+let wxRetries = 0;
+async function fetchWeather(){
+  const chip = $('weather-chip');
+  try{
+    /* Without a timeout a hung request leaves the chip stuck on --° until the
+       next 10-minute tick. */
+    const ctrl = new AbortController();
+    const killer = setTimeout(() => ctrl.abort(), 8000);
+    let r;
+    try { r = await fetch(WX_URL, { signal: ctrl.signal }); }
+    finally { clearTimeout(killer); }
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+    const cur = d && d.current;
+    if (!cur || typeof cur.temperature_2m !== 'number') throw new Error('unexpected response shape');
+    const code = cur.weather_code;
+    $('wx-icon').textContent = WX_ICON[code] || '\u{1F321}\uFE0F';
+    $('wx-temp').textContent = Math.round(cur.temperature_2m) + '\u00b0';
+    $('wx-desc').textContent = WX_TEXT[code] || '';
+    chip.title = 'Orlando, FL \u2014 updated ' + new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});
+    /* Only drop `hidden`: the chip already carries `md:flex`, and adding a bare
+       `flex` forced it visible on phones too. */
+    chip.classList.remove('hidden','wx-stale');
+    wxRetries = 0;
+  }catch(e){
+    /* The old `catch(e){}` made a dead API look identical to a working one. */
+    console.warn('[weather]', e && e.message ? e.message : e);
+    $('wx-icon').textContent = '\u{1F321}\uFE0F';
+    $('wx-temp').textContent = '--\u00b0';
+    $('wx-desc').textContent = 'Unavailable';
+    chip.title = 'Weather unavailable \u2014 ' + (e && e.message ? e.message : 'request failed');
+    chip.classList.remove('hidden');
+    chip.classList.add('wx-stale');
+    if (++wxRetries <= 3) setTimeout(fetchWeather, wxRetries * 15000);
+  }
+}
+fetchWeather();
+setInterval(fetchWeather, 600000);
+
+/* ============================================================
+   KEYBOARD
+   ============================================================ */
+document.addEventListener('keydown', e => {
+  if (e.target.matches('input,textarea')) return;
+  if (e.key === '/'){ e.preventDefault(); $('search-bar').focus(); }
+  if (e.key === 'Escape' && arranging) setArrange(false);
+});
+
+/* ---- staggered entrance ---- */
+allCards().forEach((c,i) => { c.style.animationDelay = (i*55) + 'ms'; });
+
+});
+</script>
+</body>
+</html>
